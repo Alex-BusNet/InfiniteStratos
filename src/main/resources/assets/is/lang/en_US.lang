@@ -1,0 +1,22 @@
+#Item localization
+item.infinitestratos:yukihiranigata.name=Yukihira Nigata
+item.infinitestratos:byakushiki.name=Byakushiki
+item.infinitestratos:yukihirablade.name=Yukihira Blade
+item.infinitestratos:yukihirahilt.name=Yukihira Hilt
+item.infinitestratos:absolutedefense.name=Absolute Defense System
+item.infinitestratos:iscore.name=IS Unit Core
+item.infinitestratos.name:isprocessor.name=IS Unit Processor
+
+#Blocks
+tile.infinitestratos:flag.name=Emerald Flag Block
+
+#Creative Tabs
+itemGroup.infinitestratos=Infinite Stratos
+
+#Keys
+keys.infinitestratos.category=Let's Mod Reboot
+keys.infintestratos.charge=Charge
+keys.infinitestratos.release=Release
+keys.infinitestratos.standby=IS Unit Standby Mode
+keys.infinitestratos.partialdeploy=IS Unit Partial Deployment
+keys.infinitestratos.fulldeploy=IS Unit Full Deployment

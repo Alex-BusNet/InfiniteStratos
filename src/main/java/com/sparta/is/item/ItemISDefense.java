@@ -1,0 +1,15 @@
+package com.sparta.is.item;
+
+import com.sparta.is.creativetab.CreativeTabIS;
+import com.sparta.is.reference.Names;
+
+public class ItemISDefense extends ItemIS
+{
+    public ItemISDefense()
+    {
+        super();
+        this.setCreativeTab(CreativeTabIS.IS_TAB);
+        this.setUnlocalizedName(Names.Parts.ABSOLUTE_DEFENSE);
+    }
+
+}
