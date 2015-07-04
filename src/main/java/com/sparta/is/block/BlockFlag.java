@@ -7,8 +7,7 @@ public class BlockFlag extends BlockIS
     public BlockFlag()
     {
         super();
-        this.setBlockName("flag");
-        this.setBlockTextureName(Names.Blocks.FLAG);
+        this.setBlockName(Names.Blocks.FLAG);
     }
 
 }

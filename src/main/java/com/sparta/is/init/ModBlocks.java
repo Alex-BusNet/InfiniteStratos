@@ -1,7 +1,7 @@
 package com.sparta.is.init;
 
-import com.sparta.is.block.BlockFlag;
-import com.sparta.is.block.BlockIS;
+import com.sparta.is.block.*;
+import com.sparta.is.reference.Names;
 import com.sparta.is.reference.Reference;
 import cpw.mods.fml.common.registry.GameRegistry;
 
@@ -9,9 +9,15 @@ import cpw.mods.fml.common.registry.GameRegistry;
 public class ModBlocks
 {
     public static final BlockIS flag = new BlockFlag();
+    public static final BlockTileEntityIS isStation = new BlockISUnitStation();
+    public static final BlockTileEntityIS alchemyArray = new BlockISAlchemyArray();
+    public static final BlockTileEntityIS unitStand = new BlockUnitStand();
 
     public static void init()
     {
-        GameRegistry.registerBlock(flag, "Flag");
+        GameRegistry.registerBlock(flag, Names.Blocks.FLAG);
+        GameRegistry.registerBlock(isStation, Names.Blocks.IS_UNIT_STATION);
+        GameRegistry.registerBlock(alchemyArray, Names.Blocks.ALCHEMY_ARRAY);
+        GameRegistry.registerBlock(unitStand, Names.Blocks.UNIT_STAND);
     }
 }

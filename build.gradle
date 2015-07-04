@@ -15,50 +15,214 @@ buildscript {
     }
 }
 
+apply plugin: 'java'
 apply plugin: 'forge'
+apply plugin: 'curseforge'
+apply plugin: 'maven'
 
-version = "1.0"
-group= "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "modid"
 
-minecraft {
-    version = "1.7.10-10.13.3.1408-1.7.10"
-    runDir = "eclipse"
+repositories {
+    maven { // the repo from which to get NEI and stuff
+        name 'CB Repo'
+        url "http://chickenbones.net/maven/"
+    }
+    maven { // The repo from which to get waila
+        name "Mobius Repo"
+        url "http://mobiusstrip.eu/maven"
+    }
 }
 
 dependencies {
-    // you may put jars on which you depend on in ./libs
-    // or you may define them like so..
-    //compile "some.group:artifact:version:classifier"
-    //compile "some.group:artifact:version"
-      
-    // real examples
-    //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-    // for more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
+    compile('mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10') {
+        exclude group: 'mcp.mobius.waila'
+    }
+    compile "codechicken:CodeChickenLib:1.7.10-1.1.3.136:dev"
+    compile "codechicken:CodeChickenCore:1.7.10-1.0.6.43:dev"
+    compile "codechicken:NotEnoughItems:1.7.10-1.0.4.105:dev"
 }
 
-processResources
-{
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+ext.configFile = file "build.properties"
+
+configFile.withReader {
+    def prop = new Properties()
+    prop.load(it)
+    project.ext.config = new ConfigSlurper().parse prop
+}
+
+version = config.mod_version
+group= "com.sparta.is" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "IS"
+
+minecraft {
+    version = config.minecraft_version + "-" + config.forge_version + "-" + config.minecraft_version
+
+    replaceIn "reference/Reference.java"
+    replace "@MOD_VERSION@", "${config.mod_version}.${System.getenv("BUILD_NUMBER") ?:0}"
+    if(project.hasProperty("is_sha1_signature")) {
+        replace "@FINGERPRINT@", project.is_sha1_signature
+    }
+
+    runDir = "eclipse"
+}
+
+version = "${config.minecraft_version}-${config.mod_version}.${System.getenv("BUILD_NUMBER") ?:0}"
+
+processResources {
+    // exclude xcf files, as they are for development only
+    exclude '**/*.xcf'
 
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-                
+        include '*.info'
+
         // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+        expand 'mod_version': project.version, 'minecraft_version': project.config.minecraft_version
     }
-        
+
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
+        exclude '**/*.info'
+    }
+}
+
+task devJar(type: Jar, dependsOn: 'classes') {
+    from(sourceSets.main.output) {
+        include '**'
+    }
+
+    extension = 'jar'
+    classifier = 'dev'
+}
+
+artifacts {
+    archives devJar
+}
+
+import net.minecraftforge.gradle.delayed.*
+import net.minecraftforge.gradle.tasks.dev.ChangelogTask
+
+task createChangelog(type: ChangelogTask) {
+
+    if (("${System.getenv().JOB_NAME}" != null) && project.hasProperty("jenkins_server") && project.hasProperty("jenkins_password")) {
+        def jobName = "${System.getenv().JOB_NAME}"
+        def buildNumber = "${System.getenv().BUILD_NUMBER}"
+
+        setServerRoot(new DelayedString(project, project.jenkins_server))
+        setJobName(new DelayedString(project, jobName.toString()))
+        setAuthName(new DelayedString(project, project.jenkins_user))
+        setAuthPassword(new DelayedString(project, project.jenkins_password))
+        setTargetBuild({ buildNumber.toString() });
+        setOutput(new DelayedFile(project, 'build/libs/' + project.archivesBaseName + '-' + project.version + '-changelog.txt'));
+    }
+
+    onlyIf {
+        return (("${System.getenv().JOB_NAME}" != null) && project.hasProperty("jenkins_server") && project.hasProperty("jenkins_password"))
+    }
+}
+
+tasks.build.dependsOn('createChangelog')
+tasks.build.dependsOn('signJar')
+
+if (!project.hasProperty("keystore_location")) // keystore stuff
+    ext.keystore_location = "."
+if (!project.hasProperty("keystore_password")) // keystore stuff
+    ext.keystore_password = ""
+if (!project.hasProperty("is_keystore_alias")) // keystore stuff
+    ext.is_keystore_alias = ""
+
+task signJar(dependsOn: ["reobf", "devJar"]) {
+    inputs.dir jar.destinationDir
+    inputs.file keystore_location
+    inputs.property "is_keystore_alias", is_keystore_alias
+    inputs.property "keystore_password", keystore_password
+    outputs.dir devJar.destinationDir
+
+    // only sign if the keystore exists
+    onlyIf {
+        return keystore_location != "." && keystore_password != ""
+    }
+    // the actual action.. sign the jar.
+    doLast {
+        jar.destinationDir.eachFile { file ->
+            if (!file.getPath().endsWith(".jar"))
+                return; // skip non-jars
+
+            logger.lifecycle "signing $file"
+            ant.signjar(
+                    destDir: file.getParentFile(), // same place it came from
+                    jar: file,
+                    keystore: keystore_location,
+                    alias: is_keystore_alias,
+                    storepass: keystore_password
+            )
+        }
+    }
+}
+
+curse {
+    dependsOn 'reobf'
+    onlyIf { return project.hasProperty('is_curseforge_apikey') }
+
+    projectId = project.hasProperty('is_curseforge_projectid') ? project.is_curseforge_projectid : ''
+    apiKey = project.hasProperty('is_curseforge_apikey') ? project.is_curseforge_apikey : ''
+    changelog = project.hasProperty('changelog') ? project.changelog : ''
+    releaseType = config.release_type
+
+    additionalArtifact devJar
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            if (project.hasProperty("forgemaven_url")) {
+                logger.info('Publishing to files server')
+                repository(url: project.forgemaven_url) {
+                    authentication(userName: project.forgemaven_username, password: project.forgemaven_password)
+                }
+            }
+
+            pom {
+                groupId = project.group
+                version = project.version
+                artifactId = project.archivesBaseName
+            }
+
+            pom.project {
+                name project.archivesBaseName
+                packaging 'jar'
+                description 'Infinite Stratos'
+                url 'https://github.com/Alex-BusNet/InfiniteStratos/'
+
+                scm {
+                    url 'https://github.com/Alex-BusNet/InfiniteStratos/'
+                    connection 'scm:git:git://github.com/Alex-BusNet/InfiniteStratos.git'
+                    developerConnection 'scm:git:git@github.com/Alex-BusNet/InfiniteStratos.git'
+                }
+
+                issueManagement {
+                    system 'github'
+                    url 'https://github.com/Alex-BusNet/InfiniteStratos/issues'
+                }
+
+                licenses {
+                    license {
+                        name 'GNU Lesser General Public License 3.0'
+                        url 'https://www.gnu.org/licenses/lgpl-3.0.txt'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'Sparta'
+                        name 'Sparta'
+                        roles {
+                            role 'developer'
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

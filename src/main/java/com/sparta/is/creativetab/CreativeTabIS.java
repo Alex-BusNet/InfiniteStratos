@@ -12,7 +12,7 @@ public class CreativeTabIS
         @Override
         public Item getTabIconItem()
         {
-            return ModItems.yukihira;
+            return ModItems.tabLabel;
         }
     };
 }

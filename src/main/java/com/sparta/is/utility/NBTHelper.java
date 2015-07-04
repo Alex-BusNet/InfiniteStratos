@@ -1,10 +1,30 @@
 package com.sparta.is.utility;
 
+import com.sparta.is.reference.Names;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+
+import java.util.UUID;
 
 public class NBTHelper
 {
+    public static void clearStatefulNBTTags(ItemStack itemStack)
+    {
+        if (NBTHelper.hasTag(itemStack, Names.NBT.CRAFTING_GUI_OPEN))
+        {
+            NBTHelper.removeTag(itemStack, Names.NBT.CRAFTING_GUI_OPEN);
+        }
+        else if (NBTHelper.hasTag(itemStack, Names.NBT.IS_UNIT_STATION_GUI_OPEN))
+        {
+            NBTHelper.removeTag(itemStack, Names.NBT.IS_UNIT_STATION_GUI_OPEN);
+        }
+        else if (NBTHelper.hasTag(itemStack, Names.NBT.IS_EQUIPPED_GUI_OPEN))
+        {
+            NBTHelper.removeTag(itemStack, Names.NBT.IS_EQUIPPED_GUI_OPEN);
+        }
+    }
+
     public static boolean hasTag(ItemStack itemStack, String keyName)
     {
         return itemStack != null && itemStack.stackTagCompound != null && itemStack.stackTagCompound.hasKey(keyName);
@@ -18,11 +38,28 @@ public class NBTHelper
         }
     }
 
+    public static boolean hasUUID(ItemStack itemStack)
+    {
+        return hasTag(itemStack, Names.NBT.UUID_MOST_SIG) && hasTag(itemStack, Names.NBT.UUID_LEAST_SIG);
+    }
+
+    public static void setUUID(ItemStack itemStack)
+    {
+        initNBTTagCompound(itemStack);
+
+        if (!hasTag(itemStack, Names.NBT.UUID_MOST_SIG) && !hasTag(itemStack, Names.NBT.UUID_LEAST_SIG))
+        {
+            UUID itemUUID = UUID.randomUUID();
+            setLong(itemStack, Names.NBT.UUID_MOST_SIG, itemUUID.getMostSignificantBits());
+            setLong(itemStack, Names.NBT.UUID_LEAST_SIG, itemUUID.getLeastSignificantBits());
+        }
+    }
+
+
     /**
      * Initializes the NBT Tag Compound for the given ItemStack if it is null
      *
-     * @param itemStack
-     *         The ItemStack for which its NBT Tag Compound is being checked for initialization
+     * @param itemStack The ItemStack for which its NBT Tag Compound is being checked for initialization
      */
     private static void initNBTTagCompound(ItemStack itemStack)
     {
@@ -190,5 +227,45 @@ public class NBTHelper
         initNBTTagCompound(itemStack);
 
         itemStack.stackTagCompound.setDouble(keyName, keyValue);
+    }
+
+    // tag list
+    public static NBTTagList getTagList(ItemStack itemStack, String keyName, int nbtBaseType)
+    {
+        initNBTTagCompound(itemStack);
+
+        if (!itemStack.stackTagCompound.hasKey(keyName))
+        {
+            setTagList(itemStack, keyName, new NBTTagList());
+        }
+
+        return itemStack.stackTagCompound.getTagList(keyName, nbtBaseType);
+    }
+
+    public static void setTagList(ItemStack itemStack, String keyName, NBTTagList nbtTagList)
+    {
+        initNBTTagCompound(itemStack);
+
+        itemStack.stackTagCompound.setTag(keyName, nbtTagList);
+    }
+
+    // tag compound
+    public static NBTTagCompound getTagCompound(ItemStack itemStack, String keyName)
+    {
+        initNBTTagCompound(itemStack);
+
+        if (!itemStack.stackTagCompound.hasKey(keyName))
+        {
+            setTagCompound(itemStack, keyName, new NBTTagCompound());
+        }
+
+        return itemStack.stackTagCompound.getCompoundTag(keyName);
+    }
+
+    public static void setTagCompound(ItemStack itemStack, String keyName, NBTTagCompound nbtTagCompound)
+    {
+        initNBTTagCompound(itemStack);
+
+        itemStack.stackTagCompound.setTag(keyName, nbtTagCompound);
     }
 }

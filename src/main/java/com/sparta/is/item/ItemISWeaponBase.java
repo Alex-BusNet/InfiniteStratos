@@ -16,7 +16,6 @@ public class ItemISWeaponBase extends Item
         this.setMaxStackSize(1);
         this.setMaxDamage(100);
         this.setCreativeTab(CreativeTabIS.IS_TAB);
-
     }
 
     public String getUnlocalizedName (Item item)

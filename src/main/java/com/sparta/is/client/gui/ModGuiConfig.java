@@ -1,6 +1,6 @@
 package com.sparta.is.client.gui;
 
-import com.sparta.is.client.handler.ConfigurationHandler;
+import com.sparta.is.handler.ConfigurationHandler;
 import com.sparta.is.reference.Reference;
 import cpw.mods.fml.client.config.GuiConfig;
 import net.minecraft.client.gui.GuiScreen;

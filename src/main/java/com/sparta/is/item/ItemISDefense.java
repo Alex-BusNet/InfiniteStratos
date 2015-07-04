@@ -8,8 +8,9 @@ public class ItemISDefense extends ItemIS
     public ItemISDefense()
     {
         super();
-        this.setCreativeTab(CreativeTabIS.IS_TAB);
         this.setUnlocalizedName(Names.Parts.ABSOLUTE_DEFENSE);
+        this.setCreativeTab(CreativeTabIS.IS_TAB);
+        this.setMaxStackSize(1);
     }
 
 }
