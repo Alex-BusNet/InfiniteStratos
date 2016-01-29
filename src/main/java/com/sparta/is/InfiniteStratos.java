@@ -17,7 +17,6 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.common.network.NetworkRegistry;
-import net.minecraftforge.oredict.OreDictionary;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, certificateFingerprint = Reference.FINGERPRINT, version = Reference.MOD_VERSION, dependencies = Reference.DEPENDENCIES, guiFactory = Reference.GUI_FACTORY_CLASS)
 public class InfiniteStratos
@@ -90,11 +89,6 @@ public class InfiniteStratos
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event)
     {
-        for (String oreName : OreDictionary.getOreNames())
-        {
-            LogHelper.info(oreName);
-        }
-
         LogHelper.info("Post Initialization Complete");
     }
 

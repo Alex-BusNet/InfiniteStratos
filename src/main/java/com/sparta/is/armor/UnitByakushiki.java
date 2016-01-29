@@ -307,7 +307,6 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 
             if(key == Key.STANDBY && state != 0)
             {
-
                 player.capabilities.allowFlying = false;
 
                 if(player.capabilities.isFlying && !player.capabilities.isCreativeMode)
@@ -323,7 +322,6 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
             }
             else if (key == Key.PARTIAL_DEPLOY  && state != 1 && state != 2)
             {
-
                 player.capabilities.allowFlying = false;
 
                 if(player.capabilities.isFlying && !player.capabilities.isCreativeMode)
@@ -340,8 +338,8 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
             else if (key == Key.FULL_DEPLOY && state != 2)
             {
                 player.capabilities.allowFlying = true;
-                player.capabilities.setPlayerWalkSpeed(0.3F);
-                player.capabilities.setFlySpeed(0.1F);
+                player.capabilities.setFlySpeed(0.01F);
+                player.capabilities.setPlayerWalkSpeed(0.1F);
 
                 if(falling)
                 {

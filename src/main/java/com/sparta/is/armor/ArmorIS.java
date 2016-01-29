@@ -103,9 +103,9 @@ public class ArmorIS extends ItemArmor implements IModifyable
         return state;
     }
 
-    public void setState(int state1)
+    public void setState(int newState)
     {
-        state = state1;
+        state = newState;
     }
 
 
@@ -126,5 +126,7 @@ public class ArmorIS extends ItemArmor implements IModifyable
     {
         return new String[] {"armor"};
     }
+
+
 
 }

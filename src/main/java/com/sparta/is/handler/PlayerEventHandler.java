@@ -9,9 +9,12 @@ import com.sparta.is.settings.OneOffSettings;
 import com.sparta.is.settings.UnitSettings;
 import com.sparta.is.utility.EntityHelper;
 import com.sparta.is.utility.LogHelper;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 
 public class PlayerEventHandler
 {
@@ -55,6 +58,20 @@ public class PlayerEventHandler
     public void onPlayerLoggedOut(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent event)
     {
         LogHelper.info("Player logged out");
+    }
+
+    @SubscribeEvent
+    public void onLivingFallEvent(LivingFallEvent lfe)
+    {
+        LogHelper.info("LivingFall Event Called");
+
+        if(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
+        {
+            if(EntityHelper.isUnitEquipped(lfe.entityLiving, 1))
+            {
+                lfe.distance = 0.0f;
+            }
+        }
     }
 
 }
