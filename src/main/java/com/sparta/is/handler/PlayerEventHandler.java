@@ -63,7 +63,7 @@ public class PlayerEventHandler
     @SubscribeEvent
     public void onLivingFallEvent(LivingFallEvent lfe)
     {
-        LogHelper.info("LivingFall Event Called");
+//        LogHelper.info("LivingFall Event Called");
 
         if(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
         {

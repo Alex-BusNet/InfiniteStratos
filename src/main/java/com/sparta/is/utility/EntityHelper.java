@@ -19,7 +19,14 @@ public class EntityHelper
 
             if((item_slot != null) && (item_slot.getItem() instanceof ArmorIS))
             {
-                return true;
+                if(((ArmorIS) item_slot.getItem()).getState() == 2)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
@@ -48,6 +55,28 @@ public class EntityHelper
         if (entity != null)
         {
             entity.getEntityData().setTag(Reference.LOWERCASE_MOD_ID, nbtTagCompound);
+        }
+    }
+
+    public static void ISPlayerModifier(EntityLivingBase entity)
+    {
+        if(entity instanceof EntityPlayer)
+        {
+            ItemStack equippedArmor = ((EntityPlayer) entity).getCurrentArmor(1);
+
+            if(equippedArmor.getItem() instanceof ArmorIS)
+            {
+                if(((ArmorIS) equippedArmor.getItem()).getState() == 2)
+                {
+                    ((EntityPlayer) entity).yOffset = 3.0F;
+                    ((EntityPlayer) entity).motionX +=  0.1F;
+                }
+                else
+                {
+                    ((EntityPlayer) entity).yOffset = 1.62F;
+                    ((EntityPlayer) entity).motionX = 0.1F;
+                }
+            }
         }
     }
 }

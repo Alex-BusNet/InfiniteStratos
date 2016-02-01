@@ -11,6 +11,7 @@ import com.sparta.is.utility.DamageSourceHelper;
 import com.sparta.is.utility.EntityHelper;
 import com.sparta.is.utility.IKeyBound;
 
+import com.sparta.is.utility.LogHelper;
 import com.sparta.repackage.cofh.api.energy.IEnergyContainerItem;
 import com.sparta.repackage.cofh.api.item.IEmpowerableItem;
 import com.sparta.repackage.cofh.lib.util.helpers.EnergyHelper;
@@ -58,7 +59,7 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
     {
         super();
         this.setUnlocalizedName(Names.Weapons.YUKIHIRA_NIGATA);
-        this.setTextureName(Names.Weapons.YUKIHIRA_NIGATA);
+//        this.setTextureName(Names.Weapons.YUKIHIRA_NIGATA);
         maxEnergy = byakushiki.getShieldCapacity();
         maxTransfer = 300;
         energyPerUse = 50;
@@ -69,9 +70,9 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
     {
         if(entity instanceof EntityPlayer)
         {
-            ((EntityPlayer) entity).capabilities.allowFlying = true;
-            ((EntityPlayer) entity).capabilities.setPlayerWalkSpeed(0.6F);
-            ((EntityPlayer) entity).capabilities.setFlySpeed(0.2F);
+//            ((EntityPlayer) entity).capabilities.allowFlying = true;
+//            ((EntityPlayer) entity).capabilities.setPlayerWalkSpeed(0.6F);
+//            ((EntityPlayer) entity).capabilities.setFlySpeed(0.2F);
             ((EntityPlayer) entity).capabilities.disableDamage = true;
         }
     }
@@ -230,19 +231,19 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
         if ( oneOff == 1 && byakushiki.getState() == 2)
         {
             this.setUnlocalizedName(Names.One_Off.REIRAKU_BYAKUYA);
-            this.setTextureName(TEX_LOC + Names.One_Off.REIRAKU_BYAKUYA);
+//            this.setTextureName(TEX_LOC + Names.One_Off.REIRAKU_BYAKUYA);
             ReirakuByakuya(itemStack, world, entity);
         }
         else
         {
             this.setUnlocalizedName(Names.Weapons.YUKIHIRA_NIGATA);
-            this.setTextureName(TEX_LOC + Names.Weapons.YUKIHIRA_NIGATA);
+//            this.setTextureName(TEX_LOC + Names.Weapons.YUKIHIRA_NIGATA);
 
             if(byakushiki.getState() == 2)
             {
-                ((EntityPlayer) entity).capabilities.allowFlying = true;
-                ((EntityPlayer) entity).capabilities.setPlayerWalkSpeed(0.3F);
-                ((EntityPlayer) entity).capabilities.setFlySpeed(0.1F);
+//                ((EntityPlayer) entity).capabilities.allowFlying = true;
+//                ((EntityPlayer) entity).capabilities.setPlayerWalkSpeed(0.3F);
+//                ((EntityPlayer) entity).capabilities.setFlySpeed(0.1F);
             }
         }
     }
@@ -327,6 +328,8 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
     {
         this.yukihiraIcon = iconRegister.registerIcon(this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1));
         this.reirakuIcon = iconRegister.registerIcon(this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1) + "_oneOff");
+        LogHelper.debug("Yukihira icon loc:" + yukihiraIcon.getIconName());
+        LogHelper.debug("Reiraku icon loc:" + reirakuIcon.getIconName());
     }
 
     protected String getUnwrappedUnlocalizedName(String unlocalizedName)

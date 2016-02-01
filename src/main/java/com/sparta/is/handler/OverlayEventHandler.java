@@ -32,7 +32,7 @@ public class OverlayEventHandler
         {
             ItemStack slotItemStack = entityPlayerSP.inventory.armorItemInSlot(i);
 
-            if (slotItemStack != null && slotItemStack.getItem() == ModItems.yukihira)
+            if (slotItemStack != null && slotItemStack.getItem() == ModItems.yukihiraNigata)
             {
                 foundInHotbar = true;
                 break;

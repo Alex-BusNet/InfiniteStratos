@@ -23,35 +23,35 @@ public final class Names
 
     public static final class Weapons
     {
-        public static final String YUKIHIRA_NIGATA = "yukihiraNigata"; //Byakushiki
-        public static final String ELUCIDATOR = "elucidator"; //Kuro Akiko
-        public static final String DARK_REPULSER = "darkRepulser"; //Kuro Akiko
-        public static final String AMATSUKI = "amatsuki"; //Akatsubaki
-        public static final String KARAWARE = "karaware"; //Akatsubaki
-        public static final String VENT = "vent"; //RRCII
-        public static final String GARM = "garm"; //RRCII
-        public static final String RAIN_OF_SATURDAY = "rainOfSaturday"; //RRCII
-        public static final String BREAD_SLICER = "breadSlicer"; // RRCII
-        public static final String GRAY_SCALE = "grayScale"; //RRCII
-        public static final String GARDEN_CURTAIN = "gardenCurtain"; //RRCII
-        public static final String KATANA = "katana"; //Uchigane
-        public static final String BLUE_PIERCE = "bluePierce"; //Blue Tears
-        public static final String OPTICAL_DRONE = "opticalDrone"; //Blue Tears
-        public static final String MISSLE_POD = "misslePod"; //Blue Tears
-        public static final String STARDUST_SHOOTER = "starDustShooter"; //Blue Tears
-        public static final String SOUTEN_GAGETSU = "soutenGagetsu"; //Shenlong
-        public static final String RYUHOU = "ryuhou"; //Shenlong
-        public static final String LANDSLIDE = "landslide"; //Shenlong
+        public static final String YUKIHIRA_NIGATA = "yukihiraNigata";                  //Byakushiki
+        public static final String ELUCIDATOR = "elucidator";                           //Kuro Akiko
+        public static final String DARK_REPULSER = "darkRepulser";                      //Kuro Akiko
+        public static final String AMATSUKI = "amatsuki";                               //Akatsubaki
+        public static final String KARAWARE = "karaware";                               //Akatsubaki
+        public static final String VENT = "vent";                                       //RRCII
+        public static final String GARM = "garm";                                       //RRCII
+        public static final String RAIN_OF_SATURDAY = "rainOfSaturday";                 //RRCII
+        public static final String BREAD_SLICER = "breadSlicer";                        //RRCII
+        public static final String GRAY_SCALE = "grayScale";                            //RRCII
+        public static final String GARDEN_CURTAIN = "gardenCurtain";                    //RRCII
+        public static final String KATANA = "katana";                                   //Uchigane
+        public static final String BLUE_PIERCE = "bluePierce";                          //Blue Tears
+        public static final String OPTICAL_DRONE = "opticalDrone";                      //Blue Tears
+        public static final String MISSLE_POD = "misslePod";                            //Blue Tears
+        public static final String STARDUST_SHOOTER = "starDustShooter";                //Blue Tears
+        public static final String SOUTEN_GAGETSU = "soutenGagetsu";                    //Shenlong
+        public static final String RYUHOU = "ryuhou";                                   //Shenlong
+        public static final String LANDSLIDE = "landslide";                             //Shenlong
         public static final String THERMAL_DIFFUSION_IMPACT_CANNONS = "thermalDiffusionImpactCannons"; //Shenlong
-        public static final String ACTIVE_INERTIA_CANCELLER = "activeInertiaCaneller"; //SR
-        public static final String WIRE_DAGGER = "wireDagger"; //SR
-        public static final String PURIZUSHI = "purizushi"; //SR
-        public static final String BEAM_SPEAR = "beamSpear"; //SR
-        public static final String RUSTY_NAIL = "rustyNail"; //ML
-        public static final String HEAVY_RAIN = "heavyRain"; //ML
-        public static final String STAR_BREAKER = "starBreaker"; //Silent Zephyrs
-        public static final String TRANCE = "trance"; //UN
-        public static final String SHUNRAI = "shunrai"; //UN
+        public static final String ACTIVE_INERTIA_CANCELLER = "activeInertiaCaneller";  //SR
+        public static final String WIRE_DAGGER = "wireDagger";                          //SR
+        public static final String PURIZUSHI = "purizushi";                             //SR
+        public static final String BEAM_SPEAR = "beamSpear";                            //SR
+        public static final String RUSTY_NAIL = "rustyNail";                            //ML
+        public static final String HEAVY_RAIN = "heavyRain";                            //ML
+        public static final String STAR_BREAKER = "starBreaker";                        //Silent Zephyrs
+        public static final String TRANCE = "trance";                                   //UN
+        public static final String SHUNRAI = "shunrai";                                 //UN
     }
 
     public static final class Units

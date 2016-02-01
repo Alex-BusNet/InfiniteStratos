@@ -14,22 +14,29 @@ public class Textures
         public static ResourceLocation BYAKUSHIKI = ResourceLocationHelper.getResourceLocation(ARMOR_SHEET_LOCATION + "Byakushiki_Armor.png");
     }
 
+    public static final class WeaponIcons
+    {
+        private static String WEAPON_ICON_LOCATION = "textures/items/";
+
+        public static ResourceLocation YUKIHIRA_NIGATA_ICON = ResourceLocationHelper.getResourceLocation(WEAPON_ICON_LOCATION + "yukihiraNigata.png");
+    }
+
     public static final class Items
     {
         private static final String ITEM_TEXTURE_LOCATION = "textures/items/";
 
         public static final ResourceLocation YUKIHIRA_HILT = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihirahilt.png");
         public static final ResourceLocation YUKIHIRA_BLADE = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihirablade.png");
-        public static final ResourceLocation YUKIHIRA_NIGATA = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihiranigata.png");
+        public static final ResourceLocation YUKIHIRA_NIGATA = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihiraNigata.png");
         public static final ResourceLocation YUKIHIRA_MODEL_TEXTURE = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihiraModel_color.png");
-        public static final ResourceLocation REIRAKU_BYAKUYA = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "ReirakuByakuya.png");
+        public static final ResourceLocation REIRAKU_BYAKUYA = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihiraNigata_oneOff.png");
         public static final ResourceLocation ABSOLUTE_DEFENSE = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "absolutedefense.png");
-        public static final ResourceLocation IS_CORE = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "iscore.png");
-        public static final ResourceLocation IS_PROCESSOR = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "isprocessor.png");
+        public static final ResourceLocation IS_CORE = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "isCore.png");
+        public static final ResourceLocation IS_PROCESSOR = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "isProcessor.png");
         public static final ResourceLocation TEST_UNIT = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "testUnit.png");
-        public static final ResourceLocation IS_UNIT_STATION = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "ISUnitStation.png");
-        public static final ResourceLocation IS_UNIT_STATION_MAIN_DISPLAY = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "ISUnitStation_mainDisplay.png");
-        public static final ResourceLocation IS_UNIT_STATION_SMALL_DISPLAY = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "ISUnitStation_smallDisplay.png");
+        public static final ResourceLocation IS_UNIT_STATION = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "isUnitStation.png");
+        public static final ResourceLocation IS_UNIT_STATION_MAIN_DISPLAY = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "isUnitStation_mainDisplay.png");
+        public static final ResourceLocation IS_UNIT_STATION_SMALL_DISPLAY = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "isUnitStation_smallDisplay.png");
         public static final ResourceLocation UNIT_STAND = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "unitStand.png");
         public static final ResourceLocation BYAKUSHIKI_CHEST = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "byakushikiChest.png");
         public static final ResourceLocation TABANE_SPAWN_EGG = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "tabaneSpawnEgg.png");
@@ -63,7 +70,7 @@ public class Textures
         public static final ResourceLocation UNIT_STAND_GUI = ResourceLocationHelper.getResourceLocation(GUI_TEXTURE_LOCATION + "unitStand.png");
         public static final ResourceLocation OVERLAY = ResourceLocationHelper.getResourceLocation(GUI_TEXTURE_LOCATION + "overlay.png");
         public static final ResourceLocation WIDGETS = ResourceLocationHelper.getResourceLocation(GUI_TEXTURE_LOCATION + "widgets.png");
-        public static final ResourceLocation SHIELD_BAR = ResourceLocationHelper.getResourceLocation(GUI_TEXTURE_LOCATION + "ShieldBar.png");
+        public static final ResourceLocation SHIELD_BAR = ResourceLocationHelper.getResourceLocation(GUI_TEXTURE_LOCATION + "shieldBar.png");
 
         public static final class Elements
         {

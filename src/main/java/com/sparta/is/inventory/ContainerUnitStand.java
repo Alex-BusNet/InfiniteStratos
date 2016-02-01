@@ -1,5 +1,6 @@
 package com.sparta.is.inventory;
 
+import com.sparta.is.armor.ArmorIS;
 import com.sparta.is.item.ItemISUnit;
 import com.sparta.is.tileentity.TileEntityUnitStand;
 import net.minecraft.entity.player.EntityPlayer;
@@ -63,7 +64,7 @@ public class ContainerUnitStand extends ContainerIS
                  * If the stack being shift-clicked into ISUnitStation's container
                  * is an IS UNIT, first try to put it in the tool slot.
                  */
-                if(slotItemStack.getItem() instanceof ItemISUnit)
+                if(slotItemStack.getItem() instanceof ArmorIS || slotItemStack.getItem() instanceof ItemISUnit)
                 {
                     if(!this.mergeItemStack(slotItemStack, TileEntityUnitStand.IS_UNIT_SLOT_INDEX, TileEntityUnitStand.INVENTORY_SIZE, false))
                     {

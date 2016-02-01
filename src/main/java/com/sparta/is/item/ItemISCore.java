@@ -12,7 +12,7 @@ import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
-public class ItemISCore extends Item
+public class ItemISCore extends ItemIS
 {
     public ItemISCore()
     {

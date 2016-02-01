@@ -71,7 +71,7 @@ public class ClientProxy extends CommonProxy
         MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.isStation), new ItemRendererISUnitStation());
         MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.unitStand), new ItemRendererUnitStand());
         MinecraftForgeClient.registerItemRenderer(ModUnits.byakushikiChest, new ItemRendererByakushikiChest());
-        MinecraftForgeClient.registerItemRenderer(ModItems.yukihira, new ItemRendererYukihira());
+        MinecraftForgeClient.registerItemRenderer(ModItems.yukihiraNigata, new ItemRendererYukihira());
         MinecraftForgeClient.registerItemRenderer(ModItems.elucidator, new ItemRendererElucidator());
 
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityISStation.class, new TileEntityRendererISUnitStation());

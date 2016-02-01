@@ -9,15 +9,15 @@ import net.minecraft.item.Item;
 @GameRegistry.ObjectHolder(Reference.MOD_ID)
 public class ModItems
 {
-    public static final ItemISEqualizer yukihira = new ItemYukihira();
+    public static final ItemISEqualizer yukihiraNigata = new ItemYukihira();
     public static final ItemISEqualizer elucidator = new ItemElucidator();
 
     public static final ItemIS yukihiraBlade = new ItemYukihiraBlade();
     public static final ItemIS yukihiraHilt = new ItemYukihiraHilt();
 
-    public static final Item core = new ItemISCore();
-    public static final ItemIS processor = new ItemISProcessor();
-    public static final ItemIS absDefense = new ItemISDefense();
+    public static final ItemIS isCore = new ItemISCore();
+    public static final ItemIS isProcessor = new ItemISProcessor();
+    public static final ItemIS absoluteDefense = new ItemISDefense();
 
     public static final Item tabLabel = new ItemTabLabel();
 
@@ -27,12 +27,12 @@ public class ModItems
 
     public static void init()
     {
-        GameRegistry.registerItem(yukihira, Names.Weapons.YUKIHIRA_NIGATA);
+        GameRegistry.registerItem(yukihiraNigata, Names.Weapons.YUKIHIRA_NIGATA);
         GameRegistry.registerItem(yukihiraBlade, Names.Parts.YUKIHIRA_BLADE);
         GameRegistry.registerItem(yukihiraHilt, Names.Parts.YUKIHIRA_HILT);
-        GameRegistry.registerItem(core, Names.Parts.IS_CORE);
-        GameRegistry.registerItem(processor, Names.Parts.IS_PROCESSOR);
-        GameRegistry.registerItem(absDefense, Names.Parts.ABSOLUTE_DEFENSE);
+        GameRegistry.registerItem(isCore, Names.Parts.IS_CORE);
+        GameRegistry.registerItem(isProcessor, Names.Parts.IS_PROCESSOR);
+        GameRegistry.registerItem(absoluteDefense, Names.Parts.ABSOLUTE_DEFENSE);
         GameRegistry.registerItem(testUnit, Names.Units.TEST_UNIT);
         GameRegistry.registerItem(tabaneSpawnEgg, Names.Villagers.TABANE);
         GameRegistry.registerItem(elucidator, Names.Weapons.ELUCIDATOR);
