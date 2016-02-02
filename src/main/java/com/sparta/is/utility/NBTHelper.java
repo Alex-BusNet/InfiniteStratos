@@ -55,7 +55,6 @@ public class NBTHelper
         }
     }
 
-
     /**
      * Initializes the NBT Tag Compound for the given ItemStack if it is null
      *

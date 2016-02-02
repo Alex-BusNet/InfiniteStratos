@@ -81,7 +81,6 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
     @Override
     public void getSubItems(Item item, CreativeTabs tabs, List list)
     {
-//        list.add(EnergyHelper.setDefaultEnergyTag(new ItemStack(item, 1, 0), 0));
         list.add(EnergyHelper.setDefaultEnergyTag(new ItemStack(item, 1, 0), maxEnergy));
     }
 
@@ -207,13 +206,13 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
         super.onArmorTick(world, player, itemStack);
 
         //TODO: Create method to handle auto-deployment for player falling
-        if(state != 2 && player.motionY < -1.0D && getRemainingShieldCapacity() > 0 && /* !player.capabilities.isFlying && */ !player.capabilities.isCreativeMode)
-        {
-            LogHelper.info("Before: " + player.motionY);
-            player.motionY = 0.0D;
-            LogHelper.info("After: " + player.motionY);
-            doKeyBindingAction(player, itemStack, Key.FULL_DEPLOY, true);
-        }
+//        if(state != 2 && player.motionY < -1.0D && getRemainingShieldCapacity() > 0 && /* !player.capabilities.isFlying && */ !player.capabilities.isCreativeMode)
+//        {
+//            LogHelper.info("Before: " + player.motionY);
+//            player.motionY = 0.0D;
+//            LogHelper.info("After: " + player.motionY);
+//            doKeyBindingAction(player, itemStack, Key.FULL_DEPLOY, true);
+//        }
 
 
     }
@@ -247,7 +246,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
                 {
                     entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.INVALID_OWNER, ItemHelper.getOwnerName(itemStack)));
                 }
-                else if(entityPlayer.getUniqueID() != ItemHelper.getOwnerUUID(itemStack))
+                else if(entityPlayer.getUniqueID() == ItemHelper.getOwnerUUID(itemStack))
                 {
                     entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ALREADY_OWNER, itemStack.getUnlocalizedName()));
                 }
@@ -315,7 +314,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 //                }
 //
 //                player.capabilities.setFlySpeed(0.05F);
-                player.capabilities.setPlayerWalkSpeed(0.1F);
+//                player.capabilities.setPlayerWalkSpeed(0.1F);
 //                state = 0;
                 unitSettings.setDeployedState(0);
                 player.addChatMessage(new ChatComponentText("Unit in Standby"));
@@ -330,7 +329,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 //                }
 //
 //                player.capabilities.setFlySpeed(0.05F);
-                player.capabilities.setPlayerWalkSpeed(0.1F);
+//                player.capabilities.setPlayerWalkSpeed(0.1F);
 //                state = 1;
                 unitSettings.setDeployedState(1);
                 player.addChatMessage(new ChatComponentText("Unit Partially Deployed"));
@@ -339,7 +338,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
             {
 //                player.capabilities.allowFlying = true;
 //                player.capabilities.setFlySpeed(0.01F);
-                player.capabilities.setPlayerWalkSpeed(0.1F);
+//                player.capabilities.setPlayerWalkSpeed(0.1F);
 
 //                if(falling)
 //                {

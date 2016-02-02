@@ -34,7 +34,7 @@ public class ModItems
         GameRegistry.registerItem(isProcessor, Names.Parts.IS_PROCESSOR);
         GameRegistry.registerItem(absoluteDefense, Names.Parts.ABSOLUTE_DEFENSE);
         GameRegistry.registerItem(testUnit, Names.Units.TEST_UNIT);
-        GameRegistry.registerItem(tabaneSpawnEgg, Names.Villagers.TABANE);
+        GameRegistry.registerItem(tabaneSpawnEgg, Names.Items.TABANE_SPAWN_EGG);
         GameRegistry.registerItem(elucidator, Names.Weapons.ELUCIDATOR);
         GameRegistry.registerItem(tabLabel, Names.Empty.TAB_LABEL);
     }

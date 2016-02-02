@@ -297,30 +297,18 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
             PacketHandler.INSTANCE.sendTo(new MessageOneOffSettings(oneOffSettings), (EntityPlayerMP) entityPlayer);
         }
     }
-
-    @Override
-    public String getUnlocalizedName()
-    {
-        return String.format("item.%s%s", Textures.RESOURCE_PREFIX, getUnwrappedUnlocalizedName(super.getUnlocalizedName()));
-    }
-
-    @Override
-    public String getUnlocalizedName(ItemStack itemStack)
-    {
-        return String.format("item.%s%s", Textures.RESOURCE_PREFIX, getUnwrappedUnlocalizedName(super.getUnlocalizedName()));
-    }
-
-    @Override
-    public IIcon getIconIndex(ItemStack stack)
-    {
-        return getIcon(stack, 0);
-    }
-
-    @Override
-    public IIcon getIcon(ItemStack itemStack, int pass)
-    {
-        return oneOff == 0 ? this.yukihiraIcon : this.reirakuIcon;
-    }
+//
+//    @Override
+//    public IIcon getIconIndex(ItemStack stack)
+//    {
+//        return getIcon(stack, 0);
+//    }
+//
+//    @Override
+//    public IIcon getIcon(ItemStack itemStack, int pass)
+//    {
+//        return oneOff == 0 ? this.yukihiraIcon : this.reirakuIcon;
+//    }
 
     @Override
     @SideOnly(Side.CLIENT)
@@ -330,11 +318,6 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
         this.reirakuIcon = iconRegister.registerIcon(this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1) + "_oneOff");
         LogHelper.debug("Yukihira icon loc:" + yukihiraIcon.getIconName());
         LogHelper.debug("Reiraku icon loc:" + reirakuIcon.getIconName());
-    }
-
-    protected String getUnwrappedUnlocalizedName(String unlocalizedName)
-    {
-        return unlocalizedName.substring(unlocalizedName.indexOf(".") + 1);
     }
 
     @Override
