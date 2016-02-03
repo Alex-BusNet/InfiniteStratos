@@ -20,8 +20,9 @@ public class ConfigurationHandler
         if(configuration == null)
         {
             configuration = new Configuration(configFile);
-            loadConfiguration();
         }
+
+        loadConfiguration();
     }
 
     @SubscribeEvent
@@ -36,7 +37,10 @@ public class ConfigurationHandler
     private static void loadConfiguration()
     {
         Settings.General.syncThreshold = configuration.getInt(Messages.Configuration.GENERAL_SYNC_THRESHOLD, Configuration.CATEGORY_GENERAL, 5, 0, Short.MAX_VALUE, StatCollector.translateToLocal(Messages.Configuration.GENERAL_SYNC_THRESHOLD_COMMENT), Messages.Configuration.GENERAL_SYNC_THRESHOLD_LABEL);
+
         Settings.Sounds.soundMode = ConfigurationHelper.getString(configuration, Messages.Configuration.SOUND_MODE, Configuration.CATEGORY_GENERAL, "All", StatCollector.translateToLocal(Messages.Configuration.SOUND_MODE_COMMENT), new String[]{"All", "Self", "None"}, Messages.Configuration.SOUND_MODE_LABEL);
+
+
         if (configuration.hasChanged())
         {
             configuration.save();

@@ -89,14 +89,14 @@ public class UnitSettings implements INBTTaggable
             {
                 this.totalEqualizers = unitSettings.getInteger("totalEqualizers");
 
-                if (this.totalEqualizers < 1)
-                {
-                    this.totalEqualizers = 1;
-                }
-                else if(this.totalEqualizers > MAX_EQUALIZERS)
-                {
-                    this.totalEqualizers = MAX_EQUALIZERS;
-                }
+//                if (this.totalEqualizers < 1)
+//                {
+//                    this.totalEqualizers = 1;
+//                }
+//                else if(this.totalEqualizers > MAX_EQUALIZERS)
+//                {
+//                    this.totalEqualizers = MAX_EQUALIZERS;
+//                }
             }
             else
             {
@@ -107,18 +107,18 @@ public class UnitSettings implements INBTTaggable
             {
                 this.deployedState = unitSettings.getInteger("deployedState");
 
-                if (this.deployedState  == 0)
-                {
-                    this.deployedState = 0;
-                }
-                else if (this.deployedState == 1)
-                {
-                    this.deployedState = 1;
-                }
-                else if(this.deployedState == 2)
-                {
-                    this.deployedState = 2;
-                }
+//                if (this.deployedState  == 0)
+//                {
+//                    this.deployedState = 0;
+//                }
+//                else if (this.deployedState == 1)
+//                {
+//                    this.deployedState = 1;
+//                }
+//                else if(this.deployedState == 2)
+//                {
+//                    this.deployedState = 2;
+//                }
             }
             else
             {
@@ -129,20 +129,20 @@ public class UnitSettings implements INBTTaggable
             {
                 this.ownerName = unitSettings.getString("ownerName");
 
-                if ( ownerName == null )
-                {
-                    this.ownerName = "Unknown";
-                }
+//                if ( ownerName == null )
+//                {
+//                    this.ownerName = "Unknown";
+//                }
             }
 
             if(unitSettings.hasKey("unitName"))
             {
                 this.unitName = unitSettings.getString("unitName");
 
-                if(unitName == null)
-                {
-                    this.unitName = "None";
-                }
+//                if(unitName == null)
+//                {
+//                    this.unitName = "None";
+//                }
             }
 
         }

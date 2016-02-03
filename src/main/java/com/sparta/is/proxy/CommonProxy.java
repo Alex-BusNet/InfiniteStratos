@@ -26,7 +26,7 @@ public abstract class CommonProxy implements IProxy
         FMLCommonHandler.instance().bus().register(craftingHandler);
         MinecraftForge.EVENT_BUS.register(craftingHandler);
         MinecraftForge.EVENT_BUS.register(new UnitOverlay(Minecraft.getMinecraft()));
-       MinecraftForge.EVENT_BUS.register(armorEventHandler);
+        MinecraftForge.EVENT_BUS.register(armorEventHandler);
     }
 
     public ModelBiped getArmorModel(int id)
