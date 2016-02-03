@@ -50,7 +50,7 @@ configFile.withReader {
 }
 
 version = config.mod_version
-group= "com.sparta.is" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = "com.sparta.is" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "IS"
 
 minecraft {
