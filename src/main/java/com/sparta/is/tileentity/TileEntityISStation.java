@@ -122,11 +122,6 @@ public class TileEntityISStation extends TileEntityIS implements IInventory
 
     public boolean isStandNearby()
     {
-        if(worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 2) instanceof TileEntityUnitStand)
-        {
-            return true;
-        }
-
         return false;
     }
 

@@ -58,25 +58,25 @@ public class EntityHelper
         }
     }
 
-    public static void ISPlayerModifier(EntityLivingBase entity)
-    {
-        if(entity instanceof EntityPlayer)
-        {
-            ItemStack equippedArmor = ((EntityPlayer) entity).getCurrentArmor(1);
-
-            if(equippedArmor.getItem() instanceof ArmorIS)
-            {
-                if(((ArmorIS) equippedArmor.getItem()).getState() == 2)
-                {
-                    ((EntityPlayer) entity).yOffset = 3.0F;
-                    ((EntityPlayer) entity).motionX +=  0.1F;
-                }
-                else
-                {
-                    ((EntityPlayer) entity).yOffset = 1.62F;
-                    ((EntityPlayer) entity).motionX = 0.1F;
-                }
-            }
-        }
-    }
+//    public static void ISPlayerModifier(EntityLivingBase entity)
+//    {
+//        if(entity instanceof EntityPlayer)
+//        {
+//            ItemStack equippedArmor = ((EntityPlayer) entity).getCurrentArmor(1);
+//
+//            if(equippedArmor.getItem() instanceof ArmorIS)
+//            {
+//                if(((ArmorIS) equippedArmor.getItem()).getState() == 2)
+//                {
+//                    ((EntityPlayer) entity).yOffset = 3.0F;
+//                    ((EntityPlayer) entity).motionX +=  0.1F;
+//                }
+//                else
+//                {
+//                    ((EntityPlayer) entity).yOffset = 1.62F;
+//                    ((EntityPlayer) entity).motionX = 0.1F;
+//                }
+//            }
+//        }
+//    }
 }

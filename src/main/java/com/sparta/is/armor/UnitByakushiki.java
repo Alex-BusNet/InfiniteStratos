@@ -203,7 +203,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
     @Override
     public void onArmorTick(World world, EntityPlayer player, ItemStack itemStack)
     {
-        super.onArmorTick(world, player, itemStack);
+//        super.onArmorTick(world, player, itemStack);
 
         //TODO: Create method to handle auto-deployment for player falling
 //        if(state != 2 && player.motionY < -1.0D && getRemainingShieldCapacity() > 0 && /* !player.capabilities.isFlying && */ !player.capabilities.isCreativeMode)

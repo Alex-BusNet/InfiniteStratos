@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL11;
 public class GuiISUnitStation extends GuiBase
 {
     private TileEntityISStation tileEntityISStation;
+    private String unitName = "IS Test Unit";
 
     public GuiISUnitStation(InventoryPlayer inventoryPlayer, TileEntityISStation tileEntityISStation)
     {
@@ -23,7 +24,7 @@ public class GuiISUnitStation extends GuiBase
     @Override
     protected void drawGuiContainerForegroundLayer(int x, int y)
     {
-        fontRendererObj.drawString("IS Test Unit", 55, 7, new GuiColor(0, 0, 0).getColor());
+        fontRendererObj.drawString(unitName, 55, 7, new GuiColor(0, 0, 0).getColor());
     }
 
     @Override
@@ -37,5 +38,10 @@ public class GuiISUnitStation extends GuiBase
         int yStart = (height - ySize) / 2;
         this.drawTexturedModalRect(xStart, yStart, 0, 0, xSize, ySize);
 
+    }
+
+    private void setUnitInformation()
+    {
+        unitName = "Test Unit";
     }
 }
