@@ -215,9 +215,9 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
         }
     }
 
-    /* IOwnable */
+    /* IKeyBound */
     @Override
-    public void doKeyBindingAction(EntityPlayer player, ItemStack itemStack, Key key, boolean falling)
+    public void doKeyBindingAction(EntityPlayer player, ItemStack itemStack, Key key)
     {
         if(key != Key.UNKNOWN)
         {

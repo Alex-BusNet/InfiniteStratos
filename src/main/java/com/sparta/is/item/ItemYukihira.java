@@ -249,7 +249,7 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
     }
 
     @Override
-    public void doKeyBindingAction(EntityPlayer entityPlayer, ItemStack itemStack, Key key, boolean falling)
+    public void doKeyBindingAction(EntityPlayer entityPlayer, ItemStack itemStack, Key key)
     {
         if(key != Key.UNKNOWN)
         {

@@ -75,7 +75,7 @@ public class KeyInputEventHandler
                             }
                             else
                             {
-                                ((IKeyBound) currentEquippedItem.getItem()).doKeyBindingAction(entityPlayer, currentEquippedItem, getPressedKeyBinding(), false);
+                                ((IKeyBound) currentEquippedItem.getItem()).doKeyBindingAction(entityPlayer, currentEquippedItem, getPressedKeyBinding());
                             }
                         }
                     }
@@ -100,7 +100,7 @@ public class KeyInputEventHandler
                         }
                         else
                         {
-                            ((IKeyBound) currentEquippedArmor.getItem()).doKeyBindingAction(entityPlayer, currentEquippedArmor, getPressedKeyBinding(), false);
+                            ((IKeyBound) currentEquippedArmor.getItem()).doKeyBindingAction(entityPlayer, currentEquippedArmor, getPressedKeyBinding());
                         }
                     }
                 }
