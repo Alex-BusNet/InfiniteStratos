@@ -206,13 +206,13 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 //        super.onArmorTick(world, player, itemStack);
 
         //TODO: Create method to handle auto-deployment for player falling
-//        if(state != 2 && player.motionY < -1.0D && getRemainingShieldCapacity() > 0 && /* !player.capabilities.isFlying && */ !player.capabilities.isCreativeMode)
-//        {
-//            LogHelper.info("Before: " + player.motionY);
-//            player.motionY = 0.0D;
-//            LogHelper.info("After: " + player.motionY);
-//            doKeyBindingAction(player, itemStack, Key.FULL_DEPLOY, true);
-//        }
+        if(state != 2 && player.motionY < -1.0D && getRemainingShieldCapacity() > 0 && !player.capabilities.isFlying && !player.capabilities.isCreativeMode)
+        {
+            LogHelper.info("Before: " + player.motionY);
+            player.motionY = 0.0D;
+            LogHelper.info("After: " + player.motionY);
+            doKeyBindingAction(player, itemStack, Key.FULL_DEPLOY, true);
+        }
 
 
     }
@@ -306,50 +306,67 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 
             if(key == Key.STANDBY && state != 0)
             {
-//                player.capabilities.allowFlying = false;
-//
-//                if(player.capabilities.isFlying && !player.capabilities.isCreativeMode)
-//                {
-//                    player.capabilities.isFlying = false;
-//                }
-//
-//                player.capabilities.setFlySpeed(0.05F);
-//                player.capabilities.setPlayerWalkSpeed(0.1F);
-//                state = 0;
+                if(!player.getEntityWorld().isRemote)
+                {
+                    player.capabilities.allowFlying = false;
+
+                    if(player.capabilities.isFlying && !player.capabilities.isCreativeMode)
+                    {
+                        player.capabilities.isFlying = false;
+                    }
+
+                    player.capabilities.setFlySpeed(0.05F);
+                    player.capabilities.setPlayerWalkSpeed(0.1F);
+
+                    player.sendPlayerAbilities();
+                }
+
+                state = 0;
                 unitSettings.setDeployedState(0);
                 player.addChatMessage(new ChatComponentText("Unit in Standby"));
             }
             else if (key == Key.PARTIAL_DEPLOY  && state != 1 && state != 2)
             {
-//                player.capabilities.allowFlying = false;
-//
-//                if(player.capabilities.isFlying && !player.capabilities.isCreativeMode)
-//                {
-//                    player.capabilities.isFlying = false;
-//                }
-//
-//                player.capabilities.setFlySpeed(0.05F);
-//                player.capabilities.setPlayerWalkSpeed(0.1F);
-//                state = 1;
+                if(!player.getEntityWorld().isRemote)
+                {
+                    player.capabilities.allowFlying = false;
+
+                    if ( player.capabilities.isFlying && ! player.capabilities.isCreativeMode )
+                    {
+                        player.capabilities.isFlying = false;
+                    }
+
+                    player.capabilities.setFlySpeed(0.05F);
+                    player.capabilities.setPlayerWalkSpeed(0.1F);
+
+                    player.sendPlayerAbilities();
+                }
+
+                state = 1;
                 unitSettings.setDeployedState(1);
                 player.addChatMessage(new ChatComponentText("Unit Partially Deployed"));
             }
             else if (key == Key.FULL_DEPLOY && state != 2)
             {
-//                player.capabilities.allowFlying = true;
-//                player.capabilities.setFlySpeed(0.01F);
-//                player.capabilities.setPlayerWalkSpeed(0.1F);
+                if(!player.getEntityWorld().isRemote)
+                {
+                    player.capabilities.allowFlying = true;
+                    player.capabilities.setFlySpeed(0.1F);
+                    player.capabilities.setPlayerWalkSpeed(0.3F);
 
-//                if(falling)
-//                {
-//                    player.capabilities.isFlying = true;
-//                }
-//                else
-//                {
-//                    player.capabilities.isFlying = false;
-//                }
+                    if ( falling )
+                    {
+                        player.capabilities.isFlying = true;
+                    }
+                    else
+                    {
+                        player.capabilities.isFlying = false;
+                    }
 
-//                state = 2;
+                    player.sendPlayerAbilities();
+                }
+
+                state = 2;
                 unitSettings.setDeployedState(2);
                 player.addChatMessage(new ChatComponentText("Unit Fully Deployed"));
             }

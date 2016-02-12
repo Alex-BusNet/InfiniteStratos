@@ -3,6 +3,7 @@ package com.sparta.is.client.gui.inventory;
 import com.sparta.is.inventory.ContainerISUnitStation;
 import com.sparta.is.reference.Textures;
 import com.sparta.is.tileentity.TileEntityISStation;
+import com.sparta.is.utility.LogHelper;
 import com.sparta.repackage.cofh.lib.gui.GuiBase;
 import com.sparta.repackage.cofh.lib.gui.GuiColor;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -24,6 +25,7 @@ public class GuiISUnitStation extends GuiBase
     @Override
     protected void drawGuiContainerForegroundLayer(int x, int y)
     {
+        setUnitInformation();
         fontRendererObj.drawString(unitName, 55, 7, new GuiColor(0, 0, 0).getColor());
     }
 
@@ -42,6 +44,16 @@ public class GuiISUnitStation extends GuiBase
 
     private void setUnitInformation()
     {
-        unitName = "Test Unit";
+        LogHelper.info("setUnitInformation called");
+
+        if(tileEntityISStation.isStandNearby())
+        {
+            LogHelper.info("Stand nearby. Getting Unit Info");
+            tileEntityISStation.getUnitName();
+        }
+        else
+        {
+            unitName = "Test Unit";
+        }
     }
 }
