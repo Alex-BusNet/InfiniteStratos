@@ -3,6 +3,7 @@ package com.sparta.is.tileentity;
 import com.sparta.is.reference.Names;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -16,6 +17,9 @@ public class TileEntityISStation extends TileEntityIS implements IInventory
     public static final int EQUALIZER_SLOT_4_INDEX = 3;
 
     private ItemStack[] inventory;
+
+    private boolean standNearby = false;
+    private Item storedUnit;
 
     public TileEntityISStation()
     {
@@ -122,12 +126,22 @@ public class TileEntityISStation extends TileEntityIS implements IInventory
 
     public boolean isStandNearby()
     {
-        if(worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 2) instanceof TileEntityUnitStand)
-        {
-            return true;
-        }
+        return standNearby;
+    }
 
-        return false;
+    public void setStandNearby()
+    {
+        standNearby = !standNearby;
+    }
+
+    public void setStoredUnit(Item unit)
+    {
+        this.storedUnit = unit;
+    }
+
+    public String getUnitName()
+    {
+        return this.storedUnit.getUnlocalizedName();
     }
 
     @Override
@@ -146,6 +160,8 @@ public class TileEntityISStation extends TileEntityIS implements IInventory
                 inventory[currentIndex].writeToNBT(tagCompound);
                 tagList.appendTag(tagCompound);
             }
+
+
         }
         nbtTagCompound.setTag("Items", tagList);
     }

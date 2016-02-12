@@ -26,7 +26,7 @@ public class OverlayEventHandler
 
         // look for the ItemHUDactivator in the hotbar.  If not present, return without changing the HUD.
         boolean foundInHotbar = false;
-        final int LAST_ARMOR_SLOT_PLUS_ONE = 0 + entityPlayerSP.inventory.getHotbarSize();
+        final int LAST_ARMOR_SLOT_PLUS_ONE = 1 + entityPlayerSP.inventory.getHotbarSize();
 
         for (int i = 0; i < LAST_ARMOR_SLOT_PLUS_ONE; ++i)
         {
