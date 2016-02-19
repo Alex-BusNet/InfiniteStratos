@@ -16,11 +16,11 @@ public class EntityIS extends EntityVillager
         super.entityInit();
     }
 
-    @Override
-    public boolean isAIEnabled()
-    {
-        return true;
-    }
+//    @Override
+//    public boolean isAIEnabled()
+//    {
+//        return true;
+//    }
 
 
 }

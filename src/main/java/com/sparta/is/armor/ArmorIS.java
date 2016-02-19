@@ -5,13 +5,12 @@ import com.google.common.collect.Multimap;
 import com.sparta.is.creativetab.CreativeTabIS;
 import com.sparta.is.reference.Textures;
 import com.sparta.is.utility.IModifyable;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
+
+//import net.minecraft.client.renderer.texture.IIconRegister;
 
 public class ArmorIS extends ItemArmor implements IModifyable
 {
@@ -45,12 +44,12 @@ public class ArmorIS extends ItemArmor implements IModifyable
         return String.format("armor.%s%s",Textures.RESOURCE_PREFIX, getUnwrappedLocalizedName(super.getUnlocalizedName()));
     }
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister)
-    {
-        itemIcon = iconRegister.registerIcon(String.format("%s", getUnwrappedLocalizedName(this.getUnlocalizedName())));
-    }
+//    @Override
+//    @SideOnly(Side.CLIENT)
+//    public void registerIcons(IIconRegister iconRegister)
+//    {
+//        itemIcon = iconRegister.registerIcon(String.format("%s", getUnwrappedLocalizedName(this.getUnlocalizedName())));
+//    }
 
     protected String getUnwrappedLocalizedName(String unlocalizedName)
     {

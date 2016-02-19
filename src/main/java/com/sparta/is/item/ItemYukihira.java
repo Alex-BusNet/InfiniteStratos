@@ -4,23 +4,23 @@ import com.sparta.is.armor.ArmorIS;
 import com.sparta.is.armor.UnitByakushiki;
 import com.sparta.is.network.PacketHandler;
 import com.sparta.is.network.message.MessageOneOffSettings;
-import com.sparta.is.reference.*;
+import com.sparta.is.reference.Key;
+import com.sparta.is.reference.Material;
+import com.sparta.is.reference.Messages;
+import com.sparta.is.reference.Names;
 import com.sparta.is.settings.OneOffSettings;
 import com.sparta.is.settings.UnitSettings;
 import com.sparta.is.utility.DamageSourceHelper;
 import com.sparta.is.utility.EntityHelper;
 import com.sparta.is.utility.IKeyBound;
-
 import com.sparta.is.utility.LogHelper;
 import com.sparta.repackage.cofh.api.energy.IEnergyContainerItem;
 import com.sparta.repackage.cofh.api.item.IEmpowerableItem;
 import com.sparta.repackage.cofh.lib.util.helpers.EnergyHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.MathHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
@@ -249,7 +249,7 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
     }
 
     @Override
-    public void doKeyBindingAction(EntityPlayer entityPlayer, ItemStack itemStack, Key key)
+    public void doKeyBindingAction(EntityPlayer entityPlayer, ItemStack itemStack, Key key, boolean falling)
     {
         if(key != Key.UNKNOWN)
         {
@@ -310,15 +310,15 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
 //        return oneOff == 0 ? this.yukihiraIcon : this.reirakuIcon;
 //    }
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister)
-    {
-        this.yukihiraIcon = iconRegister.registerIcon(this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1));
-        this.reirakuIcon = iconRegister.registerIcon(this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1) + "_oneOff");
-        LogHelper.debug("Yukihira icon loc:" + yukihiraIcon.getIconName());
-        LogHelper.debug("Reiraku icon loc:" + reirakuIcon.getIconName());
-    }
+//    @Override
+//    @SideOnly(Side.CLIENT)
+//    public void registerIcons(IIconRegister iconRegister)
+//    {
+//        this.yukihiraIcon = iconRegister.registerIcon(this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1));
+//        this.reirakuIcon = iconRegister.registerIcon(this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1) + "_oneOff");
+//        LogHelper.debug("Yukihira icon loc:" + yukihiraIcon.getIconName());
+//        LogHelper.debug("Reiraku icon loc:" + reirakuIcon.getIconName());
+//    }
 
     @Override
     public int receiveEnergy(ItemStack container, int maxReceive, boolean simulate)

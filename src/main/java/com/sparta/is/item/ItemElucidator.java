@@ -10,8 +10,6 @@ import com.sparta.repackage.cofh.api.energy.IEnergyContainerItem;
 import com.sparta.repackage.cofh.lib.util.helpers.EnergyHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.MathHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
@@ -53,14 +51,6 @@ public class ItemElucidator extends ItemISEqualizer implements IEnergyContainerI
     {
         int unbreakingLevel = MathHelper.clampI(EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, stack), 0, 4);
         return energyPerUse * (5 - unbreakingLevel) / 5;
-    }
-
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister)
-    {
-        itemIcon = iconRegister.registerIcon(this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1));
     }
 
     @Override

@@ -5,8 +5,6 @@ import com.sparta.is.entity.EntityIS;
 import com.sparta.is.reference.Names;
 import com.sparta.is.reference.Reference;
 import com.sparta.is.reference.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -114,8 +112,7 @@ public class ItemTabaneSpawnEgg extends ItemEgg
             }
             else
             {
-                if (movingobjectposition.typeOfHit == MovingObjectPosition
-                        .MovingObjectType.BLOCK)
+                if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
                 {
                     int i = movingobjectposition.blockX;
                     int j = movingobjectposition.blockY;
@@ -126,8 +123,7 @@ public class ItemTabaneSpawnEgg extends ItemEgg
                         return par1ItemStack;
                     }
 
-                    if (!par3EntityPlayer.canPlayerEdit(i, j, k, movingobjectposition
-                            .sideHit, par1ItemStack))
+                    if (!par3EntityPlayer.canPlayerEdit(i, j, k, movingobjectposition.sideHit, par1ItemStack))
                     {
                         return par1ItemStack;
                     }
@@ -208,13 +204,6 @@ public class ItemTabaneSpawnEgg extends ItemEgg
     public boolean requiresMultipleRenderPasses()
     {
         return true;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister)
-    {
-        itemIcon = iconRegister.registerIcon(this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1) + "_overlay");
     }
 
     /**

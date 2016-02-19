@@ -7,9 +7,6 @@ package com.sparta.is.tileentity;
 import com.sparta.is.api.array.AlchemyArray;
 import com.sparta.is.network.PacketHandler;
 import com.sparta.is.network.message.MessageTileEntityAlchemyArray;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -22,6 +19,9 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityAlchemyArray extends TileEntityIS implements ISidedInventory
 {

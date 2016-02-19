@@ -1,12 +1,14 @@
 package com.sparta.is.client.gui;
 
-import cpw.mods.fml.client.IModGuiFactory;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.fml.client.IModGuiFactory;
 
 import java.util.Set;
 
-public class GuiFactory implements IModGuiFactory {
+public class GuiFactory implements IModGuiFactory
+{
     @Override
     public void initialize(Minecraft minecraftInstance)
     {

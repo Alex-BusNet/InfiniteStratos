@@ -3,10 +3,10 @@ package com.sparta.is.proxy;
 import com.sparta.is.client.gui.overlay.UnitOverlay;
 import com.sparta.is.client.handler.ArmorEventHandler;
 import com.sparta.is.handler.*;
-import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public abstract class CommonProxy implements IProxy
 {

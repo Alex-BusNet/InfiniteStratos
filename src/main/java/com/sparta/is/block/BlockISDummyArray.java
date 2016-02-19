@@ -4,7 +4,6 @@ package com.sparta.is.block;
  * BORROWED FROM Equivalent Exchange 3 FOR SAKE OF EARLY TILE ENTITY DEVELOPMENT
  */
 
-import com.sparta.is.reference.Names;
 import com.sparta.is.reference.RenderIds;
 import com.sparta.is.tileentity.TileEntityAlchemyArray;
 import com.sparta.is.tileentity.TileEntityDummyArray;
@@ -17,6 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.Explosion;
@@ -32,7 +32,6 @@ public class BlockISDummyArray extends BlockTileEntityIS
     {
         super(Material.circuits);
         setCreativeTab(null);
-        this.setBlockName(Names.Blocks.DUMMY_ARRAY);
     }
 
     @Override
@@ -54,11 +53,11 @@ public class BlockISDummyArray extends BlockTileEntityIS
     }
 
     @Override
-    public int getLightValue(IBlockAccess world, int x, int y, int z)
+    public int getLightValue(IBlockAccess world, BlockPos blockPos)
     {
-        if (world.getTileEntity(x, y, z) instanceof TileEntityDummyArray)
+        if (world.getTileEntity(blockPos) instanceof TileEntityDummyArray)
         {
-            TileEntityDummyArray tileEntityDummyArray = (TileEntityDummyArray) world.getTileEntity(x, y, z);
+            TileEntityDummyArray tileEntityDummyArray = (TileEntityDummyArray) world.getTileEntity(blockPos);
 
             return tileEntityDummyArray.getLightLevel();
         }

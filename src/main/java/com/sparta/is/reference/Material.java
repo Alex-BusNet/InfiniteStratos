@@ -13,7 +13,7 @@ public class Material
 
     public static final class Armor
     {
-        public static final ItemArmor.ArmorMaterial IS_ARMOR = EnumHelper.addArmorMaterial(Names.Materials.IS_ARMOR, 0, new int[]{100,100,100,100}, 0);
+        public static final ItemArmor.ArmorMaterial IS_ARMOR = EnumHelper.addArmorMaterial(Names.Materials.IS_ARMOR, Textures.Materials.IS_ARMOR.toString(), 0, new int[]{100,100,100,100}, 0);
     }
 
 }

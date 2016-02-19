@@ -4,12 +4,12 @@ import com.sparta.is.inventory.ContainerISUnitStation;
 import com.sparta.is.reference.Messages;
 import com.sparta.is.utility.IOwnable;
 import com.sparta.is.utility.ItemHelper;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.UsernameCache;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 
 import java.text.DecimalFormat;

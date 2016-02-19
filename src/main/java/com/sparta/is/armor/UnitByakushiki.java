@@ -10,9 +10,6 @@ import com.sparta.repackage.cofh.api.energy.IEnergyContainerItem;
 import com.sparta.repackage.cofh.lib.util.helpers.EnergyHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.MathHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
@@ -32,6 +29,9 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.UsernameCache;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 import java.util.UUID;
@@ -181,7 +181,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
                     {
                         EnumAction action = held_item.getItemUseAction();
 
-                        if ( action == EnumAction.bow )
+                        if ( action == EnumAction.BOW )
                         {
                             armorModel.aimedBow = true;
                         }
@@ -212,7 +212,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
             LogHelper.info("Before: " + player.motionY);
             player.motionY = 0.0D;
             LogHelper.info("After: " + player.motionY);
-            doKeyBindingAction(player, itemStack, Key.FULL_DEPLOY);
+            doKeyBindingAction(player, itemStack, Key.FULL_DEPLOY, true);
 
         }
 
@@ -229,12 +229,12 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
                 NBTTagCompound nbtTagCompound = EntityHelper.getCustomEntityData(entityPlayer);
                 UnitSettings unitSettings = new UnitSettings();
                 unitSettings.readFromNBT(nbtTagCompound);
-                unitSettings.setOwnerName(entityPlayer.getDisplayName());
+                unitSettings.setOwnerName(entityPlayer.getDisplayNameString());
                 unitSettings.setUnitName(itemStack.getUnlocalizedName());
                 unitSettings.setTotalEqualizers(TOTAL_EQUALIZERS);
 
                 ItemHelper.setOwner(itemStack, entityPlayer);
-                this.setOwnerName(entityPlayer.getDisplayName());
+                this.setOwnerName(entityPlayer.getDisplayNameString());
 
                 entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.OWNER_SET_TO_SELF, new Object[]{itemStack.func_151000_E()}));
 
@@ -296,7 +296,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 
     /* IKeyBound */
     @Override
-    public void doKeyBindingAction(EntityPlayer player, ItemStack itemStack, Key key)
+    public void doKeyBindingAction(EntityPlayer player, ItemStack itemStack, Key key, boolean falling)
     {
 
         if(key != Key.UNKNOWN)

@@ -1,6 +1,6 @@
 package com.sparta.is.glUtils;
 
-import java.io.*;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 /**

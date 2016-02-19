@@ -3,8 +3,8 @@ package com.sparta.is.init;
 import com.sparta.is.item.*;
 import com.sparta.is.reference.Names;
 import com.sparta.is.reference.Reference;
-import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.item.Item;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 @GameRegistry.ObjectHolder(Reference.MOD_ID)
 public class ModItems

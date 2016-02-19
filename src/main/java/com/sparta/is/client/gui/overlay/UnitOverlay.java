@@ -30,7 +30,7 @@ public class UnitOverlay extends Gui
         World world = mc.theWorld;
         EntityPlayer player = mc.thePlayer;
 
-        FontRenderer fontRenderer = mc.fontRenderer;
+        FontRenderer fontRenderer = mc.fontRendererObj;
 
         DecimalFormat decimalFormat = new DecimalFormat("#,###");
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
