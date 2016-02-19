@@ -206,12 +206,14 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 //        super.onArmorTick(world, player, itemStack);
 
         //TODO: Create method to handle auto-deployment for player falling
+
         if(state != 2 && player.motionY < -1.0D && getRemainingShieldCapacity() > 0 && !player.capabilities.isFlying && !player.capabilities.isCreativeMode)
         {
             LogHelper.info("Before: " + player.motionY);
             player.motionY = 0.0D;
             LogHelper.info("After: " + player.motionY);
-            doKeyBindingAction(player, itemStack, Key.FULL_DEPLOY, true);
+            doKeyBindingAction(player, itemStack, Key.FULL_DEPLOY);
+
         }
 
 
@@ -292,9 +294,9 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
         }
     }
 
-    /* IOwnable */
+    /* IKeyBound */
     @Override
-    public void doKeyBindingAction(EntityPlayer player, ItemStack itemStack, Key key, boolean falling)
+    public void doKeyBindingAction(EntityPlayer player, ItemStack itemStack, Key key)
     {
 
         if(key != Key.UNKNOWN)
@@ -478,4 +480,5 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
     {
         return maxEnergy;
     }
+
 }

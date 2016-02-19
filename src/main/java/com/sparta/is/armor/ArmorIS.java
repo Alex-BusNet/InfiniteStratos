@@ -73,6 +73,13 @@ public class ArmorIS extends ItemArmor implements IModifyable
         return textures[0];
     }
 
+    @Override
+    public boolean isValidArmor(ItemStack itemStack, int armorType, Entity entity)
+    {
+        return armorType == 1;
+    }
+
+
     public int getShieldCapacity()
     {
         return totalShieldCapacity;
