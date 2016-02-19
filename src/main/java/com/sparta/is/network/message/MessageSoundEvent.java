@@ -2,12 +2,12 @@ package com.sparta.is.network.message;
 
 import com.sparta.is.InfiniteStratos;
 import com.sparta.is.reference.Settings;
+import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.util.UUID;
 
@@ -86,7 +86,7 @@ public class MessageSoundEvent implements IMessage, IMessageHandler<MessageSound
         }
         else if (Settings.Sounds.soundMode.equalsIgnoreCase("Self"))
         {
-            if ( FMLClientHandler.instance().getClient().thePlayer.getUniqueID().equals(originUUID))
+            if (FMLClientHandler.instance().getClient().thePlayer.getUniqueID().equals(originUUID))
             {
                 InfiniteStratos.proxy.playSound(event.soundName, event.xCoord, event.yCoord, event.zCoord, event.volume, event.pitch);
             }

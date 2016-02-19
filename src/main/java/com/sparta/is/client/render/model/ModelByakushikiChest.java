@@ -1,8 +1,8 @@
 package com.sparta.is.client.render.model;
 
 import com.sparta.is.glUtils.TessellatorModel;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ModelByakushikiChest

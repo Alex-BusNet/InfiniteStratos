@@ -3,16 +3,18 @@ package com.sparta.is.block;
 import com.sparta.is.creativetab.CreativeTabIS;
 import com.sparta.is.reference.Textures;
 import com.sparta.is.tileentity.TileEntityIS;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -33,23 +35,30 @@ public abstract class BlockTileEntityIS extends BlockContainer
         return String.format("tile.%s%s", Textures.RESOURCE_PREFIX, getUnwrappedUnlocalizedName(super.getUnlocalizedName()));
     }
 
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void registerBlockIcons(IIconRegister iconRegister)
+    {
+        blockIcon = iconRegister.registerIcon(String.format("%s", getUnwrappedUnlocalizedName(this.getUnlocalizedName())));
+    }
+
     protected String getUnwrappedUnlocalizedName(String unlocalizedName)
     {
         return unlocalizedName.substring(unlocalizedName.indexOf(".") + 1);
     }
 
     @Override
-    public void breakBlock(World world, BlockPos blockPos, IBlockState meta)
+    public void breakBlock(World world, int x, int y, int z, Block block, int meta)
     {
-        dropInventory(world, blockPos);
-        super.breakBlock(world, blockPos, meta);
+        dropInventory(world, x, y, z);
+        super.breakBlock(world, x, y, z, block, meta);
     }
 
     @Override
-    public void onBlockPlacedBy(World world, BlockPos blockPos, IBlockState iBlockState, EntityLivingBase entityLiving, ItemStack itemStack)
+    public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entityLiving, ItemStack itemStack)
     {
-        super.onBlockPlacedBy(world, blockPos, iBlockState, entityLiving, itemStack);
-        if (world.getTileEntity(blockPos) instanceof TileEntityIS)
+        super.onBlockPlacedBy(world, x, y, z, entityLiving, itemStack);
+        if (world.getTileEntity(x, y, z) instanceof TileEntityIS)
         {
             int direction = 0;
             int facing = MathHelper.floor_double(entityLiving.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
@@ -73,16 +82,16 @@ public abstract class BlockTileEntityIS extends BlockContainer
 
             if (itemStack.hasDisplayName())
             {
-                ((TileEntityIS) world.getTileEntity(blockPos)).setCustomName(itemStack.getDisplayName());
+                ((TileEntityIS) world.getTileEntity(x, y, z)).setCustomName(itemStack.getDisplayName());
             }
 
-            ((TileEntityIS) world.getTileEntity(blockPos)).setOrientation(direction);
+            ((TileEntityIS) world.getTileEntity(x, y, z)).setOrientation(direction);
         }
     }
 
-    protected void dropInventory(World world, BlockPos blockPos)
+    protected void dropInventory(World world, int x, int y, int z)
     {
-        TileEntity tileEntity = world.getTileEntity(blockPos);
+        TileEntity tileEntity = world.getTileEntity(x, y, z);
 
         if (!(tileEntity instanceof IInventory))
         {
@@ -102,10 +111,6 @@ public abstract class BlockTileEntityIS extends BlockContainer
                 float dX = rand.nextFloat() * 0.8F + 0.1F;
                 float dY = rand.nextFloat() * 0.8F + 0.1F;
                 float dZ = rand.nextFloat() * 0.8F + 0.1F;
-
-                float x = blockPos.getX();
-                float y = blockPos.getY();
-                float z = blockPos.getZ();
 
                 EntityItem entityItem = new EntityItem(world, x + dX, y + dY, z + dZ, itemStack.copy());
 

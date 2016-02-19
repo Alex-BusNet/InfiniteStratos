@@ -23,13 +23,13 @@ import com.sparta.is.settings.UnitSettings;
 import com.sparta.is.tileentity.TileEntityAlchemyArray;
 import com.sparta.is.tileentity.TileEntityISStation;
 import com.sparta.is.tileentity.TileEntityUnitStand;
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.client.registry.RenderingRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class ClientProxy extends CommonProxy
 {

@@ -4,8 +4,8 @@ import com.sparta.is.InfiniteStratos;
 import com.sparta.is.entity.EntityIS;
 import com.sparta.is.entity.EntityISTabane;
 import com.sparta.is.reference.Names;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
+import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.common.registry.EntityRegistry;
 
 public class ModEntities
 {

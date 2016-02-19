@@ -3,7 +3,7 @@ package com.sparta.is.init;
 import com.sparta.is.block.*;
 import com.sparta.is.reference.Names;
 import com.sparta.is.reference.Reference;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.GameRegistry;
 
 @GameRegistry.ObjectHolder(Reference.MOD_ID)
 public class ModBlocks

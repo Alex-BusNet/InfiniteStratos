@@ -1,8 +1,8 @@
 package com.sparta.is.tileentity.events;
 
 import com.sparta.is.tileentity.TileEntityIS;
-import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
 

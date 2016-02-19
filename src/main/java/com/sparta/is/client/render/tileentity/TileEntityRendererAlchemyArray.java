@@ -4,12 +4,12 @@ import com.sparta.is.api.array.AlchemyArray;
 import com.sparta.is.api.array.ICustomAlchemyArrayRender;
 import com.sparta.is.client.util.RenderUtils;
 import com.sparta.is.tileentity.TileEntityAlchemyArray;
+import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)

@@ -1,8 +1,8 @@
 package com.sparta.is.events;
 
-/*Base Class for all Infinite Stratos Events */
+import cpw.mods.fml.common.eventhandler.Event;
 
-import net.minecraftforge.fml.common.eventhandler.Event;
+/*Base Class for all Infinite Stratos Events */
 
 public class ISEvents extends Event
 {

@@ -5,7 +5,7 @@ import com.sparta.is.tileentity.TileEntityAlchemyArray;
 import com.sparta.is.tileentity.TileEntityDummyArray;
 import com.sparta.is.tileentity.TileEntityISStation;
 import com.sparta.is.tileentity.TileEntityUnitStand;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.GameRegistry;
 
 public class TileEntities
 {

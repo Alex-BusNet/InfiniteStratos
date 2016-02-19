@@ -1,8 +1,8 @@
 package com.sparta.is.client.util;
 
 import com.sparta.is.utility.ResourceLocationHelper;
+import cpw.mods.fml.client.FMLClientHandler;
 import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraftforge.fml.client.FMLClientHandler;
 
 public class ClientSoundHelper
 {

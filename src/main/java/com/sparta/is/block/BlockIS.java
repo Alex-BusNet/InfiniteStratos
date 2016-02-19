@@ -3,17 +3,17 @@ package com.sparta.is.block;
 import com.sparta.is.creativetab.CreativeTabIS;
 import com.sparta.is.reference.Textures;
 import com.sparta.is.tileentity.TileEntityIS;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -41,6 +41,12 @@ public class BlockIS extends Block
         //tile.modid:blockname.name
     }
 
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void registerBlockIcons(IIconRegister iconRegister)
+    {
+        blockIcon = iconRegister.registerIcon(String.format("%s", getUnwrappedUnlocalizedName(this.getUnlocalizedName())));
+    }
 
     protected String getUnwrappedUnlocalizedName(String unlocalizedName)
     {
@@ -48,58 +54,50 @@ public class BlockIS extends Block
     }
 
     @Override
-    public void breakBlock(World world, BlockPos blockPos, IBlockState blockState)
+    public void breakBlock(World world, int x, int y, int z, Block block, int meta)
     {
-        dropInventory(world, blockPos);
-        super.breakBlock(world, blockPos, blockState);
+        dropInventory(world, x, y, z);
+        super.breakBlock(world, x, y, z, block, meta);
     }
 
     @Override
-    public void onBlockPlacedBy(World world, BlockPos blockPos, IBlockState iBlockState, EntityLivingBase entityLiving, ItemStack itemStack)
+    public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entityLiving, ItemStack itemStack)
     {
-        super.onBlockPlacedBy(world, blockPos, iBlockState, entityLiving, itemStack);
-        if ( world.getTileEntity(blockPos) instanceof TileEntityIS )
+        super.onBlockPlacedBy(world, x, y, z, entityLiving, itemStack);
+        if (world.getTileEntity(x, y, z) instanceof TileEntityIS)
         {
             int direction = 0;
             int facing = MathHelper.floor_double(entityLiving.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
 
-            if ( facing == 0 )
+            if (facing == 0)
             {
                 direction = ForgeDirection.NORTH.ordinal();
             }
-            else if ( facing == 1 )
+            else if (facing == 1)
             {
                 direction = ForgeDirection.EAST.ordinal();
             }
-            else if ( facing == 2 )
+            else if (facing == 2)
             {
                 direction = ForgeDirection.SOUTH.ordinal();
             }
-            else if ( facing == 3 )
+            else if (facing == 3)
             {
                 direction = ForgeDirection.WEST.ordinal();
             }
 
-            if ( itemStack.hasDisplayName() )
+            if (itemStack.hasDisplayName())
             {
-                ((TileEntityIS) world.getTileEntity(blockPos)).setCustomName(itemStack.getDisplayName());
+                ((TileEntityIS) world.getTileEntity(x, y, z)).setCustomName(itemStack.getDisplayName());
             }
 
-            ((TileEntityIS) world.getTileEntity(blockPos)).setOrientation(direction);
+            ((TileEntityIS) world.getTileEntity(x, y, z)).setOrientation(direction);
         }
     }
 
-    @Override
-    public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos blockPos, IBlockState iBlockState)
+    protected void dropInventory(World world, int x, int y, int z)
     {
-        this.setBlockBoundsBasedOnState(world, blockPos);
-        return super.getCollisionBoundingBox(world, blockPos, iBlockState);
-    }
-
-
-    protected void dropInventory(World world, BlockPos blockPos)
-    {
-        TileEntity tileEntity = world.getTileEntity(blockPos);
+        TileEntity tileEntity = world.getTileEntity(x, y, z);
 
         if (!(tileEntity instanceof IInventory))
         {

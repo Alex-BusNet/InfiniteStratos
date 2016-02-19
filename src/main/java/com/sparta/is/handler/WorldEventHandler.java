@@ -2,8 +2,8 @@ package com.sparta.is.handler;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
 import net.minecraftforge.event.world.WorldEvent;
+import cpw.mods.fml.relauncher.Side;
 
 public class WorldEventHandler
 {

@@ -1,6 +1,11 @@
 package com.sparta.repackage.cofh.lib.util.helpers;
 
-import com.sparta.repackage.cofh.api.energy.*;
+import com.sparta.repackage.cofh.api.energy.IEnergyConnection;
+import com.sparta.repackage.cofh.api.energy.IEnergyContainerItem;
+import com.sparta.repackage.cofh.api.energy.IEnergyHandler;
+import com.sparta.repackage.cofh.api.energy.IEnergyProvider;
+import com.sparta.repackage.cofh.api.energy.IEnergyReceiver;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;

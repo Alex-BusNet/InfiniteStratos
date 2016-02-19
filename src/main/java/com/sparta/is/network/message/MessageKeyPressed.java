@@ -2,11 +2,11 @@ package com.sparta.is.network.message;
 
 import com.sparta.is.reference.Key;
 import com.sparta.is.utility.IKeyBound;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageKeyPressed implements IMessage, IMessageHandler<MessageKeyPressed, IMessage>
 {
@@ -65,23 +65,23 @@ public class MessageKeyPressed implements IMessage, IMessageHandler<MessageKeyPr
         {
             if (message.keyPressed == Key.STANDBY.ordinal())
             {
-                ((IKeyBound) entityPlayer.getCurrentArmor(2).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentArmor(2), Key.STANDBY, false);
+                ((IKeyBound) entityPlayer.getCurrentArmor(2).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentArmor(2), Key.STANDBY);
             }
             else if (message.keyPressed == Key.PARTIAL_DEPLOY.ordinal())
             {
-                ((IKeyBound) entityPlayer.getCurrentArmor(2).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentArmor(2), Key.PARTIAL_DEPLOY, false);
+                ((IKeyBound) entityPlayer.getCurrentArmor(2).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentArmor(2), Key.PARTIAL_DEPLOY);
             }
             else if (message.keyPressed == Key.FULL_DEPLOY.ordinal())
             {
-                ((IKeyBound) entityPlayer.getCurrentArmor(2).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentArmor(2), Key.FULL_DEPLOY, false);
+                ((IKeyBound) entityPlayer.getCurrentArmor(2).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentArmor(2), Key.FULL_DEPLOY);
             }
             else if(message.keyPressed == Key.ONE_OFF_ABILITY.ordinal())
             {
-                ((IKeyBound) entityPlayer.getCurrentEquippedItem().getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentEquippedItem(), Key.ONE_OFF_ABILITY, false);
+                ((IKeyBound) entityPlayer.getCurrentEquippedItem().getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentEquippedItem(), Key.ONE_OFF_ABILITY);
             }
             else if(message.keyPressed == Key.ONE_OFF_ABILITY_OFF.ordinal())
             {
-                ((IKeyBound) entityPlayer.getCurrentEquippedItem().getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentEquippedItem(), Key.ONE_OFF_ABILITY_OFF, false);
+                ((IKeyBound) entityPlayer.getCurrentEquippedItem().getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentEquippedItem(), Key.ONE_OFF_ABILITY_OFF);
             }
         }
 

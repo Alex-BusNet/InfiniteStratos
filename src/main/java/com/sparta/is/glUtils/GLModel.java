@@ -1,5 +1,6 @@
 package com.sparta.is.glUtils;
 
+import com.sparta.is.reference.Textures;
 import org.lwjgl.opengl.GL11;
 
 /**

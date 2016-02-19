@@ -7,10 +7,9 @@ import com.sparta.is.inventory.ContainerUnitStand;
 import com.sparta.is.reference.GUIs;
 import com.sparta.is.tileentity.TileEntityISStation;
 import com.sparta.is.tileentity.TileEntityUnitStand;
+import cpw.mods.fml.common.network.IGuiHandler;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.IGuiHandler;
 
 public class GuiHandler implements IGuiHandler
 {
@@ -18,15 +17,14 @@ public class GuiHandler implements IGuiHandler
     @Override
     public Object getServerGuiElement(int id, EntityPlayer entityPlayer, World world, int x, int y, int z)
     {
-        BlockPos blockPos = new BlockPos(x, y, z);
         if(id == GUIs.IS_UNIT_STATION.ordinal())
         {
-            TileEntityISStation tileEntityISStation = (TileEntityISStation) world.getTileEntity(blockPos);
+            TileEntityISStation tileEntityISStation = (TileEntityISStation) world.getTileEntity(x, y, z);
             return new ContainerISUnitStation(entityPlayer.inventory, tileEntityISStation);
         }
         else if(id == GUIs.UNIT_STAND.ordinal())
         {
-            TileEntityUnitStand tileEntityUnitStand = (TileEntityUnitStand) world.getTileEntity(blockPos);
+            TileEntityUnitStand tileEntityUnitStand = (TileEntityUnitStand) world.getTileEntity(x, y, z);
             return new ContainerUnitStand(entityPlayer.inventory, tileEntityUnitStand);
         }
 
@@ -36,15 +34,14 @@ public class GuiHandler implements IGuiHandler
     @Override
     public Object getClientGuiElement(int id, EntityPlayer entityPlayer, World world, int x, int y, int z)
     {
-        BlockPos blockPos = new BlockPos(x, y, z);
         if(id == GUIs.IS_UNIT_STATION.ordinal())
         {
-            TileEntityISStation tileEntityISStation = (TileEntityISStation) world.getTileEntity(blockPos);
+            TileEntityISStation tileEntityISStation = (TileEntityISStation) world.getTileEntity(x, y, z);
             return new GuiISUnitStation(entityPlayer.inventory, tileEntityISStation);
         }
         else if(id == GUIs.UNIT_STAND.ordinal())
         {
-            TileEntityUnitStand tileEntityUnitStand = (TileEntityUnitStand) world.getTileEntity(blockPos);
+            TileEntityUnitStand tileEntityUnitStand = (TileEntityUnitStand) world.getTileEntity(x, y, z);
             return new GuiUnitStand(entityPlayer.inventory, tileEntityUnitStand);
         }
 

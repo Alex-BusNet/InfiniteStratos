@@ -5,20 +5,19 @@ package com.sparta.is.network.message;
  */
 
 import com.sparta.is.tileentity.TileEntityAlchemyArray;
+import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class MessageTileEntityAlchemyArray implements IMessage
+public class MessageTileEntityAlchemyArray implements IMessage, IMessageHandler<MessageTileEntityAlchemyArray, IMessage>
 {
     public NBTTagCompound tileEntityAlchemyArrayNBT;
 
@@ -61,44 +60,65 @@ public class MessageTileEntityAlchemyArray implements IMessage
         }
     }
 
-    public void toBytes(ByteBuf byteBuf) {
+    /**
+     * Deconstruct your message into the supplied byte buffer
+     *
+     * @param buf
+     */
+    @Override
+    public void toBytes(ByteBuf buf)
+    {
+        byte[] compressedNBT = null;
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-        try {
-            if (tileEntityAlchemyArrayNBT != null) {
-                CompressedStreamTools.writeCompressed(tileEntityAlchemyArrayNBT, byteArrayOutputStream);
+        try
+        {
+            if (tileEntityAlchemyArrayNBT != null)
+            {
+                compressedNBT = CompressedStreamTools.compress(tileEntityAlchemyArrayNBT);
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             e.printStackTrace();
         }
 
-        byteBuf.writeInt(byteArrayOutputStream.size());
-        if (byteArrayOutputStream.size() > 0) {
-            byteBuf.writeBytes(byteArrayOutputStream.toByteArray());
+        if (compressedNBT != null)
+        {
+            buf.writeInt(compressedNBT.length);
+            buf.writeBytes(compressedNBT);
+        }
+        else
+        {
+            buf.writeInt(0);
         }
     }
 
-    public static class MessageHandler implements IMessageHandler<MessageTileEntityAlchemyArray, IMessage> {
+    /**
+     * Called when a message is received of the appropriate type. You can optionally return a reply message, or null if no reply
+     * is needed.
+     *
+     * @param message The message
+     * @param ctx
+     * @return an optional return message
+     */
+    @Override
+    public IMessage onMessage(MessageTileEntityAlchemyArray message, MessageContext ctx)
+    {
+        if (message.tileEntityAlchemyArrayNBT != null)
+        {
+            TileEntityAlchemyArray tileEntityAlchemyArray = new TileEntityAlchemyArray();
+            tileEntityAlchemyArray.readFromNBT(message.tileEntityAlchemyArrayNBT);
 
-        @Override
-        public IMessage onMessage(MessageTileEntityAlchemyArray message, MessageContext ctx) {
+            TileEntity tileEntity = FMLClientHandler.instance().getClient().theWorld.getTileEntity(tileEntityAlchemyArray.xCoord, tileEntityAlchemyArray.yCoord, tileEntityAlchemyArray.zCoord);
 
-            if (message.tileEntityAlchemyArrayNBT != null) {
-
-                TileEntityAlchemyArray tileEntityAlchemyArray = new TileEntityAlchemyArray();
-                tileEntityAlchemyArray.readFromNBT(message.tileEntityAlchemyArrayNBT);
-
-                TileEntity tileEntity = FMLClientHandler.instance().getClient().theWorld.getTileEntity(tileEntityAlchemyArray.getPos());
-
-                if (tileEntity instanceof TileEntityAlchemyArray) {
-
-                    tileEntity.readFromNBT(message.tileEntityAlchemyArrayNBT);
-                    FMLClientHandler.instance().getClient().theWorld.checkLight(tileEntityAlchemyArray.getPos());
-                }
+            if (tileEntity instanceof TileEntityAlchemyArray)
+            {
+                tileEntity.readFromNBT(message.tileEntityAlchemyArrayNBT);
+                //NAME UPDATE
+                FMLClientHandler.instance().getClient().theWorld.func_147451_t(tileEntityAlchemyArray.xCoord, tileEntityAlchemyArray.yCoord, tileEntityAlchemyArray.zCoord);
             }
-
-            return null;
         }
+
+        return null;
     }
 }

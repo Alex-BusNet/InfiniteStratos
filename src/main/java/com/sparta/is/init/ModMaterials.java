@@ -4,7 +4,7 @@ import com.sparta.is.item.ItemISArmorMaterial;
 import com.sparta.is.item.ItemISSwordMaterial;
 import com.sparta.is.reference.Names;
 import com.sparta.is.reference.Reference;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.GameRegistry;
 
 @GameRegistry.ObjectHolder(Reference.MOD_ID)
 public class ModMaterials

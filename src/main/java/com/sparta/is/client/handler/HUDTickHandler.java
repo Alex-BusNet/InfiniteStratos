@@ -2,16 +2,16 @@ package com.sparta.is.client.handler;
 
 import com.sparta.is.client.util.RenderUtils;
 import com.sparta.is.utility.IOverlayItem;
+import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -65,7 +65,7 @@ public class HUDTickHandler
         hudOverlayX = (int) (sr.getScaledWidth() - 16 * overlayScale);
         hudOverlayY = (int) (sr.getScaledHeight() - 16 * overlayScale);
 
-        RenderUtils.renderItemIntoGUI(minecraft.fontRendererObj, itemStack, hudOverlayX, hudOverlayY, overlayOpacity, overlayScale, -90);
+        RenderUtils.renderItemIntoGUI(minecraft.fontRenderer, itemStack, hudOverlayX, hudOverlayY, overlayOpacity, overlayScale, -90);
 
         GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glPopMatrix();

@@ -12,7 +12,7 @@ public class EntityRendererTabane extends RenderLiving
 
     public EntityRendererTabane()
     {
-        super(renderManager.,modelTabane, 1.0F);
+        super(modelTabane, 1.0F);
         this.setRenderPassModel(modelTabane);
     }
 

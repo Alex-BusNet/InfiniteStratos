@@ -2,6 +2,7 @@ package com.sparta.is.client.render.item;
 
 import com.sparta.is.client.render.model.ModelByakushikiChest;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 
 public class ItemRendererByakushikiChest implements IItemRenderer

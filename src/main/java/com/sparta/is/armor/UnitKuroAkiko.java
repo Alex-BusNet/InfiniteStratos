@@ -4,14 +4,12 @@ import com.sparta.is.network.PacketHandler;
 import com.sparta.is.network.message.MessageUnitSettings;
 import com.sparta.is.reference.*;
 import com.sparta.is.settings.UnitSettings;
-import com.sparta.is.utility.EntityHelper;
-import com.sparta.is.utility.IKeyBound;
-import com.sparta.is.utility.IOwnable;
-import com.sparta.is.utility.ItemHelper;
+import com.sparta.is.utility.*;
 import com.sparta.repackage.cofh.api.energy.IEnergyContainerItem;
 import com.sparta.repackage.cofh.lib.util.helpers.EnergyHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.MathHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
+import cpw.mods.fml.client.FMLClientHandler;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -28,7 +26,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.UsernameCache;
-import net.minecraftforge.fml.client.FMLClientHandler;
 
 import java.util.List;
 import java.util.UUID;
@@ -155,11 +152,11 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
                 NBTTagCompound nbtTagCompound = EntityHelper.getCustomEntityData(entityPlayer);
                 UnitSettings unitSettings = new UnitSettings();
                 unitSettings.readFromNBT(nbtTagCompound);
-                unitSettings.setOwnerName(entityPlayer.getDisplayNameString());
+                unitSettings.setOwnerName(entityPlayer.getDisplayName());
                 unitSettings.setUnitName(itemStack.getUnlocalizedName());
 
                 ItemHelper.setOwner(itemStack, entityPlayer);
-                this.setOwnerName(entityPlayer.getDisplayNameString());
+                this.setOwnerName(entityPlayer.getDisplayName());
                 entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.OWNER_SET_TO_SELF, "the Elucidator"));
 
                 unitSettings.writeToNBT(nbtTagCompound);
@@ -220,7 +217,7 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
 
     /* IKeyBound */
     @Override
-    public void doKeyBindingAction(EntityPlayer player, ItemStack itemStack, Key key, boolean falling)
+    public void doKeyBindingAction(EntityPlayer player, ItemStack itemStack, Key key)
     {
         if(key != Key.UNKNOWN)
         {
@@ -231,67 +228,52 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
 
             if(key == Key.STANDBY && state != 0)
             {
-                if(!player.getEntityWorld().isRemote)
-                {
-                    player.capabilities.allowFlying = false;
 
-                    if(player.capabilities.isFlying && !player.capabilities.isCreativeMode)
-                    {
-                        player.capabilities.isFlying = false;
-                    }
-
-                    player.capabilities.setFlySpeed(0.05F);
-                    player.capabilities.setPlayerWalkSpeed(0.1F);
-
-                    player.sendPlayerAbilities();
-                }
-
-                state = 0;
+//                player.capabilities.allowFlying = false;
+//
+//                if(player.capabilities.isFlying && !player.capabilities.isCreativeMode)
+//                {
+//                    player.capabilities.isFlying = false;
+//                }
+//
+//                player.capabilities.setFlySpeed(0.05F);
+//                player.capabilities.setPlayerWalkSpeed(0.1F);
+//                state = 0;
                 unitSettings.setDeployedState(0);
                 player.addChatMessage(new ChatComponentText("Unit in Standby"));
             }
             else if (key == Key.PARTIAL_DEPLOY  && state != 1 && state != 2)
             {
-                if(!player.getEntityWorld().isRemote)
-                {
-                    player.capabilities.allowFlying = false;
 
-                    if ( player.capabilities.isFlying && ! player.capabilities.isCreativeMode )
-                    {
-                        player.capabilities.isFlying = false;
-                    }
-
-                    player.capabilities.setFlySpeed(0.05F);
-                    player.capabilities.setPlayerWalkSpeed(0.1F);
-
-                    player.sendPlayerAbilities();
-                }
-
-                state = 1;
+//                player.capabilities.allowFlying = false;
+//
+//                if(player.capabilities.isFlying && !player.capabilities.isCreativeMode)
+//                {
+//                    player.capabilities.isFlying = false;
+//                }
+//
+//                player.capabilities.setFlySpeed(0.05F);
+//                player.capabilities.setPlayerWalkSpeed(0.1F);
+//                state = 1;
                 unitSettings.setDeployedState(1);
                 player.addChatMessage(new ChatComponentText("Unit Partially Deployed"));
             }
             else if (key == Key.FULL_DEPLOY && state != 2)
             {
-                if(!player.getEntityWorld().isRemote)
-                {
-                    player.capabilities.allowFlying = true;
-                    player.capabilities.setFlySpeed(0.1F);
-                    player.capabilities.setPlayerWalkSpeed(0.3F);
+//                player.capabilities.allowFlying = true;
+//                player.capabilities.setPlayerWalkSpeed(0.3F);
+//                player.capabilities.setFlySpeed(0.1F);
+//
+//                if(falling)
+//                {
+//                    player.capabilities.isFlying = true;
+//                }
+//                else
+//                {
+//                    player.capabilities.isFlying = false;
+//                }
 
-                    if ( falling )
-                    {
-                        player.capabilities.isFlying = true;
-                    }
-                    else
-                    {
-                        player.capabilities.isFlying = false;
-                    }
-
-                    player.sendPlayerAbilities();
-                }
-
-                state = 2;
+//                state = 2;
                 unitSettings.setDeployedState(2);
                 player.addChatMessage(new ChatComponentText("Unit Fully Deployed"));
             }

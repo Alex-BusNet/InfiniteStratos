@@ -1,19 +1,19 @@
 package com.sparta.is.client.render.model;
 
 import com.sparta.is.reference.Models;
-import net.minecraftforge.client.model.ICustomModelLoader;
-import net.minecraftforge.client.model.obj.OBJLoader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.client.model.AdvancedModelLoader;
+import net.minecraftforge.client.model.IModelCustom;
 
 @SideOnly(Side.CLIENT)
 public class ModelISUnitStation
 {
-    private ICustomModelLoader modelISUnitStation;
+    private IModelCustom modelISUnitStation;
 
     public ModelISUnitStation()
     {
-        modelISUnitStation = OBJLoader.instance.loadModel(Models.IS_UNIT_STATION);
+        modelISUnitStation = AdvancedModelLoader.loadModel(Models.IS_UNIT_STATION);
     }
 
     public void render()

@@ -6,7 +6,7 @@ import com.sparta.is.armor.UnitByakushiki;
 import com.sparta.is.armor.UnitKuroAkiko;
 import com.sparta.is.reference.Names;
 import com.sparta.is.reference.Reference;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.GameRegistry;
 
 @GameRegistry.ObjectHolder(Reference.MOD_ID)
 public class ModUnits
