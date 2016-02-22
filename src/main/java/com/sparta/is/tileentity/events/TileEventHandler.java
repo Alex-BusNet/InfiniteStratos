@@ -1,10 +1,10 @@
 package com.sparta.is.tileentity.events;
 
 import com.sparta.is.tileentity.TileEntityIS;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -88,7 +88,7 @@ public class TileEventHandler
         {
             this.method.invoke(tile, data);
         }
-        catch( IllegalAccessException e )
+        catch( IllegalAccessException e)
         {
             throw new IllegalStateException( e );
         }

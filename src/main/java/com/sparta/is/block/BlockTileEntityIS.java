@@ -8,14 +8,15 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import java.util.Random;
 
@@ -56,19 +57,19 @@ public abstract class BlockTileEntityIS extends BlockContainer
 
             if (facing == 0)
             {
-                direction = ForgeDirection.NORTH.ordinal();
+                direction = EnumFacing.NORTH.ordinal();
             }
             else if (facing == 1)
             {
-                direction = ForgeDirection.EAST.ordinal();
+                direction = EnumFacing.EAST.ordinal();
             }
             else if (facing == 2)
             {
-                direction = ForgeDirection.SOUTH.ordinal();
+                direction = EnumFacing.SOUTH.ordinal();
             }
             else if (facing == 3)
             {
-                direction = ForgeDirection.WEST.ordinal();
+                direction = EnumFacing.WEST.ordinal();
             }
 
             if (itemStack.hasDisplayName())
@@ -78,6 +79,12 @@ public abstract class BlockTileEntityIS extends BlockContainer
 
             ((TileEntityIS) world.getTileEntity(blockPos)).setOrientation(direction);
         }
+    }
+
+    @Override
+    public boolean onBlockActivated(World world, BlockPos blockPos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ)
+    {
+        return false;
     }
 
     protected void dropInventory(World world, BlockPos blockPos)

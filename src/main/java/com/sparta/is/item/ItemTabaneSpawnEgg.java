@@ -16,6 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemEgg;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Facing;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
@@ -53,7 +54,7 @@ public class ItemTabaneSpawnEgg extends ItemEgg
     }
 
     @Override
-    public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
+    public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, BlockPos blockPos, int par7, float par8, float par9, float par10)
     {
         if (par3World.isRemote)
         {
@@ -61,7 +62,7 @@ public class ItemTabaneSpawnEgg extends ItemEgg
         }
         else
         {
-            Block block = par3World.getBlock(par4, par5, par6);
+            Block block = par3World.getBlockState(blockPos).getBlock();
             par4 += Facing.offsetsXForSide[par7];
             par5 += Facing.offsetsYForSide[par7];
             par6 += Facing.offsetsZForSide[par7];

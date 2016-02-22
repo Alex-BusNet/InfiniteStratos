@@ -7,7 +7,6 @@ import com.sparta.is.client.handler.KeyInputEventHandler;
 import com.sparta.is.client.render.Units.Byakushiki;
 import com.sparta.is.client.render.entity.EntityRendererTabane;
 import com.sparta.is.client.render.item.*;
-import com.sparta.is.client.render.tileentity.TileEntityRendererAlchemyArray;
 import com.sparta.is.client.render.tileentity.TileEntityRendererISUnitStation;
 import com.sparta.is.client.render.tileentity.TileEntityRendererUnitStand;
 import com.sparta.is.client.settings.KeyBindings;
@@ -20,7 +19,6 @@ import com.sparta.is.reference.RenderIds;
 import com.sparta.is.settings.ChalkSettings;
 import com.sparta.is.settings.OneOffSettings;
 import com.sparta.is.settings.UnitSettings;
-import com.sparta.is.tileentity.TileEntityAlchemyArray;
 import com.sparta.is.tileentity.TileEntityISStation;
 import com.sparta.is.tileentity.TileEntityUnitStand;
 import net.minecraft.client.model.ModelBiped;
@@ -76,7 +74,6 @@ public class ClientProxy extends CommonProxy
 
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityISStation.class, new TileEntityRendererISUnitStation());
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityUnitStand.class, new TileEntityRendererUnitStand());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityAlchemyArray.class, new TileEntityRendererAlchemyArray());
 
         RenderingRegistry.registerEntityRenderingHandler(EntityISTabane.class, new EntityRendererTabane());
     }

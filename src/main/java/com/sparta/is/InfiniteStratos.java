@@ -1,6 +1,5 @@
 package com.sparta.is;
 
-import com.sparta.is.api.array.AlchemyArrayRegistry;
 import com.sparta.is.client.handler.KeyInputEventHandler;
 import com.sparta.is.handler.ConfigurationHandler;
 import com.sparta.is.handler.CraftingHandler;
@@ -91,11 +90,6 @@ public class InfiniteStratos
     public void postInit(FMLPostInitializationEvent event)
     {
         LogHelper.info("Post Initialization Complete");
-    }
-
-    public AlchemyArrayRegistry getAlchemyArrayRegistry()
-    {
-        return AlchemyArrayRegistry.getInstance();
     }
 
     public TileEntityDataHelper getTileEntityDataHelper()

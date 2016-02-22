@@ -10,14 +10,14 @@ public class ModBlocks
 {
     public static final BlockIS flag = new BlockFlag();
     public static final BlockTileEntityIS isStation = new BlockISUnitStation();
-    public static final BlockTileEntityIS alchemyArray = new BlockISAlchemyArray();
+//    public static final BlockTileEntityIS alchemyArray = new BlockISAlchemyArray();
     public static final BlockTileEntityIS unitStand = new BlockUnitStand();
 
     public static void init()
     {
         GameRegistry.registerBlock(flag, Names.Blocks.FLAG);
         GameRegistry.registerBlock(isStation, Names.Blocks.IS_UNIT_STATION);
-        GameRegistry.registerBlock(alchemyArray, Names.Blocks.ALCHEMY_ARRAY);
+//        GameRegistry.registerBlock(alchemyArray, Names.Blocks.ALCHEMY_ARRAY);
         GameRegistry.registerBlock(unitStand, Names.Blocks.UNIT_STAND);
     }
 }

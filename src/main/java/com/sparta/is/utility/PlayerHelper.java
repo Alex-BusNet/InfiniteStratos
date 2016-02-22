@@ -1,17 +1,18 @@
 package com.sparta.is.utility;
 
-import cpw.mods.fml.common.FMLCommonHandler;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class PlayerHelper
 {
     public static boolean isPlayerOp(EntityPlayer entityPlayer)
     {
-        if (FMLCommonHandler.instance().getMinecraftServerInstance() != null)
+        if ( FMLCommonHandler.instance().getMinecraftServerInstance() != null)
         {
-            return FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().func_152596_g((entityPlayer).getGameProfile());
+            return FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().getOppedPlayerNames().toString().contains(entityPlayer.getDisplayNameString().toString());
         }
 
         return false;

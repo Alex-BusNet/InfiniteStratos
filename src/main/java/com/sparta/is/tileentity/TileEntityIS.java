@@ -7,31 +7,31 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.UsernameCache;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
 public class TileEntityIS extends TileEntity
 {
-    protected ForgeDirection orientation;
+    protected EnumFacing orientation;
     protected byte state;
     protected String customName;
     protected UUID ownerUUID;
 
     public TileEntityIS()
     {
-        orientation = ForgeDirection.SOUTH;
+        orientation = EnumFacing.SOUTH;
         state = 0;
         customName = "";
         ownerUUID = null;
     }
 
-    public boolean notLoaded()
-    {
-        return !this.worldObj.blockExists( this.xCoord, this.yCoord, this.zCoord );
-    }
+//    public boolean notLoaded(BlockPos blockPos)
+//    {
+//        return !this.worldObj.blockExists(blockPos);
+//    }
 
     @Nonnull
     public TileEntity getTile()
@@ -40,19 +40,19 @@ public class TileEntityIS extends TileEntity
     }
 
 
-    public ForgeDirection getOrientation()
+    public EnumFacing getOrientation()
     {
         return orientation;
     }
 
-    public void setOrientation(ForgeDirection orientation)
+    public void setOrientation(EnumFacing orientation)
     {
         this.orientation = orientation;
     }
 
     public void setOrientation(int orientation)
     {
-        this.orientation = ForgeDirection.getOrientation(orientation);
+        this.orientation = EnumFacing.getFront(orientation);
     }
 
     public short getState()
@@ -107,7 +107,7 @@ public class TileEntityIS extends TileEntity
 
         if (nbtTagCompound.hasKey(Names.NBT.DIRECTION))
         {
-            this.orientation = ForgeDirection.getOrientation(nbtTagCompound.getByte(Names.NBT.DIRECTION));
+            this.orientation = EnumFacing.getFront(nbtTagCompound.getByte(Names.NBT.DIRECTION));
         }
 
         if (nbtTagCompound.hasKey(Names.NBT.STATE))

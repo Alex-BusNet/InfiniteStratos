@@ -1,6 +1,5 @@
 package com.sparta.is.network.message;
 
-import com.sparta.is.tileentity.TileEntityAlchemyArray;
 import com.sparta.is.tileentity.TileEntityISStation;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -12,6 +11,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class MessageTileEntityISUnitStation implements IMessage, IMessageHandler<MessageTileEntityISUnitStation, IMessage>
@@ -57,13 +57,13 @@ public class MessageTileEntityISUnitStation implements IMessage, IMessageHandler
     @Override
     public void toBytes(ByteBuf buf)
     {
-        byte[] compressedNBT = null;
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         try
         {
             if (tileEntityISStationNBT != null)
             {
-                compressedNBT = CompressedStreamTools.compress(tileEntityISStationNBT);
+                CompressedStreamTools.writeCompressed(tileEntityISStationNBT, outputStream);
             }
         }
         catch (IOException e)
@@ -71,14 +71,10 @@ public class MessageTileEntityISUnitStation implements IMessage, IMessageHandler
             e.printStackTrace();
         }
 
-        if (compressedNBT != null)
+        buf.writeInt(outputStream.size());
+        if (outputStream.size() > 0)
         {
-            buf.writeInt(compressedNBT.length);
-            buf.writeBytes(compressedNBT);
-        }
-        else
-        {
-            buf.writeInt(0);
+            buf.writeBytes(outputStream.toByteArray());
         }
     }
 
@@ -87,16 +83,16 @@ public class MessageTileEntityISUnitStation implements IMessage, IMessageHandler
     {
         if (message.tileEntityISStationNBT != null)
         {
-            TileEntityAlchemyArray tileEntityAlchemyArray = new TileEntityAlchemyArray();
-            tileEntityAlchemyArray.readFromNBT(message.tileEntityISStationNBT);
+            TileEntityISStation tileEntityISStation = new TileEntityISStation();
+            tileEntityISStation.readFromNBT(message.tileEntityISStationNBT);
 
-            TileEntity tileEntity = FMLClientHandler.instance().getClient().theWorld.getTileEntity(tileEntityAlchemyArray.xCoord, tileEntityAlchemyArray.yCoord, tileEntityAlchemyArray.zCoord);
+            TileEntity tileEntity = FMLClientHandler.instance().getClient().theWorld.getTileEntity(tileEntityISStation.getPos());
 
             if (tileEntity instanceof TileEntityISStation)
             {
                 tileEntity.readFromNBT(message.tileEntityISStationNBT);
                 //NAME UPDATE
-                FMLClientHandler.instance().getClient().theWorld.func_147451_t(tileEntityAlchemyArray.xCoord, tileEntityAlchemyArray.yCoord, tileEntityAlchemyArray.zCoord);
+                FMLClientHandler.instance().getClient().theWorld.checkLight(tileEntity.getPos());
             }
         }
 

@@ -9,12 +9,13 @@ import com.sparta.is.tileentity.TileEntityISStation;
 import com.sparta.is.tileentity.TileEntityUnitStand;
 import com.sparta.is.utility.LogHelper;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 public class BlockISUnitStation extends BlockTileEntityIS
 {
@@ -46,7 +47,7 @@ public class BlockISUnitStation extends BlockTileEntityIS
     }
 
     @Override
-    public boolean onBlockActivated(World world, BlockPos blockPos, EntityPlayer player, int par6, float par7, float par8, float par9)
+    public boolean onBlockActivated(World world, BlockPos blockPos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ)
     {
 
         if (player.isSneaking())
@@ -62,7 +63,7 @@ public class BlockISUnitStation extends BlockTileEntityIS
 //                    LogHelper.info("Orientation: " + ((TileEntityISStation) world.getTileEntity(blockPos)).getOrientation());
                     if(findStand(((TileEntityISStation) world.getTileEntity(blockPos)).getOrientation(), world, blockPos))
                     {
-                        player.openGui(InfiniteStratos.instance, GUIs.IS_UNIT_STATION.ordinal(), world, blockPos);
+                        player.openGui(InfiniteStratos.instance, GUIs.IS_UNIT_STATION.ordinal(), world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
                     }
                 }
             }
@@ -71,12 +72,12 @@ public class BlockISUnitStation extends BlockTileEntityIS
         }
     }
 
-    protected boolean findStand(ForgeDirection direction, World station, BlockPos blockPos)
+    protected boolean findStand(EnumFacing direction, World station, BlockPos blockPos)
     {
         switch(direction)
         {
             case NORTH:
-                if(station.getBlock(blockPos.add(0, 0, 2)) == ModBlocks.unitStand)
+                if(station.getBlockState(blockPos.add(0, 0, 2)) == ModBlocks.unitStand)
                 {
                     if(((TileEntityUnitStand)station.getTileEntity(blockPos.add(0, 0, 2))).getStackInSlot(0) != null)
                     {
@@ -105,7 +106,7 @@ public class BlockISUnitStation extends BlockTileEntityIS
                 }
                 break;
             case SOUTH:
-                if(station.getBlock(blockPos.add(0, 0, - 2)) == ModBlocks.unitStand)
+                if(station.getBlockState(blockPos.add(0, 0, - 2)) == ModBlocks.unitStand)
                 {
                     if(((TileEntityUnitStand)station.getTileEntity(blockPos.add(0, 0, -2))).getStackInSlot(0) != null)
                     {
@@ -134,7 +135,7 @@ public class BlockISUnitStation extends BlockTileEntityIS
                 }
                 break;
             case EAST:
-                if(station.getBlock(blockPos.add(-2, 0, 0)) == ModBlocks.unitStand)
+                if(station.getBlockState(blockPos.add(- 2, 0, 0)) == ModBlocks.unitStand)
                 {
                     if(((TileEntityUnitStand)station.getTileEntity(blockPos.add(-2, 0, 0))).getStackInSlot(0) != null)
                     {
@@ -163,7 +164,7 @@ public class BlockISUnitStation extends BlockTileEntityIS
                 }
                 break;
             case WEST:
-                if(station.getBlock(blockPos.add(2, 0, 0)) == ModBlocks.unitStand)
+                if(station.getBlockState(blockPos.add(2, 0, 0)) == ModBlocks.unitStand)
                 {
                     if(((TileEntityUnitStand)station.getTileEntity(blockPos.add(2, 0, 0))).getStackInSlot(0) != null)
                     {

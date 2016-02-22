@@ -1,7 +1,7 @@
 package com.sparta.is.api.array;
 
 import com.sparta.is.InfiniteStratos;
-import cpw.mods.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.SortedSet;
 
@@ -16,7 +16,8 @@ public class AlchemyArrayRegistryProxy
 
         if (isMod != null)
         {
-            return ISWrapper.ismod.getAlchemyArrayRegistry().registerAlchemyArray(alchemyArray);
+//            return ISWrapper.ismod.getAlchemyArrayRegistry().registerAlchemyArray(alchemyArray);
+            return false;
         }
 
         return false;
@@ -28,7 +29,8 @@ public class AlchemyArrayRegistryProxy
 
         if (isMod != null)
         {
-            return ISWrapper.ismod.getAlchemyArrayRegistry().getRegisteredAlchemyArrays();
+//            return ISWrapper.ismod.getAlchemyArrayRegistry().getRegisteredAlchemyArrays();
+            return null;
         }
 
         return null;

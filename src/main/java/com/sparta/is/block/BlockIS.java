@@ -16,7 +16,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 import java.util.Random;
 
@@ -65,19 +65,19 @@ public class BlockIS extends Block
 
             if ( facing == 0 )
             {
-                direction = ForgeDirection.NORTH.ordinal();
+                direction = EnumFacing.NORTH.ordinal();
             }
             else if ( facing == 1 )
             {
-                direction = ForgeDirection.EAST.ordinal();
+                direction = EnumFacing.EAST.ordinal();
             }
             else if ( facing == 2 )
             {
-                direction = ForgeDirection.SOUTH.ordinal();
+                direction = EnumFacing.SOUTH.ordinal();
             }
             else if ( facing == 3 )
             {
-                direction = ForgeDirection.WEST.ordinal();
+                direction = EnumFacing.WEST.ordinal();
             }
 
             if ( itemStack.hasDisplayName() )
@@ -120,7 +120,7 @@ public class BlockIS extends Block
                 float dY = rand.nextFloat() * 0.8F + 0.1F;
                 float dZ = rand.nextFloat() * 0.8F + 0.1F;
 
-                EntityItem entityItem = new EntityItem(world, x + dX, y + dY, z + dZ, itemStack.copy());
+                EntityItem entityItem = new EntityItem(world, tileEntity.getPos().getX() + dX, tileEntity.getPos().getY() + dY, tileEntity.getPos().getZ() + dZ, itemStack.copy());
 
                 if (itemStack.hasTagCompound())
                 {

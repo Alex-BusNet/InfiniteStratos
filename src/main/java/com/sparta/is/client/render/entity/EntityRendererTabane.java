@@ -3,6 +3,7 @@ package com.sparta.is.client.render.entity;
 import com.sparta.is.client.render.model.ModelTabane;
 import com.sparta.is.reference.Textures;
 import net.minecraft.client.renderer.entity.RenderLiving;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 
@@ -10,10 +11,10 @@ public class EntityRendererTabane extends RenderLiving
 {
     private static ModelTabane modelTabane = new ModelTabane();
 
-    public EntityRendererTabane()
+    public EntityRendererTabane(RenderManager renderManager)
     {
-        super(renderManager.,modelTabane, 1.0F);
-        this.setRenderPassModel(modelTabane);
+        super(renderManager,modelTabane, 1.0F);
+//        this.setRenderPassModel(modelTabane);
     }
 
     @Override

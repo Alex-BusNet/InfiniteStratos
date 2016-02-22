@@ -1,12 +1,12 @@
 package com.sparta.is.tileentity;
 
-import com.sparta.is.reference.Names;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.IChatComponent;
 
 public class TileEntityISStation extends TileEntityIS implements IInventory
 {
@@ -62,15 +62,21 @@ public class TileEntityISStation extends TileEntityIS implements IInventory
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slotIndex)
+    public ItemStack removeStackFromSlot(int index)
     {
-        ItemStack itemStack = getStackInSlot(slotIndex);
-        if (itemStack != null)
-        {
-            setInventorySlotContents(slotIndex, null);
-        }
-        return itemStack;
+        return null;
     }
+
+//    @Override
+//    public ItemStack getStackInSlotOnClosing(int slotIndex)
+//    {
+//        ItemStack itemStack = getStackInSlot(slotIndex);
+//        if (itemStack != null)
+//        {
+//            setInventorySlotContents(slotIndex, null);
+//        }
+//        return itemStack;
+//    }
 
     @Override
     public void setInventorySlotContents(int slotIndex, ItemStack itemStack)
@@ -82,17 +88,17 @@ public class TileEntityISStation extends TileEntityIS implements IInventory
         }
     }
 
-    @Override
-    public String getInventoryName()
-    {
-        return this.hasCustomInventoryName() ? this.getCustomName() : Names.Containers.IS_UNIT_MAINTENANCE_STATION;
-    }
-
-    @Override
-    public boolean hasCustomInventoryName()
-    {
-        return this.hasCustomName();
-    }
+//    @Override
+//    public String getInventoryName()
+//    {
+//        return this.hasCustomInventoryName() ? this.getCustomName() : Names.Containers.IS_UNIT_MAINTENANCE_STATION;
+//    }
+//
+//    @Override
+//    public boolean hasCustomInventoryName()
+//    {
+//        return this.hasCustomName();
+//    }
 
     @Override
     public int getInventoryStackLimit()
@@ -103,25 +109,50 @@ public class TileEntityISStation extends TileEntityIS implements IInventory
     @Override
     public boolean isUseableByPlayer(EntityPlayer entityPlayer)
     {
-        return this.worldObj.getTileEntity(xCoord, yCoord, zCoord) == this && entityPlayer.getDistanceSq((double) xCoord + 0.5D,(double) yCoord + 0.5D, (double) zCoord + 0.5D) <= 64D;
+//        return this.worldObj.getTileEntity() == this && entityPlayer.getDistanceSq((double) xCoord + 0.5D,(double) yCoord + 0.5D, (double) zCoord + 0.5D) <= 64D;
+        return false;
     }
 
     @Override
-    public void openInventory()
+    public void openInventory(EntityPlayer player)
     {
-        //NOOP
+
     }
 
     @Override
-    public void closeInventory()
+    public void closeInventory(EntityPlayer player)
     {
-        //NOOP
+
     }
 
     @Override
     public boolean isItemValidForSlot(int slotIndex, ItemStack itemStack)
     {
         return false;
+    }
+
+    @Override
+    public int getField(int id)
+    {
+        return 0;
+    }
+
+    @Override
+    public void setField(int id, int value)
+    {
+
+    }
+
+    @Override
+    public int getFieldCount()
+    {
+        return 0;
+    }
+
+    @Override
+    public void clear()
+    {
+
     }
 
     public boolean isStandNearby()
@@ -185,4 +216,15 @@ public class TileEntityISStation extends TileEntityIS implements IInventory
         }
     }
 
+    @Override
+    public String getName()
+    {
+        return null;
+    }
+
+    @Override
+    public IChatComponent getDisplayName()
+    {
+        return null;
+    }
 }

@@ -1,8 +1,9 @@
 package com.sparta.is.utility;
 
 import com.sparta.is.tileentity.TileEntityIS;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import java.util.UUID;
 
@@ -25,61 +26,61 @@ public class TileEntityDataHelper
         return tileEntityDataHelper;
     }
 
-    public Class getTileEntityClass(World world, int xCoord, int yCoord, int zCoord)
+    public Class getTileEntityClass(World world, BlockPos blockPos)
     {
         if (!world.isRemote)
         {
-            return world.getTileEntity(xCoord, yCoord, zCoord).getClass();
+            return world.getTileEntity(blockPos).getClass();
         }
 
         return null;
     }
 
-    public ForgeDirection getOrientation(World world, int xCoord, int yCoord, int zCoord)
+    public EnumFacing getOrientation(World world, BlockPos blockPos)
     {
-        if (!world.isRemote && world.getTileEntity(xCoord, yCoord, zCoord) instanceof TileEntityIS)
+        if (!world.isRemote && world.getTileEntity(blockPos) instanceof TileEntityIS)
         {
-            return ((TileEntityIS) world.getTileEntity(xCoord, yCoord, zCoord)).getOrientation();
+            return ((TileEntityIS) world.getTileEntity(blockPos)).getOrientation();
         }
 
         return null;
     }
 
-    public short getState(World world, int xCoord, int yCoord, int zCoord)
+    public short getState(World world, BlockPos blockPos)
     {
-        if (!world.isRemote && world.getTileEntity(xCoord, yCoord, zCoord) instanceof TileEntityIS)
+        if (!world.isRemote && world.getTileEntity(blockPos) instanceof TileEntityIS)
         {
-            return ((TileEntityIS) world.getTileEntity(xCoord, yCoord, zCoord)).getState();
+            return ((TileEntityIS) world.getTileEntity(blockPos)).getState();
         }
 
         return Short.MIN_VALUE;
     }
 
-    public String getCustomName(World world, int xCoord, int yCoord, int zCoord)
+    public String getCustomName(World world, BlockPos blockPos)
     {
-        if (!world.isRemote && world.getTileEntity(xCoord, yCoord, zCoord) instanceof TileEntityIS)
+        if (!world.isRemote && world.getTileEntity(blockPos) instanceof TileEntityIS)
         {
-            return ((TileEntityIS) world.getTileEntity(xCoord, yCoord, zCoord)).getCustomName();
+            return ((TileEntityIS) world.getTileEntity(blockPos)).getCustomName();
         }
 
         return null;
     }
 
-    public UUID getOwnerUUID(World world, int xCoord, int yCoord, int zCoord)
+    public UUID getOwnerUUID(World world, BlockPos blockPos)
     {
-        if (!world.isRemote && world.getTileEntity(xCoord, yCoord, zCoord) instanceof TileEntityIS)
+        if (!world.isRemote && world.getTileEntity(blockPos) instanceof TileEntityIS)
         {
-            return ((TileEntityIS) world.getTileEntity(xCoord, yCoord, zCoord)).getOwnerUUID();
+            return ((TileEntityIS) world.getTileEntity(blockPos)).getOwnerUUID();
         }
 
         return null;
     }
 
-    public String getOwnerName(World world, int xCoord, int yCoord, int zCoord)
+    public String getOwnerName(World world, BlockPos blockPos)
     {
-        if (!world.isRemote && world.getTileEntity(xCoord, yCoord, zCoord) instanceof TileEntityIS)
+        if (!world.isRemote && world.getTileEntity(blockPos) instanceof TileEntityIS)
         {
-            return ((TileEntityIS) world.getTileEntity(xCoord, yCoord, zCoord)).getOwnerName();
+            return ((TileEntityIS) world.getTileEntity(blockPos)).getOwnerName();
         }
 
         return null;
