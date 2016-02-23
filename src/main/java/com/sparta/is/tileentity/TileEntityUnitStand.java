@@ -6,6 +6,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.IChatComponent;
 
 public class TileEntityUnitStand extends TileEntityIS implements IInventory
 {
@@ -55,6 +56,12 @@ public class TileEntityUnitStand extends TileEntityIS implements IInventory
     }
 
     @Override
+    public ItemStack removeStackFromSlot(int index)
+    {
+        return null;
+    }
+
+//    @Override
     public ItemStack getStackInSlotOnClosing(int slotIndex)
     {
         ItemStack itemStack = getStackInSlot(slotIndex);
@@ -75,13 +82,13 @@ public class TileEntityUnitStand extends TileEntityIS implements IInventory
         }
     }
 
-    @Override
+//    @Override
     public String getInventoryName()
     {
         return this.hasCustomInventoryName() ? this.getCustomName() : Names.Containers.UNIT_STAND;
     }
 
-    @Override
+//    @Override
     public boolean hasCustomInventoryName()
     {
         return this.hasCustomName();
@@ -96,17 +103,17 @@ public class TileEntityUnitStand extends TileEntityIS implements IInventory
     @Override
     public boolean isUseableByPlayer(EntityPlayer entityPlayer)
     {
-        return this.worldObj.getTileEntity(xCoord, yCoord, zCoord) == this && entityPlayer.getDistanceSq((double) xCoord + 0.5D,(double) yCoord + 0.5D, (double) zCoord + 0.5D) <= 64D;
+        return this.worldObj.getTileEntity(entityPlayer.playerLocation.offset(entityPlayer.getHorizontalFacing())) == this && entityPlayer.getDistanceSq(entityPlayer.playerLocation.add(0.5D, 0.5D,0.5D)) <= 64D;
     }
 
     @Override
-    public void openInventory()
+    public void openInventory(EntityPlayer player)
     {
         //NOOP
     }
 
     @Override
-    public void closeInventory()
+    public void closeInventory(EntityPlayer player)
     {
         //NOOP
     }
@@ -115,6 +122,30 @@ public class TileEntityUnitStand extends TileEntityIS implements IInventory
     public boolean isItemValidForSlot(int slotIndex, ItemStack itemStack)
     {
         return false;
+    }
+
+    @Override
+    public int getField(int id)
+    {
+        return 0;
+    }
+
+    @Override
+    public void setField(int id, int value)
+    {
+
+    }
+
+    @Override
+    public int getFieldCount()
+    {
+        return 0;
+    }
+
+    @Override
+    public void clear()
+    {
+
     }
 
     @Override
@@ -155,5 +186,17 @@ public class TileEntityUnitStand extends TileEntityIS implements IInventory
                 inventory[slotIndex] = ItemStack.loadItemStackFromNBT(tagCompound);
             }
         }
+    }
+
+    @Override
+    public String getName()
+    {
+        return null;
+    }
+
+    @Override
+    public IChatComponent getDisplayName()
+    {
+        return null;
     }
 }

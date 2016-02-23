@@ -5,29 +5,14 @@ import com.sparta.is.client.handler.HUDTickHandler;
 import com.sparta.is.client.handler.ItemTooltipEventHandler;
 import com.sparta.is.client.handler.KeyInputEventHandler;
 import com.sparta.is.client.render.Units.Byakushiki;
-import com.sparta.is.client.render.entity.EntityRendererTabane;
-import com.sparta.is.client.render.item.*;
-import com.sparta.is.client.render.tileentity.TileEntityRendererISUnitStation;
-import com.sparta.is.client.render.tileentity.TileEntityRendererUnitStand;
 import com.sparta.is.client.settings.KeyBindings;
 import com.sparta.is.client.util.ClientSoundHelper;
-import com.sparta.is.entity.EntityISTabane;
-import com.sparta.is.init.ModBlocks;
-import com.sparta.is.init.ModItems;
-import com.sparta.is.init.ModUnits;
-import com.sparta.is.reference.RenderIds;
 import com.sparta.is.settings.ChalkSettings;
 import com.sparta.is.settings.OneOffSettings;
 import com.sparta.is.settings.UnitSettings;
-import com.sparta.is.tileentity.TileEntityISStation;
-import com.sparta.is.tileentity.TileEntityUnitStand;
 import net.minecraft.client.model.ModelBiped;
-import net.minecraft.item.Item;
-import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class ClientProxy extends CommonProxy
 {
@@ -43,8 +28,8 @@ public class ClientProxy extends CommonProxy
     public void registerEventHandlers()
     {
         super.registerEventHandlers();
-        FMLCommonHandler.instance().bus().register(new KeyInputEventHandler());
-        FMLCommonHandler.instance().bus().register(new HUDTickHandler());
+        MinecraftForge.EVENT_BUS.register(new KeyInputEventHandler());
+        MinecraftForge.EVENT_BUS.register(new HUDTickHandler());
         MinecraftForge.EVENT_BUS.register(new ItemTooltipEventHandler());
         MinecraftForge.EVENT_BUS.register(new DrawBlockHighlightEventHandler());
     }
@@ -58,24 +43,24 @@ public class ClientProxy extends CommonProxy
     @Override
     public void initRenderingAndTextures()
     {
-        RenderIds.isUnitStation = RenderingRegistry.getNextAvailableRenderId();
-        RenderIds.unitStand = RenderingRegistry.getNextAvailableRenderId();
-        RenderIds.alchemyArray = RenderingRegistry.getNextAvailableRenderId();
-        RenderIds.dummyArray = RenderingRegistry.getNextAvailableRenderId();
-        RenderIds.byakushikiChest = RenderingRegistry.getNextAvailableRenderId();
-        RenderIds.yukihiraNigata = RenderingRegistry.getNextAvailableRenderId();
-        RenderIds.elucidator = RenderingRegistry.getNextAvailableRenderId();
-
-        MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.isStation), new ItemRendererISUnitStation());
-        MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.unitStand), new ItemRendererUnitStand());
-        MinecraftForgeClient.registerItemRenderer(ModUnits.byakushikiChest, new ItemRendererByakushikiChest());
-        MinecraftForgeClient.registerItemRenderer(ModItems.yukihiraNigata, new ItemRendererYukihira());
-        MinecraftForgeClient.registerItemRenderer(ModItems.elucidator, new ItemRendererElucidator());
-
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityISStation.class, new TileEntityRendererISUnitStation());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityUnitStand.class, new TileEntityRendererUnitStand());
-
-        RenderingRegistry.registerEntityRenderingHandler(EntityISTabane.class, new EntityRendererTabane());
+//        RenderIds.isUnitStation = RenderingRegistry.getNextAvailableRenderId();
+//        RenderIds.unitStand = RenderingRegistry.getNextAvailableRenderId();
+//        RenderIds.alchemyArray = RenderingRegistry.getNextAvailableRenderId();
+//        RenderIds.dummyArray = RenderingRegistry.getNextAvailableRenderId();
+//        RenderIds.byakushikiChest = RenderingRegistry.getNextAvailableRenderId();
+//        RenderIds.yukihiraNigata = RenderingRegistry.getNextAvailableRenderId();
+//        RenderIds.elucidator = RenderingRegistry.getNextAvailableRenderId();
+//
+//        MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.isStation), new ItemRendererISUnitStation());
+//        MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.unitStand), new ItemRendererUnitStand());
+//        MinecraftForgeClient.registerItemRenderer(ModUnits.byakushikiChest, new ItemRendererByakushikiChest());
+//        MinecraftForgeClient.registerItemRenderer(ModItems.yukihiraNigata, new ItemRendererYukihira());
+//        MinecraftForgeClient.registerItemRenderer(ModItems.elucidator, new ItemRendererElucidator());
+//
+//        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityISStation.class, new TileEntityRendererISUnitStation());
+//        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityUnitStand.class, new TileEntityRendererUnitStand());
+//
+//        RenderingRegistry.registerEntityRenderingHandler(EntityISTabane.class, new EntityRendererTabane());
     }
 
     @Override

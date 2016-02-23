@@ -126,7 +126,7 @@ public class ItemHelper
 
     public static void setOwnerName(ItemStack itemStack, EntityPlayer entityPlayer)
     {
-        NBTHelper.setString(itemStack, Names.NBT.OWNER, entityPlayer.getDisplayName());
+        NBTHelper.setString(itemStack, Names.NBT.OWNER, entityPlayer.getDisplayName().getFormattedText());
     }
 
 

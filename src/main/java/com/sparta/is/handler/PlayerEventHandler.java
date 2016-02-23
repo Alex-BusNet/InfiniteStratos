@@ -9,14 +9,14 @@ import com.sparta.is.settings.OneOffSettings;
 import com.sparta.is.settings.UnitSettings;
 import com.sparta.is.utility.EntityHelper;
 import com.sparta.is.utility.LogHelper;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class PlayerEventHandler
 {
     @SubscribeEvent
-    public void onPlayerLoggedIn(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event)
+    public void onPlayerLoggedIn(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event)
     {
         if (event.player != null)
         {
@@ -52,7 +52,7 @@ public class PlayerEventHandler
     }
 
     @SubscribeEvent
-    public void onPlayerLoggedOut(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent event)
+    public void onPlayerLoggedOut(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent event)
     {
         LogHelper.info("Player logged out");
     }

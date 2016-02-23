@@ -2,11 +2,11 @@ package com.sparta.is.handler;
 
 import com.sparta.is.client.gui.overlay.UnitOverlay;
 import com.sparta.is.init.ModItems;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 public class OverlayEventHandler

@@ -4,10 +4,10 @@ import com.sparta.is.reference.Messages;
 import com.sparta.is.reference.Reference;
 import com.sparta.is.reference.Settings;
 import com.sparta.is.utility.ConfigurationHelper;
-import cpw.mods.fml.client.event.ConfigChangedEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.File;
 

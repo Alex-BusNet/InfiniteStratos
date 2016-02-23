@@ -1,23 +1,15 @@
 package com.sparta.is.client.handler;
 
-import com.sparta.is.InfiniteStratos;
-import com.sparta.is.api.array.AlchemyArray;
-import com.sparta.is.client.util.RenderUtils;
 import com.sparta.is.reference.ToolMode;
-import com.sparta.is.settings.ChalkSettings;
-import com.sparta.is.tileentity.TileEntityIS;
 import com.sparta.is.utility.IModalTool;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -73,7 +65,7 @@ public class DrawBlockHighlightEventHandler
             event.setCanceled(true);
             if (toolMode == ToolMode.STANDARD)
             {
-                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos()), 0, event.partialTicks);
             }
         }
     }
@@ -88,56 +80,56 @@ public class DrawBlockHighlightEventHandler
             event.setCanceled(true);
             if (toolMode == ToolMode.STANDARD)
             {
-                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos()), 0, event.partialTicks);
             }
             else if (toolMode == ToolMode.WIDE)
             {
-                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos()), 0, event.partialTicks);
 
-                if (event.target.sideHit == ForgeDirection.NORTH.ordinal() || event.target.sideHit == ForgeDirection.SOUTH.ordinal())
+                if (event.target.sideHit == EnumFacing.NORTH || event.target.sideHit == EnumFacing.SOUTH)
                 {
-                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX - 1, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
-                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX + 1, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(0,-1,0)), 0, event.partialTicks);
+                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(0,1,0)), 0, event.partialTicks);
                 }
-                else if (event.target.sideHit == ForgeDirection.EAST.ordinal() || event.target.sideHit == ForgeDirection.WEST.ordinal())
+                else if (event.target.sideHit == EnumFacing.EAST || event.target.sideHit == EnumFacing.WEST)
                 {
-                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ - 1, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
-                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ + 1, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(0,0,-1)), 0, event.partialTicks);
+                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(0,0,1)), 0, event.partialTicks);
                 }
                 else
                 {
                     if (facing == 0 || facing == 2)
                     {
-                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX - 1, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
-                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX + 1, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(-1,0,0)), 0, event.partialTicks);
+                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(1,0,0)), 0, event.partialTicks);
                     }
                     else
                     {
-                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ - 1, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
-                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ + 1, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(0,0,-1)), 0, event.partialTicks);
+                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(0,0,1)), 0, event.partialTicks);
                     }
                 }
             }
             else if (toolMode == ToolMode.TALL)
             {
-                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos()), 0, event.partialTicks);
 
-                if (event.target.sideHit == ForgeDirection.NORTH.ordinal() || event.target.sideHit == ForgeDirection.SOUTH.ordinal() || event.target.sideHit == ForgeDirection.EAST.ordinal() || event.target.sideHit == ForgeDirection.WEST.ordinal())
+                if (event.target.sideHit == EnumFacing.NORTH || event.target.sideHit == EnumFacing.SOUTH || event.target.sideHit == EnumFacing.EAST || event.target.sideHit == EnumFacing.WEST)
                 {
-                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY - 1, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
-                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY + 1, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(0,-1,0)), 0, event.partialTicks);
+                    drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(0,1,0)), 0, event.partialTicks);
                 }
                 else
                 {
                     if (facing == 1 || facing == 3)
                     {
-                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX - 1, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
-                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX + 1, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(-1,0,0)), 0, event.partialTicks);
+                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(1,0,0)), 0, event.partialTicks);
                     }
                     else
                     {
-                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ - 1, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
-                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ + 1, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(0,0,-1)), 0, event.partialTicks);
+                        drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos().add(0,0,1)), 0, event.partialTicks);
                     }
                 }
             }
@@ -154,7 +146,7 @@ public class DrawBlockHighlightEventHandler
             event.setCanceled(true);
             if (toolMode == ToolMode.STANDARD)
             {
-                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos()), 0, event.partialTicks);
             }
         }
     }
@@ -169,7 +161,7 @@ public class DrawBlockHighlightEventHandler
             event.setCanceled(true);
             if (toolMode == ToolMode.STANDARD)
             {
-                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos()), 0, event.partialTicks);
             }
         }
     }
@@ -184,7 +176,7 @@ public class DrawBlockHighlightEventHandler
             event.setCanceled(true);
             if (toolMode == ToolMode.STANDARD)
             {
-                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.blockX, event.target.blockY, event.target.blockZ, event.target.sideHit, event.target.hitVec), 0, event.partialTicks);
+                drawSelectionBox(event.context, event.player, new MovingObjectPosition(event.target.hitVec, event.target.sideHit, event.target.getBlockPos()), 0, event.partialTicks);
             }
         }
     }
@@ -196,9 +188,9 @@ public class DrawBlockHighlightEventHandler
 //        ResourceLocation texture = alchemyArray.getTexture();
 //        int rotation = chalkSettings.getRotation();
 //
-//        double x = event.target.blockX + 0.5F;
-//        double y = event.target.blockY + 0.5F;
-//        double z = event.target.blockZ + 0.5F;
+//        double x = event.target.getBlockPos().getX() + 0.5F;
+//        double y = event.target.getBlockPos().getX() + 0.5F;
+//        double z = event.target.getBlockPos().getZ() + 0.5F;
 //        double iPX = event.player.prevPosX + (event.player.posX - event.player.prevPosX) * event.partialTicks;
 //        double iPY = event.player.prevPosY + (event.player.posY - event.player.prevPosY) * event.partialTicks;
 //        double iPZ = event.player.prevPosZ + (event.player.posZ - event.player.prevPosZ) * event.partialTicks;
@@ -217,8 +209,8 @@ public class DrawBlockHighlightEventHandler
 //
 //        int chargeLevel = ((chalkSettings.getSize() - 1) * 2) + 1;
 //
-//        ForgeDirection sideHit = ForgeDirection.getOrientation(event.target.sideHit);
-//        TileEntity tileEntity = event.player.worldObj.getTileEntity(event.target.blockX, event.target.blockY, event.target.blockZ);
+//        EnumFacing sideHit = EnumFacing.getOrientation(event.target.sideHit);
+//        TileEntity tileEntity = event.player.worldObj.getTileEntity(event.target.getBlockPos().getX(), event.target.getBlockPos().getX(), event.target.getBlockPos().getZ());
 //        boolean shouldRender = true;
 //
 //        if (tileEntity instanceof TileEntityIS)
@@ -229,7 +221,7 @@ public class DrawBlockHighlightEventHandler
 //            }
 //        }
 //
-//        if (!canPlaceAlchemyArray(event.currentItem, event.player.worldObj, event.target.blockX, event.target.blockY, event.target.blockZ, event.target.sideHit))
+//        if (!canPlaceAlchemyArray(event.currentItem, event.player.worldObj, event.target.getBlockPos().getX(), event.target.getBlockPos().getX(), event.target.getBlockPos().getZ(), event.target.sideHit))
 //        {
 //            shouldRender = false;
 //        }
@@ -349,7 +341,7 @@ public class DrawBlockHighlightEventHandler
 //        ChalkSettings chalkSettings = InfiniteStratos.proxy.getClientProxy().chalkSettings;
 //
 //        int coordOffset = chalkSettings.getSize() - 1;
-//        ForgeDirection orientation = ForgeDirection.getOrientation(side);
+//        EnumFacing orientation = EnumFacing.getOrientation(side);
 //        AlchemyArray alchemyArray = AlchemyArrayRegistry.getInstance().getAlchemyArray(chalkSettings.getIndex());
 //        boolean canPlaceAlchemyArray = isValidForArray(world, x, y, z, side);
 //
@@ -366,7 +358,7 @@ public class DrawBlockHighlightEventHandler
 //
 //        if (canPlaceAlchemyArray)
 //        {
-//            if (orientation == ForgeDirection.UP || orientation == ForgeDirection.DOWN)
+//            if (orientation == EnumFacing.UP || orientation == EnumFacing.DOWN)
 //            {
 //                for (int i = x - coordOffset; i <= x + coordOffset; i++)
 //                {
@@ -379,7 +371,7 @@ public class DrawBlockHighlightEventHandler
 //                    }
 //                }
 //            }
-//            else if (orientation == ForgeDirection.NORTH || orientation == ForgeDirection.SOUTH)
+//            else if (orientation == EnumFacing.NORTH || orientation == EnumFacing.SOUTH)
 //            {
 //                for (int i = x - coordOffset; i <= x + coordOffset; i++)
 //                {
@@ -392,7 +384,7 @@ public class DrawBlockHighlightEventHandler
 //                    }
 //                }
 //            }
-//            else if (orientation == ForgeDirection.EAST || orientation == ForgeDirection.WEST)
+//            else if (orientation == EnumFacing.EAST || orientation == EnumFacing.WEST)
 //            {
 //                for (int i = y - coordOffset; i <= y + coordOffset; i++)
 //                {
@@ -412,14 +404,14 @@ public class DrawBlockHighlightEventHandler
 //
 //    private boolean isValidForArray(World world, int x, int y, int z, int sideHit)
 //    {
-//        ForgeDirection side = ForgeDirection.getOrientation(sideHit);
-//        return world.isSideSolid(x, y, z, side) && ((side == ForgeDirection.DOWN && world.getBlock(x, y - 1, z).isReplaceable(world, x, y, z)) ||
-//                (side == ForgeDirection.UP && world.getBlock(x, y + 1, z).isReplaceable(world, x, y, z)) ||
-//                (side == ForgeDirection.NORTH && world.getBlock(x, y, z - 1).isReplaceable(world, x, y, z)) ||
-//                (side == ForgeDirection.SOUTH && world.getBlock(x, y, z + 1).isReplaceable(world, x, y, z)) ||
-//                (side == ForgeDirection.WEST && world.getBlock(x - 1, y, z).isReplaceable(world, x, y, z)) ||
-//                (side == ForgeDirection.EAST && world.getBlock(x + 1, y, z).isReplaceable(world, x, y, z)));
-    }
+//        EnumFacing side = EnumFacing.getOrientation(sideHit);
+//        return world.isSideSolid(x, y, z, side) && ((side == EnumFacing.DOWN && world.getBlock(x, y - 1, z).isReplaceable(world, x, y, z)) ||
+//                (side == EnumFacing.UP && world.getBlock(x, y + 1, z).isReplaceable(world, x, y, z)) ||
+//                (side == EnumFacing.NORTH && world.getBlock(x, y, z - 1).isReplaceable(world, x, y, z)) ||
+//                (side == EnumFacing.SOUTH && world.getBlock(x, y, z + 1).isReplaceable(world, x, y, z)) ||
+//                (side == EnumFacing.WEST && world.getBlock(x - 1, y, z).isReplaceable(world, x, y, z)) ||
+//                (side == EnumFacing.EAST && world.getBlock(x + 1, y, z).isReplaceable(world, x, y, z)));
+//    }
 
     private void drawSelectionBox(RenderGlobal context, EntityPlayer entityPlayer, MovingObjectPosition rayTrace, int i, float partialTicks)
     {
@@ -432,15 +424,15 @@ public class DrawBlockHighlightEventHandler
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             GL11.glDepthMask(false);
             float f1 = 0.002F;
-            Block block = entityPlayer.worldObj.getBlock(rayTrace.blockX, rayTrace.blockY, rayTrace.blockZ);
+            Block block = entityPlayer.worldObj.getBlockState(rayTrace.getBlockPos()).getBlock();
 
             if (block.getMaterial() != Material.air)
             {
-                block.setBlockBoundsBasedOnState(entityPlayer.worldObj, rayTrace.blockX, rayTrace.blockY, rayTrace.blockZ);
+                block.setBlockBoundsBasedOnState(entityPlayer.worldObj, rayTrace.getBlockPos());
                 double d0 = entityPlayer.lastTickPosX + (entityPlayer.posX - entityPlayer.lastTickPosX) * (double) partialTicks;
                 double d1 = entityPlayer.lastTickPosY + (entityPlayer.posY - entityPlayer.lastTickPosY) * (double) partialTicks;
                 double d2 = entityPlayer.lastTickPosZ + (entityPlayer.posZ - entityPlayer.lastTickPosZ) * (double) partialTicks;
-                context.drawOutlinedBoundingBox(block.getSelectedBoundingBoxFromPool(entityPlayer.worldObj, rayTrace.blockX, rayTrace.blockY, rayTrace.blockZ).expand((double) f1, (double) f1, (double) f1).getOffsetBoundingBox(-d0, -d1, -d2), -1);
+                context.drawSelectionBoundingBox(block.getSelectedBoundingBox(entityPlayer.worldObj, rayTrace.getBlockPos()).expand(0.002d, 0.002d, 0.002d).offset(- d0, - d1, - d2));
             }
 
             GL11.glDepthMask(true);

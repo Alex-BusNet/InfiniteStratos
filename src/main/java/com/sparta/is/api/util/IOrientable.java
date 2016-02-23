@@ -1,6 +1,6 @@
 package com.sparta.is.api.util;
 
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 public interface IOrientable
 {
@@ -12,12 +12,12 @@ public interface IOrientable
     /**
      * @return the direction the tile is facing
      */
-    ForgeDirection getForward();
+    EnumFacing getForward();
 
     /**
      * @return the direction top of the tile
      */
-    ForgeDirection getUp();
+    EnumFacing getUp();
 
     /**
      * Update the orientation
@@ -25,5 +25,5 @@ public interface IOrientable
      * @param Forward new forward direction
      * @param Up      new upwards direction
      */
-    void setOrientation( ForgeDirection Forward, ForgeDirection Up );
+    void setOrientation( EnumFacing Forward, EnumFacing Up );
 }

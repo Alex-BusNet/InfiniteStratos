@@ -1,19 +1,27 @@
 package com.sparta.is.client.render.model;
 
 import com.sparta.is.reference.Models;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraftforge.client.model.AdvancedModelLoader;
-import net.minecraftforge.client.model.IModelCustom;
+import com.sparta.is.utility.LogHelper;
+import net.minecraftforge.client.model.IModel;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.client.model.obj.OBJLoader;
 
 @SideOnly(Side.CLIENT)
 public class ModelUnitStand
 {
-    private IModelCustom modelUnitStand;
+    private IModel modelUnitStand;
 
     public ModelUnitStand()
     {
-        modelUnitStand = AdvancedModelLoader.loadModel(Models.UNIT_STAND);
+        try
+        {
+            modelUnitStand = OBJLoader.instance.loadModel(Models.UNIT_STAND);
+        }
+        catch ( Exception e )
+        {
+            LogHelper.error("Model Unit Stand Load Error");
+        }
     }
 
     public void render()

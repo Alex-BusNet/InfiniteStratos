@@ -3,7 +3,7 @@ package com.sparta.is.utility;
 
 import com.sparta.is.reference.Reference;
 import com.sparta.is.tileentity.TileEntityIS;
-import cpw.mods.fml.relauncher.FMLRelaunchLog;
+import net.minecraftforge.fml.relauncher.FMLRelaunchLog;
 import org.apache.logging.log4j.Level;
 
 public class LogHelper

@@ -1,13 +1,14 @@
 package com.sparta.is.utility;
 
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.LoaderState;
+
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.LoaderState;
 
 public class LoaderHelper
 {
     public static LoaderState getLoaderState()
     {
-        if (Loader.instance().isInState(LoaderState.SERVER_STARTED))
+        if ( Loader.instance().isInState(LoaderState.SERVER_STARTED))
         {
             return LoaderState.SERVER_STARTED;
         }

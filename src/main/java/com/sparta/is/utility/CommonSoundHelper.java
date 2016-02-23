@@ -2,8 +2,8 @@ package com.sparta.is.utility;
 
 import com.sparta.is.network.PacketHandler;
 import com.sparta.is.network.message.MessageSoundEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 public class CommonSoundHelper
 {
@@ -24,6 +24,6 @@ public class CommonSoundHelper
 
     public static void playSoundAtPlayer(EntityPlayer entityPlayer, String soundName, float volume, float pitch, double range)
     {
-        PacketHandler.INSTANCE.sendToAllAround(new MessageSoundEvent(entityPlayer, soundName, volume, pitch), new NetworkRegistry.TargetPoint(entityPlayer.worldObj.provider.dimensionId, entityPlayer.posX, entityPlayer.posY, entityPlayer.posZ, range));
+        PacketHandler.INSTANCE.sendToAllAround(new MessageSoundEvent(entityPlayer, soundName, volume, pitch), new NetworkRegistry.TargetPoint(entityPlayer.worldObj.provider.getDimensionId(), entityPlayer.posX, entityPlayer.posY, entityPlayer.posZ, range));
     }
 }

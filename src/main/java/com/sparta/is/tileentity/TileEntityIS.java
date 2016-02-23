@@ -8,12 +8,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraftforge.common.UsernameCache;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
-public class TileEntityIS extends TileEntity
+public class TileEntityIS extends TileEntity implements ITickable
 {
     protected EnumFacing orientation;
     protected byte state;
@@ -168,5 +169,10 @@ public class TileEntityIS extends TileEntity
         return PacketHandler.INSTANCE.getPacketFrom(new MessageTileEntityIS(this));
     }
 
+    @Override
+    public void update()
+    {
+
+    }
 }
 
