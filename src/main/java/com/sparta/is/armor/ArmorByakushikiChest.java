@@ -3,14 +3,13 @@ package com.sparta.is.armor;
 import com.sparta.is.reference.Material;
 import com.sparta.is.reference.Names;
 import com.sparta.repackage.cofh.api.energy.IEnergyContainerItem;
-import com.sparta.repackage.cofh.api.item.IEmpowerableItem;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.ISpecialArmor;
 
-public class ArmorByakushikiChest extends ArmorIS implements IEmpowerableItem, IEnergyContainerItem, ISpecialArmor
+public class ArmorByakushikiChest extends ArmorIS implements IEnergyContainerItem, ISpecialArmor
 {
     public ArmorByakushikiChest()
     {

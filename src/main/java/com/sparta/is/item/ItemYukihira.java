@@ -13,9 +13,7 @@ import com.sparta.is.settings.UnitSettings;
 import com.sparta.is.utility.DamageSourceHelper;
 import com.sparta.is.utility.EntityHelper;
 import com.sparta.is.utility.IKeyBound;
-import com.sparta.is.utility.LogHelper;
 import com.sparta.repackage.cofh.api.energy.IEnergyContainerItem;
-import com.sparta.repackage.cofh.api.item.IEmpowerableItem;
 import com.sparta.repackage.cofh.lib.util.helpers.EnergyHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.MathHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
@@ -38,7 +36,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyContainerItem, IEmpowerableItem
+public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyContainerItem
 {
     private UnitByakushiki byakushiki = new UnitByakushiki();
     private int oneOff = 0;
