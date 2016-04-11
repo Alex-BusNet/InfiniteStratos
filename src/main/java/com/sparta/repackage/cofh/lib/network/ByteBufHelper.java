@@ -1,4 +1,4 @@
-package cofh.lib.network;
+package com.sparta.repackage.cofh.lib.network;
 
 import io.netty.buffer.ByteBuf;
 

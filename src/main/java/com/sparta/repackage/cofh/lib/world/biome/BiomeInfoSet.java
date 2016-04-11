@@ -1,14 +1,8 @@
-package cofh.lib.world.biome;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Random;
-import java.util.Set;
+package com.sparta.repackage.cofh.lib.world.biome;
 
 import net.minecraft.world.biome.BiomeGenBase;
+
+import java.util.*;
 
 public class BiomeInfoSet implements Set<BiomeInfo> {
 

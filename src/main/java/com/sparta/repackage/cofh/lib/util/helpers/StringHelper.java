@@ -1,7 +1,4 @@
-package cofh.lib.util.helpers;
-
-import java.util.List;
-import java.util.Locale;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.item.EnumRarity;
@@ -9,8 +6,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
-
 import org.lwjgl.input.Keyboard;
+
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Contains various helper functions to assist with String manipulation.

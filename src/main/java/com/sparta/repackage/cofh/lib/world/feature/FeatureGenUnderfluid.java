@@ -1,20 +1,20 @@
-package cofh.lib.world.feature;
+package com.sparta.repackage.cofh.lib.world.feature;
 
-import cofh.lib.util.WeightedRandomBlock;
-import cofh.lib.util.helpers.BlockHelper;
-import cofh.lib.util.helpers.FluidHelper;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
+import com.sparta.repackage.cofh.lib.util.WeightedRandomBlock;
+import com.sparta.repackage.cofh.lib.util.helpers.BlockHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.FluidHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraftforge.fluids.Fluid;
 
-public class FeatureGenUnderfluid extends FeatureBase {
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
+public class FeatureGenUnderfluid extends FeatureBase
+{
 
 	final boolean water;
 	final WorldGenerator worldGen;

@@ -1,6 +1,6 @@
-package cofh.lib.util.helpers;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
-import cofh.api.item.IAugmentItem;
+import com.sparta.repackage.cofh.api.item.IAugmentItem;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;

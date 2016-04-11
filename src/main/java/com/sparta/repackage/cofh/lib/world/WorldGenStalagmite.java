@@ -1,8 +1,8 @@
-package cofh.lib.world;
+package com.sparta.repackage.cofh.lib.world;
 
-import static cofh.lib.world.WorldGenMinableCluster.*;
+import static com.sparta.repackage.cofh.lib.world.WorldGenMinableCluster.*;
 
-import cofh.lib.util.WeightedRandomBlock;
+import com.sparta.repackage.cofh.lib.util.WeightedRandomBlock;
 
 import java.util.List;
 import java.util.Random;

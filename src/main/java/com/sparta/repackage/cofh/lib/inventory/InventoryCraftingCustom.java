@@ -1,4 +1,4 @@
-package cofh.lib.inventory;
+package com.sparta.repackage.cofh.lib.inventory;
 
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;

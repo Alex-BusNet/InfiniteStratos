@@ -1,6 +1,6 @@
-package cofh.lib.world;
+package com.sparta.repackage.cofh.lib.world;
 
-import cofh.lib.util.WeightedRandomBlock;
+import com.sparta.repackage.cofh.lib.util.WeightedRandomBlock;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package cofh.lib.util;
+package com.sparta.repackage.cofh.lib.util;
 
 import com.google.common.base.Objects;
 import com.google.common.primitives.Ints;

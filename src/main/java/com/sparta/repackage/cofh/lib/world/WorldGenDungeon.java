@@ -1,10 +1,10 @@
-package cofh.lib.world;
+package com.sparta.repackage.cofh.lib.world;
 
-import static cofh.lib.world.WorldGenMinableCluster.*;
+import static com.sparta.repackage.cofh.lib.world.WorldGenMinableCluster.*;
 import static java.lang.Math.abs;
 
-import cofh.lib.util.WeightedRandomBlock;
-import cofh.lib.util.WeightedRandomNBTTag;
+import com.sparta.repackage.cofh.lib.util.WeightedRandomBlock;
+import com.sparta.repackage.cofh.lib.util.WeightedRandomNBTTag;
 
 import java.util.Arrays;
 import java.util.List;

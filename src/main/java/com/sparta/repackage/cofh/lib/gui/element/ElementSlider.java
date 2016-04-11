@@ -1,11 +1,10 @@
-package cofh.lib.gui.element;
+package com.sparta.repackage.cofh.lib.gui.element;
 
-import static cofh.lib.gui.element.ElementButtonBase.*;
-
-import cofh.lib.gui.GuiBase;
-import cofh.lib.gui.GuiColor;
-
+import com.sparta.repackage.cofh.lib.gui.GuiBase;
+import com.sparta.repackage.cofh.lib.gui.GuiColor;
 import org.lwjgl.opengl.GL11;
+
+import static com.sparta.repackage.cofh.lib.gui.element.ElementButtonBase.*;
 
 public abstract class ElementSlider extends ElementBase {
 

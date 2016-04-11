@@ -1,8 +1,8 @@
-package cofh.lib.gui.element;
+package com.sparta.repackage.cofh.lib.gui.element;
 
-import cofh.lib.gui.GuiBase;
-import cofh.lib.render.RenderHelper;
-import cofh.lib.util.helpers.StringHelper;
+import com.sparta.repackage.cofh.lib.gui.GuiBase;
+import com.sparta.repackage.cofh.lib.render.RenderHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
 
 import java.util.List;
 

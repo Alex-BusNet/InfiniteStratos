@@ -3,9 +3,9 @@
  * http://www.teamcofh.com
  */
 @API(apiVersion = CoFHLibProps.VERSION, owner = "CoFHLib", provides = "CoFHLib|render|particle")
-package cofh.lib.render.particle;
+package com.sparta.repackage.cofh.lib.render.particle;
 
-import cofh.lib.CoFHLibProps;
 
+import com.sparta.repackage.cofh.lib.CoFHLibProps;
 import net.minecraftforge.fml.common.API;
 

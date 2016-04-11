@@ -1,7 +1,7 @@
-package cofh.lib.util.helpers;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
-import cofh.api.tileentity.IRedstoneControl;
-import cofh.api.tileentity.IRedstoneControl.ControlMode;
+import com.sparta.repackage.cofh.api.tileentity.IRedstoneControl;
+import com.sparta.repackage.cofh.api.tileentity.IRedstoneControl.ControlMode;
 
 import java.util.List;
 

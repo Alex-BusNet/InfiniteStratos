@@ -1,17 +1,11 @@
-package cofh.lib.gui;
+package com.sparta.repackage.cofh.lib.gui;
 
-import cofh.lib.audio.SoundBase;
-import cofh.lib.gui.element.ElementBase;
-import cofh.lib.gui.element.TabBase;
-import cofh.lib.gui.slot.SlotFalseCopy;
-import cofh.lib.render.RenderHelper;
-import cofh.lib.util.helpers.StringHelper;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import com.sparta.repackage.cofh.lib.gui.slot.SlotFalseCopy;
+import com.sparta.repackage.cofh.lib.render.RenderHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
+import com.sparta.repackage.cofh.lib.audio.SoundBase;
+import com.sparta.repackage.cofh.lib.gui.element.ElementBase;
+import com.sparta.repackage.cofh.lib.gui.element.TabBase;
 
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.FontRenderer;
@@ -31,6 +25,12 @@ import net.minecraftforge.fml.client.FMLClientHandler;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Base class for a modular GUIs. Works with Elements {@link ElementBase} and Tabs {@link TabBase} which are both modular elements.

@@ -1,11 +1,11 @@
-package cofh.lib.gui.element;
+package com.sparta.repackage.cofh.lib.gui.element;
 
-import cofh.lib.gui.GuiBase;
-import cofh.lib.gui.GuiProps;
-
+import com.sparta.repackage.cofh.lib.gui.GuiBase;
+import com.sparta.repackage.cofh.lib.gui.GuiProps;
 import net.minecraft.util.ResourceLocation;
 
-public abstract class ElementButtonBase extends ElementBase {
+public abstract class ElementButtonBase extends ElementBase
+{
 
 	public static final ResourceLocation HOVER = new ResourceLocation(GuiProps.PATH_ELEMENTS + "Button_Hover.png");
 	public static final ResourceLocation ENABLED = new ResourceLocation(GuiProps.PATH_ELEMENTS + "Button_Enabled.png");

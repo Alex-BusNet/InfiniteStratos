@@ -1,10 +1,11 @@
-package cofh.lib.world;
+package com.sparta.repackage.cofh.lib.world;
 
-import cofh.lib.util.WeightedRandomWorldGenerator;
+import com.sparta.repackage.cofh.lib.util.WeightedRandomWorldGenerator;
 
 import java.util.ArrayList;
 import java.util.Random;
 
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
@@ -25,4 +26,9 @@ public class WorldGenMulti extends WorldGenerator {
 		return gen.generator.generate(world, random, x, y, z);
 	}
 
+	@Override
+	public boolean generate(World worldIn, Random rand, BlockPos position)
+	{
+		return false;
+	}
 }

@@ -1,4 +1,4 @@
-package cofh.lib.world.feature;
+package com.sparta.repackage.cofh.lib.world.feature;
 
 import java.util.Random;
 

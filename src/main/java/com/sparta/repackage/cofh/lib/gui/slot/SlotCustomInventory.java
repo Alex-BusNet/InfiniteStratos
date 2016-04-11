@@ -1,6 +1,6 @@
-package cofh.lib.gui.slot;
+package com.sparta.repackage.cofh.lib.gui.slot;
 
-import cofh.api.core.ICustomInventory;
+import com.sparta.repackage.cofh.api.core.ICustomInventory;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;

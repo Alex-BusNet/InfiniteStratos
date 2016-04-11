@@ -1,6 +1,6 @@
-package cofh.lib.gui.slot;
+package com.sparta.repackage.cofh.lib.gui.slot;
 
-import cofh.lib.util.helpers.EnergyHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.EnergyHelper;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;

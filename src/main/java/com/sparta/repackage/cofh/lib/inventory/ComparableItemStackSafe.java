@@ -1,6 +1,6 @@
-package cofh.lib.inventory;
+package com.sparta.repackage.cofh.lib.inventory;
 
-import cofh.lib.util.helpers.ItemHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.ItemHelper;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

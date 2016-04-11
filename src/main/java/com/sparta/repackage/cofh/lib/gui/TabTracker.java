@@ -1,6 +1,7 @@
-package cofh.lib.gui;
+package com.sparta.repackage.cofh.lib.gui;
 
-import cofh.lib.gui.element.TabBase;
+
+import com.sparta.repackage.cofh.lib.gui.element.TabBase;
 
 /**
  * Keeps track of which tabs should be open by default when a player opens a GUI.

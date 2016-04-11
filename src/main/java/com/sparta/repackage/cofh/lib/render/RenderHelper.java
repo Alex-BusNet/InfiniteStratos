@@ -1,4 +1,4 @@
-package cofh.lib.render;
+package com.sparta.repackage.cofh.lib.render;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;

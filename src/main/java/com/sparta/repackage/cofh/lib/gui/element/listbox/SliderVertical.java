@@ -1,7 +1,8 @@
-package cofh.lib.gui.element.listbox;
+package com.sparta.repackage.cofh.lib.gui.element.listbox;
 
-import cofh.lib.gui.GuiBase;
-import cofh.lib.gui.element.ElementSlider;
+
+import com.sparta.repackage.cofh.lib.gui.element.ElementSlider;
+import com.sparta.repackage.cofh.lib.gui.GuiBase;
 
 public class SliderVertical extends ElementSlider {
 

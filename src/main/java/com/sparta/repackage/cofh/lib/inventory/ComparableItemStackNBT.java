@@ -1,4 +1,4 @@
-package cofh.lib.inventory;
+package com.sparta.repackage.cofh.lib.inventory;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;

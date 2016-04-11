@@ -1,8 +1,8 @@
-package cofh.lib.world.feature;
+package com.sparta.repackage.cofh.lib.world.feature;
 
-import cofh.api.world.IFeatureGenerator;
-import cofh.lib.world.biome.BiomeInfo;
-import cofh.lib.world.biome.BiomeInfoSet;
+import com.sparta.repackage.cofh.api.world.IFeatureGenerator;
+import com.sparta.repackage.cofh.lib.world.biome.BiomeInfo;
+import com.sparta.repackage.cofh.lib.world.biome.BiomeInfoSet;
 
 import gnu.trove.set.hash.THashSet;
 

@@ -1,9 +1,7 @@
-package cofh.lib.world.feature;
+package com.sparta.repackage.cofh.lib.world.feature;
 
-import static cofh.lib.world.WorldGenMinableCluster.canGenerateInBlock;
-
-import cofh.lib.util.WeightedRandomBlock;
-import cofh.lib.util.helpers.BlockHelper;
+import com.sparta.repackage.cofh.lib.util.WeightedRandomBlock;
+import com.sparta.repackage.cofh.lib.util.helpers.BlockHelper;
 
 import java.util.List;
 import java.util.Random;

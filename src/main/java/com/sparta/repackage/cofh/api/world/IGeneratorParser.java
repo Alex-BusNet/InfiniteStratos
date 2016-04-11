@@ -1,6 +1,6 @@
 package com.sparta.repackage.cofh.api.world;
 
-import cofh.lib.util.WeightedRandomBlock;
+import com.sparta.repackage.cofh.lib.util.WeightedRandomBlock;
 import com.google.gson.JsonObject;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.apache.logging.log4j.Logger;

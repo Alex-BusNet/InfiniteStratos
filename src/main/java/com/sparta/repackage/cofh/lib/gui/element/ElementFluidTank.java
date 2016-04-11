@@ -1,15 +1,14 @@
-package cofh.lib.gui.element;
+package com.sparta.repackage.cofh.lib.gui.element;
 
-import cofh.lib.gui.GuiBase;
-import cofh.lib.gui.GuiProps;
-import cofh.lib.render.RenderHelper;
-import cofh.lib.util.helpers.MathHelper;
-import cofh.lib.util.helpers.StringHelper;
-
-import java.util.List;
-
+import com.sparta.repackage.cofh.lib.gui.GuiBase;
+import com.sparta.repackage.cofh.lib.gui.GuiProps;
+import com.sparta.repackage.cofh.lib.render.RenderHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.MathHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.IFluidTank;
+
+import java.util.List;
 
 public class ElementFluidTank extends ElementBase {
 

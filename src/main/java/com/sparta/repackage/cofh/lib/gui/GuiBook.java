@@ -1,4 +1,4 @@
-package cofh.lib.gui;
+package com.sparta.repackage.cofh.lib.gui;
 
 import net.minecraft.client.gui.GuiScreen;
 

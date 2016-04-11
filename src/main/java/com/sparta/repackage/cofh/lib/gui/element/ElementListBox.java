@@ -1,17 +1,18 @@
-package cofh.lib.gui.element;
+package com.sparta.repackage.cofh.lib.gui.element;
 
-import static org.lwjgl.opengl.GL11.*;
-
-import cofh.lib.gui.GuiBase;
-import cofh.lib.gui.GuiColor;
-import cofh.lib.gui.element.listbox.IListBoxElement;
-import cofh.lib.util.helpers.StringHelper;
+import com.sparta.repackage.cofh.lib.gui.GuiBase;
+import com.sparta.repackage.cofh.lib.gui.GuiColor;
+import com.sparta.repackage.cofh.lib.gui.element.listbox.IListBoxElement;
+import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ElementListBox extends ElementBase {
+import static org.lwjgl.opengl.GL11.*;
+
+public class ElementListBox extends ElementBase
+{
 
 	public int borderColor = new GuiColor(120, 120, 120, 255).getColor();
 	public int backgroundColor = new GuiColor(0, 0, 0, 255).getColor();

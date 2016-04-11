@@ -1,7 +1,7 @@
-package cofh.lib.util.helpers;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
-import cofh.api.tileentity.ISecurable;
-import cofh.api.tileentity.ISecurable.AccessMode;
+import com.sparta.repackage.cofh.api.tileentity.ISecurable;
+import com.sparta.repackage.cofh.api.tileentity.ISecurable.AccessMode;
 import com.google.common.base.Strings;
 import com.mojang.authlib.GameProfile;
 

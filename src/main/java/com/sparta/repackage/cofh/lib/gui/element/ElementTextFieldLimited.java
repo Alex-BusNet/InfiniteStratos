@@ -1,6 +1,7 @@
-package cofh.lib.gui.element;
+package com.sparta.repackage.cofh.lib.gui.element;
 
-import cofh.lib.gui.GuiBase;
+
+import com.sparta.repackage.cofh.lib.gui.GuiBase;
 
 public class ElementTextFieldLimited extends ElementTextField {
 

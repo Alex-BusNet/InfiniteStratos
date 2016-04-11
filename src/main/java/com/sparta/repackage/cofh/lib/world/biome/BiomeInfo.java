@@ -1,12 +1,12 @@
-package cofh.lib.world.biome;
-
-import java.util.Collection;
-import java.util.Random;
+package com.sparta.repackage.cofh.lib.world.biome;
 
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.TempCategory;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
+
+import java.util.Collection;
+import java.util.Random;
 
 public class BiomeInfo {
 

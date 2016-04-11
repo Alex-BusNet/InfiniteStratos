@@ -1,11 +1,12 @@
-package cofh.lib.world.feature;
-
-import java.util.Random;
+package com.sparta.repackage.cofh.lib.world.feature;
 
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 
-public class FeatureGenLargeVein extends FeatureBase {
+import java.util.Random;
+
+public class FeatureGenLargeVein extends FeatureBase
+{
 
 	final WorldGenerator worldGen;
 	final int count;

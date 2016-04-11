@@ -1,6 +1,6 @@
-package cofh.lib.util;
+package com.sparta.repackage.cofh.lib.util;
 
-import cofh.lib.util.helpers.ItemHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.ItemHelper;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
@@ -24,7 +24,7 @@ public class OreDictionaryProxy {
 
 	public int getOreID(ItemStack stack) {
 
-		return OreDictionary.getOreID(stack);
+		return OreDictionary.getOreID(stack.getUnlocalizedName());
 	}
 
 	public int getOreID(String oreName) {
@@ -34,7 +34,7 @@ public class OreDictionaryProxy {
 
 	public String getOreName(ItemStack stack) {
 
-		return OreDictionary.getOreName(OreDictionary.getOreID(stack));
+		return OreDictionary.getOreName(OreDictionary.getOreID(stack.getUnlocalizedName()));
 	}
 
 	public String getOreName(int oreID) {
@@ -44,12 +44,12 @@ public class OreDictionaryProxy {
 
 	public boolean isOreIDEqual(ItemStack stack, int oreID) {
 
-		return OreDictionary.getOreID(stack) == oreID;
+		return OreDictionary.getOreID(stack.getUnlocalizedName()) == oreID;
 	}
 
 	public boolean isOreNameEqual(ItemStack stack, String oreName) {
 
-		return OreDictionary.getOreName(OreDictionary.getOreID(stack)).equals(oreName);
+		return OreDictionary.getOreName(OreDictionary.getOreID(stack.getUnlocalizedName())).equals(oreName);
 	}
 
 	public boolean oreNameExists(String oreName) {

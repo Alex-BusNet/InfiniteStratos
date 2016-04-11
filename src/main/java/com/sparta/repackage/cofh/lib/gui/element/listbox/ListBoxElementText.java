@@ -1,10 +1,10 @@
-package cofh.lib.gui.element.listbox;
+package com.sparta.repackage.cofh.lib.gui.element.listbox;
 
-import cofh.lib.gui.element.ElementListBox;
-
+import com.sparta.repackage.cofh.lib.gui.element.ElementListBox;
 import net.minecraft.client.Minecraft;
 
-public class ListBoxElementText implements IListBoxElement {
+public class ListBoxElementText implements IListBoxElement
+{
 
 	private final String _text;
 

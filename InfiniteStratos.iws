@@ -63,57 +63,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="EnergyHelper.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/util/helpers/EnergyHelper.java">
+      <file leaf-file-name="BlockHelper.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/util/helpers/BlockHelper.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="36" column="29" selection-start-line="36" selection-start-column="29" selection-end-line="36" selection-end-column="29" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="IGeneratorParser.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/world/IGeneratorParser.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="41" selection-start-line="0" selection-start-column="41" selection-end-line="0" selection-end-column="41" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ContainerBase.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/ContainerBase.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ContainerInventoryItem.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/ContainerInventoryItem.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="8" column="43" selection-start-line="8" selection-start-column="43" selection-end-line="8" selection-end-column="43" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CustomInventoryWrapper.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/CustomInventoryWrapper.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.034216337">
-              <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+            <state vertical-scroll-proportion="3.3399558">
+              <caret line="178" column="24" selection-start-line="178" selection-start-column="24" selection-end-line="178" selection-end-column="24" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -140,57 +94,57 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/item/IInventoryContainerItem.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/item/IMultiModeItem.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/item/ISpecialFilterFluid.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/item/ISpecialFilterItem.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/item/IToolHammer.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/IBlockAppearance.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/IBlockConfigGui.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/IBlockDebug.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/IBlockInfo.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/IDismantleable.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/CoFHAPIProps.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/package-info.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/core/ICustomInventory.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/core/IInitializer.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/core/package-info.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/inventory/IInventoryConnection.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/inventory/IInventoryHandler.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/inventory/IInventoryRetainer.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/inventory/package-info.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IAugmentable.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IEnergyInfo.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IPortableData.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IReconfigurableFacing.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IReconfigurableSides.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IRedstoneCache.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IRedstoneControl.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/ISecurable.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/ITileInfo.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/package-info.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IEnderAttuned.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IEnderDestination.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IEnderEnergyHandler.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IEnderFluidHandler.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IEnderItemHandler.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IItemDuct.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/package-info.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/world/IFeatureGenerator.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/world/IFeatureHandler.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/world/IFeatureParser.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/world/IGeneratorParser.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/world/package-info.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/package-info.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/audio/ISoundSource.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/CoFHLibProps.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/audio/package-info.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/audio/SoundBase.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/audio/SoundTile.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/ContainerBase.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/ContainerFalse.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/ContainerInventoryItem.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/CustomInventoryWrapper.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/biome/BiomeInfoSet.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/biome/package-info.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/feature/FeatureBase.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/feature/FeatureGenCave.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/feature/FeatureGenLargeVein.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/feature/FeatureGenNormal.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/feature/FeatureGenSurface.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/feature/FeatureGenTopBlock.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/feature/FeatureGenUnderfluid.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/feature/FeatureGenUniform.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/feature/package-info.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/package-info.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenAdvLakes.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenBoulder.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenDecoration.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenDungeon.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenGeode.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenMassiveTree.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenMinableCluster.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenMinableLargeVein.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenMinablePlate.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenMulti.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenSmallTree.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenSparseMinableCluster.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenSpike.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenStalactite.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenStalagmite.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementButtonManaged.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementDualScaled.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementButtonBase.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementEnergyStored.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementFluid.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementFluidTank.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementIcon.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementListBox.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementSimple.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementSimpleBox.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementSimpleToolTip.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementSlider.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementTextField.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementTextFieldFiltered.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/inventory/ComparableItemStack.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/inventory/ComparableItemStackSafe.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/inventory/InventoryManagerStandard.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/render/particle/EntityDropParticleFX.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/render/RenderFluidOverlayItem.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/slot/SlotCustomInventory.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/slot/SlotEnergy.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/slot/SlotSpecificItem.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/GuiBase.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/listbox/IListBoxElement.java" />
       </list>
     </option>
   </component>
@@ -259,28 +213,7 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="Scope" />
-      <pane id="ProjectPane">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="InfiniteStratos" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="InfiniteStratos" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="InfiniteStratos" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
-      </pane>
       <pane id="PackagesPane">
         <subPane>
           <PATH>
@@ -337,6 +270,88 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="util" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="InfiniteStratos" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="InfiniteStratos" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="com.sparta" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="repackage.cofh" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="util" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="helpers" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="InfiniteStratos" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="InfiniteStratos" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="com.sparta" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="repackage.cofh" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="render" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="InfiniteStratos" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="InfiniteStratos" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="com.sparta" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="repackage.cofh" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="gui" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
             </PATH_ELEMENT>
@@ -367,7 +382,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="container" />
+              <option name="myItemId" value="slot" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -389,7 +404,33 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="api" />
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="gui" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="element" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="InfiniteStratos" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="InfiniteStratos" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="com.sparta" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="repackage.cofh" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -409,6 +450,27 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="InfiniteStratos" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="InfiniteStratos" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="InfiniteStratos" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -720,7 +782,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="54" />
+      <option name="time" value="65" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -729,446 +791,434 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/item/IInventoryContainerItem.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenDungeon.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.037527595">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="6" column="28" selection-start-line="6" selection-start-column="28" selection-end-line="6" selection-end-column="28" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/item/ISpecialFilterFluid.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenGeode.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.43156734">
-          <caret line="23" column="1" selection-start-line="23" selection-start-column="1" selection-end-line="23" selection-end-column="1" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="2" column="35" selection-start-line="2" selection-start-column="35" selection-end-line="2" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenMassiveTree.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenMinableCluster.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
           <folding>
-            <element signature="imports" expanded="false" />
+            <element signature="e#666#687#0" expanded="true" />
+            <element signature="e#860#881#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/item/ISpecialFilterItem.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenMinableLargeVein.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.41280353">
-          <caret line="22" column="1" selection-start-line="22" selection-start-column="1" selection-end-line="22" selection-end-column="1" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/item/IToolHammer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.18763797">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/IBlockAppearance.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenMinablePlate.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="37" selection-start-line="0" selection-start-column="37" selection-end-line="0" selection-end-column="37" />
+          <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/IBlockConfigGui.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenMulti.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="43" selection-start-line="0" selection-start-column="43" selection-end-line="0" selection-end-column="43" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/IBlockDebug.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="39" selection-start-line="0" selection-start-column="39" selection-end-line="0" selection-end-column="39" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/IDismantleable.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="42" selection-start-line="0" selection-start-column="42" selection-end-line="0" selection-end-column="42" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/CoFHAPIProps.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="34" selection-start-line="0" selection-start-column="34" selection-end-line="0" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/package-info.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.11258278">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/core/ICustomInventory.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="37" selection-start-line="0" selection-start-column="37" selection-end-line="0" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/core/IInitializer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="41" selection-start-line="0" selection-start-column="41" selection-end-line="0" selection-end-column="41" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/core/package-info.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.13134658">
-          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/inventory/IInventoryConnection.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="43" selection-start-line="0" selection-start-column="43" selection-end-line="0" selection-end-column="43" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/inventory/IInventoryHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.18763797">
-          <caret line="11" column="58" selection-start-line="11" selection-start-column="58" selection-end-line="11" selection-end-column="58" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/IBlockInfo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.037527595">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/inventory/IInventoryRetainer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="41" selection-start-line="0" selection-start-column="41" selection-end-line="0" selection-end-column="41" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/inventory/package-info.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.093818985">
-          <caret line="5" column="9" selection-start-line="5" selection-start-column="9" selection-end-line="5" selection-end-column="9" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IAugmentable.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="43" selection-start-line="0" selection-start-column="43" selection-end-line="0" selection-end-column="43" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IEnergyInfo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="38" selection-start-line="0" selection-start-column="38" selection-end-line="0" selection-end-column="38" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IPortableData.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="42" selection-start-line="0" selection-start-column="42" selection-end-line="0" selection-end-column="43" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IReconfigurableFacing.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="44" selection-start-line="0" selection-start-column="44" selection-end-line="0" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IRedstoneCache.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="48" selection-start-line="0" selection-start-column="38" selection-end-line="0" selection-end-column="48" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IReconfigurableSides.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.22516556">
-          <caret line="12" column="17" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/IRedstoneControl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="44" selection-start-line="0" selection-start-column="44" selection-end-line="0" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/ISecurable.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="42" selection-start-line="0" selection-start-column="42" selection-end-line="0" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/ITileInfo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="10" selection-start-line="0" selection-start-column="10" selection-end-line="0" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/tileentity/package-info.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.093818985">
-          <caret line="5" column="24" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IEnderAttuned.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="37" selection-start-line="0" selection-start-column="37" selection-end-line="0" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IEnderDestination.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="38" selection-start-line="0" selection-start-column="38" selection-end-line="0" selection-end-column="38" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IEnderEnergyHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="40" selection-start-line="0" selection-start-column="40" selection-end-line="0" selection-end-column="40" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IEnderFluidHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="45" selection-start-line="0" selection-start-column="45" selection-end-line="0" selection-end-column="45" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IEnderItemHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="42" selection-start-line="0" selection-start-column="42" selection-end-line="0" selection-end-column="43" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/IItemDuct.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="42" selection-start-line="0" selection-start-column="42" selection-end-line="0" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/transport/package-info.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.13134658">
-          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/world/IFeatureGenerator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="40" selection-start-line="0" selection-start-column="40" selection-end-line="0" selection-end-column="40" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/world/IFeatureHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="43" selection-start-line="0" selection-start-column="43" selection-end-line="0" selection-end-column="43" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/world/IFeatureParser.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="42" selection-start-line="0" selection-start-column="42" selection-end-line="0" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/util/helpers/EnergyHelper.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="36" column="29" selection-start-line="36" selection-start-column="29" selection-end-line="36" selection-end-column="29" />
+          <caret line="26" column="5" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#961#962#0" expanded="true" />
+            <element signature="e#980#981#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/world/package-info.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenSmallTree.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.13134658">
-          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/package-info.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.093818985">
-          <caret line="5" column="35" selection-start-line="5" selection-start-column="35" selection-end-line="5" selection-end-column="35" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/audio/ISoundSource.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenSparseMinableCluster.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="33" selection-start-line="0" selection-start-column="33" selection-end-line="0" selection-end-column="33" />
+          <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenSpike.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenStalactite.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/CoFHLibProps.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="35" selection-start-line="0" selection-start-column="35" selection-end-line="0" selection-end-column="35" />
+        <state vertical-scroll-proportion="0.037527595">
+          <caret line="2" column="13" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/audio/package-info.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/block/IBlockAppearance.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.16887417">
+          <caret line="12" column="17" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/world/WorldGenStalagmite.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.07505519">
-          <caret line="4" column="18" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/audio/SoundBase.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.034216337">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/audio/SoundTile.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.0022075055">
-          <caret line="0" column="32" selection-start-line="0" selection-start-column="32" selection-end-line="0" selection-end-column="32" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/api/world/IGeneratorParser.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="41" selection-start-line="0" selection-start-column="41" selection-end-line="0" selection-end-column="41" />
+          <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/ContainerFalse.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementButtonOption.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="10" selection-start-line="0" selection-start-column="10" selection-end-line="0" selection-end-column="10" />
+        <state vertical-scroll-proportion="0.13134658">
+          <caret line="7" column="22" selection-start-line="7" selection-start-column="22" selection-end-line="7" selection-end-column="22" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementDualScaled.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.05629139">
+          <caret line="3" column="28" selection-start-line="3" selection-start-column="28" selection-end-line="3" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementButtonManaged.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.09161148">
+          <caret line="5" column="51" selection-start-line="5" selection-start-column="51" selection-end-line="5" selection-end-column="51" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementButtonBase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.05629139">
+          <caret line="3" column="28" selection-start-line="3" selection-start-column="28" selection-end-line="3" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementButton.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.46909493">
+          <caret line="30" column="29" selection-start-line="30" selection-start-column="29" selection-end-line="30" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementEnergyStored.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.11258278">
+          <caret line="6" column="28" selection-start-line="6" selection-start-column="28" selection-end-line="6" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementFluid.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.05629139">
+          <caret line="3" column="28" selection-start-line="3" selection-start-column="28" selection-end-line="3" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementFluidTank.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.11258278">
+          <caret line="6" column="28" selection-start-line="6" selection-start-column="28" selection-end-line="6" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementIcon.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.05518764">
+          <caret line="3" column="28" selection-start-line="3" selection-start-column="28" selection-end-line="3" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementSimpleBox.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.037527595">
+          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementSimple.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.05629139">
+          <caret line="3" column="28" selection-start-line="3" selection-start-column="28" selection-end-line="3" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementSimpleToolTip.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.07505519">
+          <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementSlider.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.10816777">
+          <caret line="6" column="24" selection-start-line="6" selection-start-column="24" selection-end-line="6" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementTextField.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.11258278">
+          <caret line="6" column="4" selection-start-line="6" selection-start-column="4" selection-end-line="6" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementTextFieldFiltered.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.16887417">
+          <caret line="9" column="13" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+          <folding>
+            <element signature="imports" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/ContainerBase.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.26269317">
+          <caret line="14" column="22" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/ContainerFalse.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.18763797">
+          <caret line="11" column="19" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/ContainerInventoryItem.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="8" column="43" selection-start-line="8" selection-start-column="43" selection-end-line="8" selection-end-column="43" />
+        <state vertical-scroll-proportion="0.07505519">
+          <caret line="6" column="22" selection-start-line="6" selection-start-column="22" selection-end-line="6" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/CustomInventoryWrapper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.093818985">
+          <caret line="9" column="13" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/IAugmentableContainer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.18763797">
+          <caret line="10" column="17" selection-start-line="10" selection-start-column="17" selection-end-line="10" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/InventoryContainerItemWrapper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.093818985">
+          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/inventory/ComparableItemStack.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.05629139">
+          <caret line="3" column="28" selection-start-line="3" selection-start-column="28" selection-end-line="3" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/inventory/ComparableItemStackSafe.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.037527595">
+          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/inventory/InventoryManagerStandard.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.034216337">
+          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/render/particle/EntityDropParticleFX.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.037527595">
+          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/render/RenderItemAsBlock.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.037527595">
+          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/container/CustomInventoryWrapper.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/render/RenderHelper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.41280353">
+          <caret line="23" column="19" selection-start-line="23" selection-start-column="19" selection-end-line="23" selection-end-column="19" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/render/RenderFluidOverlayItem.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.034216337">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/render/IconOverlay.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.07505519">
+          <caret line="4" column="39" selection-start-line="4" selection-start-column="39" selection-end-line="4" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/slot/SlotCustomInventory.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.037527595">
+          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/slot/SlotEnergy.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.037527595">
+          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/slot/SlotSpecificItem.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.037527595">
+          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/listbox/IListBoxElement.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="5" column="17" selection-start-line="5" selection-start-column="17" selection-end-line="5" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/element/ElementListBox.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.28145695">
+          <caret line="185" column="18" selection-start-line="185" selection-start-column="18" selection-end-line="185" selection-end-column="18" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1019#1036#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/.gradle/minecraft/forgeSrc-1.8.9-11.15.1.1744-PROJECT(InfiniteStratos)-sources.jar!/net/minecraft/client/gui/inventory/GuiContainer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-7.786976">
+          <caret line="24" column="22" selection-start-line="24" selection-start-column="22" selection-end-line="24" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/gui/GuiBase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.22516556">
+          <caret line="39" column="46" selection-start-line="39" selection-start-column="46" selection-end-line="39" selection-end-column="46" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sparta/repackage/cofh/lib/util/helpers/BlockHelper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="3.3399558">
+          <caret line="178" column="24" selection-start-line="178" selection-start-column="24" selection-end-line="178" selection-end-column="24" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

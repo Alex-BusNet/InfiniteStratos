@@ -1,4 +1,4 @@
-package cofh.lib.util;
+package com.sparta.repackage.cofh.lib.util;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;

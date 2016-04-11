@@ -1,4 +1,4 @@
-package cofh.lib.util.helpers;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
 /**
  * Contains various helper functions to assist with colors.

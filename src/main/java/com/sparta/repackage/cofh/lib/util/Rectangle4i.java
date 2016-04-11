@@ -1,4 +1,4 @@
-package cofh.lib.util;
+package com.sparta.repackage.cofh.lib.util;
 
 /**
  * Generic rectangle class.

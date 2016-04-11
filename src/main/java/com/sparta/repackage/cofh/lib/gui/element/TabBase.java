@@ -1,18 +1,17 @@
-package cofh.lib.gui.element;
+package com.sparta.repackage.cofh.lib.gui.element;
 
-import cofh.lib.gui.GuiBase;
-import cofh.lib.gui.GuiProps;
-import cofh.lib.gui.TabTracker;
-import cofh.lib.render.RenderHelper;
-import cofh.lib.util.Rectangle4i;
+
+import com.sparta.repackage.cofh.lib.render.RenderHelper;
+import com.sparta.repackage.cofh.lib.util.Rectangle4i;
+import com.sparta.repackage.cofh.lib.gui.GuiBase;
+import com.sparta.repackage.cofh.lib.gui.GuiProps;
+import com.sparta.repackage.cofh.lib.gui.TabTracker;
+import net.minecraft.util.ResourceLocation;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import net.minecraft.util.ResourceLocation;
-
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 
 /**
  * Base class for a tab element. Has self-contained rendering methods and a link back to the {@link GuiBase} it is a part of.

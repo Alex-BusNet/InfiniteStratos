@@ -1,6 +1,6 @@
-package cofh.lib.render.particle;
+package com.sparta.repackage.cofh.lib.render.particle;
 
-import cofh.lib.util.helpers.MathHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.MathHelper;
 
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;

@@ -1,4 +1,4 @@
-package cofh.lib.util.helpers;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
 import java.util.Iterator;
 
@@ -28,7 +28,7 @@ public class EntityHelper {
 
 	public static int getEntityFacingCardinal(EntityLivingBase living) {
 
-		int quadrant = cofh.lib.util.helpers.MathHelper.floor(living.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
+		int quadrant = com.sparta.repackage.cofh.lib.util.helpers.MathHelper.floor(living.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
 
 		switch (quadrant) {
 		case 0:

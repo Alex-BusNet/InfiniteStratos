@@ -1,13 +1,13 @@
-package cofh.lib.util.helpers;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contains helper functions to assist with working with fireworks.

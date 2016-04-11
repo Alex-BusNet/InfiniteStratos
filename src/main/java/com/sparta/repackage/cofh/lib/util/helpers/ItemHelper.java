@@ -1,10 +1,10 @@
-package cofh.lib.util.helpers;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
 import static net.minecraftforge.oredict.OreDictionary.WILDCARD_VALUE;
 
-import cofh.api.item.IInventoryContainerItem;
-import cofh.api.item.IMultiModeItem;
-import cofh.lib.util.OreDictionaryProxy;
+import com.sparta.repackage.cofh.api.item.IInventoryContainerItem;
+import com.sparta.repackage.cofh.api.item.IMultiModeItem;
+import com.sparta.repackage.cofh.lib.util.OreDictionaryProxy;
 import com.google.common.base.Strings;
 
 import java.util.ArrayList;

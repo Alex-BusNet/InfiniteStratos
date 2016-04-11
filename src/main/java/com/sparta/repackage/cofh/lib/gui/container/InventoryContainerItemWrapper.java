@@ -1,7 +1,7 @@
-package cofh.lib.gui.container;
+package com.sparta.repackage.cofh.lib.gui.container;
 
-import cofh.api.item.IInventoryContainerItem;
 
+import com.sparta.repackage.cofh.api.item.IInventoryContainerItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;

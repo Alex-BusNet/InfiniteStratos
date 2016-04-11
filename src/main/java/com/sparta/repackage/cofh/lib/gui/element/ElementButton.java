@@ -1,14 +1,15 @@
-package cofh.lib.gui.element;
+package com.sparta.repackage.cofh.lib.gui.element;
 
-import cofh.lib.gui.GuiBase;
-import cofh.lib.render.RenderHelper;
-import cofh.lib.util.helpers.StringHelper;
+
+import com.sparta.repackage.cofh.lib.render.RenderHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
+import com.sparta.repackage.cofh.lib.gui.GuiBase;
+import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
-
-public class ElementButton extends ElementButtonBase {
+public class ElementButton extends com.sparta.repackage.cofh.lib.gui.element.ElementButtonBase
+{
 
 	int sheetX;
 	int sheetY;

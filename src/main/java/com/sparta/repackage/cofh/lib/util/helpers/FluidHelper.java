@@ -1,4 +1,4 @@
-package cofh.lib.util.helpers;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
 import java.io.DataInput;
 import java.io.DataOutput;

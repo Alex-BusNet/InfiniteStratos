@@ -1,8 +1,8 @@
-package cofh.lib.world.biome;
-
-import java.util.Random;
+package com.sparta.repackage.cofh.lib.world.biome;
 
 import net.minecraft.world.biome.BiomeGenBase;
+
+import java.util.Random;
 
 public class BiomeInfoRarity extends BiomeInfo {
 

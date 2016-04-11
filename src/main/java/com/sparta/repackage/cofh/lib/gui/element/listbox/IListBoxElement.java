@@ -1,6 +1,7 @@
-package cofh.lib.gui.element.listbox;
+package com.sparta.repackage.cofh.lib.gui.element.listbox;
 
-import cofh.lib.gui.element.ElementListBox;
+
+import com.sparta.repackage.cofh.lib.gui.element.ElementListBox;
 
 public interface IListBoxElement {
 

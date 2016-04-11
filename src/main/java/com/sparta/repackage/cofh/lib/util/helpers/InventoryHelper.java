@@ -1,14 +1,13 @@
-package cofh.lib.util.helpers;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
-import cofh.api.transport.IItemDuct;
-
-import java.util.List;
-
+import com.sparta.repackage.cofh.api.transport.IItemDuct;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+
+import java.util.List;
 
 /**
  * This class contains helper functions related to Inventories and Inventory manipulation.
@@ -53,7 +52,7 @@ public class InventoryHelper {
 		}
 		int openSlot = -1;
 		for (int i = startIndex; i <= endIndex; i++) {
-			if (ItemHelper.itemsEqualForCrafting(stack, inventory[i]) && inventory[i].getMaxStackSize() > inventory[i].stackSize) {
+			if ( com.sparta.repackage.cofh.lib.util.helpers.ItemHelper.itemsEqualForCrafting(stack, inventory[i]) && inventory[i].getMaxStackSize() > inventory[i].stackSize) {
 				int hold = inventory[i].getMaxStackSize() - inventory[i].stackSize;
 				if (hold >= stack.stackSize) {
 					inventory[i].stackSize += stack.stackSize;

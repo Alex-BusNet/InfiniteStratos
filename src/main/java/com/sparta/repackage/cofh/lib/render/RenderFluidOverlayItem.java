@@ -1,7 +1,6 @@
-package cofh.lib.render;
+package com.sparta.repackage.cofh.lib.render;
 
-import cofh.lib.util.helpers.ItemHelper;
-
+import com.sparta.repackage.cofh.lib.util.helpers.ItemHelper;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
@@ -12,8 +11,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidContainerItem;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 

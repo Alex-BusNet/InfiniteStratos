@@ -1,6 +1,6 @@
-package cofh.lib.gui.slot;
+package com.sparta.repackage.cofh.lib.gui.slot;
 
-import cofh.lib.inventory.ComparableItemStack;
+import com.sparta.repackage.cofh.lib.inventory.ComparableItemStack;
 
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;

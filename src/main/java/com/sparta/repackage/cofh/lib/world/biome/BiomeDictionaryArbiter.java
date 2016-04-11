@@ -1,12 +1,12 @@
-package cofh.lib.world.biome;
-
-import java.util.HashMap;
+package com.sparta.repackage.cofh.lib.world.biome;
 
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.LoaderState;
+
+import java.util.HashMap;
 
 public class BiomeDictionaryArbiter {
 

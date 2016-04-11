@@ -1,4 +1,4 @@
-package cofh.lib.util;
+package com.sparta.repackage.cofh.lib.util;
 
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.util.WeightedRandom;

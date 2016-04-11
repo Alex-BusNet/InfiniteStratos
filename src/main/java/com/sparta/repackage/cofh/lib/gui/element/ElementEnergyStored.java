@@ -1,14 +1,13 @@
-package cofh.lib.gui.element;
+package com.sparta.repackage.cofh.lib.gui.element;
 
-import cofh.api.energy.IEnergyStorage;
-import cofh.lib.gui.GuiBase;
-import cofh.lib.gui.GuiProps;
-import cofh.lib.render.RenderHelper;
-import cofh.lib.util.helpers.MathHelper;
+import com.sparta.repackage.cofh.api.energy.IEnergyStorage;
+import com.sparta.repackage.cofh.lib.gui.GuiBase;
+import com.sparta.repackage.cofh.lib.gui.GuiProps;
+import com.sparta.repackage.cofh.lib.render.RenderHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.MathHelper;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.List;
-
-import net.minecraft.util.ResourceLocation;
 
 public class ElementEnergyStored extends ElementBase {
 

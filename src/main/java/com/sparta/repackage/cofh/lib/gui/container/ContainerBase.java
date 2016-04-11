@@ -1,8 +1,8 @@
 package com.sparta.repackage.cofh.lib.gui.container;
 
-import cofh.lib.gui.slot.SlotFalseCopy;
-import cofh.lib.util.helpers.InventoryHelper;
-import cofh.lib.util.helpers.MathHelper;
+import com.sparta.repackage.cofh.lib.gui.slot.SlotFalseCopy;
+import com.sparta.repackage.cofh.lib.util.helpers.InventoryHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.MathHelper;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;

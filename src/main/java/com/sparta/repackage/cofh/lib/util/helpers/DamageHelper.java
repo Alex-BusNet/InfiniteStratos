@@ -1,4 +1,4 @@
-package cofh.lib.util.helpers;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;

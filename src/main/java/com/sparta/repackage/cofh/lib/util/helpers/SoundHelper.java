@@ -1,6 +1,6 @@
-package cofh.lib.util.helpers;
+package com.sparta.repackage.cofh.lib.util.helpers;
 
-import cofh.lib.audio.SoundBase;
+import com.sparta.repackage.cofh.lib.audio.SoundBase;
 
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SoundHandler;

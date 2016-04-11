@@ -1,20 +1,18 @@
-package cofh.lib.gui.element;
+package com.sparta.repackage.cofh.lib.gui.element;
 
-import static org.lwjgl.opengl.GL11.*;
-
-import cofh.lib.gui.GuiBase;
-import cofh.lib.gui.GuiColor;
-import cofh.lib.util.helpers.MathHelper;
-import cofh.lib.util.helpers.StringHelper;
-
+import com.sparta.repackage.cofh.lib.gui.GuiBase;
+import com.sparta.repackage.cofh.lib.gui.GuiColor;
+import com.sparta.repackage.cofh.lib.util.helpers.MathHelper;
+import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraftforge.client.MinecraftForgeClient;
-
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class ElementTextField extends ElementBase {
 

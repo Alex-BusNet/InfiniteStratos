@@ -3,9 +3,9 @@
  * http://www.teamcofh.com
  */
 @API(apiVersion = CoFHLibProps.VERSION, owner = "CoFHLib", provides = "CoFHLib|world")
-package cofh.lib.world;
+package com.sparta.repackage.cofh.lib.world;
 
-import cofh.lib.CoFHLibProps;
+import com.sparta.repackage.cofh.lib.CoFHLibProps;
 
 import net.minecraftforge.fml.common.API;
 
