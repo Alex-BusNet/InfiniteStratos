@@ -3,7 +3,9 @@ package com.sparta.repackage.cofh.lib.util.helpers;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.sparta.is.reference.Textures;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDirectional;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,10 +13,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.*;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 /**
@@ -181,37 +181,42 @@ public final class BlockHelper {
 		return ForgeDirection.VALID_DIRECTIONS[getMicroBlockAngle(side.ordinal(), hitX, hitY, hitZ)];
 	}
 
-	public static int getHighestY(World world, int x, int z) {
+	public static int getHighestY(World world, BlockPos blockPos) {
 
-		return world.getChunkFromBlockCoords(x, z).getTopFilledSegment() + 16;
+		return world.getChunkFromBlockCoords(blockPos).getTopFilledSegment() + 16;
 	}
 
-	public static int getSurfaceBlockY(World world, int x, int z) {
+	public static int getSurfaceBlockY(World world, BlockPos blockPos) {
 
-		int y = world.getChunkFromBlockCoords(x, z).getTopFilledSegment() + 16;
+		int y = world.getChunkFromBlockCoords(blockPos).getTopFilledSegment() + 16;
 
 		Block block;
 		do {
 			if (--y < 0) {
 				break;
 			}
-			block = world.getBlock(x, y, z);
-		} while (block.isAir(world, x, y, z) || block.isReplaceable(world, x, y, z) || block.isLeaves(world, x, y, z) || block.isFoliage(world, x, y, z)
-				|| block.canBeReplacedByLeaves(world, x, y, z));
+
+			blockPos.add(0, y, 0);
+			block = world.getBlockState(blockPos).getBlock();
+		} while (block.isAir(world, blockPos) || block.isReplaceable(world, blockPos) || block.isLeaves(world, blockPos) || block.isFoliage(world, blockPos)
+				|| block.canBeReplacedByLeaves(world, blockPos
+		));
 		return y;
 	}
 
-	public static int getTopBlockY(World world, int x, int z) {
+	public static int getTopBlockY(World world, BlockPos blockPos) {
 
-		int y = world.getChunkFromBlockCoords(x, z).getTopFilledSegment() + 16;
+		int y = world.getChunkFromBlockCoords(blockPos).getTopFilledSegment() + 16;
 
 		Block block;
 		do {
 			if (--y < 0) {
 				break;
 			}
-			block = world.getBlock(x, y, z);
-		} while (block.isAir(world, x, y, z));
+
+			blockPos.add(0, y, 0);
+			block = world.getBlockState(blockPos).getBlock();
+		} while (block.isAir(world, blockPos));
 		return y;
 	}
 
@@ -310,53 +315,49 @@ public final class BlockHelper {
 	// ForgeDirection.values()[side]);
 	// }
 
-	public static Block getAdjacentBlock(World world, int x, int y, int z, ForgeDirection dir) {
+	public static Block getAdjacentBlock(World world, BlockPos blockPos, EnumFacing dir) {
 
-		x += dir.offsetX;
-		y += dir.offsetY;
-		z += dir.offsetZ;
-		return world == null || !world.blockExists(x, y, z) ? Blocks.air : world.getBlock(x, y, z);
+		blockPos.add(dir.getFrontOffsetX(), dir.getFrontOffsetY(), dir.getFrontOffsetZ());
+		return world == null || world.isAirBlock(blockPos) ? Blocks.air : world.getBlockState(blockPos).getBlock();
 	}
 
-	public static Block getAdjacentBlock(World world, int x, int y, int z, int side) {
+	public static Block getAdjacentBlock(World world, BlockPos blockPos, int side) {
 
-		return world == null ? Blocks.air : getAdjacentBlock(world, x, y, z, ForgeDirection.getOrientation(side));
+		return world == null ? Blocks.air : getAdjacentBlock(world, blockPos, EnumFacing.getFront(side));
 	}
 
 	/* Safe Tile Entity Retrieval */
-	public static TileEntity getAdjacentTileEntity(World world, int x, int y, int z, ForgeDirection dir) {
+	public static TileEntity getAdjacentTileEntity(World world, BlockPos blockPos, EnumFacing dir) {
 
-		x += dir.offsetX;
-		y += dir.offsetY;
-		z += dir.offsetZ;
-		return world == null || !world.blockExists(x, y, z) ? null : world.getTileEntity(x, y, z);
+		blockPos.add(dir.getFrontOffsetX(), dir.getFrontOffsetY(), dir.getFrontOffsetZ());
+		return world == null || !world.isAirBlock(blockPos) ? null : world.getTileEntity(blockPos);
 	}
 
-	public static TileEntity getAdjacentTileEntity(World world, int x, int y, int z, int side) {
+	public static TileEntity getAdjacentTileEntity(World world, BlockPos blockPos, int side) {
 
-		return world == null ? null : getAdjacentTileEntity(world, x, y, z, ForgeDirection.getOrientation(side));
+		return world == null ? null : getAdjacentTileEntity(world, blockPos, EnumFacing.getFront(side));
 	}
 
-	public static TileEntity getAdjacentTileEntity(TileEntity refTile, ForgeDirection dir) {
+	public static TileEntity getAdjacentTileEntity(TileEntity refTile, EnumFacing dir) {
 
-		return refTile == null ? null : getAdjacentTileEntity(refTile.getWorldObj(), refTile.xCoord, refTile.yCoord, refTile.zCoord, dir);
+		return refTile == null ? null : getAdjacentTileEntity(refTile.getWorld(), refTile.getPos(), dir);
 	}
 
 	public static TileEntity getAdjacentTileEntity(TileEntity refTile, int side) {
 
-		return refTile == null ? null : getAdjacentTileEntity(refTile.getWorldObj(), refTile.xCoord, refTile.yCoord, refTile.zCoord,
-				ForgeDirection.values()[side]);
+		return refTile == null ? null : getAdjacentTileEntity(refTile.getWorld(), refTile.getPos(),
+				EnumFacing.values()[side]);
 	}
 
-	public static int determineAdjacentSide(TileEntity refTile, int x, int y, int z) {
+	public static int determineAdjacentSide(TileEntity refTile, BlockPos blockPos) {
 
-		return y > refTile.yCoord ? 1 : y < refTile.yCoord ? 0 : z > refTile.zCoord ? 3 : z < refTile.zCoord ? 2 : x > refTile.xCoord ? 5 : 4;
+		return blockPos.getY() > refTile.getPos().getY() ? 1 : blockPos.getY() < refTile.getPos().getY() ? 0 : blockPos.getZ() > refTile.getPos().getZ() ? 3 : blockPos.getZ() < refTile.getPos().getZ() ? 2 : blockPos.getX() > refTile.getPos().getX() ? 5 : 4;
 	}
 
 	/* COORDINATE TRANSFORM */
 	public static int[] getAdjacentCoordinatesForSide(MovingObjectPosition pos) {
 
-		return getAdjacentCoordinatesForSide(pos.blockX, pos.blockY, pos.blockZ, pos.sideHit);
+		return getAdjacentCoordinatesForSide(pos.getBlockPos().getX(), pos.getBlockPos().getY(), pos.getBlockPos().getZ(), pos.sideHit.getIndex());
 	}
 
 	public static int[] getAdjacentCoordinatesForSide(int x, int y, int z, int side) {
@@ -366,12 +367,12 @@ public final class BlockHelper {
 
 	public static AxisAlignedBB getAdjacentAABBForSide(MovingObjectPosition pos) {
 
-		return getAdjacentAABBForSide(pos.blockX, pos.blockY, pos.blockZ, pos.sideHit);
+		return getAdjacentAABBForSide(pos.getBlockPos().getX(), pos.getBlockPos().getY(), pos.getBlockPos().getZ(), pos.sideHit.getIndex());
 	}
 
 	public static AxisAlignedBB getAdjacentAABBForSide(int x, int y, int z, int side) {
 
-		return AxisAlignedBB.getBoundingBox(x + SIDE_COORD_MOD[side][0], y + SIDE_COORD_MOD[side][1], z + SIDE_COORD_MOD[side][2],
+		return AxisAlignedBB.fromBounds(x + SIDE_COORD_MOD[side][0], y + SIDE_COORD_MOD[side][1], z + SIDE_COORD_MOD[side][2],
 				x + SIDE_COORD_AABB[side][0], y + SIDE_COORD_AABB[side][1], z + SIDE_COORD_AABB[side][2]);
 	}
 
@@ -530,32 +531,38 @@ public final class BlockHelper {
 		}
 	}
 
-	public static List<ItemStack> breakBlock(World worldObj, int x, int y, int z, Block block, int fortune, boolean doBreak, boolean silkTouch) {
+	public static List<ItemStack> breakBlock(World worldObj, BlockPos blockPos, int fortune, boolean doBreak, boolean silkTouch) {
 
-		return breakBlock(worldObj, null, x, y, z, block, fortune, doBreak, silkTouch);
+		return breakBlock(worldObj, null, blockPos, fortune, doBreak, silkTouch);
 	}
 
-	public static List<ItemStack> breakBlock(World worldObj, EntityPlayer player, int x, int y, int z, Block block, int fortune, boolean doBreak,
-			boolean silkTouch) {
+	public static List<ItemStack> breakBlock(World worldObj, EntityPlayer player, BlockPos blockPos, int fortune, boolean doBreak, boolean silkTouch)
+	{
+		Block block = worldObj.getBlockState(blockPos).getBlock();
 
-		if (block.getBlockHardness(worldObj, x, y, z) == -1) {
+		if (block.getBlockHardness(worldObj, blockPos) == -1)
+		{
 			return new LinkedList<ItemStack>();
 		}
-		int meta = worldObj.getBlockMetadata(x, y, z);
+		int meta = block.getMetaFromState(worldObj.getBlockState(blockPos));
+
 		List<ItemStack> stacks = null;
-		if (silkTouch && block.canSilkHarvest(worldObj, player, x, y, z, meta)) {
+
+		if (silkTouch && worldObj.getBlockState(blockPos).getBlock().canSilkHarvest(worldObj, blockPos, worldObj.getBlockState(blockPos), player))
+		{
 			stacks = new LinkedList<ItemStack>();
 			stacks.add(createStackedBlock(block, meta));
-		} else {
-			stacks = block.getDrops(worldObj, x, y, z, meta, fortune);
+		} else
+		{
+			stacks = block.getDrops(worldObj, blockPos, worldObj.getBlockState(blockPos), fortune);
 		}
 		if (!doBreak) {
 			return stacks;
 		}
-		worldObj.playAuxSFXAtEntity(player, 2001, x, y, z, Block.getIdFromBlock(block) + (meta << 12));
-		worldObj.setBlockToAir(x, y, z);
+		worldObj.playAuxSFXAtEntity(player, 2001, blockPos, Block.getIdFromBlock(block) + (meta << 12));
+		worldObj.setBlockToAir(blockPos);
 
-		List<EntityItem> result = worldObj.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.getBoundingBox(x - 2, y - 2, z - 2, x + 3, y + 3, z + 3));
+		List<EntityItem> result = worldObj.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.fromBounds(blockPos.getX() - 2, blockPos.getY() - 2, blockPos.getZ() - 2, blockPos.getX() + 3, blockPos.getY() + 3, blockPos.getZ() + 3));
 		for (int i = 0; i < result.size(); i++) {
 			EntityItem entity = result.get(i);
 			if (entity.isDead || entity.getEntityItem().stackSize <= 0) {
