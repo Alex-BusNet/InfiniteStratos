@@ -37,7 +37,7 @@ public class SecurityHelper {
 		if (setup) {
 			return;
 		}
-		EnumConnectionState.PLAY.func_150755_b().put(-26, Login.S__PacketSendUUID.class);
+//		EnumConnectionState.PLAY.func_150755_b().put(-26, Login.S__PacketSendUUID.class);
 		Map<Class<?>, EnumConnectionState> data;
 		data = ReflectionHelper.getPrivateValue(EnumConnectionState.class, null, "field_150761_f");
 		data.put(Login.S__PacketSendUUID.class, EnumConnectionState.PLAY);
@@ -215,7 +215,7 @@ public class SecurityHelper {
 			GameProfile temp = new GameProfile(uuid, name);
 			owner = MinecraftServer.getServer().func_147130_as().fillProfileProperties(temp, true);
 			if (owner != temp) {
-				MinecraftServer.getServer().func_152358_ax().func_152649_a(owner);
+				MinecraftServer.getServer().func_152358_ax().addEntry(owner);
 			}
 		}
 		return owner;

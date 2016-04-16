@@ -1,7 +1,8 @@
 package com.sparta.repackage.cofh.lib.render;
 
+import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.item.ItemStack;
-
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -10,7 +11,8 @@ import org.lwjgl.opengl.GL11;
  * @author King Lemming
  *
  */
-public class RenderItemAsBlock implements IItemRenderer {
+public class RenderItemAsBlock implements IItemRenderer
+{
 
 	public static RenderItemAsBlock instance = new RenderItemAsBlock();
 

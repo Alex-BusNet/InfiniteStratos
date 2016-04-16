@@ -1,11 +1,6 @@
 package com.sparta.repackage.cofh.lib.util.helpers;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import com.sparta.is.reference.Textures;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockDirectional;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,6 +11,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Contains various helper functions to assist with {@link Block} and Block-related manipulation and interaction.
@@ -176,9 +174,9 @@ public final class BlockHelper {
 		return direction;
 	}
 
-	public static ForgeDirection getMicroBlockAngle(ForgeDirection side, float hitX, float hitY, float hitZ) {
+	public static EnumFacing getMicroBlockAngle(EnumFacing side, float hitX, float hitY, float hitZ) {
 
-		return ForgeDirection.VALID_DIRECTIONS[getMicroBlockAngle(side.ordinal(), hitX, hitY, hitZ)];
+		return EnumFacing.VALUES[getMicroBlockAngle(side.ordinal(), hitX, hitY, hitZ)];
 	}
 
 	public static int getHighestY(World world, BlockPos blockPos) {
@@ -222,9 +220,9 @@ public final class BlockHelper {
 
 	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player, double distance, boolean fluid) {
 
-		Vec3 posVec = Vec3.createVectorHelper(player.posX, player.posY, player.posZ);
+		Vec3 posVec = new Vec3(player.posX, player.posY, player.posZ);
 		Vec3 lookVec = player.getLook(1);
-		posVec.yCoord += player.getEyeHeight();
+		posVec.addVector(0, player.getEyeHeight(), 0);
 		lookVec = posVec.addVector(lookVec.xCoord * distance, lookVec.yCoord * distance, lookVec.zCoord * distance);
 		return player.worldObj.rayTraceBlocks(posVec, lookVec, fluid);
 	}
@@ -247,7 +245,7 @@ public final class BlockHelper {
 	public static int getCurrentMousedOverSide(EntityPlayer player) {
 
 		MovingObjectPosition mouseOver = getCurrentMovingObjectPosition(player);
-		return mouseOver == null ? 0 : mouseOver.sideHit;
+		return mouseOver == null ? 0 : mouseOver.sideHit.ordinal();
 	}
 
 	public static int determineXZPlaceFacing(EntityLivingBase living) {
@@ -408,9 +406,9 @@ public final class BlockHelper {
 		return bId < MAX_ID ? rotateType[Block.getIdFromBlock(block)] != 0 : false;
 	}
 
-	public static int rotateVanillaBlock(World world, Block block, int x, int y, int z) {
+	public static int rotateVanillaBlock(World world, Block block, BlockPos blockPos) {
 
-		int bId = Block.getIdFromBlock(block), bMeta = world.getBlockMetadata(x, y, z);
+		int bId = Block.getIdFromBlock(block), bMeta = world.getBlockState(blockPos).getBlock().getMetaFromState(world.getBlockState(blockPos));
 		switch (rotateType[bId]) {
 		case RotationType.FOUR_WAY:
 			return SIDE_LEFT[bMeta];
@@ -439,9 +437,10 @@ public final class BlockHelper {
 		case RotationType.CHEST:
 			int coords[] = new int[3];
 			for (int i = 2; i < 6; i++) {
-				coords = getAdjacentCoordinatesForSide(x, y, z, i);
-				if (isEqual(world.getBlock(coords[0], coords[1], coords[2]), block)) {
-					world.setBlockMetadataWithNotify(coords[0], coords[1], coords[2], SIDE_OPPOSITE[bMeta], 1);
+				coords = getAdjacentCoordinatesForSide(blockPos.getX(), blockPos.getY(), blockPos.getZ(), i);
+				BlockPos coordPos = new BlockPos(coords[0], coords[1], coords[2]);
+				if (isEqual(world.getBlockState(coordPos).getBlock(), block)) {
+					world.setBlockState(coordPos, world.getBlockState(coordPos).getBlock().getStateFromMeta(bMeta), 1);
 					return SIDE_OPPOSITE[bMeta];
 				}
 			}
@@ -470,9 +469,9 @@ public final class BlockHelper {
 		}
 	}
 
-	public static int rotateVanillaBlockAlt(World world, Block block, int x, int y, int z) {
+	public static int rotateVanillaBlockAlt(World world, Block block, BlockPos blockPos) {
 
-		int bId = Block.getIdFromBlock(block), bMeta = world.getBlockMetadata(x, y, z);
+		int bId = Block.getIdFromBlock(block), bMeta = world.getBlockState(blockPos).getBlock().getMetaFromState(world.getBlockState(blockPos));;
 		switch (rotateType[bId]) {
 		case RotationType.FOUR_WAY:
 			return SIDE_RIGHT[bMeta];
@@ -501,9 +500,10 @@ public final class BlockHelper {
 		case RotationType.CHEST:
 			int coords[] = new int[3];
 			for (int i = 2; i < 6; i++) {
-				coords = getAdjacentCoordinatesForSide(x, y, z, i);
-				if (isEqual(world.getBlock(coords[0], coords[1], coords[2]), block)) {
-					world.setBlockMetadataWithNotify(coords[0], coords[1], coords[2], SIDE_OPPOSITE[bMeta], 1);
+				coords = getAdjacentCoordinatesForSide(blockPos.getX(), blockPos.getY(), blockPos.getZ(), i);
+				BlockPos coordPos = new BlockPos(coords[0], coords[1], coords[2]);
+				if (isEqual(world.getBlockState(coordPos).getBlock(), block)) {
+					world.setBlockState(coordPos, world.getBlockState(coordPos).getBlock().getStateFromMeta(bMeta), 1);
 					return SIDE_OPPOSITE[bMeta];
 				}
 			}

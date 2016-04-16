@@ -5,11 +5,11 @@ import com.sparta.repackage.cofh.api.energy.IEnergyContainerItem;
 import com.sparta.repackage.cofh.api.energy.IEnergyProvider;
 import com.sparta.repackage.cofh.api.energy.IEnergyReceiver;
 
-import net.minecraft.block.state.pattern.BlockHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 
 import java.util.List;
 
@@ -89,24 +89,24 @@ public class EnergyHelper {
 
         TileEntity handler = BlockHelper.getAdjacentTileEntity(tile, side);
 
-        return handler instanceof IEnergyProvider ? ((IEnergyProvider) handler).extractEnergy(ForgeDirection.VALID_DIRECTIONS[side ^ 1], energy, simulate) : 0;
+        return handler instanceof IEnergyProvider ? ((IEnergyProvider) handler).extractEnergy(EnumFacing.VALUES[side ^ 1], energy, simulate) : 0;
     }
 
     public static int insertEnergyIntoAdjacentEnergyReceiver(TileEntity tile, int side, int energy, boolean simulate) {
 
         TileEntity handler = BlockHelper.getAdjacentTileEntity(tile, side);
 
-        return handler instanceof IEnergyReceiver ? ((IEnergyReceiver) handler).receiveEnergy(ForgeDirection.VALID_DIRECTIONS[side ^ 1], energy, simulate) : 0;
+        return handler instanceof IEnergyReceiver ? ((IEnergyReceiver) handler).receiveEnergy(EnumFacing.VALUES[side ^ 1], energy, simulate) : 0;
     }
 
     public static boolean isAdjacentEnergyConnectableFromSide(TileEntity tile, int side) {
 
         TileEntity handler = BlockHelper.getAdjacentTileEntity(tile, side);
 
-        return isEnergyConnectableFromSide(handler, ForgeDirection.VALID_DIRECTIONS[side ^ 1]);
+        return isEnergyConnectableFromSide(handler, EnumFacing.VALUES[side ^ 1]);
     }
 
-    public static boolean isEnergyConnectableFromSide(TileEntity tile, ForgeDirection from) {
+    public static boolean isEnergyConnectableFromSide(TileEntity tile, EnumFacing from) {
 
         return tile instanceof IEnergyConnection ? ((IEnergyConnection) tile).canConnectEnergy(from) : false;
     }
@@ -115,10 +115,10 @@ public class EnergyHelper {
 
         TileEntity handler = BlockHelper.getAdjacentTileEntity(tile, side);
 
-        return isEnergyReceiverFromSide(handler, ForgeDirection.VALID_DIRECTIONS[side ^ 1]);
+        return isEnergyReceiverFromSide(handler, EnumFacing.VALUES[side ^ 1]);
     }
 
-    public static boolean isEnergyReceiverFromSide(TileEntity tile, ForgeDirection from) {
+    public static boolean isEnergyReceiverFromSide(TileEntity tile, EnumFacing from) {
 
         return tile instanceof IEnergyReceiver ? ((IEnergyReceiver) tile).canConnectEnergy(from) : false;
     }
@@ -127,10 +127,10 @@ public class EnergyHelper {
 
         TileEntity handler = BlockHelper.getAdjacentTileEntity(tile, side);
 
-        return isEnergyProviderFromSide(handler, ForgeDirection.VALID_DIRECTIONS[side ^ 1]);
+        return isEnergyProviderFromSide(handler, EnumFacing.VALUES[side ^ 1]);
     }
 
-    public static boolean isEnergyProviderFromSide(TileEntity tile, ForgeDirection from) {
+    public static boolean isEnergyProviderFromSide(TileEntity tile, EnumFacing from) {
 
         return tile instanceof IEnergyProvider ? ((IEnergyProvider) tile).canConnectEnergy(from) : false;
     }

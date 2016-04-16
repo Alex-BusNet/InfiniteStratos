@@ -3,9 +3,10 @@
  * http://www.teamcofh.com
  */
 @API(apiVersion = CoFHAPIProps.VERSION, owner = "CoFHAPI", provides = "CoFHAPI|modhelpers")
-package cofh.api.modhelpers;
+package com.sparta.repackage.cofh.api.modhelpers;
 
-import cofh.api.CoFHAPIProps;
-
+import com.sparta.repackage.cofh.api.CoFHAPIProps;
 import net.minecraftforge.fml.common.API;
+
+
 

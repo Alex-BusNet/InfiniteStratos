@@ -5,7 +5,7 @@ import com.sparta.is.reference.Textures;
 import com.sparta.is.tileentity.TileEntityUnitStand;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import org.lwjgl.opengl.GL11;
 
 public class TileEntityRendererUnitStand extends TileEntitySpecialRenderer
@@ -13,12 +13,12 @@ public class TileEntityRendererUnitStand extends TileEntitySpecialRenderer
     private final ModelUnitStand modelUnitStand = new ModelUnitStand();
 
     @Override
-    public void renderTileEntityAt(TileEntity tileEntity, double x, double y, double z, float tick)
+    public void renderTileEntityAt(TileEntity tileEntity, double x, double y, double z, float tick, int stage)
     {
         if(tileEntity instanceof TileEntityUnitStand)
         {
             TileEntityUnitStand tileEntityUnitStand = (TileEntityUnitStand) tileEntity;
-            ForgeDirection direction = tileEntityUnitStand.getOrientation();
+            EnumFacing direction = tileEntityUnitStand.getOrientation();
 
             GL11.glPushMatrix();
 
@@ -35,27 +35,27 @@ public class TileEntityRendererUnitStand extends TileEntitySpecialRenderer
         }
     }
 
-    private void scaleTranslateRotate(double x, double y, double z, ForgeDirection orientation)
+    private void scaleTranslateRotate(double x, double y, double z, EnumFacing orientation)
     {
-        if (orientation == ForgeDirection.NORTH)
+        if (orientation == EnumFacing.NORTH)
         {
             GL11.glTranslated(x + 0.4d, y, z + 0.5d);//y + 0.42d
             GL11.glScalef(0.25F, 0.27F, 0.25F);
             GL11.glRotatef(180, 0.0F, 1.0F, 0.0F);
         }
-        else if (orientation == ForgeDirection.EAST)
+        else if (orientation == EnumFacing.EAST)
         {
             GL11.glTranslated(x + 0.5d, y, z + 0.4d);
             GL11.glScalef(0.25F, 0.27F, 0.25F);
             GL11.glRotatef(90, 0.0F, 1.0F, 0.0F);
         }
-        else if (orientation == ForgeDirection.SOUTH)
+        else if (orientation == EnumFacing.SOUTH)
         {
             GL11.glTranslated(x + 0.6d, y, z + 0.5d);
             GL11.glScalef(0.25F, 0.27F, 0.25F);
             GL11.glRotatef(0, 0.0F, 1.0F, 0.0F);
         }
-        else if (orientation == ForgeDirection.WEST)
+        else if (orientation == EnumFacing.WEST)
         {
             GL11.glTranslated(x + 0.5d, y, z + 0.6d);
             GL11.glScalef(0.25F, 0.27F, 0.25F);
