@@ -1,15 +1,9 @@
 package com.sparta.repackage.cofh.lib.util.helpers;
 
-import com.sparta.repackage.cofh.api.tileentity.ISecurable;
-import com.sparta.repackage.cofh.api.tileentity.ISecurable.AccessMode;
 import com.google.common.base.Strings;
 import com.mojang.authlib.GameProfile;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
+import com.sparta.repackage.cofh.api.tileentity.ISecurable;
+import com.sparta.repackage.cofh.api.tileentity.ISecurable.AccessMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -26,6 +20,11 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class SecurityHelper {
 
@@ -202,7 +201,7 @@ public class SecurityHelper {
 			if (!Strings.isNullOrEmpty(uuid)) {
 				return new GameProfile(UUID.fromString(uuid), name);
 			} else if (!Strings.isNullOrEmpty(name)) {
-				return new GameProfile(UUID.fromString(PreYggdrasilConverter.func_152719_a(name)), name);
+				return new GameProfile(UUID.fromString(PreYggdrasilConverter.getStringUUIDFromName(name)), name);
 			}
 		}
 		return UNKNOWN_GAME_PROFILE;
@@ -210,12 +209,12 @@ public class SecurityHelper {
 
 	public static GameProfile getProfile(UUID uuid, String name) {
 
-		GameProfile owner = MinecraftServer.getServer().func_152358_ax().func_152652_a(uuid);
+		GameProfile owner = MinecraftServer.getServer().getPlayerProfileCache().getProfileByUUID(uuid);
 		if (owner == null) {
 			GameProfile temp = new GameProfile(uuid, name);
-			owner = MinecraftServer.getServer().func_147130_as().fillProfileProperties(temp, true);
+			owner = MinecraftServer.getServer().getMinecraftSessionService().fillProfileProperties(temp, true);
 			if (owner != temp) {
-				MinecraftServer.getServer().func_152358_ax().addEntry(owner);
+				MinecraftServer.getServer().getPlayerProfileCache().addEntry(owner);
 			}
 		}
 		return owner;
@@ -234,7 +233,8 @@ public class SecurityHelper {
 	// this class is to avoid an illegal access error from FML's event handler
 	private static class Login {
 
-		public static class S__PacketSendUUID extends Packet {
+		public static class S__PacketSendUUID implements Packet
+		{
 
 			@SubscribeEvent
 			public void login(PlayerLoggedInEvent evt) {
@@ -266,11 +266,11 @@ public class SecurityHelper {
 				buffer.writeLong(id.getLeastSignificantBits());
 			}
 
-			@Override
-			public boolean hasPriority() {
-
-				return true;
-			}
+//			@Override
+//			public boolean hasPriority() {
+//
+//				return true;
+//			}
 
 			@Override
 			public void processPacket(INetHandler p_148833_1_) {

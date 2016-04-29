@@ -5,13 +5,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Multimap;
 
-import java.awt.image.BufferedImage;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import javax.imageio.ImageIO;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.Item;
 import net.minecraft.util.RegistryNamespaced;
@@ -22,7 +15,15 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.RegistryDelegate;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class RegistryUtils {
 
@@ -40,7 +41,7 @@ public class RegistryUtils {
 
 			int id = registry.getIDForObject(oldThing);
 			BiMap map = ((BiMap) registry.registryObjects);
-			registry.underlyingIntegerMap.func_148746_a(object, id);
+			registry.underlyingIntegerMap.put(object, id);
 			map.remove(name);
 			map.forcePut(name, object);
 		}
