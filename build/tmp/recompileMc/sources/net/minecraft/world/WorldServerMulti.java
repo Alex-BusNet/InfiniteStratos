@@ -10,7 +10,7 @@ import net.minecraft.world.storage.ISaveHandler;
 
 public class WorldServerMulti extends WorldServer
 {
-    private WorldServer delegate;
+    private final WorldServer delegate;
     private IBorderListener borderListener;
 
     public WorldServerMulti(MinecraftServer server, ISaveHandler saveHandlerIn, int dimensionId, WorldServer delegate, Profiler profilerIn)
@@ -63,8 +63,9 @@ public class WorldServerMulti extends WorldServer
     {
         this.mapStorage = this.delegate.getMapStorage();
         this.worldScoreboard = this.delegate.getScoreboard();
+        this.lootTable = this.delegate.getLootTableManager();
         String s = VillageCollection.fileNameForProvider(this.provider);
-        VillageCollection villagecollection = (VillageCollection)this.perWorldStorage.loadData(VillageCollection.class, s);
+        VillageCollection villagecollection = (VillageCollection)this.perWorldStorage.getOrLoadData(VillageCollection.class, s);
 
         if (villagecollection == null)
         {
@@ -77,6 +78,7 @@ public class WorldServerMulti extends WorldServer
             this.villageCollectionObj.setWorldsForAll(this);
         }
 
+        this.initCapabilities();
         return this;
     }
 
@@ -89,5 +91,14 @@ public class WorldServerMulti extends WorldServer
     {
         super.flush();
         this.delegate.getWorldBorder().removeListener(this.borderListener); // Unlink ourselves, to prevent world leak.
+    }
+
+    /**
+     * Called during saving of a world to give children worlds a chance to save additional data. Only used to save
+     * WorldProviderEnd's data in Vanilla.
+     */
+    public void saveAdditionalData()
+    {
+        this.provider.onWorldSave();
     }
 }

@@ -1,15 +1,19 @@
 package net.minecraft.command.server;
 
-import net.minecraft.command.*;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IChatComponent;
-
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.Nullable;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.PlayerNotFoundException;
+import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 
 public class CommandMessage extends CommandBase
 {
@@ -36,8 +40,6 @@ public class CommandMessage extends CommandBase
 
     /**
      * Gets the usage string for the command.
-     *  
-     * @param sender The command sender that executed the command
      */
     public String getCommandUsage(ICommandSender sender)
     {
@@ -45,12 +47,9 @@ public class CommandMessage extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
-     *  
-     * @param sender The command sender that executed the command
-     * @param args The arguments that were passed
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 2)
         {
@@ -58,7 +57,7 @@ public class CommandMessage extends CommandBase
         }
         else
         {
-            EntityPlayer entityplayer = getPlayer(sender, args[0]);
+            EntityPlayer entityplayer = getPlayer(server, sender, args[0]);
 
             if (entityplayer == sender)
             {
@@ -66,30 +65,28 @@ public class CommandMessage extends CommandBase
             }
             else
             {
-                IChatComponent ichatcomponent = getChatComponentFromNthArg(sender, args, 1, !(sender instanceof EntityPlayer));
-                ChatComponentTranslation chatcomponenttranslation = new ChatComponentTranslation("commands.message.display.incoming", new Object[] {sender.getDisplayName(), ichatcomponent.createCopy()});
-                ChatComponentTranslation chatcomponenttranslation1 = new ChatComponentTranslation("commands.message.display.outgoing", new Object[] {entityplayer.getDisplayName(), ichatcomponent.createCopy()});
-                chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.GRAY).setItalic(Boolean.valueOf(true));
-                chatcomponenttranslation1.getChatStyle().setColor(EnumChatFormatting.GRAY).setItalic(Boolean.valueOf(true));
-                entityplayer.addChatMessage(chatcomponenttranslation);
-                sender.addChatMessage(chatcomponenttranslation1);
+                ITextComponent itextcomponent = getChatComponentFromNthArg(sender, args, 1, !(sender instanceof EntityPlayer));
+                TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("commands.message.display.incoming", new Object[] {sender.getDisplayName(), itextcomponent.createCopy()});
+                TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.message.display.outgoing", new Object[] {entityplayer.getDisplayName(), itextcomponent.createCopy()});
+                textcomponenttranslation.getStyle().setColor(TextFormatting.GRAY).setItalic(Boolean.valueOf(true));
+                textcomponenttranslation1.getStyle().setColor(TextFormatting.GRAY).setItalic(Boolean.valueOf(true));
+                entityplayer.addChatMessage(textcomponenttranslation);
+                sender.addChatMessage(textcomponenttranslation1);
             }
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
         /**
          * Returns a List of strings (chosen from the given strings) which the last word in the given string array is a
          * beginning-match for. (Tab completion).
          */
-        return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
+        return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
     }
 
     /**
      * Return whether the specified command parameter index is a username parameter.
-     *  
-     * @param args The arguments that were passed
      */
     public boolean isUsernameIndex(String[] args, int index)
     {

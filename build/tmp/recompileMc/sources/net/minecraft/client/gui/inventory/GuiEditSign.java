@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.inventory;
 
+import java.io.IOException;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -8,21 +9,19 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Blocks;
-import net.minecraft.network.play.client.C12PacketUpdateSign;
+import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatAllowedCharacters;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
-
-import java.io.IOException;
 
 @SideOnly(Side.CLIENT)
 public class GuiEditSign extends GuiScreen
 {
     /** Reference to the sign object. */
-    private TileEntitySign tileSign;
+    private final TileEntitySign tileSign;
     /** Counts the number of screen updates. */
     private int updateCounter;
     /** The index of the line that is being edited. */
@@ -43,7 +42,7 @@ public class GuiEditSign extends GuiScreen
     {
         this.buttonList.clear();
         Keyboard.enableRepeatEvents(true);
-        this.buttonList.add(this.doneBtn = new GuiButton(0, this.width / 2 - 100, this.height / 4 + 120, I18n.format("gui.done", new Object[0])));
+        this.doneBtn = this.func_189646_b(new GuiButton(0, this.width / 2 - 100, this.height / 4 + 120, I18n.format("gui.done", new Object[0])));
         this.tileSign.setEditable(false);
     }
 
@@ -53,11 +52,11 @@ public class GuiEditSign extends GuiScreen
     public void onGuiClosed()
     {
         Keyboard.enableRepeatEvents(false);
-        NetHandlerPlayClient nethandlerplayclient = this.mc.getNetHandler();
+        NetHandlerPlayClient nethandlerplayclient = this.mc.getConnection();
 
         if (nethandlerplayclient != null)
         {
-            nethandlerplayclient.addToSendQueue(new C12PacketUpdateSign(this.tileSign.getPos(), this.tileSign.signText));
+            nethandlerplayclient.sendPacket(new CPacketUpdateSign(this.tileSign.getPos(), this.tileSign.signText));
         }
 
         this.tileSign.setEditable(true);
@@ -104,7 +103,7 @@ public class GuiEditSign extends GuiScreen
 
         String s = this.tileSign.signText[this.editLine].getUnformattedText();
 
-        if (keyCode == 14 && s.length() > 0)
+        if (keyCode == 14 && !s.isEmpty())
         {
             s = s.substring(0, s.length() - 1);
         }
@@ -114,7 +113,7 @@ public class GuiEditSign extends GuiScreen
             s = s + typedChar;
         }
 
-        this.tileSign.signText[this.editLine] = new ChatComponentText(s);
+        this.tileSign.signText[this.editLine] = new TextComponentString(s);
 
         if (keyCode == 1)
         {
@@ -123,7 +122,7 @@ public class GuiEditSign extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
@@ -133,11 +132,11 @@ public class GuiEditSign extends GuiScreen
         GlStateManager.pushMatrix();
         GlStateManager.translate((float)(this.width / 2), 0.0F, 50.0F);
         float f = 93.75F;
-        GlStateManager.scale(-f, -f, -f);
+        GlStateManager.scale(-93.75F, -93.75F, -93.75F);
         GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
         Block block = this.tileSign.getBlockType();
 
-        if (block == Blocks.standing_sign)
+        if (block == Blocks.STANDING_SIGN)
         {
             float f1 = (float)(this.tileSign.getBlockMetadata() * 360) / 16.0F;
             GlStateManager.rotate(f1, 0.0F, 1.0F, 0.0F);

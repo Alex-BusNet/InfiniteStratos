@@ -1,3 +1,22 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.network.handshake;
 
 import io.netty.buffer.Unpooled;
@@ -9,27 +28,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.*;
-import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraft.network.play.client.C17PacketCustomPayload;
-import net.minecraft.network.play.server.S01PacketJoinGame;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
-import net.minecraft.network.play.server.S40PacketDisconnect;
-import net.minecraft.server.management.ServerConfigurationManager;
-import net.minecraft.util.ChatComponentText;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.common.network.*;
-import net.minecraftforge.fml.common.network.internal.FMLMessage;
-import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
-import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
-import net.minecraftforge.fml.common.registry.PersistentRegistryManager;
-import net.minecraftforge.fml.relauncher.Side;
-import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -39,8 +37,40 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-@SuppressWarnings("rawtypes")
-public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> implements ChannelOutboundHandler {
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.EnumConnectionState;
+import net.minecraft.network.INetHandler;
+import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketJoinGame;
+import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketDisconnect;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkException;
+import net.minecraftforge.fml.common.network.FMLOutboundHandler;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.PacketLoggingHandler;
+import net.minecraftforge.fml.common.network.internal.FMLMessage;
+import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
+import net.minecraftforge.fml.common.registry.PersistentRegistryManager;
+import net.minecraftforge.fml.relauncher.Side;
+
+import org.apache.logging.log4j.Level;
+
+// TODO build test suites to validate the behaviour of this stuff and make it less annoyingly magical
+public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet<?>> implements ChannelOutboundHandler {
     private static boolean DEBUG_HANDSHAKE = Boolean.parseBoolean(System.getProperty("fml.debugNetworkHandshake", "false"));
     private static enum ConnectionState {
         OPENING, AWAITING_HANDSHAKE, HANDSHAKING, HANDSHAKECOMPLETE, FINALIZING, CONNECTED;
@@ -62,7 +92,7 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
         return net;
     }
 
-    public static NetworkDispatcher allocAndSet(NetworkManager manager, ServerConfigurationManager scm)
+    public static NetworkDispatcher allocAndSet(NetworkManager manager, PlayerList scm)
     {
         NetworkDispatcher net = new NetworkDispatcher(manager, scm);
         manager.channel().attr(FML_DISPATCHER).getAndSet(net);
@@ -73,7 +103,7 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
     public static final AttributeKey<Boolean> IS_LOCAL = AttributeKey.valueOf("fml:isLocal");
     public static final AttributeKey<PersistentRegistryManager.GameDataSnapshot> FML_GAMEDATA_SNAPSHOT = AttributeKey.valueOf("fml:gameDataSnapshot");
     public final NetworkManager manager;
-    private final ServerConfigurationManager scm;
+    private final PlayerList scm;
     private EntityPlayerMP player;
     private ConnectionState state;
     private ConnectionType connectionType;
@@ -86,7 +116,7 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
 
     public NetworkDispatcher(NetworkManager manager)
     {
-        super(Packet.class, false);
+        super(false);
         this.manager = manager;
         this.scm = null;
         this.side = Side.CLIENT;
@@ -99,9 +129,9 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
             PacketLoggingHandler.register(manager);
     }
 
-    public NetworkDispatcher(NetworkManager manager, ServerConfigurationManager scm)
+    public NetworkDispatcher(NetworkManager manager, PlayerList scm)
     {
-        super(Packet.class, false);
+        super(false);
         this.manager = manager;
         this.scm = scm;
         this.side = Side.SERVER;
@@ -117,12 +147,12 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
     public void serverToClientHandshake(EntityPlayerMP player)
     {
         this.player = player;
-        insertIntoChannel();
         Boolean fml = this.manager.channel().attr(NetworkRegistry.FML_MARKER).get();
-        if (fml != null && fml.booleanValue())
+        if (fml != null && fml)
         {
             //FML on client, send server hello
             //TODO: Make this cleaner as it uses netty magic 0.o
+            insertIntoChannel();
         }
         else
         {
@@ -181,12 +211,14 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
                 {
                     completeServerSideConnection(ConnectionType.MODDED);
                 }
+                // FORGE: sometimes the netqueue will tick while login is occurring, causing an NPE. We shouldn't tick until the connection is complete
+                if (this.playerEntity.connection != this) return;
                 super.update();
             }
         };
         this.netHandler = serverHandler;
         // NULL the play server here - we restore it further on. If not, there are packets sent before the login
-        player.playerNetServerHandler = null;
+        player.connection = null;
         // manually for the manager into the PLAY state, so we can send packets later
         this.manager.setConnectionState(EnumConnectionState.PLAY);
 
@@ -198,7 +230,7 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
             int dimension = playerNBT.getInteger("Dimension");
             if (DimensionManager.isDimensionRegistered(dimension))
             {
-        	    return dimension;
+                return dimension;
             }
         }
         return 0;
@@ -227,21 +259,21 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
         this.state = ConnectionState.CONNECTED;
         MinecraftForge.EVENT_BUS.post(new FMLNetworkEvent.ServerConnectionFromClientEvent(manager));
         if (DEBUG_HANDSHAKE)
-            manager.closeChannel(new ChatComponentText("Handshake Complete review log file for details."));
+            manager.closeChannel(new TextComponentString("Handshake Complete review log file for details."));
         scm.initializeConnectionToPlayer(manager, player, serverHandler);
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception
+    protected void channelRead0(ChannelHandlerContext ctx, Packet<?> msg) throws Exception
     {
         boolean handled = false;
-        if (msg instanceof C17PacketCustomPayload)
+        if (msg instanceof CPacketCustomPayload)
         {
-            handled = handleServerSideCustomPacket((C17PacketCustomPayload) msg, ctx);
+            handled = handleServerSideCustomPacket((CPacketCustomPayload) msg, ctx);
         }
-        else if (msg instanceof S3FPacketCustomPayload)
+        else if (msg instanceof SPacketCustomPayload)
         {
-            handled = handleClientSideCustomPacket((S3FPacketCustomPayload)msg, ctx);
+            handled = handleClientSideCustomPacket((SPacketCustomPayload)msg, ctx);
         }
         else if (state != ConnectionState.CONNECTED && state != ConnectionState.HANDSHAKECOMPLETE)
         {
@@ -255,7 +287,7 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
 
     private boolean handleVanilla(Packet<?> msg)
     {
-        if (state == ConnectionState.AWAITING_HANDSHAKE && msg instanceof S01PacketJoinGame)
+        if (state == ConnectionState.AWAITING_HANDSHAKE && msg instanceof SPacketJoinGame)
         {
             handshakeChannel.pipeline().fireUserEventTriggered(msg);
         }
@@ -295,30 +327,30 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
     {
         kickWithMessage("This is modded. No modded response received. Bye!");
     }
-    @SuppressWarnings("unchecked")
-	private void kickWithMessage(String message)
+
+    private void kickWithMessage(String message)
     {
-        final ChatComponentText chatcomponenttext = new ChatComponentText(message);
+        final TextComponentString TextComponentString = new TextComponentString(message);
         if (side == Side.CLIENT)
         {
-            manager.closeChannel(chatcomponenttext);
+            manager.closeChannel(TextComponentString);
         }
         else
         {
-            manager.sendPacket(new S40PacketDisconnect(chatcomponenttext), new GenericFutureListener<Future<? super Void>>()
+            manager.sendPacket(new SPacketDisconnect(TextComponentString), new GenericFutureListener<Future<? super Void>>()
             {
                 @Override
                 public void operationComplete(Future<? super Void> result)
                 {
-                    manager.closeChannel(chatcomponenttext);
+                    manager.closeChannel(TextComponentString);
                 }
-            }, new GenericFutureListener[0]);
+            }, (GenericFutureListener<? extends Future<? super Void>>[])null);
         }
         manager.channel().config().setAutoRead(false);
     }
 
     private MultiPartCustomPayload multipart = null;
-    private boolean handleClientSideCustomPacket(S3FPacketCustomPayload msg, ChannelHandlerContext context)
+    private boolean handleClientSideCustomPacket(SPacketCustomPayload msg, ChannelHandlerContext context)
     {
         String channelName = msg.getChannelName();
         if ("FML|MP".equals(channelName))
@@ -381,7 +413,7 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
         return false;
     }
 
-    private boolean handleServerSideCustomPacket(C17PacketCustomPayload msg, ChannelHandlerContext context)
+    private boolean handleServerSideCustomPacket(CPacketCustomPayload msg, ChannelHandlerContext context)
     {
         if (state == ConnectionState.AWAITING_HANDSHAKE)
         {
@@ -449,11 +481,11 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
     {
         if (side == Side.CLIENT)
         {
-        	MinecraftForge.EVENT_BUS.post(new FMLNetworkEvent.ClientDisconnectionFromServerEvent(manager));
+            MinecraftForge.EVENT_BUS.post(new FMLNetworkEvent.ClientDisconnectionFromServerEvent(manager));
         }
         else
         {
-        	MinecraftForge.EVENT_BUS.post(new FMLNetworkEvent.ServerDisconnectionFromClientEvent(manager));
+            MinecraftForge.EVENT_BUS.post(new FMLNetworkEvent.ServerDisconnectionFromClientEvent(manager));
         }
         cleanAttributes(ctx);
         ctx.disconnect(promise);
@@ -468,7 +500,7 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
         }
         else
         {
-        	MinecraftForge.EVENT_BUS.post(new FMLNetworkEvent.ServerDisconnectionFromClientEvent(manager));
+            MinecraftForge.EVENT_BUS.post(new FMLNetworkEvent.ServerDisconnectionFromClientEvent(manager));
         }
         cleanAttributes(ctx);
         ctx.close(promise);
@@ -553,7 +585,15 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
         // Stop the epic channel closed spam at close
         if (!(cause instanceof ClosedChannelException))
         {
-            FMLLog.log(Level.ERROR, cause, "NetworkDispatcher exception");
+            // Mute the reset by peer exception - it's disconnection noise
+            if (cause.getMessage().contains("Connection reset by peer"))
+            {
+                FMLLog.log(Level.DEBUG, cause, "Muted NetworkDispatcher exception");
+            }
+            else
+            {
+                FMLLog.log(Level.ERROR, cause, "NetworkDispatcher exception");
+            }
         }
         super.exceptionCaught(ctx, cause);
     }
@@ -574,12 +614,12 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
         FMLLog.fine("Received override dimension %d", overrideDim);
     }
 
-    public int getOverrideDimension(S01PacketJoinGame packetIn) {
+    public int getOverrideDimension(SPacketJoinGame packetIn) {
         FMLLog.fine("Overriding dimension: using %d", this.overrideLoginDim);
         return this.overrideLoginDim != 0 ? this.overrideLoginDim : packetIn.getDimension();
     }
 
-    private class MultiPartCustomPayload extends S3FPacketCustomPayload
+    private class MultiPartCustomPayload extends SPacketCustomPayload
     {
         private String channel;
         private byte[] data;
@@ -603,7 +643,7 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet> imple
 
         public void processPart(PacketBuffer input) throws IOException
         {
-            int part = (int)(input.readByte() & 0xFF);
+            int part = input.readByte() & 0xFF;
             if (part != part_expected)
             {
                 throw new IOException("Received FML MultiPart packet out of order, Expected " + part_expected + " Got " + part);

@@ -1,16 +1,15 @@
 package net.minecraft.enchantment;
 
+import java.util.Random;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-
-import java.util.Random;
 
 public class EnchantmentDurability extends Enchantment
 {
-    protected EnchantmentDurability(int enchID, ResourceLocation enchName, int enchWeight)
+    protected EnchantmentDurability(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
     {
-        super(enchID, enchName, enchWeight, EnumEnchantmentType.BREAKABLE);
+        super(rarityIn, EnumEnchantmentType.BREAKABLE, slots);
         this.setName("durability");
     }
 

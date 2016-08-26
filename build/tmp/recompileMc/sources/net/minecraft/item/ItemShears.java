@@ -2,10 +2,11 @@ package net.minecraft.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class ItemShears extends Item
@@ -14,35 +15,32 @@ public class ItemShears extends Item
     {
         this.setMaxStackSize(1);
         this.setMaxDamage(238);
-        this.setCreativeTab(CreativeTabs.tabTools);
+        this.setCreativeTab(CreativeTabs.TOOLS);
     }
 
     /**
      * Called when a Block is destroyed using this Item. Return true to trigger the "Use Item" statistic.
      */
-    public boolean onBlockDestroyed(ItemStack stack, World worldIn, Block blockIn, BlockPos pos, EntityLivingBase playerIn)
+    public boolean onBlockDestroyed(ItemStack stack, World worldIn, IBlockState state, BlockPos pos, EntityLivingBase entityLiving)
     {
-        if (blockIn.getMaterial() != Material.leaves && blockIn != Blocks.web && blockIn != Blocks.tallgrass && blockIn != Blocks.vine && blockIn != Blocks.tripwire && blockIn != Blocks.wool && !(blockIn instanceof net.minecraftforge.common.IShearable))
-        {
-            return super.onBlockDestroyed(stack, worldIn, blockIn, pos, playerIn);
-        }
-        else
-        {
-            return true;
-        }
+        stack.damageItem(1, entityLiving);
+        Block block = state.getBlock();
+        return state.getMaterial() != Material.LEAVES && block != Blocks.WEB && block != Blocks.TALLGRASS && block != Blocks.VINE && block != Blocks.TRIPWIRE && block != Blocks.WOOL && !(state instanceof net.minecraftforge.common.IShearable) ? super.onBlockDestroyed(stack, worldIn, state, pos, entityLiving) : true;
     }
 
     /**
      * Check whether this Item can harvest the given Block
      */
-    public boolean canHarvestBlock(Block blockIn)
+    public boolean canHarvestBlock(IBlockState blockIn)
     {
-        return blockIn == Blocks.web || blockIn == Blocks.redstone_wire || blockIn == Blocks.tripwire;
+        Block block = blockIn.getBlock();
+        return block == Blocks.WEB || block == Blocks.REDSTONE_WIRE || block == Blocks.TRIPWIRE;
     }
 
-    public float getStrVsBlock(ItemStack stack, Block block)
+    public float getStrVsBlock(ItemStack stack, IBlockState state)
     {
-        return block != Blocks.web && block.getMaterial() != Material.leaves ? (block == Blocks.wool ? 5.0F : super.getStrVsBlock(stack, block)) : 15.0F;
+        Block block = state.getBlock();
+        return block != Blocks.WEB && state.getMaterial() != Material.LEAVES ? (block == Blocks.WOOL ? 5.0F : super.getStrVsBlock(stack, state)) : 15.0F;
     }
 
 
@@ -50,7 +48,7 @@ public class ItemShears extends Item
      * Returns true if the item can be used on the given entity, e.g. shears on sheep.
      */
     @Override
-    public boolean itemInteractionForEntity(ItemStack itemstack, net.minecraft.entity.player.EntityPlayer player, EntityLivingBase entity)
+    public boolean itemInteractionForEntity(ItemStack itemstack, net.minecraft.entity.player.EntityPlayer player, EntityLivingBase entity, net.minecraft.util.EnumHand hand)
     {
         if (entity.worldObj.isRemote)
         {
@@ -63,7 +61,7 @@ public class ItemShears extends Item
             if (target.isShearable(itemstack, entity.worldObj, pos))
             {
                 java.util.List<ItemStack> drops = target.onSheared(itemstack, entity.worldObj, pos,
-                        net.minecraft.enchantment.EnchantmentHelper.getEnchantmentLevel(net.minecraft.enchantment.Enchantment.fortune.effectId, itemstack));
+                        net.minecraft.enchantment.EnchantmentHelper.getEnchantmentLevel(net.minecraft.init.Enchantments.FORTUNE, itemstack));
 
                 java.util.Random rand = new java.util.Random();
                 for(ItemStack stack : drops)
@@ -94,7 +92,7 @@ public class ItemShears extends Item
             if (target.isShearable(itemstack, player.worldObj, pos))
             {
                 java.util.List<ItemStack> drops = target.onSheared(itemstack, player.worldObj, pos,
-                        net.minecraft.enchantment.EnchantmentHelper.getEnchantmentLevel(net.minecraft.enchantment.Enchantment.fortune.effectId, itemstack));
+                        net.minecraft.enchantment.EnchantmentHelper.getEnchantmentLevel(net.minecraft.init.Enchantments.FORTUNE, itemstack));
                 java.util.Random rand = new java.util.Random();
 
                 for(ItemStack stack : drops)
@@ -109,7 +107,7 @@ public class ItemShears extends Item
                 }
 
                 itemstack.damageItem(1, player);
-                player.addStat(net.minecraft.stats.StatList.mineBlockStatArray[Block.getIdFromBlock(block)], 1);
+                player.addStat(net.minecraft.stats.StatList.getBlockStats(block));
             }
         }
         return false;

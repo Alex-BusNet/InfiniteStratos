@@ -1,21 +1,45 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.eventhandler;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
-import com.google.common.collect.MapMaker;
-import com.google.common.reflect.TypeToken;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.ModContainer;
-import org.apache.logging.log4j.Level;
-
-import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.Nonnull;
+
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
+
+import org.apache.logging.log4j.Level;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Sets;
+import com.google.common.reflect.TypeToken;
 
 public class EventBus implements IEventExceptionHandler
 {
@@ -53,9 +77,16 @@ public class EventBus implements IEventExceptionHandler
             activeModContainer = Loader.instance().getMinecraftModContainer();
         }
         listenerOwners.put(target, activeModContainer);
-        Set<? extends Class<?>> supers = TypeToken.of(target.getClass()).getTypes().rawTypes();
-        for (Method method : target.getClass().getMethods())
+        boolean isStatic = target.getClass() == Class.class;
+        @SuppressWarnings("unchecked")
+        Set<? extends Class<?>> supers = isStatic ? Sets.newHashSet((Class<?>)target) : TypeToken.of(target.getClass()).getTypes().rawTypes();
+        for (Method method : (isStatic ? (Class<?>)target : target.getClass()).getMethods())
         {
+            if (isStatic && !Modifier.isStatic(method.getModifiers()))
+                continue;
+            else if (!isStatic && Modifier.isStatic(method.getModifiers()))
+                continue;
+
             for (Class<?> cls : supers)
             {
                 try

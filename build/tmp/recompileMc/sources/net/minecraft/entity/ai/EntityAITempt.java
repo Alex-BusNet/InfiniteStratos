@@ -1,5 +1,8 @@
 package net.minecraft.entity.ai;
 
+import com.google.common.collect.Sets;
+import java.util.Set;
+import javax.annotation.Nullable;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -9,8 +12,8 @@ import net.minecraft.pathfinding.PathNavigateGround;
 public class EntityAITempt extends EntityAIBase
 {
     /** The entity using this AI that is tempted by the player. */
-    private EntityCreature temptedEntity;
-    private double speed;
+    private final EntityCreature temptedEntity;
+    private final double speed;
     /** X position of player tempting this mob */
     private double targetX;
     /** Y position of player tempting this mob */
@@ -30,12 +33,16 @@ public class EntityAITempt extends EntityAIBase
     private int delayTemptCounter;
     /** True if this EntityAITempt task is running */
     private boolean isRunning;
-    private Item temptItem;
+    private final Set<Item> temptItem;
     /** Whether the entity using this AI will be scared by the tempter's sudden movement. */
-    private boolean scaredByPlayerMovement;
-    private boolean avoidWater;
+    private final boolean scaredByPlayerMovement;
 
     public EntityAITempt(EntityCreature temptedEntityIn, double speedIn, Item temptItemIn, boolean scaredByPlayerMovementIn)
+    {
+        this(temptedEntityIn, speedIn, scaredByPlayerMovementIn, Sets.newHashSet(new Item[] {temptItemIn}));
+    }
+
+    public EntityAITempt(EntityCreature temptedEntityIn, double speedIn, boolean scaredByPlayerMovementIn, Set<Item> temptItemIn)
     {
         this.temptedEntity = temptedEntityIn;
         this.speed = speedIn;
@@ -62,17 +69,13 @@ public class EntityAITempt extends EntityAIBase
         else
         {
             this.temptingPlayer = this.temptedEntity.worldObj.getClosestPlayerToEntity(this.temptedEntity, 10.0D);
-
-            if (this.temptingPlayer == null)
-            {
-                return false;
-            }
-            else
-            {
-                ItemStack itemstack = this.temptingPlayer.getCurrentEquippedItem();
-                return itemstack == null ? false : itemstack.getItem() == this.temptItem;
-            }
+            return this.temptingPlayer == null ? false : this.isTempting(this.temptingPlayer.getHeldItemMainhand()) || this.isTempting(this.temptingPlayer.getHeldItemOffhand());
         }
+    }
+
+    protected boolean isTempting(@Nullable ItemStack stack)
+    {
+        return stack == null ? false : this.temptItem.contains(stack.getItem());
     }
 
     /**
@@ -117,8 +120,6 @@ public class EntityAITempt extends EntityAIBase
         this.targetY = this.temptingPlayer.posY;
         this.targetZ = this.temptingPlayer.posZ;
         this.isRunning = true;
-        this.avoidWater = ((PathNavigateGround)this.temptedEntity.getNavigator()).getAvoidsWater();
-        ((PathNavigateGround)this.temptedEntity.getNavigator()).setAvoidsWater(false);
     }
 
     /**
@@ -130,7 +131,6 @@ public class EntityAITempt extends EntityAIBase
         this.temptedEntity.getNavigator().clearPathEntity();
         this.delayTemptCounter = 100;
         this.isRunning = false;
-        ((PathNavigateGround)this.temptedEntity.getNavigator()).setAvoidsWater(this.avoidWater);
     }
 
     /**
@@ -138,7 +138,7 @@ public class EntityAITempt extends EntityAIBase
      */
     public void updateTask()
     {
-        this.temptedEntity.getLookHelper().setLookPositionWithEntity(this.temptingPlayer, 30.0F, (float)this.temptedEntity.getVerticalFaceSpeed());
+        this.temptedEntity.getLookHelper().setLookPositionWithEntity(this.temptingPlayer, (float)(this.temptedEntity.getHorizontalFaceSpeed() + 20), (float)this.temptedEntity.getVerticalFaceSpeed());
 
         if (this.temptedEntity.getDistanceSqToEntity(this.temptingPlayer) < 6.25D)
         {

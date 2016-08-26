@@ -1,6 +1,9 @@
 package net.minecraft.command;
 
 import com.google.common.collect.Lists;
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -8,11 +11,10 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.List;
 
 public class CommandFill extends CommandBase
 {
@@ -34,8 +36,6 @@ public class CommandFill extends CommandBase
 
     /**
      * Gets the usage string for the command.
-     *  
-     * @param sender The command sender that executed the command
      */
     public String getCommandUsage(ICommandSender sender)
     {
@@ -43,12 +43,9 @@ public class CommandFill extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
-     *  
-     * @param sender The command sender that executed the command
-     * @param args The arguments that were passed
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 7)
         {
@@ -80,9 +77,9 @@ public class CommandFill extends CommandBase
             {
                 World world = sender.getEntityWorld();
 
-                for (int k = blockpos2.getZ(); k < blockpos3.getZ() + 16; k += 16)
+                for (int k = blockpos2.getZ(); k <= blockpos3.getZ(); k += 16)
                 {
-                    for (int l = blockpos2.getX(); l < blockpos3.getX() + 16; l += 16)
+                    for (int l = blockpos2.getX(); l <= blockpos3.getX(); l += 16)
                     {
                         if (!world.isBlockLoaded(new BlockPos(l, blockpos3.getY() - blockpos2.getY(), k)))
                         {
@@ -122,20 +119,20 @@ public class CommandFill extends CommandBase
 
                             if (args.length >= 9)
                             {
-                                if (!args[8].equals("outline") && !args[8].equals("hollow"))
+                                if (!"outline".equals(args[8]) && !"hollow".equals(args[8]))
                                 {
-                                    if (args[8].equals("destroy"))
+                                    if ("destroy".equals(args[8]))
                                     {
                                         world.destroyBlock(blockpos4, true);
                                     }
-                                    else if (args[8].equals("keep"))
+                                    else if ("keep".equals(args[8]))
                                     {
                                         if (!world.isAirBlock(blockpos4))
                                         {
                                             continue;
                                         }
                                     }
-                                    else if (args[8].equals("replace") && !block.hasTileEntity(state))
+                                    else if ("replace".equals(args[8]) && !block.hasTileEntity(state))
                                     {
                                         if (args.length > 9)
                                         {
@@ -161,9 +158,9 @@ public class CommandFill extends CommandBase
                                 }
                                 else if (k1 != blockpos2.getX() && k1 != blockpos3.getX() && j1 != blockpos2.getY() && j1 != blockpos3.getY() && i1 != blockpos2.getZ() && i1 != blockpos3.getZ())
                                 {
-                                    if (args[8].equals("hollow"))
+                                    if ("hollow".equals(args[8]))
                                     {
-                                        world.setBlockState(blockpos4, Blocks.air.getDefaultState(), 2);
+                                        world.setBlockState(blockpos4, Blocks.AIR.getDefaultState(), 2);
                                         list.add(blockpos4);
                                     }
 
@@ -180,7 +177,7 @@ public class CommandFill extends CommandBase
                                     ((IInventory)tileentity1).clear();
                                 }
 
-                                world.setBlockState(blockpos4, Blocks.barrier.getDefaultState(), block == Blocks.barrier ? 2 : 4);
+                                world.setBlockState(blockpos4, Blocks.BARRIER.getDefaultState(), block == Blocks.BARRIER ? 2 : 4);
                             }
 
                             IBlockState iblockstate1 = block.getStateFromMeta(i);
@@ -220,7 +217,7 @@ public class CommandFill extends CommandBase
                 else
                 {
                     sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, j);
-                    notifyOperators(sender, this, "commands.fill.success", new Object[] {Integer.valueOf(j)});
+                    notifyCommandListener(sender, this, "commands.fill.success", new Object[] {Integer.valueOf(j)});
                 }
             }
             else
@@ -230,8 +227,8 @@ public class CommandFill extends CommandBase
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length > 0 && args.length <= 3 ? func_175771_a(args, 0, pos) : (args.length > 3 && args.length <= 6 ? func_175771_a(args, 3, pos) : (args.length == 7 ? getListOfStringsMatchingLastWord(args, Block.blockRegistry.getKeys()) : (args.length == 9 ? getListOfStringsMatchingLastWord(args, new String[] {"replace", "destroy", "keep", "hollow", "outline"}): (args.length == 10 && "replace".equals(args[8]) ? getListOfStringsMatchingLastWord(args, Block.blockRegistry.getKeys()) : null))));
+        return args.length > 0 && args.length <= 3 ? getTabCompletionCoordinate(args, 0, pos) : (args.length > 3 && args.length <= 6 ? getTabCompletionCoordinate(args, 3, pos) : (args.length == 7 ? getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys()) : (args.length == 9 ? getListOfStringsMatchingLastWord(args, new String[] {"replace", "destroy", "keep", "hollow", "outline"}): (args.length == 10 && "replace".equals(args[8]) ? getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys()) : Collections.<String>emptyList()))));
     }
 }

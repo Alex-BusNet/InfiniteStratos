@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RConUtils
 {
     /** Translation array of decimal to hex digits */
-    public static final char[] hexDigits = new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    public static final char[] HEX_DIGITS = new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
     /**
      * Read a null-terminated string from the given byte array
@@ -58,6 +58,6 @@ public class RConUtils
      */
     public static String getByteAsHexString(byte input)
     {
-        return "" + hexDigits[(input & 240) >>> 4] + hexDigits[input & 15];
+        return "" + HEX_DIGITS[(input & 240) >>> 4] + HEX_DIGITS[input & 15];
     }
 }

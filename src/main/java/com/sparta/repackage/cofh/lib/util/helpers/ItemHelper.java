@@ -1,16 +1,9 @@
 package com.sparta.repackage.cofh.lib.util.helpers;
 
-import static net.minecraftforge.oredict.OreDictionary.WILDCARD_VALUE;
-
+import com.google.common.base.Strings;
 import com.sparta.repackage.cofh.api.item.IInventoryContainerItem;
 import com.sparta.repackage.cofh.api.item.IMultiModeItem;
 import com.sparta.repackage.cofh.lib.util.OreDictionaryProxy;
-import com.google.common.base.Strings;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -25,12 +18,17 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static net.minecraftforge.oredict.OreDictionary.WILDCARD_VALUE;
 
 /**
  * Contains various helper functions to assist with {@link Item} and {@link ItemStack} manipulation and interaction.
@@ -265,7 +263,7 @@ public final class ItemHelper {
 	 */
 	public static int getItemDamage(ItemStack stack) {
 
-		return Items.diamond.getDamage(stack);
+		return Items.DIAMOND.getDamage(stack);
 	}
 
 	/**
@@ -903,13 +901,13 @@ public final class ItemHelper {
 	/* MULTIMODE ITEM HELPERS */
 	public static boolean isPlayerHoldingMultiModeItem(EntityPlayer player) {
 
-		Item equipped = player.getCurrentEquippedItem() != null ? player.getCurrentEquippedItem().getItem() : null;
+		Item equipped = player.getHeldItemMainhand() != null ? player.getActiveItemStack().getItem() : null;
 		return equipped instanceof IMultiModeItem;
 	}
 
 	public static boolean incrHeldMultiModeItemState(EntityPlayer player) {
 
-		ItemStack equipped = player.getCurrentEquippedItem();
+		ItemStack equipped = player.getActiveItemStack();
 		IMultiModeItem multiModeItem = (IMultiModeItem) equipped.getItem();
 
 		return multiModeItem.incrMode(equipped);
@@ -917,7 +915,7 @@ public final class ItemHelper {
 
 	public static boolean decrHeldMultiModeItemState(EntityPlayer player) {
 
-		ItemStack equipped = player.getCurrentEquippedItem();
+		ItemStack equipped = player.getActiveItemStack();
 		IMultiModeItem multiModeItem = (IMultiModeItem) equipped.getItem();
 
 		return multiModeItem.incrMode(equipped);
@@ -925,23 +923,10 @@ public final class ItemHelper {
 
 	public static boolean setHeldMultiModeItemState(EntityPlayer player, int mode) {
 
-		ItemStack equipped = player.getCurrentEquippedItem();
+		ItemStack equipped = player.getActiveItemStack();
 		IMultiModeItem multiModeItem = (IMultiModeItem) equipped.getItem();
 
 		return multiModeItem.setMode(equipped, mode);
-	}
-
-	/**
-	 * Determine if a player is holding a registered Fluid Container.
-	 */
-	public static final boolean isPlayerHoldingFluidContainer(EntityPlayer player) {
-
-		return FluidContainerRegistry.isContainer(player.getCurrentEquippedItem());
-	}
-
-	public static final boolean isPlayerHoldingFluidContainerItem(EntityPlayer player) {
-
-		return FluidHelper.isPlayerHoldingFluidContainerItem(player);
 	}
 
 	public static final boolean isPlayerHoldingEnergyContainerItem(EntityPlayer player) {
@@ -951,7 +936,7 @@ public final class ItemHelper {
 
 	public static final boolean isPlayerHoldingNothing(EntityPlayer player) {
 
-		return player.getCurrentEquippedItem() == null;
+		return player.getHeldItemMainhand() == null;
 	}
 
 	public static Item getItemFromStack(ItemStack theStack) {
@@ -969,7 +954,7 @@ public final class ItemHelper {
 
 	public static final boolean isPlayerHoldingItem(Class<?> item, EntityPlayer player) {
 
-		return item.isInstance(getItemFromStack(player.getCurrentEquippedItem()));
+		return item.isInstance(getItemFromStack(player.getActiveItemStack()));
 	}
 
 	/**
@@ -977,7 +962,7 @@ public final class ItemHelper {
 	 */
 	public static final boolean isPlayerHoldingItem(Item item, EntityPlayer player) {
 
-		return areItemsEqual(item, getItemFromStack(player.getCurrentEquippedItem()));
+		return areItemsEqual(item, getItemFromStack(player.getActiveItemStack()));
 	}
 
 	/**
@@ -985,7 +970,7 @@ public final class ItemHelper {
 	 */
 	public static final boolean isPlayerHoldingItemStack(ItemStack stack, EntityPlayer player) {
 
-		return itemsEqualWithMetadata(stack, player.getCurrentEquippedItem());
+		return itemsEqualWithMetadata(stack, player.getActiveItemStack());
 	}
 
 	/**
@@ -1082,9 +1067,9 @@ public final class ItemHelper {
 	public static boolean isBlacklist(ItemStack output) {
 
 		Item item = output.getItem();
-		return Item.getItemFromBlock(Blocks.birch_stairs) == item || Item.getItemFromBlock(Blocks.jungle_stairs) == item
-				|| Item.getItemFromBlock(Blocks.oak_stairs) == item || Item.getItemFromBlock(Blocks.spruce_stairs) == item
-				|| Item.getItemFromBlock(Blocks.planks) == item || Item.getItemFromBlock(Blocks.wooden_slab) == item;
+		return Item.getItemFromBlock(Blocks.BIRCH_STAIRS) == item || Item.getItemFromBlock(Blocks.JUNGLE_STAIRS) == item
+				|| Item.getItemFromBlock(Blocks.OAK_STAIRS) == item || Item.getItemFromBlock(Blocks.SPRUCE_STAIRS) == item
+				|| Item.getItemFromBlock(Blocks.PLANKS) == item || Item.getItemFromBlock(Blocks.WOODEN_SLAB) == item;
 	}
 
 	public static String getItemNBTString(ItemStack theItem, String nbtKey, String invalidReturn) {

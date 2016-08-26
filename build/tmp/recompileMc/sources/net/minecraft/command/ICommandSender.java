@@ -1,9 +1,11 @@
 package net.minecraft.command;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.Vec3;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 
 public interface ICommandSender
@@ -16,12 +18,12 @@ public interface ICommandSender
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    IChatComponent getDisplayName();
+    ITextComponent getDisplayName();
 
     /**
      * Send a chat message to the CommandSender
      */
-    void addChatMessage(IChatComponent component);
+    void addChatMessage(ITextComponent component);
 
     /**
      * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
@@ -38,7 +40,7 @@ public interface ICommandSender
      * Get the position vector. <b>{@code null} is not allowed!</b> If you are not an entity in the world, return 0.0D,
      * 0.0D, 0.0D
      */
-    Vec3 getPositionVector();
+    Vec3d getPositionVector();
 
     /**
      * Get the world, if available. <b>{@code null} is not allowed!</b> If you are not an entity in the world, return
@@ -49,6 +51,7 @@ public interface ICommandSender
     /**
      * Returns the entity associated with the command sender. MAY BE NULL!
      */
+    @Nullable
     Entity getCommandSenderEntity();
 
     /**
@@ -57,4 +60,10 @@ public interface ICommandSender
     boolean sendCommandFeedback();
 
     void setCommandStat(CommandResultStats.Type type, int amount);
+
+    /**
+     * Get the Minecraft server instance
+     */
+    @Nullable
+    MinecraftServer getServer();
 }

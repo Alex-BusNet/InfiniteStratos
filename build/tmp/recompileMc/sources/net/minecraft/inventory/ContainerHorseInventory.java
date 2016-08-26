@@ -1,6 +1,8 @@
 package net.minecraft.inventory;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.HorseArmorType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -9,8 +11,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ContainerHorseInventory extends Container
 {
-    private IInventory horseInventory;
-    private EntityHorse theHorse;
+    private final IInventory horseInventory;
+    private final EntityHorse theHorse;
 
     public ContainerHorseInventory(IInventory playerInventory, final IInventory horseInventoryIn, final EntityHorse horse, EntityPlayer player)
     {
@@ -18,15 +20,15 @@ public class ContainerHorseInventory extends Container
         this.theHorse = horse;
         int i = 3;
         horseInventoryIn.openInventory(player);
-        int j = (i - 4) * 18;
+        int j = -18;
         this.addSlotToContainer(new Slot(horseInventoryIn, 0, 8, 18)
         {
             /**
              * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
              */
-            public boolean isItemValid(ItemStack stack)
+            public boolean isItemValid(@Nullable ItemStack stack)
             {
-                return super.isItemValid(stack) && stack.getItem() == Items.saddle && !this.getHasStack();
+                return super.isItemValid(stack) && stack.getItem() == Items.SADDLE && !this.getHasStack();
             }
         });
         this.addSlotToContainer(new Slot(horseInventoryIn, 1, 8, 36)
@@ -34,9 +36,9 @@ public class ContainerHorseInventory extends Container
             /**
              * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
              */
-            public boolean isItemValid(ItemStack stack)
+            public boolean isItemValid(@Nullable ItemStack stack)
             {
-                return super.isItemValid(stack) && horse.canWearArmor() && EntityHorse.isArmorItem(stack.getItem());
+                return super.isItemValid(stack) && horse.getType().isHorse() && HorseArmorType.isHorseArmor(stack.getItem());
             }
             /**
              * Actualy only call when we want to render the white square effect over the slots. Return always True,
@@ -45,13 +47,13 @@ public class ContainerHorseInventory extends Container
             @SideOnly(Side.CLIENT)
             public boolean canBeHovered()
             {
-                return horse.canWearArmor();
+                return horse.getType().isHorse();
             }
         });
 
         if (horse.isChested())
         {
-            for (int k = 0; k < i; ++k)
+            for (int k = 0; k < 3; ++k)
             {
                 for (int l = 0; l < 5; ++l)
                 {
@@ -64,13 +66,13 @@ public class ContainerHorseInventory extends Container
         {
             for (int k1 = 0; k1 < 9; ++k1)
             {
-                this.addSlotToContainer(new Slot(playerInventory, k1 + i1 * 9 + 9, 8 + k1 * 18, 102 + i1 * 18 + j));
+                this.addSlotToContainer(new Slot(playerInventory, k1 + i1 * 9 + 9, 8 + k1 * 18, 102 + i1 * 18 + -18));
             }
         }
 
         for (int j1 = 0; j1 < 9; ++j1)
         {
-            this.addSlotToContainer(new Slot(playerInventory, j1, 8 + j1 * 18, 160 + j));
+            this.addSlotToContainer(new Slot(playerInventory, j1, 8 + j1 * 18, 142));
         }
     }
 
@@ -82,6 +84,7 @@ public class ContainerHorseInventory extends Container
     /**
      * Take a stack from the specified inventory slot.
      */
+    @Nullable
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
         ItemStack itemstack = null;

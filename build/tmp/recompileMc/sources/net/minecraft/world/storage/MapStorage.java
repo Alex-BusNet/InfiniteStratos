@@ -2,22 +2,26 @@ package net.minecraft.world.storage;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagShort;
 import net.minecraft.world.WorldSavedData;
 
-import java.io.*;
-import java.util.List;
-import java.util.Map;
-
 public class MapStorage
 {
-    private ISaveHandler saveHandler;
+    private final ISaveHandler saveHandler;
     protected Map<String, WorldSavedData> loadedDataMap = Maps.<String, WorldSavedData>newHashMap();
-    private List<WorldSavedData> loadedDataList = Lists.<WorldSavedData>newArrayList();
-    private Map<String, Short> idCounts = Maps.<String, Short>newHashMap();
+    private final List<WorldSavedData> loadedDataList = Lists.<WorldSavedData>newArrayList();
+    private final Map<String, Short> idCounts = Maps.<String, Short>newHashMap();
 
     public MapStorage(ISaveHandler saveHandlerIn)
     {
@@ -26,10 +30,11 @@ public class MapStorage
     }
 
     /**
-     * Loads an existing MapDataBase corresponding to the given String id from disk, instantiating the given Class, or
-     * returns null if none such file exists. args: Class to instantiate, String dataid
+     * Loads an existing MapDataBase corresponding to the given id from disk, instantiating the given Class, or returns
+     * null if none such file exists.
      */
-    public WorldSavedData loadData(Class <? extends WorldSavedData > clazz, String dataIdentifier)
+    @Nullable
+    public WorldSavedData getOrLoadData(Class <? extends WorldSavedData > clazz, String dataIdentifier)
     {
         WorldSavedData worldsaveddata = (WorldSavedData)this.loadedDataMap.get(dataIdentifier);
 
@@ -53,7 +58,7 @@ public class MapStorage
                         }
                         catch (Exception exception)
                         {
-                            throw new RuntimeException("Failed to instantiate " + clazz.toString(), exception);
+                            throw new RuntimeException("Failed to instantiate " + clazz, exception);
                         }
 
                         FileInputStream fileinputstream = new FileInputStream(file1);
@@ -112,22 +117,20 @@ public class MapStorage
     /**
      * Saves the given MapDataBase to disk.
      */
-    private void saveData(WorldSavedData p_75747_1_)
+    private void saveData(WorldSavedData data)
     {
         if (this.saveHandler != null)
         {
             try
             {
-                File file1 = this.saveHandler.getMapFileFromName(p_75747_1_.mapName);
+                File file1 = this.saveHandler.getMapFileFromName(data.mapName);
 
                 if (file1 != null)
                 {
                     NBTTagCompound nbttagcompound = new NBTTagCompound();
-                    p_75747_1_.writeToNBT(nbttagcompound);
-                    NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                    nbttagcompound1.setTag("data", nbttagcompound);
+                    nbttagcompound.setTag("data", data.writeToNBT(new NBTTagCompound()));
                     FileOutputStream fileoutputstream = new FileOutputStream(file1);
-                    CompressedStreamTools.writeCompressed(nbttagcompound1, fileoutputstream);
+                    CompressedStreamTools.writeCompressed(nbttagcompound, fileoutputstream);
                     fileoutputstream.close();
                 }
             }
@@ -213,8 +216,7 @@ public class MapStorage
 
                     for (String s : this.idCounts.keySet())
                     {
-                        short short1 = ((Short)this.idCounts.get(s)).shortValue();
-                        nbttagcompound.setShort(s, short1);
+                        nbttagcompound.setShort(s, ((Short)this.idCounts.get(s)).shortValue());
                     }
 
                     DataOutputStream dataoutputstream = new DataOutputStream(new FileOutputStream(file1));

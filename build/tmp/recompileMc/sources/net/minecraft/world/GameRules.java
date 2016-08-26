@@ -1,13 +1,12 @@
 package net.minecraft.world;
 
-import net.minecraft.nbt.NBTTagCompound;
-
 import java.util.Set;
 import java.util.TreeMap;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class GameRules
 {
-    private TreeMap<String, GameRules.Value> theGameRules = new TreeMap();
+    private final TreeMap<String, GameRules.Value> theGameRules = new TreeMap();
 
     public GameRules()
     {
@@ -26,6 +25,9 @@ public class GameRules
         this.addGameRule("randomTickSpeed", "3", GameRules.ValueType.NUMERICAL_VALUE);
         this.addGameRule("sendCommandFeedback", "true", GameRules.ValueType.BOOLEAN_VALUE);
         this.addGameRule("reducedDebugInfo", "false", GameRules.ValueType.BOOLEAN_VALUE);
+        this.addGameRule("spectatorsGenerateChunks", "true", GameRules.ValueType.BOOLEAN_VALUE);
+        this.addGameRule("spawnRadius", "10", GameRules.ValueType.NUMERICAL_VALUE);
+        this.addGameRule("disableElytraMovementCheck", "false", GameRules.ValueType.BOOLEAN_VALUE);
     }
 
     public void addGameRule(String key, String value, GameRules.ValueType type)
@@ -94,8 +96,7 @@ public class GameRules
     {
         for (String s : nbt.getKeySet())
         {
-            String s1 = nbt.getString(s);
-            this.setOrCreateGameRule(s, s1);
+            this.setOrCreateGameRule(s, nbt.getString(s));
         }
     }
 

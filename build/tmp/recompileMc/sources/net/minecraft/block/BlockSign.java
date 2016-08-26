@@ -1,45 +1,43 @@
 package net.minecraft.block;
 
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.Random;
 
 public class BlockSign extends BlockContainer
 {
+    protected static final AxisAlignedBB SIGN_AABB = new AxisAlignedBB(0.25D, 0.0D, 0.25D, 0.75D, 1.0D, 0.75D);
+
     protected BlockSign()
     {
-        super(Material.wood);
-        float f = 0.25F;
-        float f1 = 1.0F;
-        this.setBlockBounds(0.5F - f, 0.0F, 0.5F - f, 0.5F + f, f1, 0.5F + f);
+        super(Material.WOOD);
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        return null;
+        return SIGN_AABB;
     }
 
-    @SideOnly(Side.CLIENT)
-    public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos)
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos)
     {
-        this.setBlockBoundsBasedOnState(worldIn, pos);
-        return super.getSelectedBoundingBox(worldIn, pos);
+        return NULL_AABB;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -52,12 +50,15 @@ public class BlockSign extends BlockContainer
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean func_181623_g()
+    /**
+     * Return true if an entity can be spawned inside the block (used to get the player's bed spawn location)
+     */
+    public boolean canSpawnInBlock()
     {
         return true;
     }
@@ -73,12 +74,18 @@ public class BlockSign extends BlockContainer
     /**
      * Get the Item that this Block should drop when harvested.
      */
+    @Nullable
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.sign;
+        return Items.SIGN;
     }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
+    {
+        return new ItemStack(Items.SIGN);
+    }
+
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ)
     {
         if (worldIn.isRemote)
         {
@@ -91,14 +98,8 @@ public class BlockSign extends BlockContainer
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    public Item getItem(World worldIn, BlockPos pos)
-    {
-        return Items.sign;
-    }
-
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
-        return !this.func_181087_e(worldIn, pos) && super.canPlaceBlockAt(worldIn, pos);
+        return !this.hasInvalidNeighbor(worldIn, pos) && super.canPlaceBlockAt(worldIn, pos);
     }
 }

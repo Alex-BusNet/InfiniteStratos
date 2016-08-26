@@ -1,7 +1,29 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.network;
 
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+
+import java.util.EnumMap;
+
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -10,8 +32,6 @@ import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import net.minecraftforge.fml.relauncher.Side;
-
-import java.util.EnumMap;
 
 /**
  * An event driven network channel, using {@link FMLNetworkEvent.CustomPacketEvent} and {@link FMLNetworkEvent.CustomNetworkEvent}
@@ -102,10 +122,10 @@ public class FMLEventChannel {
         if (event != null)
         {
             this.eventBus.post(event);
-            if (event.reply != null)
+            if (event.getReply() != null)
             {
                 ctx.channel().attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.REPLY);
-                ctx.writeAndFlush(event.reply).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                ctx.writeAndFlush(event.getReply()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             }
         }
     }

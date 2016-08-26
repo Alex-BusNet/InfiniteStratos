@@ -1,20 +1,27 @@
 package net.minecraft.block;
 
 import com.google.common.collect.Lists;
+import java.util.List;
+import javax.annotation.Nullable;
+import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.util.*;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
-
 public abstract class BlockRailBase extends Block
 {
+    protected static final AxisAlignedBB FLAT_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.125D, 1.0D);
     protected final boolean isPowered;
 
     public static boolean isRailBlock(World worldIn, BlockPos pos)
@@ -30,134 +37,118 @@ public abstract class BlockRailBase extends Block
 
     protected BlockRailBase(boolean isPowered)
     {
-        super(Material.circuits);
+        super(Material.CIRCUITS);
         this.isPowered = isPowered;
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
-        this.setCreativeTab(CreativeTabs.tabTransport);
+        this.setCreativeTab(CreativeTabs.TRANSPORTATION);
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos)
     {
-        return null;
+        return NULL_AABB;
     }
 
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    /**
-     * Ray traces through the blocks collision from start vector to end vector returning a ray trace hit.
-     */
-    public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end)
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        this.setBlockBoundsBasedOnState(worldIn, pos);
-        return super.collisionRayTrace(worldIn, pos, start, end);
+        BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = state.getBlock() == this ? (BlockRailBase.EnumRailDirection)state.getValue(this.getShapeProperty()) : null;
+        return blockrailbase$enumraildirection != null && blockrailbase$enumraildirection.isAscending() ? FULL_BLOCK_AABB : FLAT_AABB;
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
-    {
-        IBlockState iblockstate = worldIn.getBlockState(pos);
-        BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = iblockstate.getBlock() == this ? (BlockRailBase.EnumRailDirection)iblockstate.getValue(this.getShapeProperty()) : null;
-
-        if (blockrailbase$enumraildirection != null && blockrailbase$enumraildirection.isAscending())
-        {
-            this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.625F, 1.0F);
-        }
-        else
-        {
-            this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
-        }
-    }
-
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
 
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
-        return World.doesBlockHaveSolidTopSurface(worldIn, pos.down());
+        return worldIn.getBlockState(pos.down()).isSideSolid(worldIn, pos.down(), EnumFacing.UP);
     }
 
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
     {
         if (!worldIn.isRemote)
         {
-            state = this.func_176564_a(worldIn, pos, state, true);
+            state = this.updateDir(worldIn, pos, state, true);
 
             if (this.isPowered)
             {
-                this.onNeighborBlockChange(worldIn, pos, state, this);
+                state.neighborChanged(worldIn, pos, this);
             }
         }
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn)
     {
         if (!worldIn.isRemote)
         {
             BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = (BlockRailBase.EnumRailDirection)state.getValue(this.getShapeProperty());
             boolean flag = false;
 
-            if (!World.doesBlockHaveSolidTopSurface(worldIn, pos.down()))
+            if (!worldIn.getBlockState(pos.down()).isSideSolid(worldIn, pos.down(), EnumFacing.UP))
             {
                 flag = true;
             }
 
-            if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_EAST && !World.doesBlockHaveSolidTopSurface(worldIn, pos.east()))
+            if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_EAST && !worldIn.getBlockState(pos.east()).isSideSolid(worldIn, pos.east(), EnumFacing.UP))
             {
                 flag = true;
             }
-            else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_WEST && !World.doesBlockHaveSolidTopSurface(worldIn, pos.west()))
+            else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_WEST && !worldIn.getBlockState(pos.west()).isSideSolid(worldIn, pos.west(), EnumFacing.UP))
             {
                 flag = true;
             }
-            else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_NORTH && !World.doesBlockHaveSolidTopSurface(worldIn, pos.north()))
+            else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_NORTH && !worldIn.getBlockState(pos.north()).isSideSolid(worldIn, pos.north(), EnumFacing.UP))
             {
                 flag = true;
             }
-            else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_SOUTH && !World.doesBlockHaveSolidTopSurface(worldIn, pos.south()))
+            else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_SOUTH && !worldIn.getBlockState(pos.south()).isSideSolid(worldIn, pos.south(), EnumFacing.UP))
             {
                 flag = true;
             }
 
-            if (flag)
+            if (flag && !worldIn.isAirBlock(pos))
             {
                 this.dropBlockAsItem(worldIn, pos, state, 0);
                 worldIn.setBlockToAir(pos);
             }
             else
             {
-                this.onNeighborChangedInternal(worldIn, pos, state, neighborBlock);
+                this.updateState(state, worldIn, pos, blockIn);
             }
         }
     }
 
-    protected void onNeighborChangedInternal(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    protected void updateState(IBlockState p_189541_1_, World p_189541_2_, BlockPos p_189541_3_, Block p_189541_4_)
     {
     }
 
-    protected IBlockState func_176564_a(World worldIn, BlockPos p_176564_2_, IBlockState p_176564_3_, boolean p_176564_4_)
+    protected IBlockState updateDir(World worldIn, BlockPos pos, IBlockState state, boolean p_176564_4_)
     {
-        return worldIn.isRemote ? p_176564_3_ : (new BlockRailBase.Rail(worldIn, p_176564_2_, p_176564_3_)).func_180364_a(worldIn.isBlockPowered(p_176564_2_), p_176564_4_).getBlockState();
+        return worldIn.isRemote ? state : (new BlockRailBase.Rail(worldIn, pos, state)).place(worldIn.isBlockPowered(pos), p_176564_4_).getBlockState();
     }
 
-    public int getMobilityFlag()
+    public EnumPushReaction getMobilityFlag(IBlockState state)
     {
-        return 0;
+        return EnumPushReaction.NORMAL;
     }
 
     @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.CUTOUT;
+        return BlockRenderLayer.CUTOUT;
     }
 
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
@@ -183,7 +174,7 @@ public abstract class BlockRailBase extends Block
      * Return true if the rail can make corners.
      * Used by placement logic.
      * @param world The world.
-     * @param pod Block's position in world
+     * @param pos Block's position in world
      * @return True if the rail can make corners.
      */
     public boolean isFlexibleRail(IBlockAccess world, BlockPos pos)
@@ -195,7 +186,7 @@ public abstract class BlockRailBase extends Block
      * Returns true if the rail can make up and down slopes.
      * Used by placement logic.
      * @param world The world.
-     * @param pod Block's position in world
+     * @param pos Block's position in world
      * @return True if the rail can make slopes.
      */
     public boolean canMakeSlopes(IBlockAccess world, BlockPos pos)
@@ -204,10 +195,27 @@ public abstract class BlockRailBase extends Block
     }
 
     /**
+     * Return the rail's direction.
+     * Can be used to make the cart think the rail is a different shape,
+     * for example when making diamond junctions or switches.
+     * The cart parameter will often be null unless it it called from EntityMinecart.
+     *
+     * @param world The world.
+     * @param pos Block's position in world
+     * @param state The BlockState
+     * @param cart The cart asking for the metadata, null if it is not called by EntityMinecart.
+     * @return The direction.
+     */
+    public EnumRailDirection getRailDirection(IBlockAccess world, BlockPos pos, IBlockState state, @javax.annotation.Nullable net.minecraft.entity.item.EntityMinecart cart)
+    {
+        return state.getValue(getShapeProperty());
+    }
+
+    /**
      * Returns the max speed of the rail at the specified position.
      * @param world The world.
      * @param cart The cart on the rail, may be null.
-     * @param pod Block's position in world
+     * @param pos Block's position in world
      * @return The max speed of the current rail.
      */
     public float getRailMaxSpeed(World world, net.minecraft.entity.item.EntityMinecart cart, BlockPos pos)
@@ -220,7 +228,7 @@ public abstract class BlockRailBase extends Block
      * It is called once per update tick that the minecart is on the rail.
      * @param world The world.
      * @param cart The cart on the rail.
-     * @param pod Block's position in world
+     * @param pos Block's position in world
      */
     public void onMinecartPass(World world, net.minecraft.entity.item.EntityMinecart cart, BlockPos pos)
     {
@@ -240,7 +248,7 @@ public abstract class BlockRailBase extends Block
     public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis)
     {
         IBlockState state = world.getBlockState(pos);
-        for (IProperty prop : (java.util.Set<IProperty>)state.getProperties().keySet())
+        for (IProperty prop : state.getProperties().keySet())
         {
             if (prop.getName().equals("shape"))
             {
@@ -322,7 +330,7 @@ public abstract class BlockRailBase extends Block
         private final BlockRailBase block;
         private IBlockState state;
         private final boolean isPowered;
-        private final List<BlockPos> field_150657_g = Lists.<BlockPos>newArrayList();
+        private final List<BlockPos> connectedRails = Lists.<BlockPos>newArrayList();
         private final boolean canMakeSlopes;
 
         public Rail(World worldIn, BlockPos pos, IBlockState state)
@@ -331,73 +339,78 @@ public abstract class BlockRailBase extends Block
             this.pos = pos;
             this.state = state;
             this.block = (BlockRailBase)state.getBlock();
-            BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = (BlockRailBase.EnumRailDirection)state.getValue(BlockRailBase.this.getShapeProperty());
+            BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = block.getRailDirection(worldIn, pos, state, null);
             this.isPowered = !this.block.isFlexibleRail(worldIn, pos);
-            canMakeSlopes = this.block.canMakeSlopes(worldIn, pos);
-            this.func_180360_a(blockrailbase$enumraildirection);
+            this.canMakeSlopes = this.block.canMakeSlopes(worldIn, pos);
+            this.updateConnectedRails(blockrailbase$enumraildirection);
         }
 
-        private void func_180360_a(BlockRailBase.EnumRailDirection p_180360_1_)
+        public List<BlockPos> getConnectedRails()
         {
-            this.field_150657_g.clear();
+            return this.connectedRails;
+        }
 
-            switch (p_180360_1_)
+        private void updateConnectedRails(BlockRailBase.EnumRailDirection railDirection)
+        {
+            this.connectedRails.clear();
+
+            switch (railDirection)
             {
                 case NORTH_SOUTH:
-                    this.field_150657_g.add(this.pos.north());
-                    this.field_150657_g.add(this.pos.south());
+                    this.connectedRails.add(this.pos.north());
+                    this.connectedRails.add(this.pos.south());
                     break;
                 case EAST_WEST:
-                    this.field_150657_g.add(this.pos.west());
-                    this.field_150657_g.add(this.pos.east());
+                    this.connectedRails.add(this.pos.west());
+                    this.connectedRails.add(this.pos.east());
                     break;
                 case ASCENDING_EAST:
-                    this.field_150657_g.add(this.pos.west());
-                    this.field_150657_g.add(this.pos.east().up());
+                    this.connectedRails.add(this.pos.west());
+                    this.connectedRails.add(this.pos.east().up());
                     break;
                 case ASCENDING_WEST:
-                    this.field_150657_g.add(this.pos.west().up());
-                    this.field_150657_g.add(this.pos.east());
+                    this.connectedRails.add(this.pos.west().up());
+                    this.connectedRails.add(this.pos.east());
                     break;
                 case ASCENDING_NORTH:
-                    this.field_150657_g.add(this.pos.north().up());
-                    this.field_150657_g.add(this.pos.south());
+                    this.connectedRails.add(this.pos.north().up());
+                    this.connectedRails.add(this.pos.south());
                     break;
                 case ASCENDING_SOUTH:
-                    this.field_150657_g.add(this.pos.north());
-                    this.field_150657_g.add(this.pos.south().up());
+                    this.connectedRails.add(this.pos.north());
+                    this.connectedRails.add(this.pos.south().up());
                     break;
                 case SOUTH_EAST:
-                    this.field_150657_g.add(this.pos.east());
-                    this.field_150657_g.add(this.pos.south());
+                    this.connectedRails.add(this.pos.east());
+                    this.connectedRails.add(this.pos.south());
                     break;
                 case SOUTH_WEST:
-                    this.field_150657_g.add(this.pos.west());
-                    this.field_150657_g.add(this.pos.south());
+                    this.connectedRails.add(this.pos.west());
+                    this.connectedRails.add(this.pos.south());
                     break;
                 case NORTH_WEST:
-                    this.field_150657_g.add(this.pos.west());
-                    this.field_150657_g.add(this.pos.north());
+                    this.connectedRails.add(this.pos.west());
+                    this.connectedRails.add(this.pos.north());
                     break;
                 case NORTH_EAST:
-                    this.field_150657_g.add(this.pos.east());
-                    this.field_150657_g.add(this.pos.north());
+                    this.connectedRails.add(this.pos.east());
+                    this.connectedRails.add(this.pos.north());
             }
         }
 
-        private void func_150651_b()
+        private void removeSoftConnections()
         {
-            for (int i = 0; i < this.field_150657_g.size(); ++i)
+            for (int i = 0; i < this.connectedRails.size(); ++i)
             {
-                BlockRailBase.Rail blockrailbase$rail = this.findRailAt((BlockPos)this.field_150657_g.get(i));
+                BlockRailBase.Rail blockrailbase$rail = this.findRailAt((BlockPos)this.connectedRails.get(i));
 
-                if (blockrailbase$rail != null && blockrailbase$rail.func_150653_a(this))
+                if (blockrailbase$rail != null && blockrailbase$rail.isConnectedToRail(this))
                 {
-                    this.field_150657_g.set(i, blockrailbase$rail.pos);
+                    this.connectedRails.set(i, blockrailbase$rail.pos);
                 }
                 else
                 {
-                    this.field_150657_g.remove(i--);
+                    this.connectedRails.remove(i--);
                 }
             }
         }
@@ -407,6 +420,7 @@ public abstract class BlockRailBase extends Block
             return BlockRailBase.isRailBlock(this.world, pos) || BlockRailBase.isRailBlock(this.world, pos.up()) || BlockRailBase.isRailBlock(this.world, pos.down());
         }
 
+        @Nullable
         private BlockRailBase.Rail findRailAt(BlockPos pos)
         {
             IBlockState iblockstate = this.world.getBlockState(pos);
@@ -433,18 +447,18 @@ public abstract class BlockRailBase extends Block
             }
         }
 
-        private boolean func_150653_a(BlockRailBase.Rail p_150653_1_)
+        private boolean isConnectedToRail(BlockRailBase.Rail rail)
         {
-            return this.func_180363_c(p_150653_1_.pos);
+            return this.isConnectedTo(rail.pos);
         }
 
-        private boolean func_180363_c(BlockPos p_180363_1_)
+        private boolean isConnectedTo(BlockPos posIn)
         {
-            for (int i = 0; i < this.field_150657_g.size(); ++i)
+            for (int i = 0; i < this.connectedRails.size(); ++i)
             {
-                BlockPos blockpos = (BlockPos)this.field_150657_g.get(i);
+                BlockPos blockpos = (BlockPos)this.connectedRails.get(i);
 
-                if (blockpos.getX() == p_180363_1_.getX() && blockpos.getZ() == p_180363_1_.getZ())
+                if (blockpos.getX() == posIn.getX() && blockpos.getZ() == posIn.getZ())
                 {
                     return true;
                 }
@@ -471,22 +485,22 @@ public abstract class BlockRailBase extends Block
             return i;
         }
 
-        private boolean func_150649_b(BlockRailBase.Rail rail)
+        private boolean canConnectTo(BlockRailBase.Rail rail)
         {
-            return this.func_150653_a(rail) || this.field_150657_g.size() != 2;
+            return this.isConnectedToRail(rail) || this.connectedRails.size() != 2;
         }
 
-        private void func_150645_c(BlockRailBase.Rail p_150645_1_)
+        private void connectTo(BlockRailBase.Rail p_150645_1_)
         {
-            this.field_150657_g.add(p_150645_1_.pos);
+            this.connectedRails.add(p_150645_1_.pos);
             BlockPos blockpos = this.pos.north();
             BlockPos blockpos1 = this.pos.south();
             BlockPos blockpos2 = this.pos.west();
             BlockPos blockpos3 = this.pos.east();
-            boolean flag = this.func_180363_c(blockpos);
-            boolean flag1 = this.func_180363_c(blockpos1);
-            boolean flag2 = this.func_180363_c(blockpos2);
-            boolean flag3 = this.func_180363_c(blockpos3);
+            boolean flag = this.isConnectedTo(blockpos);
+            boolean flag1 = this.isConnectedTo(blockpos1);
+            boolean flag2 = this.isConnectedTo(blockpos2);
+            boolean flag3 = this.isConnectedTo(blockpos3);
             BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = null;
 
             if (flag || flag1)
@@ -557,7 +571,7 @@ public abstract class BlockRailBase extends Block
             this.world.setBlockState(this.pos, this.state, 3);
         }
 
-        private boolean func_180361_d(BlockPos p_180361_1_)
+        private boolean hasNeighborRail(BlockPos p_180361_1_)
         {
             BlockRailBase.Rail blockrailbase$rail = this.findRailAt(p_180361_1_);
 
@@ -567,21 +581,21 @@ public abstract class BlockRailBase extends Block
             }
             else
             {
-                blockrailbase$rail.func_150651_b();
-                return blockrailbase$rail.func_150649_b(this);
+                blockrailbase$rail.removeSoftConnections();
+                return blockrailbase$rail.canConnectTo(this);
             }
         }
 
-        public BlockRailBase.Rail func_180364_a(boolean p_180364_1_, boolean p_180364_2_)
+        public BlockRailBase.Rail place(boolean p_180364_1_, boolean p_180364_2_)
         {
             BlockPos blockpos = this.pos.north();
             BlockPos blockpos1 = this.pos.south();
             BlockPos blockpos2 = this.pos.west();
             BlockPos blockpos3 = this.pos.east();
-            boolean flag = this.func_180361_d(blockpos);
-            boolean flag1 = this.func_180361_d(blockpos1);
-            boolean flag2 = this.func_180361_d(blockpos2);
-            boolean flag3 = this.func_180361_d(blockpos3);
+            boolean flag = this.hasNeighborRail(blockpos);
+            boolean flag1 = this.hasNeighborRail(blockpos1);
+            boolean flag2 = this.hasNeighborRail(blockpos2);
+            boolean flag3 = this.hasNeighborRail(blockpos3);
             BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = null;
 
             if ((flag || flag1) && !flag2 && !flag3)
@@ -709,24 +723,24 @@ public abstract class BlockRailBase extends Block
                 blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
             }
 
-            this.func_180360_a(blockrailbase$enumraildirection);
+            this.updateConnectedRails(blockrailbase$enumraildirection);
             this.state = this.state.withProperty(this.block.getShapeProperty(), blockrailbase$enumraildirection);
 
             if (p_180364_2_ || this.world.getBlockState(this.pos) != this.state)
             {
                 this.world.setBlockState(this.pos, this.state, 3);
 
-                for (int i = 0; i < this.field_150657_g.size(); ++i)
+                for (int i = 0; i < this.connectedRails.size(); ++i)
                 {
-                    BlockRailBase.Rail blockrailbase$rail = this.findRailAt((BlockPos)this.field_150657_g.get(i));
+                    BlockRailBase.Rail blockrailbase$rail = this.findRailAt((BlockPos)this.connectedRails.get(i));
 
                     if (blockrailbase$rail != null)
                     {
-                        blockrailbase$rail.func_150651_b();
+                        blockrailbase$rail.removeSoftConnections();
 
-                        if (blockrailbase$rail.func_150649_b(this))
+                        if (blockrailbase$rail.canConnectTo(this))
                         {
-                            blockrailbase$rail.func_150645_c(this);
+                            blockrailbase$rail.connectTo(this);
                         }
                     }
                 }

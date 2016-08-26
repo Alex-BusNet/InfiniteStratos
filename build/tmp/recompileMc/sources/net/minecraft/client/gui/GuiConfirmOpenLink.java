@@ -1,10 +1,9 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import net.minecraft.client.resources.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.io.IOException;
 
 @SideOnly(Side.CLIENT)
 public class GuiConfirmOpenLink extends GuiYesNo
@@ -61,7 +60,7 @@ public class GuiConfirmOpenLink extends GuiYesNo
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {

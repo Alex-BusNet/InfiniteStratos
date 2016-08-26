@@ -1,11 +1,12 @@
 package net.minecraft.inventory;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class ContainerWorkbench extends Container
@@ -13,9 +14,9 @@ public class ContainerWorkbench extends Container
     /** The crafting matrix inventory (3x3). */
     public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
     public IInventory craftResult = new InventoryCraftResult();
-    private World worldObj;
+    private final World worldObj;
     /** Position of the workbench */
-    private BlockPos pos;
+    private final BlockPos pos;
 
     public ContainerWorkbench(InventoryPlayer playerInventory, World worldIn, BlockPos posIn)
     {
@@ -70,7 +71,7 @@ public class ContainerWorkbench extends Container
 
                 if (itemstack != null)
                 {
-                    playerIn.dropPlayerItemWithRandomChoice(itemstack, false);
+                    playerIn.dropItem(itemstack, false);
                 }
             }
         }
@@ -78,12 +79,13 @@ public class ContainerWorkbench extends Container
 
     public boolean canInteractWith(EntityPlayer playerIn)
     {
-        return this.worldObj.getBlockState(this.pos).getBlock() != Blocks.crafting_table ? false : playerIn.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+        return this.worldObj.getBlockState(this.pos).getBlock() != Blocks.CRAFTING_TABLE ? false : playerIn.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
     }
 
     /**
      * Take a stack from the specified inventory slot.
      */
+    @Nullable
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
         ItemStack itemstack = null;
@@ -146,8 +148,8 @@ public class ContainerWorkbench extends Container
      * Called to determine if the current slot is valid for the stack merging (double-click) code. The stack passed in
      * is null for the initial slot that was double-clicked.
      */
-    public boolean canMergeSlot(ItemStack stack, Slot p_94530_2_)
+    public boolean canMergeSlot(ItemStack stack, Slot slotIn)
     {
-        return p_94530_2_.inventory != this.craftResult && super.canMergeSlot(stack, p_94530_2_);
+        return slotIn.inventory != this.craftResult && super.canMergeSlot(stack, slotIn);
     }
 }

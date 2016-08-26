@@ -1,13 +1,12 @@
 package net.minecraft.nbt;
 
 import com.google.common.collect.Lists;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class NBTTagList extends NBTBase
 {
@@ -21,13 +20,13 @@ public class NBTTagList extends NBTBase
      */
     void write(DataOutput output) throws IOException
     {
-        if (!this.tagList.isEmpty())
+        if (this.tagList.isEmpty())
         {
-            this.tagType = ((NBTBase)this.tagList.get(0)).getId();
+            this.tagType = 0;
         }
         else
         {
-            this.tagType = 0;
+            this.tagType = ((NBTBase)this.tagList.get(0)).getId();
         }
 
         output.writeByte(this.tagType);
@@ -175,12 +174,29 @@ public class NBTTagList extends NBTBase
         if (i >= 0 && i < this.tagList.size())
         {
             NBTBase nbtbase = (NBTBase)this.tagList.get(i);
-            return nbtbase.getId() == 10 ? (NBTTagCompound)nbtbase : new NBTTagCompound();
+
+            if (nbtbase.getId() == 10)
+            {
+                return (NBTTagCompound)nbtbase;
+            }
         }
-        else
+
+        return new NBTTagCompound();
+    }
+
+    public int getIntAt(int p_186858_1_)
+    {
+        if (p_186858_1_ >= 0 && p_186858_1_ < this.tagList.size())
         {
-            return new NBTTagCompound();
+            NBTBase nbtbase = (NBTBase)this.tagList.get(p_186858_1_);
+
+            if (nbtbase.getId() == 3)
+            {
+                return ((NBTTagInt)nbtbase).getInt();
+            }
         }
+
+        return 0;
     }
 
     public int[] getIntArrayAt(int i)
@@ -188,12 +204,14 @@ public class NBTTagList extends NBTBase
         if (i >= 0 && i < this.tagList.size())
         {
             NBTBase nbtbase = (NBTBase)this.tagList.get(i);
-            return nbtbase.getId() == 11 ? ((NBTTagIntArray)nbtbase).getIntArray() : new int[0];
+
+            if (nbtbase.getId() == 11)
+            {
+                return ((NBTTagIntArray)nbtbase).getIntArray();
+            }
         }
-        else
-        {
-            return new int[0];
-        }
+
+        return new int[0];
     }
 
     public double getDoubleAt(int i)
@@ -201,12 +219,14 @@ public class NBTTagList extends NBTBase
         if (i >= 0 && i < this.tagList.size())
         {
             NBTBase nbtbase = (NBTBase)this.tagList.get(i);
-            return nbtbase.getId() == 6 ? ((NBTTagDouble)nbtbase).getDouble() : 0.0D;
+
+            if (nbtbase.getId() == 6)
+            {
+                return ((NBTTagDouble)nbtbase).getDouble();
+            }
         }
-        else
-        {
-            return 0.0D;
-        }
+
+        return 0.0D;
     }
 
     public float getFloatAt(int i)
@@ -214,12 +234,14 @@ public class NBTTagList extends NBTBase
         if (i >= 0 && i < this.tagList.size())
         {
             NBTBase nbtbase = (NBTBase)this.tagList.get(i);
-            return nbtbase.getId() == 5 ? ((NBTTagFloat)nbtbase).getFloat() : 0.0F;
+
+            if (nbtbase.getId() == 5)
+            {
+                return ((NBTTagFloat)nbtbase).getFloat();
+            }
         }
-        else
-        {
-            return 0.0F;
-        }
+
+        return 0.0F;
     }
 
     /**
@@ -257,7 +279,7 @@ public class NBTTagList extends NBTBase
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagList copy()
     {
         NBTTagList nbttaglist = new NBTTagList();
         nbttaglist.tagType = this.tagType;

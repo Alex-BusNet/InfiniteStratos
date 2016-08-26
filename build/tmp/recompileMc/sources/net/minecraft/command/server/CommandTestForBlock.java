@@ -1,17 +1,24 @@
 package net.minecraft.command.server;
 
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.*;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.CommandResultStats;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.NumberInvalidException;
+import net.minecraft.command.WrongUsageException;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.List;
 
 public class CommandTestForBlock extends CommandBase
 {
@@ -33,8 +40,6 @@ public class CommandTestForBlock extends CommandBase
 
     /**
      * Gets the usage string for the command.
-     *  
-     * @param sender The command sender that executed the command
      */
     public String getCommandUsage(ICommandSender sender)
     {
@@ -42,12 +47,9 @@ public class CommandTestForBlock extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
-     *  
-     * @param sender The command sender that executed the command
-     * @param args The arguments that were passed
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 4)
         {
@@ -126,25 +128,24 @@ public class CommandTestForBlock extends CommandBase
                                 throw new CommandException("commands.testforblock.failed.tileEntity", new Object[] {Integer.valueOf(blockpos.getX()), Integer.valueOf(blockpos.getY()), Integer.valueOf(blockpos.getZ())});
                             }
 
-                            NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                            tileentity.writeToNBT(nbttagcompound1);
+                            NBTTagCompound nbttagcompound1 = tileentity.writeToNBT(new NBTTagCompound());
 
-                            if (!NBTUtil.func_181123_a(nbttagcompound, nbttagcompound1, true))
+                            if (!NBTUtil.areNBTEquals(nbttagcompound, nbttagcompound1, true))
                             {
                                 throw new CommandException("commands.testforblock.failed.nbt", new Object[] {Integer.valueOf(blockpos.getX()), Integer.valueOf(blockpos.getY()), Integer.valueOf(blockpos.getZ())});
                             }
                         }
 
                         sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 1);
-                        notifyOperators(sender, this, "commands.testforblock.success", new Object[] {Integer.valueOf(blockpos.getX()), Integer.valueOf(blockpos.getY()), Integer.valueOf(blockpos.getZ())});
+                        notifyCommandListener(sender, this, "commands.testforblock.success", new Object[] {Integer.valueOf(blockpos.getX()), Integer.valueOf(blockpos.getY()), Integer.valueOf(blockpos.getZ())});
                     }
                 }
             }
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length > 0 && args.length <= 3 ? func_175771_a(args, 0, pos) : (args.length == 4 ? getListOfStringsMatchingLastWord(args, Block.blockRegistry.getKeys()) : null);
+        return args.length > 0 && args.length <= 3 ? getTabCompletionCoordinate(args, 0, pos) : (args.length == 4 ? getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys()) : Collections.<String>emptyList());
     }
 }

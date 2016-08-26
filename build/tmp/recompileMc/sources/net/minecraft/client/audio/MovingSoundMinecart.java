@@ -1,8 +1,9 @@
 package net.minecraft.client.audio;
 
 import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -14,7 +15,7 @@ public class MovingSoundMinecart extends MovingSound
 
     public MovingSoundMinecart(EntityMinecart minecartIn)
     {
-        super(new ResourceLocation("minecraft:minecart.base"));
+        super(SoundEvents.ENTITY_MINECART_RIDING, SoundCategory.NEUTRAL);
         this.minecart = minecartIn;
         this.repeat = true;
         this.repeatDelay = 0;

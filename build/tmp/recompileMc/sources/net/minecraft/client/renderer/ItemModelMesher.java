@@ -1,17 +1,17 @@
 package net.minecraft.client.renderer;
 
 import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.annotation.Nullable;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ModelManager;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.IBakedModel;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.Map;
-import java.util.Map.Entry;
 
 @SideOnly(Side.CLIENT)
 public class ItemModelMesher
@@ -33,7 +33,9 @@ public class ItemModelMesher
 
     public TextureAtlasSprite getParticleIcon(Item item, int meta)
     {
-        return this.getItemModel(new ItemStack(item, 1, meta)).getParticleTexture();
+        ItemStack stack = new ItemStack(item, 1, meta);
+        IBakedModel model = this.getItemModel(stack);
+        return model.getOverrides().handleItemState(model, stack, null, null).getParticleTexture();
     }
 
     public IBakedModel getItemModel(ItemStack stack)
@@ -51,11 +53,6 @@ public class ItemModelMesher
             }
         }
 
-        if(ibakedmodel instanceof net.minecraftforge.client.model.ISmartItemModel)
-        {
-            ibakedmodel = ((net.minecraftforge.client.model.ISmartItemModel)ibakedmodel).handleItemState(stack);
-        }
-
         if (ibakedmodel == null)
         {
             ibakedmodel = this.modelManager.getMissingModel();
@@ -66,9 +63,10 @@ public class ItemModelMesher
 
     protected int getMetadata(ItemStack stack)
     {
-        return stack.isItemStackDamageable() ? 0 : stack.getMetadata();
+        return stack.getMaxDamage() > 0 ? 0 : stack.getMetadata();
     }
 
+    @Nullable
     protected IBakedModel getItemModel(Item item, int meta)
     {
         return (IBakedModel)this.simpleShapesCache.get(Integer.valueOf(this.getIndex(item, meta)));

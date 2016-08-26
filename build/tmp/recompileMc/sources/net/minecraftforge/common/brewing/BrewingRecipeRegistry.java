@@ -1,10 +1,28 @@
-package net.minecraftforge.common.brewing;
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-import net.minecraft.item.ItemStack;
+package net.minecraftforge.common.brewing;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.item.ItemStack;
 
 public class BrewingRecipeRegistry {
 
@@ -18,7 +36,7 @@ public class BrewingRecipeRegistry {
     /**
      * Adds a recipe to the registry. Due to the nature of the brewing stand
      * inputs that stack (a.k.a max stack size > 1) are not allowed.
-     * 
+     *
      * @param input
      *            The ItemStack that goes in same slots as the water bottles
      *            would.
@@ -37,7 +55,7 @@ public class BrewingRecipeRegistry {
     /**
      * Adds a recipe to the registry. Due to the nature of the brewing stand
      * inputs that stack (a.k.a max stack size > 1) are not allowed.
-     * 
+     *
      * @param input
      *            The ItemStack that goes in same slots as the water bottles
      *            would.
@@ -85,7 +103,7 @@ public class BrewingRecipeRegistry {
     /**
      * Returns true if the passed input and ingredient have an output
      */
-    public static boolean hasOuput(ItemStack input, ItemStack ingredient)
+    public static boolean hasOutput(ItemStack input, ItemStack ingredient)
     {
         return getOutput(input, ingredient) != null;
     }
@@ -101,7 +119,7 @@ public class BrewingRecipeRegistry {
 
         for (int i : inputIndexes)
         {
-            if (hasOuput(inputs[i], ingredient))
+            if (hasOutput(inputs[i], ingredient))
             {
                 return true;
             }

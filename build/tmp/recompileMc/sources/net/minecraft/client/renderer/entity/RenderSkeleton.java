@@ -4,7 +4,9 @@ import net.minecraft.client.model.ModelSkeleton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.layers.LayerBipedArmor;
 import net.minecraft.client.renderer.entity.layers.LayerHeldItem;
+import net.minecraft.client.renderer.entity.layers.LayerSkeletonType;
 import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.SkeletonType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -12,8 +14,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderSkeleton extends RenderBiped<EntitySkeleton>
 {
-    private static final ResourceLocation skeletonTextures = new ResourceLocation("textures/entity/skeleton/skeleton.png");
-    private static final ResourceLocation witherSkeletonTextures = new ResourceLocation("textures/entity/skeleton/wither_skeleton.png");
+    private static final ResourceLocation SKELETON_TEXTURES = new ResourceLocation("textures/entity/skeleton/skeleton.png");
+    private static final ResourceLocation WITHER_SKELETON_TEXTURES = new ResourceLocation("textures/entity/skeleton/wither_skeleton.png");
+    private static final ResourceLocation field_190084_m = new ResourceLocation("textures/entity/skeleton/stray.png");
 
     public RenderSkeleton(RenderManager renderManagerIn)
     {
@@ -23,19 +26,19 @@ public class RenderSkeleton extends RenderBiped<EntitySkeleton>
         {
             protected void initArmor()
             {
-                this.field_177189_c = new ModelSkeleton(0.5F, true);
-                this.field_177186_d = new ModelSkeleton(1.0F, true);
+                this.modelLeggings = new ModelSkeleton(0.5F, true);
+                this.modelArmor = new ModelSkeleton(1.0F, true);
             }
         });
+        this.addLayer(new LayerSkeletonType(this));
     }
 
     /**
-     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:
-     * entityLiving, partialTickTime
+     * Allows the render to do state modifications necessary before the model is rendered.
      */
     protected void preRenderCallback(EntitySkeleton entitylivingbaseIn, float partialTickTime)
     {
-        if (entitylivingbaseIn.getSkeletonType() == 1)
+        if (entitylivingbaseIn.func_189771_df() == SkeletonType.WITHER)
         {
             GlStateManager.scale(1.2F, 1.2F, 1.2F);
         }
@@ -51,6 +54,7 @@ public class RenderSkeleton extends RenderBiped<EntitySkeleton>
      */
     protected ResourceLocation getEntityTexture(EntitySkeleton entity)
     {
-        return entity.getSkeletonType() == 1 ? witherSkeletonTextures : skeletonTextures;
+        SkeletonType skeletontype = entity.func_189771_df();
+        return skeletontype == SkeletonType.WITHER ? WITHER_SKELETON_TEXTURES : (skeletontype == SkeletonType.STRAY ? field_190084_m : SKELETON_TEXTURES);
     }
 }

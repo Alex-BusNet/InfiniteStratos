@@ -1,17 +1,38 @@
-package net.minecraftforge.fml.common.registry;
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-import com.google.common.base.Throwables;
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
-import org.apache.logging.log4j.Level;
+package net.minecraftforge.fml.common.registry;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
+import net.minecraft.util.ResourceLocation;
+import org.apache.logging.log4j.Level;
+
+import com.google.common.base.Throwables;
+
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 
 
 /**
@@ -48,8 +69,8 @@ class ObjectHolderRef {
                 }
                 else
                 {
-                    ResourceLocation tmp = isBlock ? GameData.getBlockRegistry().getNameForObject((Block)existing) :
-                        isItem ? GameData.getItemRegistry().getNameForObject((Item)existing) : null;
+                    ResourceLocation tmp = isBlock ? ForgeRegistries.BLOCKS.getKey((Block)existing) :
+                        isItem ? ForgeRegistries.ITEMS.getKey((Item)existing) : null;
                     this.injectedObject = tmp;
                 }
             } catch (Exception e)
@@ -66,28 +87,11 @@ class ObjectHolderRef {
         {
             throw new IllegalStateException(String.format("The ObjectHolder annotation cannot apply to a field that is not an Item or Block (found : %s at %s.%s)", field.getType().getName(), field.getClass().getName(), field.getName()));
         }
-        makeWritable(field);
-    }
-
-    private static Field modifiersField;
-    private static Object reflectionFactory;
-    private static Method newFieldAccessor;
-    private static Method fieldAccessorSet;
-    private static void makeWritable(Field f)
-    {
         try
         {
-            if (modifiersField == null)
-            {
-                Method getReflectionFactory = Class.forName("sun.reflect.ReflectionFactory").getDeclaredMethod("getReflectionFactory");
-                reflectionFactory = getReflectionFactory.invoke(null);
-                newFieldAccessor = Class.forName("sun.reflect.ReflectionFactory").getDeclaredMethod("newFieldAccessor", Field.class, boolean.class);
-                fieldAccessorSet = Class.forName("sun.reflect.FieldAccessor").getDeclaredMethod("set", Object.class, Object.class);
-                modifiersField = Field.class.getDeclaredField("modifiers");
-                modifiersField.setAccessible(true);
-            }
-            modifiersField.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-        } catch (Exception e)
+            FinalFieldHelper.makeWritable(field);
+        }
+        catch (Exception e)
         {
             throw Throwables.propagate(e);
         }
@@ -102,15 +106,15 @@ class ObjectHolderRef {
         Object thing;
         if (isBlock)
         {
-            thing = GameData.getBlockRegistry().getObject(injectedObject);
-            if (thing == Blocks.air)
+            thing = ForgeRegistries.BLOCKS.getValue(injectedObject);
+            if (thing == Blocks.AIR)
             {
                 thing = null;
             }
         }
         else if (isItem)
         {
-            thing = GameData.getItemRegistry().getObject(injectedObject);
+            thing = ForgeRegistries.ITEMS.getValue(injectedObject);
         }
         else
         {
@@ -124,8 +128,7 @@ class ObjectHolderRef {
         }
         try
         {
-            Object fieldAccessor = newFieldAccessor.invoke(reflectionFactory, field, false);
-            fieldAccessorSet.invoke(fieldAccessor, null, thing);
+            FinalFieldHelper.setField(field, null, thing);
         }
         catch (Exception e)
         {

@@ -7,7 +7,7 @@ public class ItemISDefense extends ItemIS
 {
     public ItemISDefense()
     {
-        super();
+        super(Names.Parts.ABSOLUTE_DEFENSE);
         this.setUnlocalizedName(Names.Parts.ABSOLUTE_DEFENSE);
         this.setCreativeTab(CreativeTabIS.IS_TAB);
         this.setMaxStackSize(1);

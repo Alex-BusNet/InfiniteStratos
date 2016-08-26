@@ -1,23 +1,23 @@
 package net.minecraft.block;
 
+import java.util.List;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.Rotation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 public class BlockQuartz extends Block
 {
@@ -25,9 +25,9 @@ public class BlockQuartz extends Block
 
     public BlockQuartz()
     {
-        super(Material.rock);
+        super(Material.ROCK);
         this.setDefaultState(this.blockState.getBaseState().withProperty(VARIANT, BlockQuartz.EnumType.DEFAULT));
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -45,14 +45,11 @@ public class BlockQuartz extends Block
                 case X:
                     return this.getDefaultState().withProperty(VARIANT, BlockQuartz.EnumType.LINES_X);
                 case Y:
-                default:
                     return this.getDefaultState().withProperty(VARIANT, BlockQuartz.EnumType.LINES_Y);
             }
         }
-        else
-        {
-            return meta == BlockQuartz.EnumType.CHISELED.getMetadata() ? this.getDefaultState().withProperty(VARIANT, BlockQuartz.EnumType.CHISELED) : this.getDefaultState().withProperty(VARIANT, BlockQuartz.EnumType.DEFAULT);
-        }
+
+        return meta == BlockQuartz.EnumType.CHISELED.getMetadata() ? this.getDefaultState().withProperty(VARIANT, BlockQuartz.EnumType.CHISELED) : this.getDefaultState().withProperty(VARIANT, BlockQuartz.EnumType.DEFAULT);
     }
 
     /**
@@ -87,7 +84,7 @@ public class BlockQuartz extends Block
      */
     public MapColor getMapColor(IBlockState state)
     {
-        return MapColor.quartzColor;
+        return MapColor.QUARTZ;
     }
 
     /**
@@ -106,15 +103,41 @@ public class BlockQuartz extends Block
         return ((BlockQuartz.EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
-    protected BlockState createBlockState()
+    /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
     {
-        return new BlockState(this, new IProperty[] {VARIANT});
+        switch (rot)
+        {
+            case COUNTERCLOCKWISE_90:
+            case CLOCKWISE_90:
+
+                switch ((BlockQuartz.EnumType)state.getValue(VARIANT))
+                {
+                    case LINES_X:
+                        return state.withProperty(VARIANT, BlockQuartz.EnumType.LINES_Z);
+                    case LINES_Z:
+                        return state.withProperty(VARIANT, BlockQuartz.EnumType.LINES_X);
+                    default:
+                        return state;
+                }
+
+            default:
+                return state;
+        }
+    }
+
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {VARIANT});
     }
 
     public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis)
     {
         IBlockState state = world.getBlockState(pos);
-        for (IProperty prop : (java.util.Set<IProperty>)state.getProperties().keySet())
+        for (IProperty prop : state.getProperties().keySet())
         {
             if (prop.getName().equals("variant") && prop.getValueClass() == EnumType.class)
             {
@@ -141,13 +164,13 @@ public class BlockQuartz extends Block
 
         private static final BlockQuartz.EnumType[] META_LOOKUP = new BlockQuartz.EnumType[values().length];
         private final int meta;
-        private final String field_176805_h;
+        private final String serializedName;
         private final String unlocalizedName;
 
         private EnumType(int meta, String name, String unlocalizedName)
         {
             this.meta = meta;
-            this.field_176805_h = name;
+            this.serializedName = name;
             this.unlocalizedName = unlocalizedName;
         }
 
@@ -173,7 +196,7 @@ public class BlockQuartz extends Block
 
         public String getName()
         {
-            return this.field_176805_h;
+            return this.serializedName;
         }
 
         static

@@ -1,20 +1,40 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.common;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.*;
-import com.google.common.collect.ImmutableList.Builder;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.item.EntityItem;
@@ -27,10 +47,10 @@ import net.minecraft.network.EnumConnectionState;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.handshake.client.C00Handshake;
-import net.minecraft.network.login.server.S00PacketDisconnect;
+import net.minecraft.network.login.server.SPacketDisconnect;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IThreadListener;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -46,22 +66,19 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.CoreModManager;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.server.FMLServerHandler;
+
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
-import java.lang.ref.WeakReference;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -130,11 +147,12 @@ public class FMLCommonHandler
         return eventBus;
     }
 
-    public void beginLoading(IFMLSidedHandler handler)
+    public List<String> beginLoading(IFMLSidedHandler handler)
     {
         sidedDelegate = handler;
         MinecraftForge.initialize();
 //        MinecraftForge.registerCrashCallable();
+        return ImmutableList.<String>of();
     }
 
     /**
@@ -205,7 +223,7 @@ public class FMLCommonHandler
     {
         if (brandings == null)
         {
-            Builder<String> brd = ImmutableList.<String>builder();
+            Builder<String> brd = ImmutableList.builder();
             brd.add(Loader.instance().getMCVersionString());
             brd.add(Loader.instance().getMCPVersionString());
             brd.add("Powered by Forge " + ForgeVersion.getVersion());
@@ -356,7 +374,7 @@ public class FMLCommonHandler
     {
         for (ICrashCallable call: crashCallables)
         {
-            category.addCrashSectionCallable(call.getLabel(), call);
+            category.setDetail(call.getLabel(), call);
         }
     }
 
@@ -599,9 +617,9 @@ public class FMLCommonHandler
     {
         if (!shouldAllowPlayerLogins())
         {
-            ChatComponentText text = new ChatComponentText("Server is still starting! Please wait before reconnecting.");
+            TextComponentString text = new TextComponentString("Server is still starting! Please wait before reconnecting.");
             FMLLog.info("Disconnecting Player: " + text.getUnformattedText());
-            manager.sendPacket(new S00PacketDisconnect(text));
+            manager.sendPacket(new SPacketDisconnect(text));
             manager.closeChannel(text);
             return false;
         }
@@ -609,9 +627,9 @@ public class FMLCommonHandler
         if (packet.getRequestedState() == EnumConnectionState.LOGIN && (!NetworkRegistry.INSTANCE.isVanillaAccepted(Side.CLIENT) && !packet.hasFMLMarker()))
         {
             manager.setConnectionState(EnumConnectionState.LOGIN);
-            ChatComponentText text = new ChatComponentText("This server requires FML/Forge to be installed. Contact your server admin for more details.");
+            TextComponentString text = new TextComponentString("This server requires FML/Forge to be installed. Contact your server admin for more details.");
             FMLLog.info("Disconnecting Player: " + text.getUnformattedText());
-            manager.sendPacket(new S00PacketDisconnect(text));
+            manager.sendPacket(new SPacketDisconnect(text));
             manager.closeChannel(text);
             return false;
         }
@@ -681,7 +699,7 @@ public class FMLCommonHandler
     }
 
     /**
-     * Loads a lang file, first searching for a marker to enable the 'extended' format {escape charaters}
+     * Loads a lang file, first searching for a marker to enable the 'extended' format {escape characters}
      * If the marker is not found it simply returns and let the vanilla code load things.
      * The Marker is 'PARSE_ESCAPES' by itself on a line starting with '#' as such:
      * #PARSE_ESCAPES
@@ -723,5 +741,9 @@ public class FMLCommonHandler
     public String stripSpecialChars(String message)
     {
         return sidedDelegate != null ? sidedDelegate.stripSpecialChars(message) : message;
+    }
+
+    public void reloadRenderers() {
+        sidedDelegate.reloadRenderers();
     }
 }

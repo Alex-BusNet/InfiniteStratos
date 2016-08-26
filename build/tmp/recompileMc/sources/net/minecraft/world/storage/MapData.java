@@ -2,32 +2,33 @@ package net.minecraft.world.storage;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S34PacketMaps;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec4b;
+import net.minecraft.network.play.server.SPacketMaps;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec4b;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
-
-import java.util.List;
-import java.util.Map;
 
 public class MapData extends WorldSavedData
 {
     public int xCenter;
     public int zCenter;
     public int dimension; //FML byte -> int
+    public boolean trackingPosition;
     public byte scale;
     /** colours */
     public byte[] colors = new byte[16384];
     public List<MapData.MapInfo> playersArrayList = Lists.<MapData.MapInfo>newArrayList();
-    private Map<EntityPlayer, MapData.MapInfo> playersHashMap = Maps.<EntityPlayer, MapData.MapInfo>newHashMap();
+    private final Map<EntityPlayer, MapData.MapInfo> playersHashMap = Maps.<EntityPlayer, MapData.MapInfo>newHashMap();
     public Map<String, Vec4b> mapDecorations = Maps.<String, Vec4b>newLinkedHashMap();
 
     public MapData(String mapname)
@@ -64,6 +65,16 @@ public class MapData extends WorldSavedData
         this.zCenter = nbt.getInteger("zCenter");
         this.scale = nbt.getByte("scale");
         this.scale = (byte)MathHelper.clamp_int(this.scale, 0, 4);
+
+        if (nbt.hasKey("trackingPosition", 1))
+        {
+            this.trackingPosition = nbt.getBoolean("trackingPosition");
+        }
+        else
+        {
+            this.trackingPosition = true;
+        }
+
         int i = nbt.getShort("width");
         int j = nbt.getShort("height");
 
@@ -98,18 +109,17 @@ public class MapData extends WorldSavedData
         }
     }
 
-    /**
-     * write data to NBTTagCompound from this MapDataBase, similar to Entities and TileEntities
-     */
-    public void writeToNBT(NBTTagCompound nbt)
+    public NBTTagCompound writeToNBT(NBTTagCompound p_189551_1_)
     {
-        nbt.setInteger("dimension", this.dimension);
-        nbt.setInteger("xCenter", this.xCenter);
-        nbt.setInteger("zCenter", this.zCenter);
-        nbt.setByte("scale", this.scale);
-        nbt.setShort("width", (short)128);
-        nbt.setShort("height", (short)128);
-        nbt.setByteArray("colors", this.colors);
+        p_189551_1_.setInteger("dimension", this.dimension);
+        p_189551_1_.setInteger("xCenter", this.xCenter);
+        p_189551_1_.setInteger("zCenter", this.zCenter);
+        p_189551_1_.setByte("scale", this.scale);
+        p_189551_1_.setShort("width", (short)128);
+        p_189551_1_.setShort("height", (short)128);
+        p_189551_1_.setByteArray("colors", this.colors);
+        p_189551_1_.setBoolean("trackingPosition", this.trackingPosition);
+        return p_189551_1_;
     }
 
     /**
@@ -135,7 +145,7 @@ public class MapData extends WorldSavedData
 
             if (!mapdata$mapinfo1.entityplayerObj.isDead && (mapdata$mapinfo1.entityplayerObj.inventory.hasItemStack(mapStack) || mapStack.isOnItemFrame()))
             {
-                if (!mapStack.isOnItemFrame() && mapdata$mapinfo1.entityplayerObj.dimension == this.dimension)
+                if (!mapStack.isOnItemFrame() && mapdata$mapinfo1.entityplayerObj.dimension == this.dimension && this.trackingPosition)
                 {
                     this.updateDecorations(0, mapdata$mapinfo1.entityplayerObj.worldObj, mapdata$mapinfo1.entityplayerObj.getName(), mapdata$mapinfo1.entityplayerObj.posX, mapdata$mapinfo1.entityplayerObj.posZ, (double)mapdata$mapinfo1.entityplayerObj.rotationYaw);
                 }
@@ -147,7 +157,7 @@ public class MapData extends WorldSavedData
             }
         }
 
-        if (mapStack.isOnItemFrame())
+        if (mapStack.isOnItemFrame() && this.trackingPosition)
         {
             EntityItemFrame entityitemframe = mapStack.getItemFrame();
             BlockPos blockpos = entityitemframe.getHangingPosition();
@@ -180,7 +190,7 @@ public class MapData extends WorldSavedData
         int j = 63;
         byte b2;
 
-        if (f >= (float)(-j) && f1 >= (float)(-j) && f <= (float)j && f1 <= (float)j)
+        if (f >= -63.0F && f1 >= -63.0F && f <= 63.0F && f1 <= 63.0F)
         {
             rotation = rotation + (rotation < 0.0D ? -8.0D : 8.0D);
             b2 = (byte)((int)(rotation * 16.0D / 360.0D));
@@ -202,31 +212,32 @@ public class MapData extends WorldSavedData
             type = 6;
             b2 = 0;
 
-            if (f <= (float)(-j))
+            if (f <= -63.0F)
             {
-                b0 = (byte)((int)((double)(j * 2) + 2.5D));
+                b0 = -128;
             }
 
-            if (f1 <= (float)(-j))
+            if (f1 <= -63.0F)
             {
-                b1 = (byte)((int)((double)(j * 2) + 2.5D));
+                b1 = -128;
             }
 
-            if (f >= (float)j)
+            if (f >= 63.0F)
             {
-                b0 = (byte)(j * 2 + 1);
+                b0 = 127;
             }
 
-            if (f1 >= (float)j)
+            if (f1 >= 63.0F)
             {
-                b1 = (byte)(j * 2 + 1);
+                b1 = 127;
             }
         }
 
         this.mapDecorations.put(entityIdentifier, new Vec4b((byte)type, b0, b1, b2));
     }
 
-    public Packet getMapPacket(ItemStack mapStack, World worldIn, EntityPlayer player)
+    @Nullable
+    public Packet<?> getMapPacket(ItemStack mapStack, World worldIn, EntityPlayer player)
     {
         MapData.MapInfo mapdata$mapinfo = (MapData.MapInfo)this.playersHashMap.get(player);
         return mapdata$mapinfo == null ? null : mapdata$mapinfo.getPacket(mapStack);
@@ -260,35 +271,35 @@ public class MapData extends WorldSavedData
     {
         /** Reference for EntityPlayer object in MapInfo */
         public final EntityPlayer entityplayerObj;
-        private boolean field_176105_d = true;
-        private int minX = 0;
-        private int minY = 0;
+        private boolean isDirty = true;
+        private int minX;
+        private int minY;
         private int maxX = 127;
         private int maxY = 127;
-        private int field_176109_i;
-        public int field_82569_d;
+        private int tick;
+        public int step;
 
         public MapInfo(EntityPlayer player)
         {
             this.entityplayerObj = player;
         }
 
-        public Packet getPacket(ItemStack stack)
+        public Packet<?> getPacket(ItemStack stack)
         {
-            if (this.field_176105_d)
+            if (this.isDirty)
             {
-                this.field_176105_d = false;
-                return new S34PacketMaps(stack.getMetadata(), MapData.this.scale, MapData.this.mapDecorations.values(), MapData.this.colors, this.minX, this.minY, this.maxX + 1 - this.minX, this.maxY + 1 - this.minY);
+                this.isDirty = false;
+                return new SPacketMaps(stack.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, MapData.this.mapDecorations.values(), MapData.this.colors, this.minX, this.minY, this.maxX + 1 - this.minX, this.maxY + 1 - this.minY);
             }
             else
             {
-                return this.field_176109_i++ % 5 == 0 ? new S34PacketMaps(stack.getMetadata(), MapData.this.scale, MapData.this.mapDecorations.values(), MapData.this.colors, 0, 0, 0, 0) : null;
+                return this.tick++ % 5 == 0 ? new SPacketMaps(stack.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, MapData.this.mapDecorations.values(), MapData.this.colors, 0, 0, 0, 0) : null;
             }
         }
 
         public void update(int x, int y)
         {
-            if (this.field_176105_d)
+            if (this.isDirty)
             {
                 this.minX = Math.min(this.minX, x);
                 this.minY = Math.min(this.minY, y);
@@ -297,7 +308,7 @@ public class MapData extends WorldSavedData
             }
             else
             {
-                this.field_176105_d = true;
+                this.isDirty = true;
                 this.minX = x;
                 this.minY = y;
                 this.maxX = x;

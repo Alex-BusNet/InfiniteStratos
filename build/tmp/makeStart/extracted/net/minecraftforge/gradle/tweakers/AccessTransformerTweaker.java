@@ -19,11 +19,11 @@
  */
 package net.minecraftforge.gradle.tweakers;
 
-import net.minecraft.launchwrapper.ITweaker;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-
 import java.io.File;
 import java.util.List;
+
+import net.minecraft.launchwrapper.ITweaker;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 
 public class AccessTransformerTweaker implements ITweaker
 {

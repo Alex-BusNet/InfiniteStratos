@@ -1,21 +1,20 @@
 package net.minecraft.client.renderer;
 
-import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class VertexBufferUploader extends WorldVertexBufferUploader
 {
-    private VertexBuffer vertexBuffer = null;
+    private net.minecraft.client.renderer.vertex.VertexBuffer vertexBuffer;
 
-    public void draw(WorldRenderer p_181679_1_)
+    public void draw(VertexBuffer vertexBufferIn)
     {
-        p_181679_1_.reset();
-        this.vertexBuffer.bufferData(p_181679_1_.getByteBuffer());
+        vertexBufferIn.reset();
+        this.vertexBuffer.bufferData(vertexBufferIn.getByteBuffer());
     }
 
-    public void setVertexBuffer(VertexBuffer vertexBufferIn)
+    public void setVertexBuffer(net.minecraft.client.renderer.vertex.VertexBuffer vertexBufferIn)
     {
         this.vertexBuffer = vertexBufferIn;
     }

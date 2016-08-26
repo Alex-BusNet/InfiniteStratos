@@ -1,3 +1,22 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.registry;
 
 import com.google.common.base.Objects;
@@ -24,22 +43,11 @@ public interface RegistryDelegate<T> {
     T get();
 
     /**
-     * Get the name of this delegate. This is completely static after registration has completed and will never change.
-     *
-     * Deprecated in favour of the resource location.
-     *
-     * @see #getResourceName()
-     * @return The name
-     */
-    @Deprecated
-    String name();
-
-    /**
      * Get the unique resource location for this delegate. Completely static after registration has completed, and
      * will never change.
      * @return The name
      */
-    ResourceLocation getResourceName();
+    ResourceLocation name();
 
     /**
      * Get the delegate type. It will be dependent on the registry this delegate is sourced from.
@@ -52,27 +60,22 @@ public interface RegistryDelegate<T> {
      */
     final class Delegate<T> implements RegistryDelegate<T>
     {
-        private T referant;
+        private T referent;
         private ResourceLocation name;
         private final Class<T> type;
 
-        public Delegate(T referant, Class<T> type) {
-            this.referant = referant;
+        public Delegate(T referent, Class<T> type) {
+            this.referent = referent;
             this.type = type;
         }
 
         @Override
         public T get() {
-            return referant;
+            return referent;
         }
 
         @Override
-        public String name() {
-            return name.toString();
-        }
-
-        @Override
-        public ResourceLocation getResourceName() { return name; }
+        public ResourceLocation name() { return name; }
 
         @Override
         public Class<T> type()
@@ -82,10 +85,10 @@ public interface RegistryDelegate<T> {
 
         void changeReference(T newTarget)
         {
-            this.referant = newTarget;
+            this.referent = newTarget;
         }
 
-        void setResourceName(ResourceLocation name) { this.name = name; }
+        void setName(ResourceLocation name) { this.name = name; }
 
         @Override
         public boolean equals(Object obj)

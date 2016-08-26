@@ -1,19 +1,22 @@
 package net.minecraft.world.gen.feature;
 
-import net.minecraft.block.*;
+import java.util.Random;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockOldLeaf;
+import net.minecraft.block.BlockOldLog;
+import net.minecraft.block.BlockPlanks;
+import net.minecraft.block.BlockVine;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.Random;
 
 public class WorldGenSwamp extends WorldGenAbstractTree
 {
-    private static final IBlockState field_181648_a = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.OAK);
-    private static final IBlockState field_181649_b = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.OAK).withProperty(BlockOldLeaf.CHECK_DECAY, Boolean.valueOf(false));
+    private static final IBlockState TRUNK = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.OAK);
+    private static final IBlockState LEAF = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.OAK).withProperty(BlockOldLeaf.CHECK_DECAY, Boolean.valueOf(false));
 
     public WorldGenSwamp()
     {
@@ -24,7 +27,7 @@ public class WorldGenSwamp extends WorldGenAbstractTree
     {
         int i;
 
-        for (i = rand.nextInt(4) + 5; worldIn.getBlockState(position.down()).getBlock().getMaterial() == Material.water; position = position.down())
+        for (i = rand.nextInt(4) + 5; worldIn.getBlockState(position.down()).getMaterial() == Material.WATER; position = position.down())
         {
             ;
         }
@@ -55,11 +58,12 @@ public class WorldGenSwamp extends WorldGenAbstractTree
                     {
                         if (j >= 0 && j < 256)
                         {
-                            Block block = worldIn.getBlockState(blockpos$mutableblockpos.set(l, j, i1)).getBlock();
+                            IBlockState iblockstate = worldIn.getBlockState(blockpos$mutableblockpos.setPos(l, j, i1));
+                            Block block = iblockstate.getBlock();
 
-                            if (!block.isAir(worldIn, blockpos$mutableblockpos.set(l, j, i1)) && !block.isLeaves(worldIn, blockpos$mutableblockpos.set(l, j, i1)))
+                            if (!iblockstate.getBlock().isAir(iblockstate, worldIn, blockpos$mutableblockpos.setPos(l, j, i1)) && !iblockstate.getBlock().isLeaves(iblockstate, worldIn, blockpos$mutableblockpos.setPos(l, j, i1)))
                             {
-                                if (block != Blocks.water && block != Blocks.flowing_water)
+                                if (block != Blocks.WATER && block != Blocks.FLOWING_WATER)
                                 {
                                     flag = false;
                                 }
@@ -84,87 +88,89 @@ public class WorldGenSwamp extends WorldGenAbstractTree
             else
             {
                 BlockPos down = position.down();
-                Block block1 = worldIn.getBlockState(down).getBlock();
-                boolean isSoil = block1.canSustainPlant(worldIn, down, net.minecraft.util.EnumFacing.UP, ((net.minecraft.block.BlockSapling)Blocks.sapling));
+                IBlockState state = worldIn.getBlockState(down);
+                boolean isSoil = state.getBlock().canSustainPlant(state, worldIn, down, net.minecraft.util.EnumFacing.UP, ((net.minecraft.block.BlockSapling)Blocks.SAPLING));
 
-                if (isSoil && position.getY() < 256 - i - 1)
+                if (isSoil && position.getY() < worldIn.getHeight() - i - 1)
                 {
-                    block1.onPlantGrow(worldIn, position.down(),position);
+                    state.getBlock().onPlantGrow(state, worldIn, position.down(),position);
 
-                    for (int l1 = position.getY() - 3 + i; l1 <= position.getY() + i; ++l1)
+                    for (int k1 = position.getY() - 3 + i; k1 <= position.getY() + i; ++k1)
                     {
-                        int k2 = l1 - (position.getY() + i);
-                        int i3 = 2 - k2 / 2;
+                        int j2 = k1 - (position.getY() + i);
+                        int l2 = 2 - j2 / 2;
 
-                        for (int k3 = position.getX() - i3; k3 <= position.getX() + i3; ++k3)
+                        for (int j3 = position.getX() - l2; j3 <= position.getX() + l2; ++j3)
                         {
-                            int l3 = k3 - position.getX();
+                            int k3 = j3 - position.getX();
 
-                            for (int j1 = position.getZ() - i3; j1 <= position.getZ() + i3; ++j1)
+                            for (int i4 = position.getZ() - l2; i4 <= position.getZ() + l2; ++i4)
                             {
-                                int k1 = j1 - position.getZ();
+                                int j1 = i4 - position.getZ();
 
-                                if (Math.abs(l3) != i3 || Math.abs(k1) != i3 || rand.nextInt(2) != 0 && k2 != 0)
+                                if (Math.abs(k3) != l2 || Math.abs(j1) != l2 || rand.nextInt(2) != 0 && j2 != 0)
                                 {
-                                    BlockPos blockpos = new BlockPos(k3, l1, j1);
+                                    BlockPos blockpos = new BlockPos(j3, k1, i4);
+                                    state = worldIn.getBlockState(blockpos);
 
-                                    if (worldIn.getBlockState(blockpos).getBlock().canBeReplacedByLeaves(worldIn, blockpos))
+                                    if (state.getBlock().canBeReplacedByLeaves(state, worldIn, blockpos))
                                     {
-                                        this.setBlockAndNotifyAdequately(worldIn, blockpos, field_181649_b);
+                                        this.setBlockAndNotifyAdequately(worldIn, blockpos, LEAF);
                                     }
                                 }
                             }
                         }
                     }
 
-                    for (int i2 = 0; i2 < i; ++i2)
+                    for (int l1 = 0; l1 < i; ++l1)
                     {
-                        BlockPos upN = position.up(i2);
-                        Block block2 = worldIn.getBlockState(upN).getBlock();
+                        BlockPos upN = position.up(l1);
+                        IBlockState iblockstate1 = worldIn.getBlockState(upN);
+                        Block block2 = iblockstate1.getBlock();
 
-                        if (block2.isAir(worldIn, upN) || block2.isLeaves(worldIn, upN) || block2 == Blocks.flowing_water || block2 == Blocks.water)
+                        if (block2.isAir(iblockstate1, worldIn, upN) || block2.isLeaves(iblockstate1, worldIn, upN) || block2 == Blocks.FLOWING_WATER || block2 == Blocks.WATER)
                         {
-                            this.setBlockAndNotifyAdequately(worldIn, position.up(i2), field_181648_a);
+                            this.setBlockAndNotifyAdequately(worldIn, position.up(l1), TRUNK);
                         }
                     }
 
-                    for (int j2 = position.getY() - 3 + i; j2 <= position.getY() + i; ++j2)
+                    for (int i2 = position.getY() - 3 + i; i2 <= position.getY() + i; ++i2)
                     {
-                        int l2 = j2 - (position.getY() + i);
-                        int j3 = 2 - l2 / 2;
+                        int k2 = i2 - (position.getY() + i);
+                        int i3 = 2 - k2 / 2;
                         BlockPos.MutableBlockPos blockpos$mutableblockpos1 = new BlockPos.MutableBlockPos();
 
-                        for (int i4 = position.getX() - j3; i4 <= position.getX() + j3; ++i4)
+                        for (int l3 = position.getX() - i3; l3 <= position.getX() + i3; ++l3)
                         {
-                            for (int j4 = position.getZ() - j3; j4 <= position.getZ() + j3; ++j4)
+                            for (int j4 = position.getZ() - i3; j4 <= position.getZ() + i3; ++j4)
                             {
-                                blockpos$mutableblockpos1.set(i4, j2, j4);
+                                blockpos$mutableblockpos1.setPos(l3, i2, j4);
 
-                                if (worldIn.getBlockState(blockpos$mutableblockpos1).getBlock().isLeaves(worldIn, blockpos$mutableblockpos1))
+                                if (worldIn.getBlockState(blockpos$mutableblockpos1).getMaterial() == Material.LEAVES)
                                 {
                                     BlockPos blockpos3 = blockpos$mutableblockpos1.west();
                                     BlockPos blockpos4 = blockpos$mutableblockpos1.east();
                                     BlockPos blockpos1 = blockpos$mutableblockpos1.north();
                                     BlockPos blockpos2 = blockpos$mutableblockpos1.south();
 
-                                    if (rand.nextInt(4) == 0 && worldIn.getBlockState(blockpos3).getBlock().isAir(worldIn,blockpos3))
+                                    if (rand.nextInt(4) == 0 && isAir(worldIn, blockpos3))
                                     {
-                                        this.func_181647_a(worldIn, blockpos3, BlockVine.EAST);
+                                        this.addVine(worldIn, blockpos3, BlockVine.EAST);
                                     }
 
-                                    if (rand.nextInt(4) == 0 && worldIn.getBlockState(blockpos4).getBlock().isAir(worldIn,blockpos4))
+                                    if (rand.nextInt(4) == 0 && isAir(worldIn, blockpos4))
                                     {
-                                        this.func_181647_a(worldIn, blockpos4, BlockVine.WEST);
+                                        this.addVine(worldIn, blockpos4, BlockVine.WEST);
                                     }
 
-                                    if (rand.nextInt(4) == 0 && worldIn.getBlockState(blockpos1).getBlock().isAir(worldIn,blockpos1))
+                                    if (rand.nextInt(4) == 0 && isAir(worldIn, blockpos1))
                                     {
-                                        this.func_181647_a(worldIn, blockpos1, BlockVine.SOUTH);
+                                        this.addVine(worldIn, blockpos1, BlockVine.SOUTH);
                                     }
 
-                                    if (rand.nextInt(4) == 0 && worldIn.getBlockState(blockpos2).getBlock().isAir(worldIn,blockpos2))
+                                    if (rand.nextInt(4) == 0 && isAir(worldIn, blockpos2))
                                     {
-                                        this.func_181647_a(worldIn, blockpos2, BlockVine.NORTH);
+                                        this.addVine(worldIn, blockpos2, BlockVine.NORTH);
                                     }
                                 }
                             }
@@ -185,16 +191,22 @@ public class WorldGenSwamp extends WorldGenAbstractTree
         }
     }
 
-    private void func_181647_a(World p_181647_1_, BlockPos p_181647_2_, PropertyBool p_181647_3_)
+    private void addVine(World worldIn, BlockPos pos, PropertyBool prop)
     {
-        IBlockState iblockstate = Blocks.vine.getDefaultState().withProperty(p_181647_3_, Boolean.valueOf(true));
-        this.setBlockAndNotifyAdequately(p_181647_1_, p_181647_2_, iblockstate);
+        IBlockState iblockstate = Blocks.VINE.getDefaultState().withProperty(prop, Boolean.valueOf(true));
+        this.setBlockAndNotifyAdequately(worldIn, pos, iblockstate);
         int i = 4;
 
-        for (p_181647_2_ = p_181647_2_.down(); p_181647_1_.getBlockState(p_181647_2_).getBlock().isAir(p_181647_1_,p_181647_2_) && i > 0; --i)
+        for (pos = pos.down(); isAir(worldIn, pos) && i > 0; --i)
         {
-            this.setBlockAndNotifyAdequately(p_181647_1_, p_181647_2_, iblockstate);
-            p_181647_2_ = p_181647_2_.down();
+            this.setBlockAndNotifyAdequately(worldIn, pos, iblockstate);
+            pos = pos.down();
         }
+    }
+
+    private boolean isAir(World world, BlockPos pos)
+    {
+        IBlockState state = world.getBlockState(pos);
+        return state.getBlock().isAir(state, world, pos);
     }
 }

@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.inventory;
 
+import java.io.IOException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.achievement.GuiAchievements;
@@ -15,8 +16,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.IOException;
-
 @SideOnly(Side.CLIENT)
 public class GuiInventory extends InventoryEffectRenderer
 {
@@ -25,9 +24,9 @@ public class GuiInventory extends InventoryEffectRenderer
     /** The old y position of the mouse pointer */
     private float oldMouseY;
 
-    public GuiInventory(EntityPlayer p_i1094_1_)
+    public GuiInventory(EntityPlayer player)
     {
-        super(p_i1094_1_.inventoryContainer);
+        super(player.inventoryContainer);
         this.allowUserInput = true;
     }
 
@@ -40,8 +39,6 @@ public class GuiInventory extends InventoryEffectRenderer
         {
             this.mc.displayGuiScreen(new GuiContainerCreative(this.mc.thePlayer));
         }
-
-        this.updateActivePotionEffects();
     }
 
     /**
@@ -63,15 +60,15 @@ public class GuiInventory extends InventoryEffectRenderer
     }
 
     /**
-     * Draw the foreground layer for the GuiContainer (everything in front of the items). Args : mouseX, mouseY
+     * Draw the foreground layer for the GuiContainer (everything in front of the items)
      */
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
-        this.fontRendererObj.drawString(I18n.format("container.crafting", new Object[0]), 86, 16, 4210752);
+        this.fontRendererObj.drawString(I18n.format("container.crafting", new Object[0]), 97, 8, 4210752);
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
@@ -81,12 +78,12 @@ public class GuiInventory extends InventoryEffectRenderer
     }
 
     /**
-     * Args : renderPartialTicks, mouseX, mouseY
+     * Draws the background layer of this container (behind the items).
      */
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
     {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(inventoryBackground);
+        this.mc.getTextureManager().bindTexture(INVENTORY_BACKGROUND);
         int i = this.guiLeft;
         int j = this.guiTop;
         this.drawTexturedModalRect(i, j, 0, 0, this.xSize, this.ySize);
@@ -94,7 +91,7 @@ public class GuiInventory extends InventoryEffectRenderer
     }
 
     /**
-     * Draws the entity to the screen. Args: xPos, yPos, scale, mouseX, mouseY, entityLiving
+     * Draws an entity on the screen looking toward the cursor.
      */
     public static void drawEntityOnScreen(int posX, int posY, int scale, float mouseX, float mouseY, EntityLivingBase ent)
     {
@@ -121,7 +118,7 @@ public class GuiInventory extends InventoryEffectRenderer
         RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
         rendermanager.setPlayerViewY(180.0F);
         rendermanager.setRenderShadow(false);
-        rendermanager.renderEntityWithPosYaw(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F);
+        rendermanager.doRenderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
         rendermanager.setRenderShadow(true);
         ent.renderYawOffset = f;
         ent.rotationYaw = f1;

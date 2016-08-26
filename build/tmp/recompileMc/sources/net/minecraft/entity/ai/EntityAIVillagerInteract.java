@@ -6,13 +6,13 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 public class EntityAIVillagerInteract extends EntityAIWatchClosest2
 {
     /** The delay before the villager throws an itemstack (in ticks) */
     private int interactionDelay;
-    private EntityVillager villager;
+    private final EntityVillager villager;
 
     public EntityAIVillagerInteract(EntityVillager villagerIn)
     {
@@ -27,7 +27,7 @@ public class EntityAIVillagerInteract extends EntityAIWatchClosest2
     {
         super.startExecuting();
 
-        if (this.villager.canAbondonItems() && this.closestEntity instanceof EntityVillager && ((EntityVillager)this.closestEntity).func_175557_cr())
+        if (this.villager.canAbondonItems() && this.closestEntity instanceof EntityVillager && ((EntityVillager)this.closestEntity).wantsMoreFood())
         {
             this.interactionDelay = 10;
         }
@@ -61,18 +61,18 @@ public class EntityAIVillagerInteract extends EntityAIWatchClosest2
                     {
                         Item item = itemstack.getItem();
 
-                        if ((item == Items.bread || item == Items.potato || item == Items.carrot) && itemstack.stackSize > 3)
+                        if ((item == Items.BREAD || item == Items.POTATO || item == Items.CARROT || item == Items.BEETROOT) && itemstack.stackSize > 3)
                         {
                             int l = itemstack.stackSize / 2;
                             itemstack.stackSize -= l;
                             itemstack1 = new ItemStack(item, l, itemstack.getMetadata());
                         }
-                        else if (item == Items.wheat && itemstack.stackSize > 5)
+                        else if (item == Items.WHEAT && itemstack.stackSize > 5)
                         {
                             int j = itemstack.stackSize / 2 / 3 * 3;
                             int k = j / 3;
                             itemstack.stackSize -= j;
-                            itemstack1 = new ItemStack(Items.bread, k, 0);
+                            itemstack1 = new ItemStack(Items.BREAD, k, 0);
                         }
 
                         if (itemstack.stackSize <= 0)
@@ -88,9 +88,9 @@ public class EntityAIVillagerInteract extends EntityAIWatchClosest2
                         float f = 0.3F;
                         float f1 = this.villager.rotationYawHead;
                         float f2 = this.villager.rotationPitch;
-                        entityitem.motionX = (double)(-MathHelper.sin(f1 / 180.0F * (float)Math.PI) * MathHelper.cos(f2 / 180.0F * (float)Math.PI) * f);
-                        entityitem.motionZ = (double)(MathHelper.cos(f1 / 180.0F * (float)Math.PI) * MathHelper.cos(f2 / 180.0F * (float)Math.PI) * f);
-                        entityitem.motionY = (double)(-MathHelper.sin(f2 / 180.0F * (float)Math.PI) * f + 0.1F);
+                        entityitem.motionX = (double)(-MathHelper.sin(f1 * 0.017453292F) * MathHelper.cos(f2 * 0.017453292F) * 0.3F);
+                        entityitem.motionZ = (double)(MathHelper.cos(f1 * 0.017453292F) * MathHelper.cos(f2 * 0.017453292F) * 0.3F);
+                        entityitem.motionY = (double)(-MathHelper.sin(f2 * 0.017453292F) * 0.3F + 0.1F);
                         entityitem.setDefaultPickupDelay();
                         this.villager.worldObj.spawnEntityInWorld(entityitem);
                         break;

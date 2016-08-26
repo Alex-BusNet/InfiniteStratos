@@ -3,9 +3,12 @@ package net.minecraft.block;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
@@ -14,9 +17,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.Collection;
-import java.util.List;
 
 public abstract class BlockFlower extends BlockBush
 {
@@ -67,7 +67,7 @@ public abstract class BlockFlower extends BlockBush
         {
             this.type = PropertyEnum.<BlockFlower.EnumFlowerType>create("type", BlockFlower.EnumFlowerType.class, new Predicate<BlockFlower.EnumFlowerType>()
             {
-                public boolean apply(BlockFlower.EnumFlowerType p_apply_1_)
+                public boolean apply(@Nullable BlockFlower.EnumFlowerType p_apply_1_)
                 {
                     return p_apply_1_.getBlockType() == BlockFlower.this.getBlockType();
                 }
@@ -85,9 +85,9 @@ public abstract class BlockFlower extends BlockBush
         return ((BlockFlower.EnumFlowerType)state.getValue(this.getTypeProperty())).getMeta();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {this.getTypeProperty()});
+        return new BlockStateContainer(this, new IProperty[] {this.getTypeProperty()});
     }
 
     /**
@@ -106,7 +106,7 @@ public abstract class BlockFlower extends BlockBush
 
         public BlockFlower getBlock()
         {
-            return this == YELLOW ? Blocks.yellow_flower : Blocks.red_flower;
+            return this == YELLOW ? Blocks.YELLOW_FLOWER : Blocks.RED_FLOWER;
         }
     }
 
@@ -197,7 +197,7 @@ public abstract class BlockFlower extends BlockBush
             {
                 Collection<BlockFlower.EnumFlowerType> collection = Collections2.<BlockFlower.EnumFlowerType>filter(Lists.newArrayList(values()), new Predicate<BlockFlower.EnumFlowerType>()
                 {
-                    public boolean apply(BlockFlower.EnumFlowerType p_apply_1_)
+                    public boolean apply(@Nullable BlockFlower.EnumFlowerType p_apply_1_)
                     {
                         return p_apply_1_.getBlockType() == blockflower$enumflowercolor;
                     }

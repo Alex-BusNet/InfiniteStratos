@@ -1,43 +1,43 @@
 package net.minecraft.block;
 
+import java.util.List;
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.IStringSerializable;
-import net.minecraft.world.ColorizerGrass;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
-import java.util.Random;
-
 public class BlockTallGrass extends BlockBush implements IGrowable, net.minecraftforge.common.IShearable
 {
     public static final PropertyEnum<BlockTallGrass.EnumType> TYPE = PropertyEnum.<BlockTallGrass.EnumType>create("type", BlockTallGrass.EnumType.class);
+    protected static final AxisAlignedBB TALL_GRASS_AABB = new AxisAlignedBB(0.09999999403953552D, 0.0D, 0.09999999403953552D, 0.8999999761581421D, 0.800000011920929D, 0.8999999761581421D);
 
     protected BlockTallGrass()
     {
-        super(Material.vine);
+        super(Material.VINE);
         this.setDefaultState(this.blockState.getBaseState().withProperty(TYPE, BlockTallGrass.EnumType.DEAD_BUSH));
-        float f = 0.4F;
-        this.setBlockBounds(0.5F - f, 0.0F, 0.5F - f, 0.5F + f, 0.8F, 0.5F + f);
     }
 
-    @SideOnly(Side.CLIENT)
-    public int getBlockColor()
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        return ColorizerGrass.getGrassColor(0.5D, 1.0D);
+        return TALL_GRASS_AABB;
     }
 
     public boolean canBlockStay(World worldIn, BlockPos pos, IBlockState state)
@@ -48,7 +48,7 @@ public class BlockTallGrass extends BlockBush implements IGrowable, net.minecraf
     /**
      * Whether this Block can be replaced directly by other blocks (true for e.g. tall grass)
      */
-    public boolean isReplaceable(World worldIn, BlockPos pos)
+    public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos)
     {
         return true;
     }
@@ -56,6 +56,7 @@ public class BlockTallGrass extends BlockBush implements IGrowable, net.minecraf
     /**
      * Get the Item that this Block should drop when harvested.
      */
+    @Nullable
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return null;
@@ -69,37 +70,22 @@ public class BlockTallGrass extends BlockBush implements IGrowable, net.minecraf
         return 1 + random.nextInt(fortune * 2 + 1);
     }
 
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te)
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack)
     {
+        if (false && !worldIn.isRemote && stack != null && stack.getItem() == Items.SHEARS) // Forge: Noop Taken care of by IShearable
         {
-            super.harvestBlock(worldIn, player, pos, state, te);
-        }
-    }
-
-    @SideOnly(Side.CLIENT)
-    public int getRenderColor(IBlockState state)
-    {
-        if (state.getBlock() != this)
-        {
-            return super.getRenderColor(state);
+            player.addStat(StatList.getBlockStats(this));
+            spawnAsEntity(worldIn, pos, new ItemStack(Blocks.TALLGRASS, 1, ((BlockTallGrass.EnumType)state.getValue(TYPE)).getMeta()));
         }
         else
         {
-            BlockTallGrass.EnumType blocktallgrass$enumtype = (BlockTallGrass.EnumType)state.getValue(TYPE);
-            return blocktallgrass$enumtype == BlockTallGrass.EnumType.DEAD_BUSH ? 16777215 : ColorizerGrass.getGrassColor(0.5D, 1.0D);
+            super.harvestBlock(worldIn, player, pos, state, te, stack);
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
-        return worldIn.getBiomeGenForCoords(pos).getGrassColorAtPos(pos);
-    }
-
-    public int getDamageValue(World worldIn, BlockPos pos)
-    {
-        IBlockState iblockstate = worldIn.getBlockState(pos);
-        return iblockstate.getBlock().getMetaFromState(iblockstate);
+        return new ItemStack(this, 1, state.getBlock().getMetaFromState(state));
     }
 
     /**
@@ -136,9 +122,9 @@ public class BlockTallGrass extends BlockBush implements IGrowable, net.minecraf
             blockdoubleplant$enumplanttype = BlockDoublePlant.EnumPlantType.FERN;
         }
 
-        if (Blocks.double_plant.canPlaceBlockAt(worldIn, pos))
+        if (Blocks.DOUBLE_PLANT.canPlaceBlockAt(worldIn, pos))
         {
-            Blocks.double_plant.placeAt(worldIn, pos, blockdoubleplant$enumplanttype, 2);
+            Blocks.DOUBLE_PLANT.placeAt(worldIn, pos, blockdoubleplant$enumplanttype, 2);
         }
     }
 
@@ -158,9 +144,9 @@ public class BlockTallGrass extends BlockBush implements IGrowable, net.minecraf
         return ((BlockTallGrass.EnumType)state.getValue(TYPE)).getMeta();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {TYPE});
+        return new BlockStateContainer(this, new IProperty[] {TYPE});
     }
 
     /**
@@ -227,7 +213,7 @@ public class BlockTallGrass extends BlockBush implements IGrowable, net.minecraf
     public List<ItemStack> onSheared(ItemStack item, IBlockAccess world, BlockPos pos, int fortune)
     {
         List<ItemStack> ret = new java.util.ArrayList<ItemStack>();
-        ret.add(new ItemStack(Blocks.tallgrass, 1, ((BlockTallGrass.EnumType)world.getBlockState(pos).getValue(TYPE)).getMeta()));
+        ret.add(new ItemStack(Blocks.TALLGRASS, 1, ((BlockTallGrass.EnumType)world.getBlockState(pos).getValue(TYPE)).getMeta()));
         return ret;
     }
     @Override
@@ -235,7 +221,7 @@ public class BlockTallGrass extends BlockBush implements IGrowable, net.minecraf
     {
         List<ItemStack> ret = new java.util.ArrayList<ItemStack>();
         if (RANDOM.nextInt(8) != 0) return ret;
-        ItemStack seed = net.minecraftforge.common.ForgeHooks.getGrassSeed(RANDOM);
+        ItemStack seed = net.minecraftforge.common.ForgeHooks.getGrassSeed(RANDOM, fortune);
         if (seed != null) ret.add(seed);
         return ret;
     }

@@ -1,28 +1,43 @@
 package net.minecraft.server.gui;
 
 import com.mojang.util.QueueLogAppender;
-import net.minecraft.server.MinecraftServer;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.swing.*;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import java.awt.*;
-import java.awt.event.*;
-
 @SideOnly(Side.SERVER)
 public class MinecraftServerGui extends JComponent
 {
-    private static final Font serverGuiFont = new Font("Monospaced", 0, 12);
+    private static final Font SERVER_GUI_FONT = new Font("Monospaced", 0, 12);
     private static final Logger LOGGER = LogManager.getLogger();
-    private DedicatedServer server;
+    private final DedicatedServer server;
 
     /**
      * Creates the server GUI and sets it visible for the user.
@@ -114,7 +129,7 @@ public class MinecraftServerGui extends JComponent
         final JTextArea jtextarea = new JTextArea();
         final JScrollPane jscrollpane = new JScrollPane(jtextarea, 22, 30);
         jtextarea.setEditable(false);
-        jtextarea.setFont(serverGuiFont);
+        jtextarea.setFont(SERVER_GUI_FONT);
         final JTextField jtextfield = new JTextField();
         jtextfield.addActionListener(new ActionListener()
         {
@@ -122,9 +137,9 @@ public class MinecraftServerGui extends JComponent
             {
                 String s = jtextfield.getText().trim();
 
-                if (s.length() > 0)
+                if (!s.isEmpty())
                 {
-                    MinecraftServerGui.this.server.addPendingCommand(s, MinecraftServer.getServer());
+                    MinecraftServerGui.this.server.addPendingCommand(s, MinecraftServerGui.this.server);
                 }
 
                 jtextfield.setText("");
@@ -147,7 +162,7 @@ public class MinecraftServerGui extends JComponent
 
                 while ((s = QueueLogAppender.getNextLogEvent("ServerGuiConsole")) != null)
                 {
-                    MinecraftServerGui.this.func_164247_a(jtextarea, jscrollpane, s);
+                    MinecraftServerGui.this.appendLine(jtextarea, jscrollpane, s);
                 }
             }
         });
@@ -157,7 +172,7 @@ public class MinecraftServerGui extends JComponent
     }
 
     private java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
-    public void func_164247_a(final JTextArea p_164247_1_, final JScrollPane p_164247_2_, final String p_164247_3_)
+    public void appendLine(final JTextArea textArea, final JScrollPane scrollPane, final String line)
     {
         try
         {
@@ -169,24 +184,24 @@ public class MinecraftServerGui extends JComponent
             {
                 public void run()
                 {
-                    MinecraftServerGui.this.func_164247_a(p_164247_1_, p_164247_2_, p_164247_3_);
+                    MinecraftServerGui.this.appendLine(textArea, scrollPane, line);
                 }
             });
         }
         else
         {
-            Document document = p_164247_1_.getDocument();
-            JScrollBar jscrollbar = p_164247_2_.getVerticalScrollBar();
+            Document document = textArea.getDocument();
+            JScrollBar jscrollbar = scrollPane.getVerticalScrollBar();
             boolean flag = false;
 
-            if (p_164247_2_.getViewport().getView() == p_164247_1_)
+            if (scrollPane.getViewport().getView() == textArea)
             {
-                flag = (double)jscrollbar.getValue() + jscrollbar.getSize().getHeight() + (double)(serverGuiFont.getSize() * 4) > (double)jscrollbar.getMaximum();
+                flag = (double)jscrollbar.getValue() + jscrollbar.getSize().getHeight() + (double)(SERVER_GUI_FONT.getSize() * 4) > (double)jscrollbar.getMaximum();
             }
 
             try
             {
-                document.insertString(document.getLength(), p_164247_3_, (AttributeSet)null);
+                document.insertString(document.getLength(), line, (AttributeSet)null);
             }
             catch (BadLocationException var8)
             {

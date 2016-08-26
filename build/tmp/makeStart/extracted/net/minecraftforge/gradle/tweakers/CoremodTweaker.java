@@ -19,19 +19,20 @@
  */
 package net.minecraftforge.gradle.tweakers;
 
-import net.minecraft.launchwrapper.ITweaker;
-import net.minecraft.launchwrapper.Launch;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraftforge.gradle.GradleForgeHacks;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+
+import net.minecraft.launchwrapper.ITweaker;
+import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraftforge.gradle.GradleForgeHacks;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CoremodTweaker implements ITweaker
 {

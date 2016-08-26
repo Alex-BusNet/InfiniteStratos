@@ -2,7 +2,6 @@ package net.minecraft.server.management;
 
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
-
 import java.io.File;
 
 public class UserListOps extends UserList<GameProfile, UserListOpsEntry>
@@ -30,10 +29,19 @@ public class UserListOps extends UserList<GameProfile, UserListOpsEntry>
         return astring;
     }
 
-    public boolean func_183026_b(GameProfile p_183026_1_)
+    /**
+     * Get the OP permission level this player has
+     */
+    public int getPermissionLevel(GameProfile profile)
     {
-        UserListOpsEntry userlistopsentry = (UserListOpsEntry)this.getEntry(p_183026_1_);
-        return userlistopsentry != null ? userlistopsentry.func_183024_b() : false;
+        UserListOpsEntry userlistopsentry = (UserListOpsEntry)this.getEntry(profile);
+        return userlistopsentry != null ? userlistopsentry.getPermissionLevel() : 0;
+    }
+
+    public boolean bypassesPlayerLimit(GameProfile profile)
+    {
+        UserListOpsEntry userlistopsentry = (UserListOpsEntry)this.getEntry(profile);
+        return userlistopsentry != null ? userlistopsentry.bypassesPlayerLimit() : false;
     }
 
     /**

@@ -1,14 +1,17 @@
 package net.minecraft.entity.ai;
 
-import net.minecraft.entity.*;
+import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IEntityOwnable;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.pathfinding.PathEntity;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
-import org.apache.commons.lang3.StringUtils;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 
 public abstract class EntityAITarget extends EntityAIBase
 {
@@ -17,7 +20,7 @@ public abstract class EntityAITarget extends EntityAIBase
     /** If true, EntityAI targets must be able to be seen (cannot be blocked by walls) to be suitable targets. */
     protected boolean shouldCheckSight;
     /** When true, only entities that can be reached with minimal effort will be targetted. */
-    private boolean nearbyOnly;
+    private final boolean nearbyOnly;
     /** When nearbyOnly is true: 0 -> No target, but OK to search; 1 -> Nearby target found; 2 -> Target too far. */
     private int targetSearchStatus;
     /** When nearbyOnly is true, this throttles target searching to avoid excessive pathfinding. */
@@ -27,6 +30,8 @@ public abstract class EntityAITarget extends EntityAIBase
      * see the target
      */
     private int targetUnseenTicks;
+    protected EntityLivingBase target;
+    protected int unseenMemoryTicks;
 
     public EntityAITarget(EntityCreature creature, boolean checkSight)
     {
@@ -35,6 +40,7 @@ public abstract class EntityAITarget extends EntityAIBase
 
     public EntityAITarget(EntityCreature creature, boolean checkSight, boolean onlyNearby)
     {
+        this.unseenMemoryTicks = 60;
         this.taskOwner = creature;
         this.shouldCheckSight = checkSight;
         this.nearbyOnly = onlyNearby;
@@ -46,6 +52,11 @@ public abstract class EntityAITarget extends EntityAIBase
     public boolean continueExecuting()
     {
         EntityLivingBase entitylivingbase = this.taskOwner.getAttackTarget();
+
+        if (entitylivingbase == null)
+        {
+            entitylivingbase = this.target;
+        }
 
         if (entitylivingbase == null)
         {
@@ -80,13 +91,21 @@ public abstract class EntityAITarget extends EntityAIBase
                         {
                             this.targetUnseenTicks = 0;
                         }
-                        else if (++this.targetUnseenTicks > 60)
+                        else if (++this.targetUnseenTicks > this.unseenMemoryTicks)
                         {
                             return false;
                         }
                     }
 
-                    return !(entitylivingbase instanceof EntityPlayer) || !((EntityPlayer)entitylivingbase).capabilities.disableDamage;
+                    if (entitylivingbase instanceof EntityPlayer && ((EntityPlayer)entitylivingbase).capabilities.disableDamage)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        this.taskOwner.setAttackTarget(entitylivingbase);
+                        return true;
+                    }
                 }
             }
         }
@@ -94,7 +113,7 @@ public abstract class EntityAITarget extends EntityAIBase
 
     protected double getTargetDistance()
     {
-        IAttributeInstance iattributeinstance = this.taskOwner.getEntityAttribute(SharedMonsterAttributes.followRange);
+        IAttributeInstance iattributeinstance = this.taskOwner.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
         return iattributeinstance == null ? 16.0D : iattributeinstance.getAttributeValue();
     }
 
@@ -114,6 +133,7 @@ public abstract class EntityAITarget extends EntityAIBase
     public void resetTask()
     {
         this.taskOwner.setAttackTarget((EntityLivingBase)null);
+        this.target = null;
     }
 
     /**
@@ -137,36 +157,30 @@ public abstract class EntityAITarget extends EntityAIBase
         {
             return false;
         }
+        else if (attacker.isOnSameTeam(target))
+        {
+            return false;
+        }
         else
         {
-            Team team = attacker.getTeam();
-            Team team1 = target.getTeam();
-
-            if (team != null && team1 == team)
+            if (attacker instanceof IEntityOwnable && ((IEntityOwnable)attacker).getOwnerId() != null)
             {
-                return false;
-            }
-            else
-            {
-                if (attacker instanceof IEntityOwnable && StringUtils.isNotEmpty(((IEntityOwnable)attacker).getOwnerId()))
-                {
-                    if (target instanceof IEntityOwnable && ((IEntityOwnable)attacker).getOwnerId().equals(((IEntityOwnable)target).getOwnerId()))
-                    {
-                        return false;
-                    }
-
-                    if (target == ((IEntityOwnable)attacker).getOwner())
-                    {
-                        return false;
-                    }
-                }
-                else if (target instanceof EntityPlayer && !includeInvincibles && ((EntityPlayer)target).capabilities.disableDamage)
+                if (target instanceof IEntityOwnable && ((IEntityOwnable)attacker).getOwnerId().equals(target.getUniqueID()))
                 {
                     return false;
                 }
 
-                return !checkSight || attacker.getEntitySenses().canSee(target);
+                if (target == ((IEntityOwnable)attacker).getOwner())
+                {
+                    return false;
+                }
             }
+            else if (target instanceof EntityPlayer && !includeInvincibles && ((EntityPlayer)target).capabilities.disableDamage)
+            {
+                return false;
+            }
+
+            return !checkSight || attacker.getEntitySenses().canSee(target);
         }
     }
 
@@ -211,18 +225,18 @@ public abstract class EntityAITarget extends EntityAIBase
     /**
      * Checks to see if this entity can find a short path to the given target.
      */
-    private boolean canEasilyReach(EntityLivingBase p_75295_1_)
+    private boolean canEasilyReach(EntityLivingBase target)
     {
         this.targetSearchDelay = 10 + this.taskOwner.getRNG().nextInt(5);
-        PathEntity pathentity = this.taskOwner.getNavigator().getPathToEntityLiving(p_75295_1_);
+        Path path = this.taskOwner.getNavigator().getPathToEntityLiving(target);
 
-        if (pathentity == null)
+        if (path == null)
         {
             return false;
         }
         else
         {
-            PathPoint pathpoint = pathentity.getFinalPathPoint();
+            PathPoint pathpoint = path.getFinalPathPoint();
 
             if (pathpoint == null)
             {
@@ -230,8 +244,8 @@ public abstract class EntityAITarget extends EntityAIBase
             }
             else
             {
-                int i = pathpoint.xCoord - MathHelper.floor_double(p_75295_1_.posX);
-                int j = pathpoint.zCoord - MathHelper.floor_double(p_75295_1_.posZ);
+                int i = pathpoint.xCoord - MathHelper.floor_double(target.posX);
+                int j = pathpoint.zCoord - MathHelper.floor_double(target.posZ);
                 return (double)(i * i + j * j) <= 2.25D;
             }
         }

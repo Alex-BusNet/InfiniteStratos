@@ -1,5 +1,6 @@
 package net.minecraft.realms;
 
+import java.lang.reflect.Constructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiScreenRealmsProxy;
@@ -7,8 +8,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.lang.reflect.Constructor;
 
 @SideOnly(Side.CLIENT)
 public class RealmsBridge extends RealmsScreen
@@ -28,9 +27,13 @@ public class RealmsBridge extends RealmsScreen
             Object object = constructor.newInstance(new Object[] {this});
             Minecraft.getMinecraft().displayGuiScreen(((RealmsScreen)object).getProxy());
         }
+        catch (ClassNotFoundException var5)
+        {
+            LOGGER.error("Realms module missing");
+        }
         catch (Exception exception)
         {
-            LOGGER.error((String)"Realms module missing", (Throwable)exception);
+            LOGGER.error((String)"Failed to load Realms module", (Throwable)exception);
         }
     }
 
@@ -45,11 +48,16 @@ public class RealmsBridge extends RealmsScreen
             Object object = constructor.newInstance(new Object[] {this});
             return ((RealmsScreen)object).getProxy();
         }
+        catch (ClassNotFoundException var5)
+        {
+            LOGGER.error("Realms module missing");
+        }
         catch (Exception exception)
         {
-            LOGGER.error((String)"Realms module missing", (Throwable)exception);
-            return null;
+            LOGGER.error((String)"Failed to load Realms module", (Throwable)exception);
         }
+
+        return null;
     }
 
     public void init()

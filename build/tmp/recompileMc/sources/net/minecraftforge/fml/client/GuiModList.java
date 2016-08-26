@@ -1,32 +1,52 @@
 /*
- * The FML Forge Mod Loader suite.
- * Copyright (C) 2012 cpw
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2.1 of the License, or any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
  *
- * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51
- * Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.client;
 
-import com.google.common.base.Strings;
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map.Entry;
+
+import javax.imageio.ImageIO;
+
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.*;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.gui.GuiUtilRenderComponents;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IResourcePack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.common.ForgeHooks;
@@ -38,21 +58,12 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.ModContainer.Disableable;
 import net.minecraftforge.fml.common.versioning.ComparableVersion;
+import static net.minecraft.util.text.TextFormatting.*;
+
 import org.apache.logging.log4j.Level;
+import org.lwjgl.input.Mouse;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map.Entry;
-
-import static net.minecraft.util.EnumChatFormatting.RED;
-import static net.minecraft.util.EnumChatFormatting.WHITE;
+import com.google.common.base.Strings;
 
 /**
  * @author cpw
@@ -152,13 +163,14 @@ public class GuiModList extends GuiScreen
     @Override
     public void initGui()
     {
+        int slotHeight = 35;
         for (ModContainer mod : mods)
         {
             listWidth = Math.max(listWidth,getFontRenderer().getStringWidth(mod.getName()) + 10);
-            listWidth = Math.max(listWidth,getFontRenderer().getStringWidth(mod.getVersion()) + 10);
+            listWidth = Math.max(listWidth,getFontRenderer().getStringWidth(mod.getVersion()) + 5 + slotHeight);
         }
         listWidth = Math.min(listWidth, 150);
-        this.modList = new GuiSlotModList(this, mods, listWidth);
+        this.modList = new GuiSlotModList(this, mods, listWidth, slotHeight);
 
         this.buttonList.add(new GuiButton(6, ((modList.right + this.width) / 2) - 100, this.height - 38, I18n.format("gui.done")));
         configModButton = new GuiButton(20, 10, this.height - 49, this.listWidth, 20, "Config");
@@ -259,7 +271,7 @@ public class GuiModList extends GuiScreen
 
             if (type != null)
             {
-                for (GuiButton b : (List<GuiButton>)buttonList)
+                for (GuiButton b : buttonList)
                 {
                     if (SortType.getTypeForButton(b) != null)
                     {
@@ -307,7 +319,7 @@ public class GuiModList extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
@@ -324,6 +336,21 @@ public class GuiModList extends GuiScreen
         int x = ((10 + modList.right) / 2) - (getFontRenderer().getStringWidth(text) / 2);
         getFontRenderer().drawString(text, x, modList.bottom + 5, 0xFFFFFF);
         search.drawTextBox();
+    }
+
+    /**
+     * Handles mouse input.
+     */
+    @Override
+    public void handleMouseInput() throws IOException
+    {
+        int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
+        int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
+
+        super.handleMouseInput();
+        if (this.modInfo != null)
+            this.modInfo.handleMouseInput(mouseX, mouseY);
+        this.modList.handleMouseInput(mouseX, mouseY);
     }
 
     Minecraft getMinecraftInstance()
@@ -431,7 +458,7 @@ public class GuiModList extends GuiScreen
                 lines.add("Child mods: " + selectedMod.getMetadata().getChildModList());
 
             if (vercheck.status == Status.OUTDATED || vercheck.status == Status.BETA_OUTDATED)
-                lines.add("Update Avalible: " + (vercheck.url == null ? "" : vercheck.url));
+                lines.add("Update Available: " + (vercheck.url == null ? "" : vercheck.url));
 
             lines.add(null);
             lines.add(selectedMod.getMetadata().description);
@@ -468,7 +495,7 @@ public class GuiModList extends GuiScreen
     {
         private ResourceLocation logoPath;
         private Dimension logoDims;
-        private List<IChatComponent> lines = null;
+        private List<ITextComponent> lines = null;
 
         public Info(int width, List<String> lines, ResourceLocation logoPath, Dimension logoDims)
         {
@@ -492,9 +519,9 @@ public class GuiModList extends GuiScreen
         @Override protected void drawBackground() {}
         @Override protected void drawSlot(int slotIdx, int entryRight, int slotTop, int slotBuffer, Tessellator tess) { }
 
-        private List<IChatComponent> resizeContent(List<String> lines)
+        private List<ITextComponent> resizeContent(List<String> lines)
         {
-            List<IChatComponent> ret = new ArrayList<IChatComponent>();
+            List<ITextComponent> ret = new ArrayList<ITextComponent>();
             for (String line : lines)
             {
                 if (line == null)
@@ -503,8 +530,8 @@ public class GuiModList extends GuiScreen
                     continue;
                 }
 
-                IChatComponent chat = ForgeHooks.newChatWithLinks(line, false);
-                ret.addAll(GuiUtilRenderComponents.func_178908_a(chat, this.listWidth-8, GuiModList.this.fontRendererObj, false, true));
+                ITextComponent chat = ForgeHooks.newChatWithLinks(line, false);
+                ret.addAll(GuiUtilRenderComponents.splitText(chat, this.listWidth-8, GuiModList.this.fontRendererObj, false, true));
             }
             return ret;
         }
@@ -541,7 +568,7 @@ public class GuiModList extends GuiScreen
             {
                 GlStateManager.enableBlend();
                 GuiModList.this.mc.renderEngine.bindTexture(logoPath);
-                WorldRenderer wr = tess.getWorldRenderer();
+                VertexBuffer wr = tess.getBuffer();
                 int offset = (this.left + this.listWidth/2) - (logoDims.width / 2);
                 wr.begin(7, DefaultVertexFormats.POSITION_TEX);
                 wr.pos(offset,                  top + logoDims.height, zLevel).tex(0, 1).endVertex();
@@ -553,7 +580,7 @@ public class GuiModList extends GuiScreen
                 top += logoDims.height + 10;
             }
 
-            for (IChatComponent line : lines)
+            for (ITextComponent line : lines)
             {
                 if (line != null)
                 {
@@ -580,14 +607,14 @@ public class GuiModList extends GuiScreen
             if (lineIdx >= lines.size())
                 return;
 
-            IChatComponent line = lines.get(lineIdx);
+            ITextComponent line = lines.get(lineIdx);
             if (line != null)
             {
                 int k = -4;
-                for (IChatComponent part : (Iterable<IChatComponent>)line) {
-                    if (!(part instanceof ChatComponentText))
+                for (ITextComponent part : line) {
+                    if (!(part instanceof TextComponentString))
                         continue;
-                    k += GuiModList.this.fontRendererObj.getStringWidth(((ChatComponentText)part).getChatComponentText_TextValue());
+                    k += GuiModList.this.fontRendererObj.getStringWidth(((TextComponentString)part).getText());
                     if (k >= x)
                     {
                         GuiModList.this.handleComponentClick(part);

@@ -1,7 +1,9 @@
 package net.minecraft.item;
 
+import java.util.List;
 import net.minecraft.block.BlockStandingSign;
 import net.minecraft.block.BlockWallSign;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -9,23 +11,23 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBanner;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 public class ItemBanner extends ItemBlock
 {
     public ItemBanner()
     {
-        super(Blocks.standing_banner);
+        super(Blocks.STANDING_BANNER);
         this.maxStackSize = 16;
-        this.setCreativeTab(CreativeTabs.tabDecorations);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
         this.setHasSubtypes(true);
         this.setMaxDamage(0);
     }
@@ -33,70 +35,67 @@ public class ItemBanner extends ItemBlock
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        if (side == EnumFacing.DOWN)
-        {
-            return false;
-        }
-        else if (!worldIn.getBlockState(pos).getBlock().getMaterial().isSolid())
-        {
-            return false;
-        }
-        else
-        {
-            pos = pos.offset(side);
+        IBlockState iblockstate = worldIn.getBlockState(pos);
+        boolean flag = iblockstate.getBlock().isReplaceable(worldIn, pos);
 
-            if (!playerIn.canPlayerEdit(pos, side, stack))
+        if (facing != EnumFacing.DOWN && (iblockstate.getMaterial().isSolid() || flag) && (!flag || facing == EnumFacing.UP))
+        {
+            pos = pos.offset(facing);
+
+            if (playerIn.canPlayerEdit(pos, facing, stack) && Blocks.STANDING_BANNER.canPlaceBlockAt(worldIn, pos))
             {
-                return false;
-            }
-            else if (!Blocks.standing_banner.canPlaceBlockAt(worldIn, pos))
-            {
-                return false;
-            }
-            else if (worldIn.isRemote)
-            {
-                return true;
-            }
-            else
-            {
-                if (side == EnumFacing.UP)
+                if (worldIn.isRemote)
                 {
-                    int i = MathHelper.floor_double((double)((playerIn.rotationYaw + 180.0F) * 16.0F / 360.0F) + 0.5D) & 15;
-                    worldIn.setBlockState(pos, Blocks.standing_banner.getDefaultState().withProperty(BlockStandingSign.ROTATION, Integer.valueOf(i)), 3);
+                    return EnumActionResult.SUCCESS;
                 }
                 else
                 {
-                    worldIn.setBlockState(pos, Blocks.wall_banner.getDefaultState().withProperty(BlockWallSign.FACING, side), 3);
+                    pos = flag ? pos.down() : pos;
+
+                    if (facing == EnumFacing.UP)
+                    {
+                        int i = MathHelper.floor_double((double)((playerIn.rotationYaw + 180.0F) * 16.0F / 360.0F) + 0.5D) & 15;
+                        worldIn.setBlockState(pos, Blocks.STANDING_BANNER.getDefaultState().withProperty(BlockStandingSign.ROTATION, Integer.valueOf(i)), 3);
+                    }
+                    else
+                    {
+                        worldIn.setBlockState(pos, Blocks.WALL_BANNER.getDefaultState().withProperty(BlockWallSign.FACING, facing), 3);
+                    }
+
+                    --stack.stackSize;
+                    TileEntity tileentity = worldIn.getTileEntity(pos);
+
+                    if (tileentity instanceof TileEntityBanner)
+                    {
+                        ((TileEntityBanner)tileentity).setItemValues(stack);
+                    }
+
+                    return EnumActionResult.SUCCESS;
                 }
-
-                --stack.stackSize;
-                TileEntity tileentity = worldIn.getTileEntity(pos);
-
-                if (tileentity instanceof TileEntityBanner)
-                {
-                    ((TileEntityBanner)tileentity).setItemValues(stack);
-                }
-
-                return true;
             }
+            else
+            {
+                return EnumActionResult.FAIL;
+            }
+        }
+        else
+        {
+            return EnumActionResult.FAIL;
         }
     }
 
     public String getItemStackDisplayName(ItemStack stack)
     {
         String s = "item.banner.";
-        EnumDyeColor enumdyecolor = this.getBaseColor(stack);
+        EnumDyeColor enumdyecolor = getBaseColor(stack);
         s = s + enumdyecolor.getUnlocalizedName() + ".name";
-        return StatCollector.translateToLocal(s);
+        return I18n.translateToLocal(s);
     }
 
-    /**
-     * allows items to add custom lines of information to the mouseover description
-     */
     @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
+    public static void appendHoverTextFromTileEntityTag(ItemStack stack, List<String> p_185054_1_)
     {
         NBTTagCompound nbttagcompound = stack.getSubCompound("BlockEntityTag", false);
 
@@ -112,24 +111,19 @@ public class ItemBanner extends ItemBlock
 
                 if (tileentitybanner$enumbannerpattern != null)
                 {
-                    tooltip.add(StatCollector.translateToLocal("item.banner." + tileentitybanner$enumbannerpattern.getPatternName() + "." + enumdyecolor.getUnlocalizedName()));
+                    p_185054_1_.add(I18n.translateToLocal("item.banner." + tileentitybanner$enumbannerpattern.getPatternName() + "." + enumdyecolor.getUnlocalizedName()));
                 }
             }
         }
     }
 
+    /**
+     * allows items to add custom lines of information to the mouseover description
+     */
     @SideOnly(Side.CLIENT)
-    public int getColorFromItemStack(ItemStack stack, int renderPass)
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
-        if (renderPass == 0)
-        {
-            return 16777215;
-        }
-        else
-        {
-            EnumDyeColor enumdyecolor = this.getBaseColor(stack);
-            return enumdyecolor.getMapColor().colorValue;
-        }
+        appendHoverTextFromTileEntityTag(stack, tooltip);
     }
 
     /**
@@ -141,7 +135,7 @@ public class ItemBanner extends ItemBlock
         for (EnumDyeColor enumdyecolor : EnumDyeColor.values())
         {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
-            TileEntityBanner.func_181020_a(nbttagcompound, enumdyecolor.getDyeDamage(), (NBTTagList)null);
+            TileEntityBanner.setBaseColorAndPatterns(nbttagcompound, enumdyecolor.getDyeDamage(), (NBTTagList)null);
             NBTTagCompound nbttagcompound1 = new NBTTagCompound();
             nbttagcompound1.setTag("BlockEntityTag", nbttagcompound);
             ItemStack itemstack = new ItemStack(itemIn, 1, enumdyecolor.getDyeDamage());
@@ -156,13 +150,13 @@ public class ItemBanner extends ItemBlock
     @SideOnly(Side.CLIENT)
     public CreativeTabs getCreativeTab()
     {
-        return CreativeTabs.tabDecorations;
+        return CreativeTabs.DECORATIONS;
     }
 
-    private EnumDyeColor getBaseColor(ItemStack stack)
+    public static EnumDyeColor getBaseColor(ItemStack stack)
     {
         NBTTagCompound nbttagcompound = stack.getSubCompound("BlockEntityTag", false);
-        EnumDyeColor enumdyecolor = null;
+        EnumDyeColor enumdyecolor;
 
         if (nbttagcompound != null && nbttagcompound.hasKey("Base"))
         {

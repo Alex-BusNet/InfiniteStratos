@@ -1,22 +1,41 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.common.toposort;
 
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import net.minecraftforge.fml.common.FMLLog;
 
-import java.util.*;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 
 /**
  * Topological sort for mod loading
@@ -169,7 +188,7 @@ public class TopologicalSort
             }
 
             FMLLog.severe("Mod Sorting failed.");
-            FMLLog.severe("Visting node %s", node);
+            FMLLog.severe("Visiting node %s", node);
             FMLLog.severe("Current sorted list : %s", sortedResult);
             FMLLog.severe("Visited set for this node : %s", visitedNodes);
             FMLLog.severe("Explored node set : %s", expandedNodes);

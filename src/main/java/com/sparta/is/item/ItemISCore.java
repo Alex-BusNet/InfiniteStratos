@@ -11,7 +11,8 @@ public class ItemISCore extends ItemIS
 {
     public ItemISCore()
     {
-        super();
+        //TODO: Add Core Variants to super();
+        super(Names.Parts.IS_CORE);
         this.setCreativeTab(CreativeTabIS.IS_TAB);
         this.setUnlocalizedName(Names.Parts.IS_CORE);
         this.setMaxStackSize(1);

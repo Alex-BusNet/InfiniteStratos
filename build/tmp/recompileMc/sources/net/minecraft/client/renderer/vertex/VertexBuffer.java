@@ -1,11 +1,10 @@
 package net.minecraft.client.renderer.vertex;
 
+import java.nio.ByteBuffer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.opengl.GL11;
-
-import java.nio.ByteBuffer;
 
 @SideOnly(Side.CLIENT)
 public class VertexBuffer
@@ -25,17 +24,17 @@ public class VertexBuffer
         OpenGlHelper.glBindBuffer(OpenGlHelper.GL_ARRAY_BUFFER, this.glBufferId);
     }
 
-    public void bufferData(ByteBuffer p_181722_1_)
+    public void bufferData(ByteBuffer data)
     {
         this.bindBuffer();
-        OpenGlHelper.glBufferData(OpenGlHelper.GL_ARRAY_BUFFER, p_181722_1_, 35044);
+        OpenGlHelper.glBufferData(OpenGlHelper.GL_ARRAY_BUFFER, data, 35044);
         this.unbindBuffer();
-        this.count = p_181722_1_.limit() / this.vertexFormat.getNextOffset();
+        this.count = data.limit() / this.vertexFormat.getNextOffset();
     }
 
     public void drawArrays(int mode)
     {
-        GL11.glDrawArrays(mode, 0, this.count);
+        GlStateManager.glDrawArrays(mode, 0, this.count);
     }
 
     public void unbindBuffer()

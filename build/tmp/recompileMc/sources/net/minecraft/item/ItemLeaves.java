@@ -1,8 +1,6 @@
 package net.minecraft.item;
 
 import net.minecraft.block.BlockLeaves;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemLeaves extends ItemBlock
 {
@@ -23,12 +21,6 @@ public class ItemLeaves extends ItemBlock
     public int getMetadata(int damage)
     {
         return damage | 4;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public int getColorFromItemStack(ItemStack stack, int renderPass)
-    {
-        return this.leaves.getRenderColor(this.leaves.getStateFromMeta(stack.getMetadata()));
     }
 
     /**

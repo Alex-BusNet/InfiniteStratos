@@ -1,24 +1,28 @@
 package net.minecraft.tileentity;
 
-import com.google.gson.JsonParseException;
+import javax.annotation.Nullable;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.event.ClickEvent;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S33PacketUpdateSign;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentUtils;
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntitySign extends TileEntity
 {
-    public final IChatComponent[] signText = new IChatComponent[] {new ChatComponentText(""), new ChatComponentText(""), new ChatComponentText(""), new ChatComponentText("")};
+    public final ITextComponent[] signText = new ITextComponent[] {new TextComponentString(""), new TextComponentString(""), new TextComponentString(""), new TextComponentString("")};
     /**
      * The index of the line currently being edited. Only used on client side, but defined on both. Note this is only
      * really used when the > < are going to be visible.
@@ -28,17 +32,23 @@ public class TileEntitySign extends TileEntity
     private EntityPlayer player;
     private final CommandResultStats stats = new CommandResultStats();
 
-    public void writeToNBT(NBTTagCompound compound)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
 
         for (int i = 0; i < 4; ++i)
         {
-            String s = IChatComponent.Serializer.componentToJson(this.signText[i]);
+            String s = ITextComponent.Serializer.componentToJson(this.signText[i]);
             compound.setString("Text" + (i + 1), s);
         }
 
         this.stats.writeStatsToNBT(compound);
+        return compound;
+    }
+
+    protected void func_190201_b(World p_190201_1_)
+    {
+        this.setWorldObj(p_190201_1_);
     }
 
     public void readFromNBT(NBTTagCompound compound)
@@ -57,14 +67,14 @@ public class TileEntitySign extends TileEntity
             /**
              * Get the formatted ChatComponent that will be used for the sender's username in chat
              */
-            public IChatComponent getDisplayName()
+            public ITextComponent getDisplayName()
             {
-                return new ChatComponentText(this.getName());
+                return new TextComponentString(this.getName());
             }
             /**
              * Send a chat message to the CommandSender
              */
-            public void addChatMessage(IChatComponent component)
+            public void addChatMessage(ITextComponent component)
             {
             }
             /**
@@ -86,9 +96,9 @@ public class TileEntitySign extends TileEntity
              * Get the position vector. <b>{@code null} is not allowed!</b> If you are not an entity in the world,
              * return 0.0D, 0.0D, 0.0D
              */
-            public Vec3 getPositionVector()
+            public Vec3d getPositionVector()
             {
-                return new Vec3((double)TileEntitySign.this.pos.getX() + 0.5D, (double)TileEntitySign.this.pos.getY() + 0.5D, (double)TileEntitySign.this.pos.getZ() + 0.5D);
+                return new Vec3d((double)TileEntitySign.this.pos.getX() + 0.5D, (double)TileEntitySign.this.pos.getY() + 0.5D, (double)TileEntitySign.this.pos.getZ() + 0.5D);
             }
             /**
              * Get the world, if available. <b>{@code null} is not allowed!</b> If you are not an entity in the world,
@@ -115,46 +125,45 @@ public class TileEntitySign extends TileEntity
             public void setCommandStat(CommandResultStats.Type type, int amount)
             {
             }
+            /**
+             * Get the Minecraft server instance
+             */
+            public MinecraftServer getServer()
+            {
+                return TileEntitySign.this.worldObj.getMinecraftServer();
+            }
         };
 
         for (int i = 0; i < 4; ++i)
         {
             String s = compound.getString("Text" + (i + 1));
+            ITextComponent itextcomponent = ITextComponent.Serializer.jsonToComponent(s);
 
             try
             {
-                IChatComponent ichatcomponent = IChatComponent.Serializer.jsonToComponent(s);
-
-                try
-                {
-                    this.signText[i] = ChatComponentProcessor.processComponent(icommandsender, ichatcomponent, (Entity)null);
-                }
-                catch (CommandException var7)
-                {
-                    this.signText[i] = ichatcomponent;
-                }
+                this.signText[i] = TextComponentUtils.processComponent(icommandsender, itextcomponent, (Entity)null);
             }
-            catch (JsonParseException var8)
+            catch (CommandException var7)
             {
-                this.signText[i] = new ChatComponentText(s);
+                this.signText[i] = itextcomponent;
             }
         }
 
         this.stats.readStatsFromNBT(compound);
     }
 
-    /**
-     * Allows for a specialized description packet to be created. This is often used to sync tile entity data from the
-     * server to the client easily. For example this is used by signs to synchronise the text to be displayed.
-     */
-    public Packet getDescriptionPacket()
+    @Nullable
+    public SPacketUpdateTileEntity getUpdatePacket()
     {
-        IChatComponent[] aichatcomponent = new IChatComponent[4];
-        System.arraycopy(this.signText, 0, aichatcomponent, 0, 4);
-        return new S33PacketUpdateSign(this.worldObj, this.pos, aichatcomponent);
+        return new SPacketUpdateTileEntity(this.pos, 9, this.getUpdateTag());
     }
 
-    public boolean func_183000_F()
+    public NBTTagCompound getUpdateTag()
+    {
+        return this.writeToNBT(new NBTTagCompound());
+    }
+
+    public boolean onlyOpsCanSetNbt()
     {
         return true;
     }
@@ -202,14 +211,14 @@ public class TileEntitySign extends TileEntity
             /**
              * Get the formatted ChatComponent that will be used for the sender's username in chat
              */
-            public IChatComponent getDisplayName()
+            public ITextComponent getDisplayName()
             {
                 return playerIn.getDisplayName();
             }
             /**
              * Send a chat message to the CommandSender
              */
-            public void addChatMessage(IChatComponent component)
+            public void addChatMessage(ITextComponent component)
             {
             }
             /**
@@ -231,9 +240,9 @@ public class TileEntitySign extends TileEntity
              * Get the position vector. <b>{@code null} is not allowed!</b> If you are not an entity in the world,
              * return 0.0D, 0.0D, 0.0D
              */
-            public Vec3 getPositionVector()
+            public Vec3d getPositionVector()
             {
-                return new Vec3((double)TileEntitySign.this.pos.getX() + 0.5D, (double)TileEntitySign.this.pos.getY() + 0.5D, (double)TileEntitySign.this.pos.getZ() + 0.5D);
+                return new Vec3d((double)TileEntitySign.this.pos.getX() + 0.5D, (double)TileEntitySign.this.pos.getY() + 0.5D, (double)TileEntitySign.this.pos.getZ() + 0.5D);
             }
             /**
              * Get the world, if available. <b>{@code null} is not allowed!</b> If you are not an entity in the world,
@@ -259,21 +268,31 @@ public class TileEntitySign extends TileEntity
             }
             public void setCommandStat(CommandResultStats.Type type, int amount)
             {
-                TileEntitySign.this.stats.func_179672_a(this, type, amount);
+                if (TileEntitySign.this.worldObj != null && !TileEntitySign.this.worldObj.isRemote)
+                {
+                    TileEntitySign.this.stats.setCommandStatForSender(TileEntitySign.this.worldObj.getMinecraftServer(), this, type, amount);
+                }
+            }
+            /**
+             * Get the Minecraft server instance
+             */
+            public MinecraftServer getServer()
+            {
+                return playerIn.getServer();
             }
         };
 
-        for (int i = 0; i < this.signText.length; ++i)
+        for (ITextComponent itextcomponent : this.signText)
         {
-            ChatStyle chatstyle = this.signText[i] == null ? null : this.signText[i].getChatStyle();
+            Style style = itextcomponent == null ? null : itextcomponent.getStyle();
 
-            if (chatstyle != null && chatstyle.getChatClickEvent() != null)
+            if (style != null && style.getClickEvent() != null)
             {
-                ClickEvent clickevent = chatstyle.getChatClickEvent();
+                ClickEvent clickevent = style.getClickEvent();
 
                 if (clickevent.getAction() == ClickEvent.Action.RUN_COMMAND)
                 {
-                    MinecraftServer.getServer().getCommandManager().executeCommand(icommandsender, clickevent.getValue());
+                    playerIn.getServer().getCommandManager().executeCommand(icommandsender, clickevent.getValue());
                 }
             }
         }

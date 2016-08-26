@@ -1,5 +1,7 @@
 package net.minecraft.block;
 
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
@@ -7,78 +9,54 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.world.ColorizerFoliage;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeColorHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Random;
-
-public abstract class BlockLeaves extends BlockLeavesBase implements net.minecraftforge.common.IShearable
+public abstract class BlockLeaves extends Block implements net.minecraftforge.common.IShearable
 {
     public static final PropertyBool DECAYABLE = PropertyBool.create("decayable");
     public static final PropertyBool CHECK_DECAY = PropertyBool.create("check_decay");
+    protected boolean leavesFancy;
     int[] surroundings;
-    @SideOnly(Side.CLIENT)
-    protected int iconIndex;
-    @SideOnly(Side.CLIENT)
-    protected boolean isTransparent;
 
     public BlockLeaves()
     {
-        super(Material.leaves, false);
+        super(Material.LEAVES);
         this.setTickRandomly(true);
-        this.setCreativeTab(CreativeTabs.tabDecorations);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
         this.setHardness(0.2F);
         this.setLightOpacity(1);
-        this.setStepSound(soundTypeGrass);
-    }
-
-    @SideOnly(Side.CLIENT)
-    public int getBlockColor()
-    {
-        return ColorizerFoliage.getFoliageColor(0.5D, 1.0D);
-    }
-
-    @SideOnly(Side.CLIENT)
-    public int getRenderColor(IBlockState state)
-    {
-        return ColorizerFoliage.getFoliageColorBasic();
-    }
-
-    @SideOnly(Side.CLIENT)
-    public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
-    {
-        return BiomeColorHelper.getFoliageColorAtPos(worldIn, pos);
+        this.setSoundType(SoundType.PLANT);
     }
 
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         int i = 1;
-        int j = i + 1;
+        int j = 2;
         int k = pos.getX();
         int l = pos.getY();
         int i1 = pos.getZ();
 
-        if (worldIn.isAreaLoaded(new BlockPos(k - j, l - j, i1 - j), new BlockPos(k + j, l + j, i1 + j)))
+        if (worldIn.isAreaLoaded(new BlockPos(k - 2, l - 2, i1 - 2), new BlockPos(k + 2, l + 2, i1 + 2)))
         {
-            for (int j1 = -i; j1 <= i; ++j1)
+            for (int j1 = -1; j1 <= 1; ++j1)
             {
-                for (int k1 = -i; k1 <= i; ++k1)
+                for (int k1 = -1; k1 <= 1; ++k1)
                 {
-                    for (int l1 = -i; l1 <= i; ++l1)
+                    for (int l1 = -1; l1 <= 1; ++l1)
                     {
                         BlockPos blockpos = pos.add(j1, k1, l1);
                         IBlockState iblockstate = worldIn.getBlockState(blockpos);
 
-                        if (iblockstate.getBlock().isLeaves(worldIn, blockpos))
+                        if (iblockstate.getBlock().isLeaves(iblockstate, worldIn, blockpos))
                         {
-                            iblockstate.getBlock().beginLeavesDecay(worldIn, blockpos);
+                            iblockstate.getBlock().beginLeavesDecay(iblockstate, worldIn, blockpos);
                         }
                     }
                 }
@@ -93,45 +71,46 @@ public abstract class BlockLeaves extends BlockLeavesBase implements net.minecra
             if (((Boolean)state.getValue(CHECK_DECAY)).booleanValue() && ((Boolean)state.getValue(DECAYABLE)).booleanValue())
             {
                 int i = 4;
-                int j = i + 1;
+                int j = 5;
                 int k = pos.getX();
                 int l = pos.getY();
                 int i1 = pos.getZ();
                 int j1 = 32;
-                int k1 = j1 * j1;
-                int l1 = j1 / 2;
+                int k1 = 1024;
+                int l1 = 16;
 
                 if (this.surroundings == null)
                 {
-                    this.surroundings = new int[j1 * j1 * j1];
+                    this.surroundings = new int[32768];
                 }
 
-                if (worldIn.isAreaLoaded(new BlockPos(k - j, l - j, i1 - j), new BlockPos(k + j, l + j, i1 + j)))
+                if (worldIn.isAreaLoaded(new BlockPos(k - 5, l - 5, i1 - 5), new BlockPos(k + 5, l + 5, i1 + 5)))
                 {
                     BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
-                    for (int i2 = -i; i2 <= i; ++i2)
+                    for (int i2 = -4; i2 <= 4; ++i2)
                     {
-                        for (int j2 = -i; j2 <= i; ++j2)
+                        for (int j2 = -4; j2 <= 4; ++j2)
                         {
-                            for (int k2 = -i; k2 <= i; ++k2)
+                            for (int k2 = -4; k2 <= 4; ++k2)
                             {
-                                Block block = worldIn.getBlockState(blockpos$mutableblockpos.set(k + i2, l + j2, i1 + k2)).getBlock();
+                                IBlockState iblockstate = worldIn.getBlockState(blockpos$mutableblockpos.setPos(k + i2, l + j2, i1 + k2));
+                                Block block = iblockstate.getBlock();
 
-                                if (!block.canSustainLeaves(worldIn, blockpos$mutableblockpos.set(k + i2, l + j2, i1 + k2)))
+                                if (!block.canSustainLeaves(iblockstate, worldIn, blockpos$mutableblockpos.setPos(k + i2, l + j2, i1 + k2)))
                                 {
-                                    if (block.isLeaves(worldIn, blockpos$mutableblockpos.set(k + i2, l + j2, i1 + k2)))
+                                    if (block.isLeaves(iblockstate, worldIn, blockpos$mutableblockpos.setPos(k + i2, l + j2, i1 + k2)))
                                     {
-                                        this.surroundings[(i2 + l1) * k1 + (j2 + l1) * j1 + k2 + l1] = -2;
+                                        this.surroundings[(i2 + 16) * 1024 + (j2 + 16) * 32 + k2 + 16] = -2;
                                     }
                                     else
                                     {
-                                        this.surroundings[(i2 + l1) * k1 + (j2 + l1) * j1 + k2 + l1] = -1;
+                                        this.surroundings[(i2 + 16) * 1024 + (j2 + 16) * 32 + k2 + 16] = -1;
                                     }
                                 }
                                 else
                                 {
-                                    this.surroundings[(i2 + l1) * k1 + (j2 + l1) * j1 + k2 + l1] = 0;
+                                    this.surroundings[(i2 + 16) * 1024 + (j2 + 16) * 32 + k2 + 16] = 0;
                                 }
                             }
                         }
@@ -139,42 +118,42 @@ public abstract class BlockLeaves extends BlockLeavesBase implements net.minecra
 
                     for (int i3 = 1; i3 <= 4; ++i3)
                     {
-                        for (int j3 = -i; j3 <= i; ++j3)
+                        for (int j3 = -4; j3 <= 4; ++j3)
                         {
-                            for (int k3 = -i; k3 <= i; ++k3)
+                            for (int k3 = -4; k3 <= 4; ++k3)
                             {
-                                for (int l3 = -i; l3 <= i; ++l3)
+                                for (int l3 = -4; l3 <= 4; ++l3)
                                 {
-                                    if (this.surroundings[(j3 + l1) * k1 + (k3 + l1) * j1 + l3 + l1] == i3 - 1)
+                                    if (this.surroundings[(j3 + 16) * 1024 + (k3 + 16) * 32 + l3 + 16] == i3 - 1)
                                     {
-                                        if (this.surroundings[(j3 + l1 - 1) * k1 + (k3 + l1) * j1 + l3 + l1] == -2)
+                                        if (this.surroundings[(j3 + 16 - 1) * 1024 + (k3 + 16) * 32 + l3 + 16] == -2)
                                         {
-                                            this.surroundings[(j3 + l1 - 1) * k1 + (k3 + l1) * j1 + l3 + l1] = i3;
+                                            this.surroundings[(j3 + 16 - 1) * 1024 + (k3 + 16) * 32 + l3 + 16] = i3;
                                         }
 
-                                        if (this.surroundings[(j3 + l1 + 1) * k1 + (k3 + l1) * j1 + l3 + l1] == -2)
+                                        if (this.surroundings[(j3 + 16 + 1) * 1024 + (k3 + 16) * 32 + l3 + 16] == -2)
                                         {
-                                            this.surroundings[(j3 + l1 + 1) * k1 + (k3 + l1) * j1 + l3 + l1] = i3;
+                                            this.surroundings[(j3 + 16 + 1) * 1024 + (k3 + 16) * 32 + l3 + 16] = i3;
                                         }
 
-                                        if (this.surroundings[(j3 + l1) * k1 + (k3 + l1 - 1) * j1 + l3 + l1] == -2)
+                                        if (this.surroundings[(j3 + 16) * 1024 + (k3 + 16 - 1) * 32 + l3 + 16] == -2)
                                         {
-                                            this.surroundings[(j3 + l1) * k1 + (k3 + l1 - 1) * j1 + l3 + l1] = i3;
+                                            this.surroundings[(j3 + 16) * 1024 + (k3 + 16 - 1) * 32 + l3 + 16] = i3;
                                         }
 
-                                        if (this.surroundings[(j3 + l1) * k1 + (k3 + l1 + 1) * j1 + l3 + l1] == -2)
+                                        if (this.surroundings[(j3 + 16) * 1024 + (k3 + 16 + 1) * 32 + l3 + 16] == -2)
                                         {
-                                            this.surroundings[(j3 + l1) * k1 + (k3 + l1 + 1) * j1 + l3 + l1] = i3;
+                                            this.surroundings[(j3 + 16) * 1024 + (k3 + 16 + 1) * 32 + l3 + 16] = i3;
                                         }
 
-                                        if (this.surroundings[(j3 + l1) * k1 + (k3 + l1) * j1 + (l3 + l1 - 1)] == -2)
+                                        if (this.surroundings[(j3 + 16) * 1024 + (k3 + 16) * 32 + (l3 + 16 - 1)] == -2)
                                         {
-                                            this.surroundings[(j3 + l1) * k1 + (k3 + l1) * j1 + (l3 + l1 - 1)] = i3;
+                                            this.surroundings[(j3 + 16) * 1024 + (k3 + 16) * 32 + (l3 + 16 - 1)] = i3;
                                         }
 
-                                        if (this.surroundings[(j3 + l1) * k1 + (k3 + l1) * j1 + l3 + l1 + 1] == -2)
+                                        if (this.surroundings[(j3 + 16) * 1024 + (k3 + 16) * 32 + l3 + 16 + 1] == -2)
                                         {
-                                            this.surroundings[(j3 + l1) * k1 + (k3 + l1) * j1 + l3 + l1 + 1] = i3;
+                                            this.surroundings[(j3 + 16) * 1024 + (k3 + 16) * 32 + l3 + 16 + 1] = i3;
                                         }
                                     }
                                 }
@@ -183,7 +162,7 @@ public abstract class BlockLeaves extends BlockLeavesBase implements net.minecra
                     }
                 }
 
-                int l2 = this.surroundings[l1 * k1 + l1 * j1 + l1];
+                int l2 = this.surroundings[16912];
 
                 if (l2 >= 0)
                 {
@@ -197,22 +176,22 @@ public abstract class BlockLeaves extends BlockLeavesBase implements net.minecra
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    public void randomDisplayTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    private void destroy(World worldIn, BlockPos pos)
     {
-        if (worldIn.canLightningStrike(pos.up()) && !World.doesBlockHaveSolidTopSurface(worldIn, pos.down()) && rand.nextInt(15) == 1)
+        this.dropBlockAsItem(worldIn, pos, worldIn.getBlockState(pos), 0);
+        worldIn.setBlockToAir(pos);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
+    {
+        if (worldIn.isRainingAt(pos.up()) && !worldIn.getBlockState(pos.down()).isFullyOpaque() && rand.nextInt(15) == 1)
         {
             double d0 = (double)((float)pos.getX() + rand.nextFloat());
             double d1 = (double)pos.getY() - 0.05D;
             double d2 = (double)((float)pos.getZ() + rand.nextFloat());
             worldIn.spawnParticle(EnumParticleTypes.DRIP_WATER, d0, d1, d2, 0.0D, 0.0D, 0.0D, new int[0]);
         }
-    }
-
-    private void destroy(World worldIn, BlockPos pos)
-    {
-        this.dropBlockAsItem(worldIn, pos, worldIn.getBlockState(pos), 0);
-        worldIn.setBlockToAir(pos);
     }
 
     /**
@@ -226,9 +205,10 @@ public abstract class BlockLeaves extends BlockLeavesBase implements net.minecra
     /**
      * Get the Item that this Block should drop when harvested.
      */
+    @Nullable
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Item.getItemFromBlock(Blocks.sapling);
+        return Item.getItemFromBlock(Blocks.SAPLING);
     }
 
     /**
@@ -251,9 +231,9 @@ public abstract class BlockLeaves extends BlockLeavesBase implements net.minecra
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
-        return !this.fancyGraphics;
+        return !this.leavesFancy;
     }
 
     /**
@@ -262,15 +242,13 @@ public abstract class BlockLeaves extends BlockLeavesBase implements net.minecra
     @SideOnly(Side.CLIENT)
     public void setGraphicsLevel(boolean fancy)
     {
-        this.isTransparent = fancy;
-        this.fancyGraphics = fancy;
-        this.iconIndex = fancy ? 0 : 1;
+        this.leavesFancy = fancy;
     }
 
     @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return this.isTransparent ? EnumWorldBlockLayer.CUTOUT_MIPPED : EnumWorldBlockLayer.SOLID;
+        return this.leavesFancy ? BlockRenderLayer.CUTOUT_MIPPED : BlockRenderLayer.SOLID;
     }
 
     public boolean isVisuallyOpaque()
@@ -281,12 +259,11 @@ public abstract class BlockLeaves extends BlockLeavesBase implements net.minecra
     public abstract BlockPlanks.EnumType getWoodType(int meta);
 
     @Override public boolean isShearable(ItemStack item, IBlockAccess world, BlockPos pos){ return true; }
-    @Override public boolean isLeaves(IBlockAccess world, BlockPos pos){ return true; }
+    @Override public boolean isLeaves(IBlockState state, IBlockAccess world, BlockPos pos){ return true; }
 
     @Override
-    public void beginLeavesDecay(World world, BlockPos pos)
+    public void beginLeavesDecay(IBlockState state, World world, BlockPos pos)
     {
-        IBlockState state = world.getBlockState(pos);
         if (!(Boolean)state.getValue(CHECK_DECAY))
         {
             world.setBlockState(pos, state.withProperty(CHECK_DECAY, true), 4);
@@ -323,4 +300,10 @@ public abstract class BlockLeaves extends BlockLeavesBase implements net.minecra
         return ret;
     }
 
+
+    @SideOnly(Side.CLIENT)
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
+    {
+        return !this.leavesFancy && blockAccess.getBlockState(pos.offset(side)).getBlock() == this ? false : super.shouldSideBeRendered(blockState, blockAccess, pos, side);
+    }
 }

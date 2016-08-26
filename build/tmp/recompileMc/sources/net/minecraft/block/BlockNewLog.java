@@ -1,10 +1,12 @@
 package net.minecraft.block;
 
 import com.google.common.base.Predicate;
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -12,13 +14,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
-
 public class BlockNewLog extends BlockLog
 {
     public static final PropertyEnum<BlockPlanks.EnumType> VARIANT = PropertyEnum.<BlockPlanks.EnumType>create("variant", BlockPlanks.EnumType.class, new Predicate<BlockPlanks.EnumType>()
     {
-        public boolean apply(BlockPlanks.EnumType p_apply_1_)
+        public boolean apply(@Nullable BlockPlanks.EnumType p_apply_1_)
         {
             return p_apply_1_.getMetadata() >= 4;
         }
@@ -47,13 +47,13 @@ public class BlockNewLog extends BlockLog
                 {
                     case ACACIA:
                     default:
-                        return MapColor.stoneColor;
+                        return MapColor.STONE;
                     case DARK_OAK:
-                        return BlockPlanks.EnumType.DARK_OAK.func_181070_c();
+                        return BlockPlanks.EnumType.DARK_OAK.getMapColor();
                 }
 
             case Y:
-                return blockplanks$enumtype.func_181070_c();
+                return blockplanks$enumtype.getMapColor();
         }
     }
 
@@ -116,9 +116,9 @@ public class BlockNewLog extends BlockLog
         return i;
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {VARIANT, LOG_AXIS});
+        return new BlockStateContainer(this, new IProperty[] {VARIANT, LOG_AXIS});
     }
 
     protected ItemStack createStackedBlock(IBlockState state)

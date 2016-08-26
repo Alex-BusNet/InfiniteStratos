@@ -1,11 +1,12 @@
 package net.minecraft.util;
 
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import javax.annotation.Nullable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Logger;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 
 public class Util
 {
@@ -16,6 +17,7 @@ public class Util
         return s.contains("win") ? Util.EnumOS.WINDOWS : (s.contains("mac") ? Util.EnumOS.OSX : (s.contains("solaris") ? Util.EnumOS.SOLARIS : (s.contains("sunos") ? Util.EnumOS.SOLARIS : (s.contains("linux") ? Util.EnumOS.LINUX : (s.contains("unix") ? Util.EnumOS.LINUX : Util.EnumOS.UNKNOWN)))));
     }
 
+    @Nullable
     public static <V> V runTask(FutureTask<V> task, Logger logger)
     {
         try
@@ -33,6 +35,11 @@ public class Util
         }
 
         return (V)null;
+    }
+
+    public static <T> T getLastElement(List<T> list)
+    {
+        return (T)list.get(list.size() - 1);
     }
 
     @SideOnly(Side.CLIENT)

@@ -1,19 +1,20 @@
 package com.sparta.is.block;
 
-import com.sparta.is.reference.RenderIds;
 import com.sparta.is.tileentity.TileEntityUnitStand;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.world.World;
 
 public class BlockUnitStand extends BlockTileEntityIS
 {
     public BlockUnitStand()
     {
-        super(Material.anvil);
+        super(Material.ANVIL);
         this.setHardness(2.0f);
 //        this.setBlockName(Names.Blocks.UNIT_STAND);
-        this.setBlockBounds(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+//        this.setBlockBounds(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
     }
 
     @Override
@@ -29,15 +30,15 @@ public class BlockUnitStand extends BlockTileEntityIS
 //    }
 
     @Override
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
     @Override
-    public int getRenderType()
+    public EnumBlockRenderType getRenderType(IBlockState state)
     {
-        return RenderIds.unitStand;
+        return EnumBlockRenderType.MODEL;
     }
 
 //    @Override

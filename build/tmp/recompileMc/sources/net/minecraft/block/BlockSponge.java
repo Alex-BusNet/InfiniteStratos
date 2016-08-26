@@ -1,24 +1,26 @@
 package net.minecraft.block;
 
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Queue;
+import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.*;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.Tuple;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
 
 public class BlockSponge extends Block
 {
@@ -26,9 +28,9 @@ public class BlockSponge extends Block
 
     protected BlockSponge()
     {
-        super(Material.sponge);
+        super(Material.SPONGE);
         this.setDefaultState(this.blockState.getBaseState().withProperty(WET, Boolean.valueOf(false)));
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -36,7 +38,7 @@ public class BlockSponge extends Block
      */
     public String getLocalizedName()
     {
-        return StatCollector.translateToLocal(this.getUnlocalizedName() + ".dry.name");
+        return I18n.translateToLocal(this.getUnlocalizedName() + ".dry.name");
     }
 
     /**
@@ -54,12 +56,14 @@ public class BlockSponge extends Block
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn)
     {
         this.tryAbsorb(worldIn, pos, state);
-        super.onNeighborBlockChange(worldIn, pos, state, neighborBlock);
+        super.neighborChanged(state, worldIn, pos, blockIn);
     }
 
     protected void tryAbsorb(World worldIn, BlockPos pos, IBlockState state)
@@ -67,14 +71,14 @@ public class BlockSponge extends Block
         if (!((Boolean)state.getValue(WET)).booleanValue() && this.absorb(worldIn, pos))
         {
             worldIn.setBlockState(pos, state.withProperty(WET, Boolean.valueOf(true)), 2);
-            worldIn.playAuxSFX(2001, pos, Block.getIdFromBlock(Blocks.water));
+            worldIn.playEvent(2001, pos, Block.getIdFromBlock(Blocks.WATER));
         }
     }
 
     private boolean absorb(World worldIn, BlockPos pos)
     {
         Queue<Tuple<BlockPos, Integer>> queue = Lists.<Tuple<BlockPos, Integer>>newLinkedList();
-        ArrayList<BlockPos> arraylist = Lists.<BlockPos>newArrayList();
+        List<BlockPos> list = Lists.<BlockPos>newArrayList();
         queue.add(new Tuple(pos, Integer.valueOf(0)));
         int i = 0;
 
@@ -88,10 +92,10 @@ public class BlockSponge extends Block
             {
                 BlockPos blockpos1 = blockpos.offset(enumfacing);
 
-                if (worldIn.getBlockState(blockpos1).getBlock().getMaterial() == Material.water)
+                if (worldIn.getBlockState(blockpos1).getMaterial() == Material.WATER)
                 {
-                    worldIn.setBlockState(blockpos1, Blocks.air.getDefaultState(), 2);
-                    arraylist.add(blockpos1);
+                    worldIn.setBlockState(blockpos1, Blocks.AIR.getDefaultState(), 2);
+                    list.add(blockpos1);
                     ++i;
 
                     if (j < 6)
@@ -107,9 +111,9 @@ public class BlockSponge extends Block
             }
         }
 
-        for (BlockPos blockpos2 : arraylist)
+        for (BlockPos blockpos2 : list)
         {
-            worldIn.notifyNeighborsOfStateChange(blockpos2, Blocks.air);
+            worldIn.notifyNeighborsOfStateChange(blockpos2, Blocks.AIR);
         }
 
         return i > 0;
@@ -141,19 +145,19 @@ public class BlockSponge extends Block
         return ((Boolean)state.getValue(WET)).booleanValue() ? 1 : 0;
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {WET});
+        return new BlockStateContainer(this, new IProperty[] {WET});
     }
 
     @SideOnly(Side.CLIENT)
-    public void randomDisplayTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
     {
-        if (((Boolean)state.getValue(WET)).booleanValue())
+        if (((Boolean)stateIn.getValue(WET)).booleanValue())
         {
             EnumFacing enumfacing = EnumFacing.random(rand);
 
-            if (enumfacing != EnumFacing.UP && !World.doesBlockHaveSolidTopSurface(worldIn, pos.offset(enumfacing)))
+            if (enumfacing != EnumFacing.UP && !worldIn.getBlockState(pos.offset(enumfacing)).isFullyOpaque())
             {
                 double d0 = (double)pos.getX();
                 double d1 = (double)pos.getY();

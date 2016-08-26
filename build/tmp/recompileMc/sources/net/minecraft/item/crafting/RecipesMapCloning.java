@@ -1,5 +1,6 @@
 package net.minecraft.item.crafting;
 
+import javax.annotation.Nullable;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
@@ -21,7 +22,7 @@ public class RecipesMapCloning implements IRecipe
 
             if (itemstack1 != null)
             {
-                if (itemstack1.getItem() == Items.filled_map)
+                if (itemstack1.getItem() == Items.FILLED_MAP)
                 {
                     if (itemstack != null)
                     {
@@ -32,7 +33,7 @@ public class RecipesMapCloning implements IRecipe
                 }
                 else
                 {
-                    if (itemstack1.getItem() != Items.map)
+                    if (itemstack1.getItem() != Items.MAP)
                     {
                         return false;
                     }
@@ -48,6 +49,7 @@ public class RecipesMapCloning implements IRecipe
     /**
      * Returns an Item that is the result of this recipe
      */
+    @Nullable
     public ItemStack getCraftingResult(InventoryCrafting inv)
     {
         int i = 0;
@@ -59,7 +61,7 @@ public class RecipesMapCloning implements IRecipe
 
             if (itemstack1 != null)
             {
-                if (itemstack1.getItem() == Items.filled_map)
+                if (itemstack1.getItem() == Items.FILLED_MAP)
                 {
                     if (itemstack != null)
                     {
@@ -70,7 +72,7 @@ public class RecipesMapCloning implements IRecipe
                 }
                 else
                 {
-                    if (itemstack1.getItem() != Items.map)
+                    if (itemstack1.getItem() != Items.MAP)
                     {
                         return null;
                     }
@@ -82,7 +84,7 @@ public class RecipesMapCloning implements IRecipe
 
         if (itemstack != null && i >= 1)
         {
-            ItemStack itemstack2 = new ItemStack(Items.filled_map, i + 1, itemstack.getMetadata());
+            ItemStack itemstack2 = new ItemStack(Items.FILLED_MAP, i + 1, itemstack.getMetadata());
 
             if (itemstack.hasDisplayName())
             {
@@ -105,6 +107,7 @@ public class RecipesMapCloning implements IRecipe
         return 9;
     }
 
+    @Nullable
     public ItemStack getRecipeOutput()
     {
         return null;

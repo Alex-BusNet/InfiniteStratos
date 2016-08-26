@@ -7,8 +7,8 @@ public class EntityNotFoundException extends CommandException
         this("commands.generic.entity.notFound", new Object[0]);
     }
 
-    public EntityNotFoundException(String p_i46035_1_, Object... p_i46035_2_)
+    public EntityNotFoundException(String message, Object... args)
     {
-        super(p_i46035_1_, p_i46035_2_);
+        super(message, args);
     }
 }

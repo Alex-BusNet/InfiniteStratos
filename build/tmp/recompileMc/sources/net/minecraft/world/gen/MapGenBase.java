@@ -1,10 +1,8 @@
 package net.minecraft.world.gen;
 
+import java.util.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.chunk.IChunkProvider;
-
-import java.util.Random;
 
 public class MapGenBase
 {
@@ -15,7 +13,7 @@ public class MapGenBase
     /** This world object. */
     protected World worldObj;
 
-    public void generate(IChunkProvider chunkProviderIn, World worldIn, int x, int z, ChunkPrimer chunkPrimerIn)
+    public void generate(World worldIn, int x, int z, ChunkPrimer primer)
     {
         int i = this.range;
         this.worldObj = worldIn;
@@ -30,7 +28,7 @@ public class MapGenBase
                 long j1 = (long)l * j;
                 long k1 = (long)i1 * k;
                 this.rand.setSeed(j1 ^ k1 ^ worldIn.getSeed());
-                this.recursiveGenerate(worldIn, l, i1, x, z, chunkPrimerIn);
+                this.recursiveGenerate(worldIn, l, i1, x, z, primer);
             }
         }
     }

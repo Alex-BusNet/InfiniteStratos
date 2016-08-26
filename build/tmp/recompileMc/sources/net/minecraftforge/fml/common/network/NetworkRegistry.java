@@ -1,23 +1,36 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.common.network;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
 import io.netty.util.AttributeKey;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.apache.logging.log4j.Level;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -33,12 +46,9 @@ import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import net.minecraftforge.fml.common.network.internal.NetworkModHolder;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
-import org.apache.logging.log4j.Level;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 /**
  * @author cpw
@@ -107,7 +117,7 @@ public enum NetworkRegistry
      * <ul>
      * <li> {@link #newSimpleChannel(String)} provides {@link SimpleNetworkWrapper}, a simple implementation of a netty handler, suitable for those who don't
      * wish to dive too deeply into netty.
-     * <li> {@link #newEventChannel(String)} provides {@link FMLEventChannel} an event driven implementation, with lower level
+     * <li> {@link #newEventDrivenChannel(String)} (String)} provides {@link FMLEventChannel} an event driven implementation, with lower level
      * access to the network data stream, for those with advanced bitbanging needs that don't wish to poke netty too hard.
      * <li> Alternatively, simply use the netty features provided here and implement the full power of the netty stack.
      * </ul>
@@ -121,7 +131,7 @@ public enum NetworkRegistry
      *
      * The first handler in the pipeline is special and should not be removed or moved from the head - it transforms
      * packets from the outbound of this pipeline into custom packets, based on the current {@link AttributeKey} value
-     * {@link NetworkRegistry#FML_MESSAGETARGET} and {@link NetworkRegistry#FML_MESSAGETARGETARGS} set on the channel.
+     * {@link FMLOutboundHandler#FML_MESSAGETARGET} and {@link FMLOutboundHandler#FML_MESSAGETARGETARGS} set on the channel.
      * For the client to server channel (source side : CLIENT) this is fixed as "TOSERVER". For SERVER to CLIENT packets,
      * several possible values exist.
      *
@@ -129,7 +139,7 @@ public enum NetworkRegistry
      * a utility codec, {@link FMLIndexedMessageToMessageCodec} that transforms from {@link FMLProxyPacket} to a mod
      * message using a message discriminator byte. This is optional, but highly recommended for use.
      *
-     * Note also that the handlers supplied need to be {@link ChannelHandler.Shareable} - they are injected into two
+     * Note also that the handlers supplied need to be {@link ChannelHandler.Sharable} - they are injected into two
      * channels.
      *
      * @param name
@@ -255,7 +265,7 @@ public enum NetworkRegistry
      * @param x X coord
      * @param y Y coord
      * @param z Z coord
-     * @return The client side GUI object (An instance of {@link GUI})
+     * @return The client side GUI object (An instance of {@link net.minecraft.client.gui.Gui})
      */
     public Object getLocalGuiContainer(ModContainer mc, EntityPlayer player, int modGuiId, World world, int x, int y, int z)
     {

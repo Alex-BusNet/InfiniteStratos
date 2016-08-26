@@ -1,14 +1,15 @@
 package net.minecraft.command.server;
 
 import com.mojang.authlib.GameProfile;
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-
-import java.util.List;
+import net.minecraft.util.math.BlockPos;
 
 public class CommandPardonPlayer extends CommandBase
 {
@@ -30,8 +31,6 @@ public class CommandPardonPlayer extends CommandBase
 
     /**
      * Gets the usage string for the command.
-     *  
-     * @param sender The command sender that executed the command
      */
     public String getCommandUsage(ICommandSender sender)
     {
@@ -39,25 +38,21 @@ public class CommandPardonPlayer extends CommandBase
     }
 
     /**
-     * Returns true if the given command sender is allowed to use this command.
+     * Check if the given ICommandSender has permission to execute this command
      */
-    public boolean canCommandSenderUseCommand(ICommandSender sender)
+    public boolean checkPermission(MinecraftServer server, ICommandSender sender)
     {
-        return MinecraftServer.getServer().getConfigurationManager().getBannedPlayers().isLanServer() && super.canCommandSenderUseCommand(sender);
+        return server.getPlayerList().getBannedPlayers().isLanServer() && super.checkPermission(server, sender);
     }
 
     /**
-     * Callback when the command is invoked
-     *  
-     * @param sender The command sender that executed the command
-     * @param args The arguments that were passed
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length == 1 && args[0].length() > 0)
         {
-            MinecraftServer minecraftserver = MinecraftServer.getServer();
-            GameProfile gameprofile = minecraftserver.getConfigurationManager().getBannedPlayers().isUsernameBanned(args[0]);
+            GameProfile gameprofile = server.getPlayerList().getBannedPlayers().getBannedProfile(args[0]);
 
             if (gameprofile == null)
             {
@@ -65,8 +60,8 @@ public class CommandPardonPlayer extends CommandBase
             }
             else
             {
-                minecraftserver.getConfigurationManager().getBannedPlayers().removeEntry(gameprofile);
-                notifyOperators(sender, this, "commands.unban.success", new Object[] {args[0]});
+                server.getPlayerList().getBannedPlayers().removeEntry(gameprofile);
+                notifyCommandListener(sender, this, "commands.unban.success", new Object[] {args[0]});
             }
         }
         else
@@ -75,8 +70,8 @@ public class CommandPardonPlayer extends CommandBase
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getConfigurationManager().getBannedPlayers().getKeys()) : null;
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, server.getPlayerList().getBannedPlayers().getKeys()) : Collections.<String>emptyList();
     }
 }

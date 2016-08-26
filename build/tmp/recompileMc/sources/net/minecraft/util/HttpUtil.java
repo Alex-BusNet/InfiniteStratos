@@ -4,7 +4,25 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import net.minecraft.server.MinecraftServer;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.Proxy;
+import java.net.ServerSocket;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nullable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.FileUtils;
@@ -12,19 +30,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
-import java.net.*;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class HttpUtil
 {
-    public static final ListeningExecutorService field_180193_a = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool((new ThreadFactoryBuilder()).setDaemon(true).setNameFormat("Downloader %d").build()));
+    public static final ListeningExecutorService DOWNLOADER_EXECUTOR = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool((new ThreadFactoryBuilder()).setDaemon(true).setNameFormat("Downloader %d").build()));
     /** The number of download threads that we have started so far. */
-    private static final AtomicInteger downloadThreadsStarted = new AtomicInteger(0);
-    private static final Logger logger = LogManager.getLogger();
+    private static final AtomicInteger DOWNLOAD_THREADS_STARTED = new AtomicInteger(0);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * Builds an encoded HTTP POST content string from a string map
@@ -70,29 +81,27 @@ public class HttpUtil
     /**
      * Sends a POST to the given URL using the map as the POST args
      */
-    public static String postMap(URL url, Map<String, Object> data, boolean skipLoggingErrors)
+    public static String postMap(URL url, Map<String, Object> data, boolean skipLoggingErrors, @Nullable Proxy p_151226_3_)
     {
         /**
          * Sends a POST to the given URL
          */
-        return post(url, buildPostString(data), skipLoggingErrors);
+        return post(url, buildPostString(data), skipLoggingErrors, p_151226_3_);
     }
 
     /**
      * Sends a POST to the given URL
      */
-    private static String post(URL url, String content, boolean skipLoggingErrors)
+    private static String post(URL url, String content, boolean skipLoggingErrors, @Nullable Proxy p_151225_3_)
     {
         try
         {
-            Proxy proxy = MinecraftServer.getServer() == null ? null : MinecraftServer.getServer().getServerProxy();
-
-            if (proxy == null)
+            if (p_151225_3_ == null)
             {
-                proxy = Proxy.NO_PROXY;
+                p_151225_3_ = Proxy.NO_PROXY;
             }
 
-            HttpURLConnection httpurlconnection = (HttpURLConnection)url.openConnection(proxy);
+            HttpURLConnection httpurlconnection = (HttpURLConnection)url.openConnection(p_151225_3_);
             httpurlconnection.setRequestMethod("POST");
             httpurlconnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             httpurlconnection.setRequestProperty("Content-Length", "" + content.getBytes().length);
@@ -121,7 +130,7 @@ public class HttpUtil
         {
             if (!skipLoggingErrors)
             {
-                logger.error((String)("Could not post to " + url), (Throwable)exception);
+                LOGGER.error("Could not post to {}", new Object[] {url, exception});
             }
 
             return "";
@@ -129,9 +138,9 @@ public class HttpUtil
     }
 
     @SideOnly(Side.CLIENT)
-    public static ListenableFuture<Object> downloadResourcePack(final File saveFile, final String packUrl, final Map<String, String> p_180192_2_, final int maxSize, final IProgressUpdate p_180192_4_, final Proxy p_180192_5_)
+    public static ListenableFuture<Object> downloadResourcePack(final File saveFile, final String packUrl, final Map<String, String> p_180192_2_, final int maxSize, @Nullable final IProgressUpdate p_180192_4_, final Proxy p_180192_5_)
     {
-        ListenableFuture<?> listenablefuture = field_180193_a.submit(new Runnable()
+        ListenableFuture<?> listenablefuture = DOWNLOADER_EXECUTOR.submit(new Runnable()
         {
             public void run()
             {
@@ -152,6 +161,7 @@ public class HttpUtil
                         byte[] abyte = new byte[4096];
                         URL url = new URL(packUrl);
                         httpurlconnection = (HttpURLConnection)url.openConnection(p_180192_5_);
+                        httpurlconnection.setInstanceFollowRedirects(true);
                         float f = 0.0F;
                         float f1 = (float)p_180192_2_.entrySet().size();
 
@@ -188,7 +198,7 @@ public class HttpUtil
                                 return;
                             }
 
-                            HttpUtil.logger.warn("Deleting " + saveFile + " as it does not match what we currently have (" + i + " vs our " + j + ").");
+                            HttpUtil.LOGGER.warn("Deleting {} as it does not match what we currently have ({} vs our {}).", new Object[] {saveFile, Integer.valueOf(i), Long.valueOf(j)});
                             FileUtils.deleteQuietly(saveFile);
                         }
                         else if (saveFile.getParentFile() != null)
@@ -208,7 +218,7 @@ public class HttpUtil
                             throw new IOException("Filesize is bigger than maximum allowed (file is " + f + ", limit is " + maxSize + ")");
                         }
 
-                        int k = 0;
+                        int k;
 
                         while ((k = inputstream.read(abyte)) >= 0)
                         {
@@ -231,7 +241,7 @@ public class HttpUtil
 
                             if (Thread.interrupted())
                             {
-                                HttpUtil.logger.error("INTERRUPTED");
+                                HttpUtil.LOGGER.error("INTERRUPTED");
 
                                 if (p_180192_4_ != null)
                                 {
@@ -260,7 +270,7 @@ public class HttpUtil
 
                             try
                             {
-                                HttpUtil.logger.error(IOUtils.toString(inputstream1));
+                                HttpUtil.LOGGER.error(IOUtils.toString(inputstream1));
                             }
                             catch (IOException ioexception)
                             {
@@ -312,27 +322,5 @@ public class HttpUtil
         }
 
         return i;
-    }
-
-    /**
-     * Send a GET request to the given URL.
-     */
-    @SideOnly(Side.CLIENT)
-    public static String get(URL url) throws IOException
-    {
-        HttpURLConnection httpurlconnection = (HttpURLConnection)url.openConnection();
-        httpurlconnection.setRequestMethod("GET");
-        BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(httpurlconnection.getInputStream()));
-        StringBuilder stringbuilder = new StringBuilder();
-        String s;
-
-        while ((s = bufferedreader.readLine()) != null)
-        {
-            stringbuilder.append(s);
-            stringbuilder.append('\r');
-        }
-
-        bufferedreader.close();
-        return stringbuilder.toString();
     }
 }

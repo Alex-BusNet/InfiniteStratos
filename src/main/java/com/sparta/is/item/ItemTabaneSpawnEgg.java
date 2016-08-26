@@ -5,7 +5,6 @@ import com.sparta.is.entity.EntityIS;
 import com.sparta.is.reference.Names;
 import com.sparta.is.reference.Reference;
 import com.sparta.is.reference.Textures;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -14,9 +13,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemEgg;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -94,62 +92,62 @@ public class ItemTabaneSpawnEgg extends ItemEgg
      * Called whenever this item is equipped and the right mouse button is pressed.
      *Args: itemStack, world, entityPlayer
      */
-    @Override
-    public ItemStack onItemRightClick(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer)
-    {
-        if (par2World.isRemote)
-        {
-            return par1ItemStack;
-        }
-        else
-        {
-            MovingObjectPosition movingobjectposition = getMovingObjectPositionFromPlayer(par2World, par3EntityPlayer, true);
-
-            if (movingobjectposition == null)
-            {
-                return par1ItemStack;
-            }
-            else
-            {
-                if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
-                {
-//                    int i = movingobjectposition.getBlockPos().getX();
-//                    int j = movingobjectposition.getBlockPos().getY();
-//                    int k = movingobjectposition.getBlockPos().getZ();
-
-                    if (!par2World.canMineBlockBody(par3EntityPlayer, movingobjectposition.getBlockPos()))
-                    {
-                        return par1ItemStack;
-                    }
-
-                    if (!par3EntityPlayer.canPlayerEdit(movingobjectposition.getBlockPos(), movingobjectposition.sideHit, par1ItemStack))
-                    {
-                        return par1ItemStack;
-                    }
-
-                    if (par2World.getBlockState(movingobjectposition.getBlockPos()) instanceof BlockLiquid)
-                    {
-                        Entity entity = spawnEntity(par2World, movingobjectposition.getBlockPos().getX(), movingobjectposition.getBlockPos().getY(), movingobjectposition.getBlockPos().getZ());
-
-                        if (entity != null)
-                        {
-                            if (entity instanceof EntityIS && par1ItemStack.hasDisplayName())
-                            {
-                                ((EntityIS)entity).setCustomNameTag(par1ItemStack.getDisplayName());
-                            }
-
-                            if (!par3EntityPlayer.capabilities.isCreativeMode)
-                            {
-                                --par1ItemStack.stackSize;
-                            }
-                        }
-                    }
-                }
-
-                return par1ItemStack;
-            }
-        }
-    }
+//    @Override
+//    public ActionResult<ItemStack> onItemRightClick(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer, EnumHand hand)
+//    {
+//        if (par2World.isRemote)
+//        {
+//            return new ActionResult(EnumActionResult.FAIL, par1ItemStack);
+//        }
+//        else
+//        {
+//            MovingObjectPosition movingobjectposition = getMovingObjectPositionFromPlayer(par2World, par3EntityPlayer, true);
+//
+//            if (movingobjectposition == null)
+//            {
+//                return new ActionResult(EnumActionResult.FAIL, par1ItemStack);
+//            }
+//            else
+//            {
+//                if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
+//                {
+////                    int i = movingobjectposition.getBlockPos().getX();
+////                    int j = movingobjectposition.getBlockPos().getY();
+////                    int k = movingobjectposition.getBlockPos().getZ();
+//
+//                    if (!par2World.canMineBlockBody(par3EntityPlayer, movingobjectposition.getBlockPos()))
+//                    {
+//                        return new ActionResult(EnumActionResult.FAIL, par1ItemStack);
+//                    }
+//
+//                    if (!par3EntityPlayer.canPlayerEdit(movingobjectposition.getBlockPos(), movingobjectposition.sideHit, par1ItemStack))
+//                    {
+//                        return new ActionResult(EnumActionResult.FAIL, par1ItemStack);
+//                    }
+//
+//                    if (par2World.getBlockState(movingobjectposition.getBlockPos()) instanceof BlockLiquid)
+//                    {
+//                        Entity entity = spawnEntity(par2World, movingobjectposition.getBlockPos().getX(), movingobjectposition.getBlockPos().getY(), movingobjectposition.getBlockPos().getZ());
+//
+//                        if (entity != null)
+//                        {
+//                            if (entity instanceof EntityIS && par1ItemStack.hasDisplayName())
+//                            {
+//                                ((EntityIS)entity).setCustomNameTag(par1ItemStack.getDisplayName());
+//                            }
+//
+//                            if (!par3EntityPlayer.capabilities.isCreativeMode)
+//                            {
+//                                --par1ItemStack.stackSize;
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                return new ActionResult(EnumActionResult.SUCCESS, par1ItemStack);
+//            }
+//        }
+//    }
 
     /**
      * Spawns the creature specified by the egg's type in the location specified by
@@ -164,10 +162,10 @@ public class ItemTabaneSpawnEgg extends ItemEgg
         {
             entityToSpawnNameFull = Names.Villagers.TABANE;
 
-            if (EntityList.stringToClassMapping.containsKey(entityToSpawnNameFull))
+            if (EntityList.getEntityString(entityToSpawn).contains(entityToSpawnNameFull))
             {
                 entityToSpawn = (EntityIS) EntityList.createEntityByName(entityToSpawnNameFull, parWorld);
-                entityToSpawn.setLocationAndAngles(parX, parY, parZ, MathHelper.wrapAngleTo180_float(parWorld.rand.nextFloat() * 360.0F), 0.0F);
+                entityToSpawn.setLocationAndAngles(parX, parY, parZ, MathHelper.wrapDegrees(parWorld.rand.nextFloat() * 360.0F), 0.0F);
                 parWorld.spawnEntityInWorld(entityToSpawn);
                 entityToSpawn.onInitialSpawn(parWorld.getDifficultyForLocation(pos), (IEntityLivingData) null);
                 entityToSpawn.playLivingSound();
@@ -192,7 +190,6 @@ public class ItemTabaneSpawnEgg extends ItemEgg
         parList.add(new ItemStack(parItem, 1, 0));
     }
 
-    @Override
     @SideOnly(Side.CLIENT)
     public int getColorFromItemStack(ItemStack par1ItemStack, int parColorType)
     {

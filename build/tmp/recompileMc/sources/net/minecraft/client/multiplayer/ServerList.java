@@ -1,6 +1,8 @@
 package net.minecraft.client.multiplayer;
 
 import com.google.common.collect.Lists;
+import java.io.File;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -10,13 +12,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.util.List;
-
 @SideOnly(Side.CLIENT)
 public class ServerList
 {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     /** The Minecraft instance. */
     private final Minecraft mc;
     private final List<ServerData> servers = Lists.<ServerData>newArrayList();
@@ -52,7 +51,7 @@ public class ServerList
         }
         catch (Exception exception)
         {
-            logger.error((String)"Couldn\'t load server list", (Throwable)exception);
+            LOGGER.error((String)"Couldn\'t load server list", (Throwable)exception);
         }
     }
 
@@ -77,32 +76,32 @@ public class ServerList
         }
         catch (Exception exception)
         {
-            logger.error((String)"Couldn\'t save server list", (Throwable)exception);
+            LOGGER.error((String)"Couldn\'t save server list", (Throwable)exception);
         }
     }
 
     /**
      * Gets the ServerData instance stored for the given index in the list.
      */
-    public ServerData getServerData(int p_78850_1_)
+    public ServerData getServerData(int index)
     {
-        return (ServerData)this.servers.get(p_78850_1_);
+        return (ServerData)this.servers.get(index);
     }
 
     /**
      * Removes the ServerData instance stored for the given index in the list.
      */
-    public void removeServerData(int p_78851_1_)
+    public void removeServerData(int index)
     {
-        this.servers.remove(p_78851_1_);
+        this.servers.remove(index);
     }
 
     /**
      * Adds the given ServerData instance to the list.
      */
-    public void addServerData(ServerData p_78849_1_)
+    public void addServerData(ServerData server)
     {
-        this.servers.add(p_78849_1_);
+        this.servers.add(server);
     }
 
     /**
@@ -116,20 +115,20 @@ public class ServerList
     /**
      * Takes two list indexes, and swaps their order around.
      */
-    public void swapServers(int p_78857_1_, int p_78857_2_)
+    public void swapServers(int pos1, int pos2)
     {
-        ServerData serverdata = this.getServerData(p_78857_1_);
-        this.servers.set(p_78857_1_, this.getServerData(p_78857_2_));
-        this.servers.set(p_78857_2_, serverdata);
+        ServerData serverdata = this.getServerData(pos1);
+        this.servers.set(pos1, this.getServerData(pos2));
+        this.servers.set(pos2, serverdata);
         this.saveServerList();
     }
 
-    public void func_147413_a(int p_147413_1_, ServerData p_147413_2_)
+    public void set(int index, ServerData server)
     {
-        this.servers.set(p_147413_1_, p_147413_2_);
+        this.servers.set(index, server);
     }
 
-    public static void func_147414_b(ServerData p_147414_0_)
+    public static void saveSingleServer(ServerData server)
     {
         ServerList serverlist = new ServerList(Minecraft.getMinecraft());
         serverlist.loadServerList();
@@ -138,9 +137,9 @@ public class ServerList
         {
             ServerData serverdata = serverlist.getServerData(i);
 
-            if (serverdata.serverName.equals(p_147414_0_.serverName) && serverdata.serverIP.equals(p_147414_0_.serverIP))
+            if (serverdata.serverName.equals(server.serverName) && serverdata.serverIP.equals(server.serverIP))
             {
-                serverlist.func_147413_a(i, p_147414_0_);
+                serverlist.set(i, server);
                 break;
             }
         }

@@ -1,8 +1,8 @@
 package net.minecraft.entity;
 
-import net.minecraft.block.Block;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public abstract class EntityFlying extends EntityLiving
@@ -16,18 +16,18 @@ public abstract class EntityFlying extends EntityLiving
     {
     }
 
-    protected void updateFallState(double y, boolean onGroundIn, Block blockIn, BlockPos pos)
+    protected void updateFallState(double y, boolean onGroundIn, IBlockState state, BlockPos pos)
     {
     }
 
     /**
-     * Moves the entity based on the specified heading.  Args: strafe, forward
+     * Moves the entity based on the specified heading.
      */
     public void moveEntityWithHeading(float strafe, float forward)
     {
         if (this.isInWater())
         {
-            this.moveFlying(strafe, forward, 0.02F);
+            this.moveRelative(strafe, forward, 0.02F);
             this.moveEntity(this.motionX, this.motionY, this.motionZ);
             this.motionX *= 0.800000011920929D;
             this.motionY *= 0.800000011920929D;
@@ -35,7 +35,7 @@ public abstract class EntityFlying extends EntityLiving
         }
         else if (this.isInLava())
         {
-            this.moveFlying(strafe, forward, 0.02F);
+            this.moveRelative(strafe, forward, 0.02F);
             this.moveEntity(this.motionX, this.motionY, this.motionZ);
             this.motionX *= 0.5D;
             this.motionY *= 0.5D;
@@ -51,7 +51,7 @@ public abstract class EntityFlying extends EntityLiving
             }
 
             float f1 = 0.16277136F / (f * f * f);
-            this.moveFlying(strafe, forward, this.onGround ? 0.1F * f1 : 0.02F);
+            this.moveRelative(strafe, forward, this.onGround ? 0.1F * f1 : 0.02F);
             f = 0.91F;
 
             if (this.onGround)

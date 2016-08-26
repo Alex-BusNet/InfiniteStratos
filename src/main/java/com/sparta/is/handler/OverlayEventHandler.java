@@ -40,10 +40,10 @@ public class OverlayEventHandler
         }
         if (!foundInHotbar) return;
 
-        switch (event.type)
+        switch (event.getType())
         {
             case HEALTH:
-                unitOverlay.renderStatusBar(event.resolution.getScaledWidth(), event.resolution.getScaledHeight());
+                unitOverlay.renderStatusBar(event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight());
                 event.setCanceled(true);
                 break;
             case ARMOR:
@@ -60,7 +60,7 @@ public class OverlayEventHandler
     @SubscribeEvent(receiveCanceled=true)
     public void onEvent(RenderGameOverlayEvent.Post event) {
 
-        switch (event.type) {
+        switch (event.getType()) {
             case HEALTH:
                 break;
             case HOTBAR:

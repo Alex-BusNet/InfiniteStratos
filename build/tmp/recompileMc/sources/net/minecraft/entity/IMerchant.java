@@ -2,7 +2,7 @@ package net.minecraft.entity;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraftforge.fml.relauncher.Side;
@@ -10,11 +10,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public interface IMerchant
 {
-    void setCustomer(EntityPlayer p_70932_1_);
+    void setCustomer(EntityPlayer player);
 
     EntityPlayer getCustomer();
 
-    MerchantRecipeList getRecipes(EntityPlayer p_70934_1_);
+    MerchantRecipeList getRecipes(EntityPlayer player);
 
     @SideOnly(Side.CLIENT)
     void setRecipes(MerchantRecipeList recipeList);
@@ -30,5 +30,5 @@ public interface IMerchant
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    IChatComponent getDisplayName();
+    ITextComponent getDisplayName();
 }

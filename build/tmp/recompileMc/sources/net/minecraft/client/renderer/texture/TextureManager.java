@@ -2,10 +2,15 @@ package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
@@ -13,20 +18,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.Callable;
-
 @SideOnly(Side.CLIENT)
 public class TextureManager implements ITickable, IResourceManagerReloadListener
 {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     private final Map<ResourceLocation, ITextureObject> mapTextureObjects = Maps.<ResourceLocation, ITextureObject>newHashMap();
     private final List<ITickable> listTickables = Lists.<ITickable>newArrayList();
     private final Map<String, Integer> mapTextureCounters = Maps.<String, Integer>newHashMap();
-    private IResourceManager theResourceManager;
+    private final IResourceManager theResourceManager;
 
     public TextureManager(IResourceManager resourceManager)
     {
@@ -69,8 +68,8 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
         }
         catch (IOException ioexception)
         {
-            logger.warn((String)("Failed to load texture: " + textureLocation), (Throwable)ioexception);
-            textureObj = TextureUtil.missingTexture;
+            LOGGER.warn("Failed to load texture: {}", new Object[] {textureLocation, ioexception});
+            textureObj = TextureUtil.MISSING_TEXTURE;
             this.mapTextureObjects.put(textureLocation, (ITextureObject)textureObj);
             flag = false;
         }
@@ -80,7 +79,7 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Registering texture");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Resource location being registered");
             crashreportcategory.addCrashSection("Resource location", textureLocation);
-            crashreportcategory.addCrashSectionCallable("Texture object class", new Callable<String>()
+            crashreportcategory.setDetail("Texture object class", new ICrashReportDetail<String>()
             {
                 public String call() throws Exception
                 {

@@ -4,20 +4,24 @@ import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class RConConsoleSource implements ICommandSender
 {
-    /** Single instance of RConConsoleSource */
-    private static final RConConsoleSource instance = new RConConsoleSource();
     /** RCon string buffer for log. */
-    private StringBuffer buffer = new StringBuffer();
+    private final StringBuffer buffer = new StringBuffer();
+    private final MinecraftServer server;
+
+    public RConConsoleSource(MinecraftServer serverIn)
+    {
+        this.server = serverIn;
+    }
 
     /**
      * Get the name of this object. For players this returns their username
@@ -30,15 +34,15 @@ public class RConConsoleSource implements ICommandSender
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
-        return new ChatComponentText(this.getName());
+        return new TextComponentString(this.getName());
     }
 
     /**
      * Send a chat message to the CommandSender
      */
-    public void addChatMessage(IChatComponent component)
+    public void addChatMessage(ITextComponent component)
     {
         this.buffer.append(component.getUnformattedText());
     }
@@ -57,16 +61,16 @@ public class RConConsoleSource implements ICommandSender
      */
     public BlockPos getPosition()
     {
-        return new BlockPos(0, 0, 0);
+        return BlockPos.ORIGIN;
     }
 
     /**
      * Get the position vector. <b>{@code null} is not allowed!</b> If you are not an entity in the world, return 0.0D,
      * 0.0D, 0.0D
      */
-    public Vec3 getPositionVector()
+    public Vec3d getPositionVector()
     {
-        return new Vec3(0.0D, 0.0D, 0.0D);
+        return Vec3d.ZERO;
     }
 
     /**
@@ -75,7 +79,7 @@ public class RConConsoleSource implements ICommandSender
      */
     public World getEntityWorld()
     {
-        return MinecraftServer.getServer().getEntityWorld();
+        return this.server.getEntityWorld();
     }
 
     /**
@@ -98,11 +102,12 @@ public class RConConsoleSource implements ICommandSender
     {
     }
 
-    @SideOnly(Side.SERVER)
-    public static RConConsoleSource getInstance()
+    /**
+     * Get the Minecraft server instance
+     */
+    public MinecraftServer getServer()
     {
-        /** Single instance of RConConsoleSource */
-        return instance;
+        return this.server;
     }
 
     /**

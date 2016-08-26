@@ -1,12 +1,11 @@
 package net.minecraft.client.resources;
 
+import java.io.IOException;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.ColorizerGrass;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.io.IOException;
 
 @SideOnly(Side.CLIENT)
 public class GrassColorReloadListener implements IResourceManagerReloadListener

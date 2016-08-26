@@ -1,12 +1,12 @@
 package net.minecraft.crash;
 
 import com.google.common.collect.Lists;
+import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-
-import java.util.List;
-import java.util.concurrent.Callable;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CrashReportCategory
 {
@@ -21,6 +21,7 @@ public class CrashReportCategory
         this.name = name;
     }
 
+    @SideOnly(Side.CLIENT)
     public static String getCoordinateInfo(double x, double y, double z)
     {
         return String.format("%.2f,%.2f,%.2f - %s", new Object[] {Double.valueOf(x), Double.valueOf(y), Double.valueOf(z), getCoordinateInfo(new BlockPos(x, y, z))});
@@ -28,16 +29,18 @@ public class CrashReportCategory
 
     public static String getCoordinateInfo(BlockPos pos)
     {
-        int i = pos.getX();
-        int j = pos.getY();
-        int k = pos.getZ();
+        return getCoordinateInfo(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    public static String getCoordinateInfo(int x, int y, int z)
+    {
         StringBuilder stringbuilder = new StringBuilder();
 
         try
         {
-            stringbuilder.append(String.format("World: (%d,%d,%d)", new Object[] {Integer.valueOf(i), Integer.valueOf(j), Integer.valueOf(k)}));
+            stringbuilder.append(String.format("World: (%d,%d,%d)", new Object[] {Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z)}));
         }
-        catch (Throwable var17)
+        catch (Throwable var16)
         {
             stringbuilder.append("(Error finding world loc)");
         }
@@ -46,18 +49,18 @@ public class CrashReportCategory
 
         try
         {
-            int l = i >> 4;
-            int i1 = k >> 4;
-            int j1 = i & 15;
-            int k1 = j >> 4;
-            int l1 = k & 15;
-            int i2 = l << 4;
-            int j2 = i1 << 4;
-            int k2 = (l + 1 << 4) - 1;
-            int l2 = (i1 + 1 << 4) - 1;
-            stringbuilder.append(String.format("Chunk: (at %d,%d,%d in %d,%d; contains blocks %d,0,%d to %d,255,%d)", new Object[] {Integer.valueOf(j1), Integer.valueOf(k1), Integer.valueOf(l1), Integer.valueOf(l), Integer.valueOf(i1), Integer.valueOf(i2), Integer.valueOf(j2), Integer.valueOf(k2), Integer.valueOf(l2)}));
+            int i = x >> 4;
+            int j = z >> 4;
+            int k = x & 15;
+            int l = y >> 4;
+            int i1 = z & 15;
+            int j1 = i << 4;
+            int k1 = j << 4;
+            int l1 = (i + 1 << 4) - 1;
+            int i2 = (j + 1 << 4) - 1;
+            stringbuilder.append(String.format("Chunk: (at %d,%d,%d in %d,%d; contains blocks %d,0,%d to %d,255,%d)", new Object[] {Integer.valueOf(k), Integer.valueOf(l), Integer.valueOf(i1), Integer.valueOf(i), Integer.valueOf(j), Integer.valueOf(j1), Integer.valueOf(k1), Integer.valueOf(l1), Integer.valueOf(i2)}));
         }
-        catch (Throwable var16)
+        catch (Throwable var15)
         {
             stringbuilder.append("(Error finding chunk loc)");
         }
@@ -66,19 +69,19 @@ public class CrashReportCategory
 
         try
         {
-            int j3 = i >> 9;
-            int k3 = k >> 9;
-            int l3 = j3 << 5;
-            int i4 = k3 << 5;
-            int j4 = (j3 + 1 << 5) - 1;
-            int k4 = (k3 + 1 << 5) - 1;
-            int l4 = j3 << 9;
-            int i5 = k3 << 9;
-            int j5 = (j3 + 1 << 9) - 1;
-            int i3 = (k3 + 1 << 9) - 1;
-            stringbuilder.append(String.format("Region: (%d,%d; contains chunks %d,%d to %d,%d, blocks %d,0,%d to %d,255,%d)", new Object[] {Integer.valueOf(j3), Integer.valueOf(k3), Integer.valueOf(l3), Integer.valueOf(i4), Integer.valueOf(j4), Integer.valueOf(k4), Integer.valueOf(l4), Integer.valueOf(i5), Integer.valueOf(j5), Integer.valueOf(i3)}));
+            int k2 = x >> 9;
+            int l2 = z >> 9;
+            int i3 = k2 << 5;
+            int j3 = l2 << 5;
+            int k3 = (k2 + 1 << 5) - 1;
+            int l3 = (l2 + 1 << 5) - 1;
+            int i4 = k2 << 9;
+            int j4 = l2 << 9;
+            int k4 = (k2 + 1 << 9) - 1;
+            int j2 = (l2 + 1 << 9) - 1;
+            stringbuilder.append(String.format("Region: (%d,%d; contains chunks %d,%d to %d,%d, blocks %d,0,%d to %d,255,%d)", new Object[] {Integer.valueOf(k2), Integer.valueOf(l2), Integer.valueOf(i3), Integer.valueOf(j3), Integer.valueOf(k3), Integer.valueOf(l3), Integer.valueOf(i4), Integer.valueOf(j4), Integer.valueOf(k4), Integer.valueOf(j2)}));
         }
-        catch (Throwable var15)
+        catch (Throwable var14)
         {
             stringbuilder.append("(Error finding world loc)");
         }
@@ -86,18 +89,15 @@ public class CrashReportCategory
         return stringbuilder.toString();
     }
 
-    /**
-     * Adds a Crashreport section with the given name with the value set to the result of the given Callable;
-     */
-    public void addCrashSectionCallable(String sectionName, Callable<String> callable)
+    public void setDetail(String nameIn, ICrashReportDetail<String> detail)
     {
         try
         {
-            this.addCrashSection(sectionName, callable.call());
+            this.addCrashSection(nameIn, detail.call());
         }
         catch (Throwable throwable)
         {
-            this.addCrashSectionThrowable(sectionName, throwable);
+            this.addCrashSectionThrowable(nameIn, throwable);
         }
     }
 
@@ -206,7 +206,7 @@ public class CrashReportCategory
             for (StackTraceElement stacktraceelement : this.stackTrace)
             {
                 builder.append("\n\tat ");
-                builder.append(stacktraceelement.toString());
+                builder.append((Object)stacktraceelement);
             }
         }
     }
@@ -219,7 +219,7 @@ public class CrashReportCategory
     public static void addBlockInfo(CrashReportCategory category, final BlockPos pos, final Block blockIn, final int blockData)
     {
         final int i = Block.getIdFromBlock(blockIn);
-        category.addCrashSectionCallable("Block type", new Callable<String>()
+        category.setDetail("Block type", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {
@@ -233,7 +233,7 @@ public class CrashReportCategory
                 }
             }
         });
-        category.addCrashSectionCallable("Block data value", new Callable<String>()
+        category.setDetail("Block data value", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {
@@ -248,7 +248,7 @@ public class CrashReportCategory
                 }
             }
         });
-        category.addCrashSectionCallable("Block location", new Callable<String>()
+        category.setDetail("Block location", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {
@@ -259,14 +259,14 @@ public class CrashReportCategory
 
     public static void addBlockInfo(CrashReportCategory category, final BlockPos pos, final IBlockState state)
     {
-        category.addCrashSectionCallable("Block", new Callable<String>()
+        category.setDetail("Block", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {
                 return state.toString();
             }
         });
-        category.addCrashSectionCallable("Block location", new Callable<String>()
+        category.setDetail("Block location", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {

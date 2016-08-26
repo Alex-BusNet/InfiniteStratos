@@ -4,10 +4,10 @@ import net.minecraft.network.EnumConnectionState;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.handshake.INetHandlerHandshakeServer;
 import net.minecraft.network.handshake.client.C00Handshake;
-import net.minecraft.network.login.server.S00PacketDisconnect;
+import net.minecraft.network.login.server.SPacketDisconnect;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 
 public class NetHandlerHandshakeTCP implements INetHandlerHandshakeServer
 {
@@ -34,17 +34,17 @@ public class NetHandlerHandshakeTCP implements INetHandlerHandshakeServer
             case LOGIN:
                 this.networkManager.setConnectionState(EnumConnectionState.LOGIN);
 
-                if (packetIn.getProtocolVersion() > 47)
+                if (packetIn.getProtocolVersion() > 210)
                 {
-                    ChatComponentText chatcomponenttext = new ChatComponentText("Outdated server! I\'m still on 1.8.9");
-                    this.networkManager.sendPacket(new S00PacketDisconnect(chatcomponenttext));
-                    this.networkManager.closeChannel(chatcomponenttext);
+                    TextComponentString textcomponentstring = new TextComponentString("Outdated server! I\'m still on 1.10.2");
+                    this.networkManager.sendPacket(new SPacketDisconnect(textcomponentstring));
+                    this.networkManager.closeChannel(textcomponentstring);
                 }
-                else if (packetIn.getProtocolVersion() < 47)
+                else if (packetIn.getProtocolVersion() < 210)
                 {
-                    ChatComponentText chatcomponenttext1 = new ChatComponentText("Outdated client! Please use 1.8.9");
-                    this.networkManager.sendPacket(new S00PacketDisconnect(chatcomponenttext1));
-                    this.networkManager.closeChannel(chatcomponenttext1);
+                    TextComponentString textcomponentstring1 = new TextComponentString("Outdated client! Please use 1.10.2");
+                    this.networkManager.sendPacket(new SPacketDisconnect(textcomponentstring1));
+                    this.networkManager.closeChannel(textcomponentstring1);
                 }
                 else
                 {
@@ -64,7 +64,7 @@ public class NetHandlerHandshakeTCP implements INetHandlerHandshakeServer
     /**
      * Invoked when disconnecting, the parameter is a ChatComponent describing the reason for termination
      */
-    public void onDisconnect(IChatComponent reason)
+    public void onDisconnect(ITextComponent reason)
     {
     }
 }

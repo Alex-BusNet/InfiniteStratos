@@ -128,6 +128,9 @@ public final class Names
     {
         public static final String TABANE_SPAWN_EGG = "tabaneSpawnEgg";
         public static final String TABANE_SPAWN_EGG_OVERLAY = "tabaneSpawnEgg_overlay"; //Used in ItemTabaneSpawnEgg to get overlay texture.
+        public static final String ITEM_CORE = "itemCore";
+        public static final String YUKIHIRA_BLADE = "yukihiraBlade";
+        public static final String YUKIHIRA_HILT = "yukihiraHilt";
     }
 
     public static final class One_Off
@@ -143,5 +146,6 @@ public final class Names
     public static final class Empty
     {
         public static final String TAB_LABEL = "tabLabel";
+
     }
 }

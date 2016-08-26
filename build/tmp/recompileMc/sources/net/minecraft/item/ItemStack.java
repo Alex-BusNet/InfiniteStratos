@@ -3,7 +3,13 @@ package net.minecraft.item;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Random;
+import java.util.Map.Entry;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentDurability;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -14,25 +20,35 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.event.HoverEvent;
+import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.datafix.FixTypes;
+import net.minecraft.util.datafix.walkers.BlockEntityTag;
+import net.minecraft.util.datafix.walkers.EntityTag;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.text.DecimalFormat;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
-
 public final class ItemStack implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>
 {
-    public static final DecimalFormat DECIMALFORMAT = new DecimalFormat("#.###");
+    public static final DecimalFormat DECIMALFORMAT = new DecimalFormat("#.##");
     /** Size of the stack. */
     public int stackSize;
     /** Number of animation frames to go when receiving an item (by walking into it, for example). */
@@ -77,14 +93,10 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
         this((Item)itemIn, amount, 0);
     }
 
-    public ItemStack(Item itemIn, int amount, int meta) { this (itemIn, amount, meta, null); }
+    public ItemStack(Item itemIn, int amount, int meta){ this(itemIn, amount, meta, null); }
     public ItemStack(Item itemIn, int amount, int meta, NBTTagCompound capNBT)
     {
         this.capNBT = capNBT;
-        this.canDestroyCacheBlock = null;
-        this.canDestroyCacheResult = false;
-        this.canPlaceOnCacheBlock = null;
-        this.canPlaceOnCacheResult = false;
         this.setItem(itemIn);
         this.stackSize = amount;
         this.itemDamage = meta;
@@ -104,10 +116,12 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
 
     private ItemStack()
     {
-        this.canDestroyCacheBlock = null;
-        this.canDestroyCacheResult = false;
-        this.canPlaceOnCacheBlock = null;
-        this.canPlaceOnCacheResult = false;
+    }
+
+    public static void func_189868_a(DataFixer p_189868_0_)
+    {
+        p_189868_0_.registerWalker(FixTypes.ITEM_INSTANCE, new BlockEntityTag());
+        p_189868_0_.registerWalker(FixTypes.ITEM_INSTANCE, new EntityTag());
     }
 
     /**
@@ -115,11 +129,12 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
      */
     public ItemStack splitStack(int amount)
     {
+        amount = Math.min(amount, this.stackSize);
         ItemStack itemstack = new ItemStack(this.item, amount, this.itemDamage, this.capabilities != null ? this.capabilities.serializeNBT() : null);
 
         if (this.stackTagCompound != null)
         {
-            itemstack.stackTagCompound = (NBTTagCompound)this.stackTagCompound.copy();
+            itemstack.stackTagCompound = this.stackTagCompound.copy();
         }
 
         this.stackSize -= amount;
@@ -138,39 +153,36 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
      * Called when the player uses this ItemStack on a Block (right-click). Places blocks, etc. (Legacy name:
      * tryPlaceItemIntoWorld)
      */
-    public boolean onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (!worldIn.isRemote) return net.minecraftforge.common.ForgeHooks.onPlaceItemIntoWorld(this, playerIn, worldIn, pos, side, hitX, hitY, hitZ);
-        boolean flag = this.getItem().onItemUse(this, playerIn, worldIn, pos, side, hitX, hitY, hitZ);
+        if (!worldIn.isRemote) return net.minecraftforge.common.ForgeHooks.onPlaceItemIntoWorld(this, playerIn, worldIn, pos, side, hitX, hitY, hitZ, hand);
+        EnumActionResult enumactionresult = this.getItem().onItemUse(this, playerIn, worldIn, pos, hand, side, hitX, hitY, hitZ);
 
-        if (flag)
+        if (enumactionresult == EnumActionResult.SUCCESS)
         {
-            playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this.item)]);
+            playerIn.addStat(StatList.getObjectUseStats(this.item));
         }
 
-        return flag;
+        return enumactionresult;
     }
 
-    public float getStrVsBlock(Block blockIn)
+    public float getStrVsBlock(IBlockState blockIn)
     {
         return this.getItem().getStrVsBlock(this, blockIn);
     }
 
-    /**
-     * Called whenever this item stack is equipped and right clicked. Returns the new item stack to put in the position
-     * where this item is. Args: world, player
-     */
-    public ItemStack useItemRightClick(World worldIn, EntityPlayer playerIn)
+    public ActionResult<ItemStack> useItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand hand)
     {
-        return this.getItem().onItemRightClick(this, worldIn, playerIn);
+        return this.getItem().onItemRightClick(this, worldIn, playerIn, hand);
     }
 
     /**
      * Called when the item in use count reach 0, e.g. item food eaten. Return the new ItemStack. Args : world, entity
      */
-    public ItemStack onItemUseFinish(World worldIn, EntityPlayer playerIn)
+    @Nullable
+    public ItemStack onItemUseFinish(World worldIn, EntityLivingBase entityLiving)
     {
-        return this.getItem().onItemUseFinish(this, worldIn, playerIn);
+        return this.getItem().onItemUseFinish(this, worldIn, entityLiving);
     }
 
     /**
@@ -178,7 +190,7 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
      */
     public NBTTagCompound writeToNBT(NBTTagCompound nbt)
     {
-        ResourceLocation resourcelocation = (ResourceLocation)Item.itemRegistry.getNameForObject(this.item);
+        ResourceLocation resourcelocation = (ResourceLocation)Item.REGISTRY.getNameForObject(this.item);
         nbt.setString("id", resourcelocation == null ? "minecraft:air" : resourcelocation.toString());
         nbt.setByte("Count", (byte)this.stackSize);
         nbt.setShort("Damage", (short)this.itemDamage);
@@ -199,16 +211,8 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
     public void readFromNBT(NBTTagCompound nbt)
     {
         this.capNBT = nbt.hasKey("ForgeCaps") ? nbt.getCompoundTag("ForgeCaps") : null;
-        if (nbt.hasKey("id", 8))
-        {
-            this.setItem(Item.getByNameOrId(nbt.getString("id")));
-        }
-        else
-        {
-            this.setItem(Item.getItemById(nbt.getShort("id")));
-        }
+        this.setItem(Item.getByNameOrId(nbt.getString("id")));
         this.capNBT = null;
-
         this.stackSize = nbt.getByte("Count");
         this.itemDamage = nbt.getShort("Damage");
 
@@ -226,6 +230,7 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
                 this.item.updateItemStackNBT(this.stackTagCompound);
             }
         }
+        else this.stackTagCompound = null;
     }
 
     /**
@@ -291,7 +296,7 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
      */
     public int getMaxDamage()
     {
-        return this.item.getMaxDamage(this);
+        return this.item == null ? 0 : this.item.getMaxDamage(this);
     }
 
     /**
@@ -310,7 +315,7 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
         {
             if (amount > 0)
             {
-                int i = EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, this);
+                int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.UNBREAKING, this);
                 int j = 0;
 
                 for (int k = 0; i > 0 && k < amount; ++k)
@@ -351,12 +356,7 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
                     if (entityIn instanceof EntityPlayer)
                     {
                         EntityPlayer entityplayer = (EntityPlayer)entityIn;
-                        entityplayer.triggerAchievement(StatList.objectBreakStats[Item.getIdFromItem(this.item)]);
-
-                        if (this.stackSize == 0 && this.getItem() instanceof ItemBow)
-                        {
-                            entityplayer.destroyCurrentEquippedItem();
-                        }
+                        entityplayer.addStat(StatList.getObjectBreakStats(this.item));
                     }
 
                     if (this.stackSize < 0)
@@ -371,7 +371,8 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
     }
 
     /**
-     * Calls the corresponding fct in di
+     * Calls the delegated method to the Item to damage the incoming Entity, and if necessary, triggers a stats
+     * increase.
      */
     public void hitEntity(EntityLivingBase entityIn, EntityPlayer playerIn)
     {
@@ -379,27 +380,27 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
 
         if (flag)
         {
-            playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this.item)]);
+            playerIn.addStat(StatList.getObjectUseStats(this.item));
         }
     }
 
     /**
      * Called when a Block is destroyed using this ItemStack
      */
-    public void onBlockDestroyed(World worldIn, Block blockIn, BlockPos pos, EntityPlayer playerIn)
+    public void onBlockDestroyed(World worldIn, IBlockState blockIn, BlockPos pos, EntityPlayer playerIn)
     {
         boolean flag = this.item.onBlockDestroyed(this, worldIn, blockIn, pos, playerIn);
 
         if (flag)
         {
-            playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this.item)]);
+            playerIn.addStat(StatList.getObjectUseStats(this.item));
         }
     }
 
     /**
      * Check whether the given Block can be harvested using this ItemStack.
      */
-    public boolean canHarvestBlock(Block blockIn)
+    public boolean canHarvestBlock(IBlockState blockIn)
     {
         /**
          * Returns the object corresponding to the stack.
@@ -407,9 +408,9 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
         return getItem().canHarvestBlock(blockIn, this);
     }
 
-    public boolean interactWithEntity(EntityPlayer playerIn, EntityLivingBase entityIn)
+    public boolean interactWithEntity(EntityPlayer playerIn, EntityLivingBase entityIn, EnumHand hand)
     {
-        return this.item.itemInteractionForEntity(this, playerIn, entityIn);
+        return this.item.itemInteractionForEntity(this, playerIn, entityIn, hand);
     }
 
     /**
@@ -421,21 +422,33 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
 
         if (this.stackTagCompound != null)
         {
-            itemstack.stackTagCompound = (NBTTagCompound)this.stackTagCompound.copy();
+            itemstack.stackTagCompound = this.stackTagCompound.copy();
         }
 
         return itemstack;
     }
 
-    public static boolean areItemStackTagsEqual(ItemStack stackA, ItemStack stackB)
+    public static boolean areItemStackTagsEqual(@Nullable ItemStack stackA, @Nullable ItemStack stackB)
     {
-        return stackA == null && stackB == null ? true : (stackA != null && stackB != null ? (stackA.stackTagCompound == null && stackB.stackTagCompound != null ? false : stackA.stackTagCompound == null || stackA.stackTagCompound.equals(stackB.stackTagCompound)) : false);
+        if (stackA == null && stackB == null) return true;
+        if (stackA == null && stackB != null) return false;
+        if (stackA != null && stackB == null) return false;
+        if (stackA.stackTagCompound == null && stackB.stackTagCompound != null) return false;
+        if (stackA.stackTagCompound != null && stackB.stackTagCompound == null) return false;
+        if (stackA.stackTagCompound != null && !stackA.stackTagCompound.equals(stackB.stackTagCompound)) return false;
+        if (stackA.capabilities != null || stackB.capabilities != null)
+        {
+            boolean ret = stackA.capabilities != null ? stackA.capabilities.areCompatible(stackB.capabilities) : stackB.capabilities.areCompatible(null);
+            if (!ret) return false;
+        }
+
+        return true;
     }
 
     /**
      * compares ItemStack argument1 with ItemStack argument2; returns true if both ItemStacks are equal
      */
-    public static boolean areItemStacksEqual(ItemStack stackA, ItemStack stackB)
+    public static boolean areItemStacksEqual(@Nullable ItemStack stackA, @Nullable ItemStack stackB)
     {
         return stackA == null && stackB == null ? true : (stackA != null && stackB != null ? stackA.isItemStackEqual(stackB) : false);
     }
@@ -445,24 +458,38 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
      */
     private boolean isItemStackEqual(ItemStack other)
     {
-        return this.stackSize != other.stackSize ? false : (this.item != other.item ? false : (this.itemDamage != other.itemDamage ? false : (this.stackTagCompound == null && other.stackTagCompound != null ? false : this.stackTagCompound == null || this.stackTagCompound.equals(other.stackTagCompound))));
+        if (this.stackSize != other.stackSize) return false;
+        if (this.item != other.item) return false;
+        if (this.itemDamage != other.itemDamage) return false;
+        if (!ItemStack.areItemStackTagsEqual(this, other)) return false;
+        return true;
     }
 
     /**
      * Compares Item and damage value of the two stacks
      */
-    public static boolean areItemsEqual(ItemStack stackA, ItemStack stackB)
+    public static boolean areItemsEqual(@Nullable ItemStack stackA, @Nullable ItemStack stackB)
     {
-        return stackA == null && stackB == null ? true : (stackA != null && stackB != null ? stackA.isItemEqual(stackB) : false);
+        return stackA == stackB ? true : (stackA != null && stackB != null ? stackA.isItemEqual(stackB) : false);
+    }
+
+    public static boolean areItemsEqualIgnoreDurability(@Nullable ItemStack stackA, @Nullable ItemStack stackB)
+    {
+        return stackA == stackB ? true : (stackA != null && stackB != null ? stackA.isItemEqualIgnoreDurability(stackB) : false);
     }
 
     /**
      * compares ItemStack argument to the instance ItemStack; returns true if the Items contained in both ItemStacks are
      * equal
      */
-    public boolean isItemEqual(ItemStack other)
+    public boolean isItemEqual(@Nullable ItemStack other)
     {
         return other != null && this.item == other.item && this.itemDamage == other.itemDamage;
+    }
+
+    public boolean isItemEqualIgnoreDurability(@Nullable ItemStack stack)
+    {
+        return !this.isItemStackDamageable() ? this.isItemEqual(stack) : stack != null && this.item == stack.item;
     }
 
     public String getUnlocalizedName()
@@ -494,19 +521,16 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
             --this.animationsToGo;
         }
 
-        this.item.onUpdate(this, worldIn, entityIn, inventorySlot, isCurrentItem);
+        if (this.item != null)
+        {
+            this.item.onUpdate(this, worldIn, entityIn, inventorySlot, isCurrentItem);
+        }
     }
 
     public void onCrafting(World worldIn, EntityPlayer playerIn, int amount)
     {
-        playerIn.addStat(StatList.objectCraftStats[Item.getIdFromItem(this.item)], amount);
+        playerIn.addStat(StatList.getCraftStats(this.item), amount);
         this.item.onCreated(this, worldIn, playerIn);
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean getIsItemStackEqual(ItemStack p_179549_1_)
-    {
-        return this.isItemStackEqual(p_179549_1_);
     }
 
     public int getMaxItemUseDuration()
@@ -520,11 +544,11 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
     }
 
     /**
-     * Called when the player releases the use item button. Args: world, entityplayer, itemInUseCount
+     * Called when the player releases the use item button.
      */
-    public void onPlayerStoppedUsing(World worldIn, EntityPlayer playerIn, int timeLeft)
+    public void onPlayerStoppedUsing(World worldIn, EntityLivingBase entityLiving, int timeLeft)
     {
-        this.getItem().onPlayerStoppedUsing(this, worldIn, playerIn, timeLeft);
+        this.getItem().onPlayerStoppedUsing(this, worldIn, entityLiving, timeLeft);
     }
 
     /**
@@ -538,6 +562,7 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
     /**
      * Returns the NBTTagCompound of the ItemStack.
      */
+    @Nullable
     public NBTTagCompound getTagCompound()
     {
         return this.stackTagCompound;
@@ -654,16 +679,16 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
 
         if (this.hasDisplayName())
         {
-            s = EnumChatFormatting.ITALIC + s;
+            s = TextFormatting.ITALIC + s;
         }
 
-        s = s + EnumChatFormatting.RESET;
+        s = s + TextFormatting.RESET;
 
         if (advanced)
         {
             String s1 = "";
 
-            if (s.length() > 0)
+            if (!s.isEmpty())
             {
                 s = s + " (";
                 s1 = ")";
@@ -680,7 +705,7 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
                 s = s + String.format("#%04d%s", new Object[] {Integer.valueOf(i), s1});
             }
         }
-        else if (!this.hasDisplayName() && this.item == Items.filled_map)
+        else if (!this.hasDisplayName() && this.item == Items.FILLED_MAP)
         {
             s = s + " #" + this.itemDamage;
         }
@@ -711,9 +736,9 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
                         int k = nbttaglist.getCompoundTagAt(j).getShort("id");
                         int l = nbttaglist.getCompoundTagAt(j).getShort("lvl");
 
-                        if (Enchantment.getEnchantmentById(k) != null)
+                        if (Enchantment.getEnchantmentByID(k) != null)
                         {
-                            list.add(Enchantment.getEnchantmentById(k).getTranslatedName(l));
+                            list.add(Enchantment.getEnchantmentByID(k).getTranslatedName(l));
                         }
                     }
                 }
@@ -727,93 +752,109 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
                 {
                     if (advanced)
                     {
-                        list.add("Color: #" + Integer.toHexString(nbttagcompound.getInteger("color")).toUpperCase());
+                        list.add("Color: #" + String.format("%06X", new Object[] {Integer.valueOf(nbttagcompound.getInteger("color"))}));
                     }
                     else
                     {
-                        list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("item.dyed"));
+                        list.add(TextFormatting.ITALIC + I18n.translateToLocal("item.dyed"));
                     }
                 }
 
                 if (nbttagcompound.getTagId("Lore") == 9)
                 {
-                    NBTTagList nbttaglist1 = nbttagcompound.getTagList("Lore", 8);
+                    NBTTagList nbttaglist3 = nbttagcompound.getTagList("Lore", 8);
 
-                    if (nbttaglist1.tagCount() > 0)
+                    if (!nbttaglist3.hasNoTags())
                     {
-                        for (int j1 = 0; j1 < nbttaglist1.tagCount(); ++j1)
+                        for (int l1 = 0; l1 < nbttaglist3.tagCount(); ++l1)
                         {
-                            list.add(EnumChatFormatting.DARK_PURPLE + "" + EnumChatFormatting.ITALIC + nbttaglist1.getStringTagAt(j1));
+                            list.add(TextFormatting.DARK_PURPLE + "" + TextFormatting.ITALIC + nbttaglist3.getStringTagAt(l1));
                         }
                     }
                 }
             }
         }
 
-        Multimap<String, AttributeModifier> multimap = this.getAttributeModifiers();
-
-        if (!multimap.isEmpty() && (i1 & 2) == 0)
+        for (EntityEquipmentSlot entityequipmentslot : EntityEquipmentSlot.values())
         {
-            list.add("");
+            Multimap<String, AttributeModifier> multimap = this.getAttributeModifiers(entityequipmentslot);
 
-            for (Entry<String, AttributeModifier> entry : multimap.entries())
+            if (!multimap.isEmpty() && (i1 & 2) == 0)
             {
-                AttributeModifier attributemodifier = (AttributeModifier)entry.getValue();
-                double d0 = attributemodifier.getAmount();
+                list.add("");
+                list.add(I18n.translateToLocal("item.modifiers." + entityequipmentslot.getName()));
 
-                if (attributemodifier.getID() == Item.itemModifierUUID)
+                for (Entry<String, AttributeModifier> entry : multimap.entries())
                 {
-                    d0 += (double)EnchantmentHelper.func_152377_a(this, EnumCreatureAttribute.UNDEFINED);
-                }
+                    AttributeModifier attributemodifier = (AttributeModifier)entry.getValue();
+                    double d0 = attributemodifier.getAmount();
+                    boolean flag = false;
 
-                double d1;
+                    if (attributemodifier.getID() == Item.ATTACK_DAMAGE_MODIFIER)
+                    {
+                        d0 = d0 + playerIn.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getBaseValue();
+                        d0 = d0 + (double)EnchantmentHelper.getModifierForCreature(this, EnumCreatureAttribute.UNDEFINED);
+                        flag = true;
+                    }
+                    else if (attributemodifier.getID() == Item.ATTACK_SPEED_MODIFIER)
+                    {
+                        d0 += playerIn.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED).getBaseValue();
+                        flag = true;
+                    }
 
-                if (attributemodifier.getOperation() != 1 && attributemodifier.getOperation() != 2)
-                {
-                    d1 = d0;
-                }
-                else
-                {
-                    d1 = d0 * 100.0D;
-                }
+                    double d1;
 
-                if (d0 > 0.0D)
-                {
-                    list.add(EnumChatFormatting.BLUE + StatCollector.translateToLocalFormatted("attribute.modifier.plus." + attributemodifier.getOperation(), new Object[] {DECIMALFORMAT.format(d1), StatCollector.translateToLocal("attribute.name." + (String)entry.getKey())}));
-                }
-                else if (d0 < 0.0D)
-                {
-                    d1 = d1 * -1.0D;
-                    list.add(EnumChatFormatting.RED + StatCollector.translateToLocalFormatted("attribute.modifier.take." + attributemodifier.getOperation(), new Object[] {DECIMALFORMAT.format(d1), StatCollector.translateToLocal("attribute.name." + (String)entry.getKey())}));
+                    if (attributemodifier.getOperation() != 1 && attributemodifier.getOperation() != 2)
+                    {
+                        d1 = d0;
+                    }
+                    else
+                    {
+                        d1 = d0 * 100.0D;
+                    }
+
+                    if (flag)
+                    {
+                        list.add(" " + I18n.translateToLocalFormatted("attribute.modifier.equals." + attributemodifier.getOperation(), new Object[] {DECIMALFORMAT.format(d1), I18n.translateToLocal("attribute.name." + (String)entry.getKey())}));
+                    }
+                    else if (d0 > 0.0D)
+                    {
+                        list.add(TextFormatting.BLUE + " " + I18n.translateToLocalFormatted("attribute.modifier.plus." + attributemodifier.getOperation(), new Object[] {DECIMALFORMAT.format(d1), I18n.translateToLocal("attribute.name." + (String)entry.getKey())}));
+                    }
+                    else if (d0 < 0.0D)
+                    {
+                        d1 = d1 * -1.0D;
+                        list.add(TextFormatting.RED + " " + I18n.translateToLocalFormatted("attribute.modifier.take." + attributemodifier.getOperation(), new Object[] {DECIMALFORMAT.format(d1), I18n.translateToLocal("attribute.name." + (String)entry.getKey())}));
+                    }
                 }
             }
         }
 
         if (this.hasTagCompound() && this.getTagCompound().getBoolean("Unbreakable") && (i1 & 4) == 0)
         {
-            list.add(EnumChatFormatting.BLUE + StatCollector.translateToLocal("item.unbreakable"));
+            list.add(TextFormatting.BLUE + I18n.translateToLocal("item.unbreakable"));
         }
 
         if (this.hasTagCompound() && this.stackTagCompound.hasKey("CanDestroy", 9) && (i1 & 8) == 0)
         {
-            NBTTagList nbttaglist2 = this.stackTagCompound.getTagList("CanDestroy", 8);
+            NBTTagList nbttaglist1 = this.stackTagCompound.getTagList("CanDestroy", 8);
 
-            if (nbttaglist2.tagCount() > 0)
+            if (!nbttaglist1.hasNoTags())
             {
                 list.add("");
-                list.add(EnumChatFormatting.GRAY + StatCollector.translateToLocal("item.canBreak"));
+                list.add(TextFormatting.GRAY + I18n.translateToLocal("item.canBreak"));
 
-                for (int k1 = 0; k1 < nbttaglist2.tagCount(); ++k1)
+                for (int j1 = 0; j1 < nbttaglist1.tagCount(); ++j1)
                 {
-                    Block block = Block.getBlockFromName(nbttaglist2.getStringTagAt(k1));
+                    Block block = Block.getBlockFromName(nbttaglist1.getStringTagAt(j1));
 
                     if (block != null)
                     {
-                        list.add(EnumChatFormatting.DARK_GRAY + block.getLocalizedName());
+                        list.add(TextFormatting.DARK_GRAY + block.getLocalizedName());
                     }
                     else
                     {
-                        list.add(EnumChatFormatting.DARK_GRAY + "missingno");
+                        list.add(TextFormatting.DARK_GRAY + "missingno");
                     }
                 }
             }
@@ -821,24 +862,24 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
 
         if (this.hasTagCompound() && this.stackTagCompound.hasKey("CanPlaceOn", 9) && (i1 & 16) == 0)
         {
-            NBTTagList nbttaglist3 = this.stackTagCompound.getTagList("CanPlaceOn", 8);
+            NBTTagList nbttaglist2 = this.stackTagCompound.getTagList("CanPlaceOn", 8);
 
-            if (nbttaglist3.tagCount() > 0)
+            if (!nbttaglist2.hasNoTags())
             {
                 list.add("");
-                list.add(EnumChatFormatting.GRAY + StatCollector.translateToLocal("item.canPlace"));
+                list.add(TextFormatting.GRAY + I18n.translateToLocal("item.canPlace"));
 
-                for (int l1 = 0; l1 < nbttaglist3.tagCount(); ++l1)
+                for (int k1 = 0; k1 < nbttaglist2.tagCount(); ++k1)
                 {
-                    Block block1 = Block.getBlockFromName(nbttaglist3.getStringTagAt(l1));
+                    Block block1 = Block.getBlockFromName(nbttaglist2.getStringTagAt(k1));
 
                     if (block1 != null)
                     {
-                        list.add(EnumChatFormatting.DARK_GRAY + block1.getLocalizedName());
+                        list.add(TextFormatting.DARK_GRAY + block1.getLocalizedName());
                     }
                     else
                     {
-                        list.add(EnumChatFormatting.DARK_GRAY + "missingno");
+                        list.add(TextFormatting.DARK_GRAY + "missingno");
                     }
                 }
             }
@@ -851,11 +892,11 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
                 list.add("Durability: " + (this.getMaxDamage() - this.getItemDamage()) + " / " + this.getMaxDamage());
             }
 
-            list.add(EnumChatFormatting.DARK_GRAY + ((ResourceLocation)Item.itemRegistry.getNameForObject(this.item)).toString());
+            list.add(TextFormatting.DARK_GRAY + ((ResourceLocation)Item.REGISTRY.getNameForObject(this.item)).toString());
 
             if (this.hasTagCompound())
             {
-                list.add(EnumChatFormatting.DARK_GRAY + "NBT: " + this.getTagCompound().getKeySet().size() + " tag(s)");
+                list.add(TextFormatting.DARK_GRAY + "NBT: " + this.getTagCompound().getKeySet().size() + " tag(s)");
             }
         }
 
@@ -899,7 +940,7 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
 
         NBTTagList nbttaglist = this.stackTagCompound.getTagList("ench", 10);
         NBTTagCompound nbttagcompound = new NBTTagCompound();
-        nbttagcompound.setShort("id", (short)ench.effectId);
+        nbttagcompound.setShort("id", (short)Enchantment.getEnchantmentID(ench));
         nbttagcompound.setShort("lvl", (short)((byte)level));
         nbttaglist.appendTag(nbttagcompound);
     }
@@ -946,6 +987,7 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
     /**
      * Return the item frame this stack is on. Returns null if not on an item frame.
      */
+    @Nullable
     public EntityItemFrame getItemFrame()
     {
         return this.itemFrame;
@@ -972,7 +1014,7 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
         this.stackTagCompound.setInteger("RepairCost", cost);
     }
 
-    public Multimap<String, AttributeModifier> getAttributeModifiers()
+    public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot equipmentSlot)
     {
         Multimap<String, AttributeModifier> multimap;
 
@@ -986,7 +1028,7 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
                 NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
                 AttributeModifier attributemodifier = SharedMonsterAttributes.readAttributeModifierFromNBT(nbttagcompound);
 
-                if (attributemodifier != null && attributemodifier.getID().getLeastSignificantBits() != 0L && attributemodifier.getID().getMostSignificantBits() != 0L)
+                if (attributemodifier != null && (!nbttagcompound.hasKey("Slot", 8) || nbttagcompound.getString("Slot").equals(equipmentSlot.getName())) && attributemodifier.getID().getLeastSignificantBits() != 0L && attributemodifier.getID().getMostSignificantBits() != 0L)
                 {
                     multimap.put(nbttagcompound.getString("AttributeName"), attributemodifier);
                 }
@@ -994,12 +1036,37 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
         }
         else
         {
-            multimap = this.getItem().getAttributeModifiers(this);
+            multimap = this.getItem().getAttributeModifiers(equipmentSlot, this);
         }
 
         return multimap;
     }
 
+    public void addAttributeModifier(String attributeName, AttributeModifier modifier, EntityEquipmentSlot equipmentSlot)
+    {
+        if (this.stackTagCompound == null)
+        {
+            this.stackTagCompound = new NBTTagCompound();
+        }
+
+        if (!this.stackTagCompound.hasKey("AttributeModifiers", 9))
+        {
+            this.stackTagCompound.setTag("AttributeModifiers", new NBTTagList());
+        }
+
+        NBTTagList nbttaglist = this.stackTagCompound.getTagList("AttributeModifiers", 10);
+        NBTTagCompound nbttagcompound = SharedMonsterAttributes.writeAttributeModifierToNBT(modifier);
+        nbttagcompound.setString("AttributeName", attributeName);
+
+        if (equipmentSlot != null)
+        {
+            nbttagcompound.setString("Slot", equipmentSlot.getName());
+        }
+
+        nbttaglist.appendTag(nbttagcompound);
+    }
+
+    @Deprecated
     public void setItem(Item newItem)
     {
         if (newItem == this.item && item != null && this.capabilities != null) //Item Didn't change but refreshed
@@ -1020,26 +1087,25 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
     /**
      * Get a ChatComponent for this Item's display name that shows this Item on hover
      */
-    public IChatComponent getChatComponent()
+    public ITextComponent getTextComponent()
     {
-        ChatComponentText chatcomponenttext = new ChatComponentText(this.getDisplayName());
+        TextComponentString textcomponentstring = new TextComponentString(this.getDisplayName());
 
         if (this.hasDisplayName())
         {
-            chatcomponenttext.getChatStyle().setItalic(Boolean.valueOf(true));
+            textcomponentstring.getStyle().setItalic(Boolean.valueOf(true));
         }
 
-        IChatComponent ichatcomponent = (new ChatComponentText("[")).appendSibling(chatcomponenttext).appendText("]");
+        ITextComponent itextcomponent = (new TextComponentString("[")).appendSibling(textcomponentstring).appendText("]");
 
         if (this.item != null)
         {
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
-            this.writeToNBT(nbttagcompound);
-            ichatcomponent.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new ChatComponentText(nbttagcompound.toString())));
-            ichatcomponent.getChatStyle().setColor(this.getRarity().rarityColor);
+            NBTTagCompound nbttagcompound = this.writeToNBT(new NBTTagCompound());
+            itextcomponent.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new TextComponentString(nbttagcompound.toString())));
+            itextcomponent.getStyle().setColor(this.getRarity().rarityColor);
         }
 
-        return ichatcomponent;
+        return itextcomponent;
     }
 
     public boolean canDestroy(Block blockIn)
@@ -1124,5 +1190,24 @@ public final class ItemStack implements net.minecraftforge.common.capabilities.I
         NBTTagCompound ret = new NBTTagCompound();
         this.writeToNBT(ret);
         return ret;
+    }
+
+    public boolean areCapsCompatible(ItemStack other)
+    {
+        if (this.capabilities == null)
+        {
+            if (other.capabilities == null)
+            {
+                return true;
+            }
+            else
+            {
+                return other.capabilities.areCompatible(null);
+            }
+        }
+        else
+        {
+            return this.capabilities.areCompatible(other.capabilities);
+        }
     }
 }

@@ -12,13 +12,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class GuiScreenHorseInventory extends GuiContainer
 {
-    private static final ResourceLocation horseGuiTextures = new ResourceLocation("textures/gui/container/horse.png");
+    private static final ResourceLocation HORSE_GUI_TEXTURES = new ResourceLocation("textures/gui/container/horse.png");
     /** The player inventory bound to this GUI. */
-    private IInventory playerInventory;
+    private final IInventory playerInventory;
     /** The horse inventory bound to this GUI. */
-    private IInventory horseInventory;
+    private final IInventory horseInventory;
     /** The EntityHorse whose inventory is currently being accessed. */
-    private EntityHorse horseEntity;
+    private final EntityHorse horseEntity;
     /** The mouse x-position recorded during the last rendered frame. */
     private float mousePosx;
     /** The mouse y-position recorded during the last renderered frame. */
@@ -34,7 +34,7 @@ public class GuiScreenHorseInventory extends GuiContainer
     }
 
     /**
-     * Draw the foreground layer for the GuiContainer (everything in front of the items). Args : mouseX, mouseY
+     * Draw the foreground layer for the GuiContainer (everything in front of the items)
      */
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
@@ -43,12 +43,12 @@ public class GuiScreenHorseInventory extends GuiContainer
     }
 
     /**
-     * Args : renderPartialTicks, mouseX, mouseY
+     * Draws the background layer of this container (behind the items).
      */
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
     {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(horseGuiTextures);
+        this.mc.getTextureManager().bindTexture(HORSE_GUI_TEXTURES);
         int i = (this.width - this.xSize) / 2;
         int j = (this.height - this.ySize) / 2;
         this.drawTexturedModalRect(i, j, 0, 0, this.xSize, this.ySize);
@@ -58,7 +58,7 @@ public class GuiScreenHorseInventory extends GuiContainer
             this.drawTexturedModalRect(i + 79, j + 17, 0, this.ySize, 90, 54);
         }
 
-        if (this.horseEntity.canWearArmor())
+        if (this.horseEntity.getType().isHorse())
         {
             this.drawTexturedModalRect(i + 7, j + 35, 0, this.ySize + 54, 18, 18);
         }
@@ -67,7 +67,7 @@ public class GuiScreenHorseInventory extends GuiContainer
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {

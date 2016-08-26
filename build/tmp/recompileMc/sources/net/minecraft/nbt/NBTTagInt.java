@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class NBTTagInt extends NBTBase.NBTPrimitive
+public class NBTTagInt extends NBTPrimitive
 {
     /** The integer value for the tag. */
     private int data;
@@ -48,7 +48,7 @@ public class NBTTagInt extends NBTBase.NBTPrimitive
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagInt copy()
     {
         return new NBTTagInt(this.data);
     }

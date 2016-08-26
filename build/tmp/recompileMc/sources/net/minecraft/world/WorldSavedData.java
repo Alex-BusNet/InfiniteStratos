@@ -2,7 +2,7 @@ package net.minecraft.world;
 
 import net.minecraft.nbt.NBTTagCompound;
 
-public abstract class WorldSavedData
+public abstract class WorldSavedData implements net.minecraftforge.common.util.INBTSerializable<NBTTagCompound>
 {
     /** The name of the map data nbt */
     public final String mapName;
@@ -19,10 +19,7 @@ public abstract class WorldSavedData
      */
     public abstract void readFromNBT(NBTTagCompound nbt);
 
-    /**
-     * write data to NBTTagCompound from this MapDataBase, similar to Entities and TileEntities
-     */
-    public abstract void writeToNBT(NBTTagCompound nbt);
+    public abstract NBTTagCompound writeToNBT(NBTTagCompound p_189551_1_);
 
     /**
      * Marks this MapDataBase dirty, to be saved to disk when the level next saves.
@@ -46,5 +43,15 @@ public abstract class WorldSavedData
     public boolean isDirty()
     {
         return this.dirty;
+    }
+
+    public void deserializeNBT(NBTTagCompound nbt)
+    {
+        this.readFromNBT(nbt);
+    }
+
+    public NBTTagCompound serializeNBT()
+    {
+        return this.writeToNBT(new NBTTagCompound());
     }
 }

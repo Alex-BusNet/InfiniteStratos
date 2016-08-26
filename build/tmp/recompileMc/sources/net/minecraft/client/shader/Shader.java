@@ -1,19 +1,18 @@
 package net.minecraft.client.shader;
 
 import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.util.JsonException;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Matrix4f;
-
-import java.io.IOException;
-import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class Shader
@@ -27,11 +26,11 @@ public class Shader
     private final List<Integer> listAuxHeights = Lists.<Integer>newArrayList();
     private Matrix4f projectionMatrix;
 
-    public Shader(IResourceManager p_i45089_1_, String p_i45089_2_, Framebuffer p_i45089_3_, Framebuffer p_i45089_4_) throws JsonException, IOException
+    public Shader(IResourceManager resourceManager, String programName, Framebuffer framebufferInIn, Framebuffer framebufferOutIn) throws JsonException, IOException
     {
-        this.manager = new ShaderManager(p_i45089_1_, p_i45089_2_);
-        this.framebufferIn = p_i45089_3_;
-        this.framebufferOut = p_i45089_4_;
+        this.manager = new ShaderManager(resourceManager, programName);
+        this.framebufferIn = framebufferInIn;
+        this.framebufferOut = framebufferOutIn;
     }
 
     public void deleteShader()
@@ -39,12 +38,12 @@ public class Shader
         this.manager.deleteShader();
     }
 
-    public void addAuxFramebuffer(String p_148041_1_, Object p_148041_2_, int p_148041_3_, int p_148041_4_)
+    public void addAuxFramebuffer(String auxName, Object auxFramebufferIn, int width, int height)
     {
-        this.listAuxNames.add(this.listAuxNames.size(), p_148041_1_);
-        this.listAuxFramebuffers.add(this.listAuxFramebuffers.size(), p_148041_2_);
-        this.listAuxWidths.add(this.listAuxWidths.size(), Integer.valueOf(p_148041_3_));
-        this.listAuxHeights.add(this.listAuxHeights.size(), Integer.valueOf(p_148041_4_));
+        this.listAuxNames.add(this.listAuxNames.size(), auxName);
+        this.listAuxFramebuffers.add(this.listAuxFramebuffers.size(), auxFramebufferIn);
+        this.listAuxWidths.add(this.listAuxWidths.size(), Integer.valueOf(width));
+        this.listAuxHeights.add(this.listAuxHeights.size(), Integer.valueOf(height));
     }
 
     private void preLoadShader()
@@ -60,9 +59,9 @@ public class Shader
         GlStateManager.bindTexture(0);
     }
 
-    public void setProjectionMatrix(Matrix4f p_148045_1_)
+    public void setProjectionMatrix(Matrix4f projectionMatrixIn)
     {
-        this.projectionMatrix = p_148045_1_;
+        this.projectionMatrix = projectionMatrixIn;
     }
 
     public void loadShader(float p_148042_1_)
@@ -92,12 +91,12 @@ public class Shader
         GlStateManager.depthMask(false);
         GlStateManager.colorMask(true, true, true, true);
         Tessellator tessellator = Tessellator.getInstance();
-        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
-        worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        worldrenderer.pos(0.0D, (double)f1, 500.0D).color(255, 255, 255, 255).endVertex();
-        worldrenderer.pos((double)f, (double)f1, 500.0D).color(255, 255, 255, 255).endVertex();
-        worldrenderer.pos((double)f, 0.0D, 500.0D).color(255, 255, 255, 255).endVertex();
-        worldrenderer.pos(0.0D, 0.0D, 500.0D).color(255, 255, 255, 255).endVertex();
+        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        vertexbuffer.pos(0.0D, (double)f1, 500.0D).color(255, 255, 255, 255).endVertex();
+        vertexbuffer.pos((double)f, (double)f1, 500.0D).color(255, 255, 255, 255).endVertex();
+        vertexbuffer.pos((double)f, 0.0D, 500.0D).color(255, 255, 255, 255).endVertex();
+        vertexbuffer.pos(0.0D, 0.0D, 500.0D).color(255, 255, 255, 255).endVertex();
         tessellator.draw();
         GlStateManager.depthMask(true);
         GlStateManager.colorMask(true, true, true, true);

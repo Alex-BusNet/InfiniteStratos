@@ -8,7 +8,7 @@ import com.sparta.is.reference.GUIs;
 import com.sparta.is.tileentity.TileEntityISStation;
 import com.sparta.is.tileentity.TileEntityUnitStand;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 

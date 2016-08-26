@@ -1,23 +1,47 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.relauncher;
 
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
-import com.google.common.collect.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
-import com.google.common.primitives.Ints;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
@@ -25,18 +49,22 @@ import net.minecraftforge.fml.common.asm.ASMTransformerWrapper;
 import net.minecraftforge.fml.common.asm.transformers.ModAccessTransformer;
 import net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker;
 import net.minecraftforge.fml.common.launcher.FMLTweaker;
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.*;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.DependsOn;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.MCVersion;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.Name;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.SortingIndex;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
+
 import org.apache.logging.log4j.Level;
 
-import java.io.*;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
-import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.ObjectArrays;
+import com.google.common.collect.Sets;
+import com.google.common.primitives.Ints;
 
 public class CoreModManager {
     private static final Attributes.Name COREMODCONTAINSFMLMOD = new Attributes.Name("FMLCorePluginContainsFMLMod");
@@ -206,7 +234,7 @@ public class CoreModManager {
 
         if (loadPlugins.isEmpty())
         {
-            throw new RuntimeException("A fatal error has occured - no valid fml load plugin was found - this is a completely corrupt FML installation.");
+            throw new RuntimeException("A fatal error has occurred - no valid fml load plugin was found - this is a completely corrupt FML installation.");
         }
 
         FMLRelaunchLog.fine("All fundamental core mods are successfully located");
@@ -343,7 +371,7 @@ public class CoreModManager {
                     ignoredModFiles.add(coreMod.getName());
                     continue;
                 }
-                ModListHelper.additionalMods.putAll(extractContainedDepJars(jar, versionedModDir));
+                ModListHelper.additionalMods.putAll(extractContainedDepJars(jar, coreMods, versionedModDir));
                 fmlCorePlugin = mfAttributes.getValue("FMLCorePlugin");
                 if (fmlCorePlugin == null)
                 {
@@ -396,7 +424,7 @@ public class CoreModManager {
         }
     }
 
-    private static Map<String,File> extractContainedDepJars(JarFile jar, File versionedModsDir) throws IOException
+    private static Map<String,File> extractContainedDepJars(JarFile jar, File baseModsDir, File versionedModsDir) throws IOException
     {
         Map<String,File> result = Maps.newHashMap();
         if (!jar.getManifest().getMainAttributes().containsKey(MODCONTAINSDEPS)) return result;
@@ -405,7 +433,8 @@ public class CoreModManager {
         String[] depList = deps.split(" ");
         for (String dep : depList)
         {
-            if (skipContainedDeps.contains(dep))
+            String depEndName = new File(dep).getName(); // extract last part of name
+            if (skipContainedDeps.contains(dep) || skipContainedDeps.contains(depEndName))
             {
                 FMLRelaunchLog.log(Level.ERROR, "Skipping dep at request: %s", dep);
                 continue;
@@ -416,26 +445,34 @@ public class CoreModManager {
                 FMLRelaunchLog.log(Level.ERROR, "Found invalid ContainsDeps declaration %s in %s", dep, jar.getName());
                 continue;
             }
-            File target = new File(versionedModsDir, dep);
+            File target = new File(versionedModsDir, depEndName);
+            File modTarget = new File(baseModsDir, depEndName);
             if (target.exists())
             {
                 FMLRelaunchLog.log(Level.DEBUG, "Found existing ContainsDep extracted to %s, skipping extraction", target.getCanonicalPath());
                 result.put(dep,target);
                 continue;
             }
-            FMLRelaunchLog.log(Level.DEBUG, "Extracted ContainedDep %s from %s to %s", dep, jar.getName(), target.getCanonicalPath());
+            else if (modTarget.exists())
+            {
+                FMLRelaunchLog.log(Level.DEBUG, "Found ContainsDep in main mods directory at %s, skipping extraction", modTarget.getCanonicalPath());
+                result.put(dep, modTarget);
+                continue;
+            }
+
+            FMLRelaunchLog.log(Level.DEBUG, "Extracting ContainedDep %s from %s to %s", dep, jar.getName(), target.getCanonicalPath());
             try
             {
                 Files.createParentDirs(target);
                 FileOutputStream targ = new FileOutputStream(target);
                 ByteStreams.copy(jar.getInputStream(jarEntry), targ);
                 targ.close();
+                FMLRelaunchLog.log(Level.DEBUG, "Extracted ContainedDep %s from %s to %s", dep, jar.getName(), target.getCanonicalPath());
+                result.put(dep,target);
             } catch (IOException e)
             {
                 FMLRelaunchLog.log(Level.ERROR, e, "An error occurred extracting dependency");
-                continue;
             }
-            result.put(dep,target);
         }
         return result;
     }
@@ -592,7 +629,7 @@ public class CoreModManager {
 
         Launch.blackboard.put("fml.deobfuscatedEnvironment", deobfuscatedEnvironment);
         tweaker.injectCascadingTweak("net.minecraftforge.fml.common.launcher.FMLDeobfTweaker");
-        tweakSorting.put("net.minecraftforge.fml.common.launcher.FMLDeobfTweaker", Integer.valueOf(1000));
+        tweakSorting.put("net.minecraftforge.fml.common.launcher.FMLDeobfTweaker", 1000);
     }
 
     public static void injectCoreModTweaks(FMLInjectionAndSortingTweaker fmlInjectionAndSortingTweaker)

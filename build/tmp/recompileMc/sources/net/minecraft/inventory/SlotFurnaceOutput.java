@@ -1,18 +1,19 @@
 package net.minecraft.inventory;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.stats.AchievementList;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 public class SlotFurnaceOutput extends Slot
 {
     /** The player that is using the GUI where this slot resides. */
-    private EntityPlayer thePlayer;
-    private int field_75228_b;
+    private final EntityPlayer thePlayer;
+    private int removeCount;
 
     public SlotFurnaceOutput(EntityPlayer player, IInventory inventoryIn, int slotIndex, int xPosition, int yPosition)
     {
@@ -23,7 +24,7 @@ public class SlotFurnaceOutput extends Slot
     /**
      * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
      */
-    public boolean isItemValid(ItemStack stack)
+    public boolean isItemValid(@Nullable ItemStack stack)
     {
         return false;
     }
@@ -36,7 +37,7 @@ public class SlotFurnaceOutput extends Slot
     {
         if (this.getHasStack())
         {
-            this.field_75228_b += Math.min(amount, this.getStack().stackSize);
+            this.removeCount += Math.min(amount, this.getStack().stackSize);
         }
 
         return super.decrStackSize(amount);
@@ -54,7 +55,7 @@ public class SlotFurnaceOutput extends Slot
      */
     protected void onCrafting(ItemStack stack, int amount)
     {
-        this.field_75228_b += amount;
+        this.removeCount += amount;
         this.onCrafting(stack);
     }
 
@@ -63,11 +64,11 @@ public class SlotFurnaceOutput extends Slot
      */
     protected void onCrafting(ItemStack stack)
     {
-        stack.onCrafting(this.thePlayer.worldObj, this.thePlayer, this.field_75228_b);
+        stack.onCrafting(this.thePlayer.worldObj, this.thePlayer, this.removeCount);
 
         if (!this.thePlayer.worldObj.isRemote)
         {
-            int i = this.field_75228_b;
+            int i = this.removeCount;
             float f = FurnaceRecipes.instance().getSmeltingExperience(stack);
 
             if (f == 0.0F)
@@ -94,18 +95,18 @@ public class SlotFurnaceOutput extends Slot
             }
         }
 
-        this.field_75228_b = 0;
+        this.removeCount = 0;
 
         net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerSmeltedEvent(thePlayer, stack);
 
-        if (stack.getItem() == Items.iron_ingot)
+        if (stack.getItem() == Items.IRON_INGOT)
         {
-            this.thePlayer.triggerAchievement(AchievementList.acquireIron);
+            this.thePlayer.addStat(AchievementList.ACQUIRE_IRON);
         }
 
-        if (stack.getItem() == Items.cooked_fish)
+        if (stack.getItem() == Items.COOKED_FISH)
         {
-            this.thePlayer.triggerAchievement(AchievementList.cookFish);
+            this.thePlayer.addStat(AchievementList.COOK_FISH);
         }
     }
 }

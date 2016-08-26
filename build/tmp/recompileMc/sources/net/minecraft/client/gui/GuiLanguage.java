@@ -2,6 +2,8 @@ package net.minecraft.client.gui;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.Language;
@@ -9,9 +11,6 @@ import net.minecraft.client.resources.LanguageManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.io.IOException;
-import java.util.Map;
 
 @SideOnly(Side.CLIENT)
 public class GuiLanguage extends GuiScreen
@@ -42,8 +41,8 @@ public class GuiLanguage extends GuiScreen
      */
     public void initGui()
     {
-        this.buttonList.add(this.forceUnicodeFontBtn = new GuiOptionButton(100, this.width / 2 - 155, this.height - 38, GameSettings.Options.FORCE_UNICODE_FONT, this.game_settings_3.getKeyBinding(GameSettings.Options.FORCE_UNICODE_FONT)));
-        this.buttonList.add(this.confirmSettingsBtn = new GuiOptionButton(6, this.width / 2 - 155 + 160, this.height - 38, I18n.format("gui.done", new Object[0])));
+        this.forceUnicodeFontBtn = (GuiOptionButton)this.func_189646_b(new GuiOptionButton(100, this.width / 2 - 155, this.height - 38, GameSettings.Options.FORCE_UNICODE_FONT, this.game_settings_3.getKeyBinding(GameSettings.Options.FORCE_UNICODE_FONT)));
+        this.confirmSettingsBtn = (GuiOptionButton)this.func_189646_b(new GuiOptionButton(6, this.width / 2 - 155 + 160, this.height - 38, I18n.format("gui.done", new Object[0])));
         this.list = new GuiLanguage.List(this.mc);
         this.list.registerScrollButtons(7, 8);
     }
@@ -91,7 +90,7 @@ public class GuiLanguage extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
@@ -160,10 +159,10 @@ public class GuiLanguage extends GuiScreen
             GuiLanguage.this.drawDefaultBackground();
         }
 
-        protected void drawSlot(int entryID, int p_180791_2_, int p_180791_3_, int p_180791_4_, int mouseXIn, int mouseYIn)
+        protected void drawSlot(int entryID, int insideLeft, int yPos, int insideSlotHeight, int mouseXIn, int mouseYIn)
         {
             GuiLanguage.this.fontRendererObj.setBidiFlag(true);
-            GuiLanguage.this.drawCenteredString(GuiLanguage.this.fontRendererObj, ((Language)this.languageMap.get(this.langCodeList.get(entryID))).toString(), this.width / 2, p_180791_3_ + 1, 16777215);
+            GuiLanguage.this.drawCenteredString(GuiLanguage.this.fontRendererObj, ((Language)this.languageMap.get(this.langCodeList.get(entryID))).toString(), this.width / 2, yPos + 1, 16777215);
             GuiLanguage.this.fontRendererObj.setBidiFlag(GuiLanguage.this.languageManager.getCurrentLanguage().isBidirectional());
         }
     }

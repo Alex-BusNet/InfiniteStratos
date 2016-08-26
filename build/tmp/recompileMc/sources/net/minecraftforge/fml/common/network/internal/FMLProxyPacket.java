@@ -1,31 +1,53 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.network.internal;
 
-import com.google.common.collect.ConcurrentHashMultiset;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multiset;
-import com.google.common.collect.Multiset.Entry;
-import com.google.common.collect.Multisets;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
+
+import java.io.IOException;
+import java.util.List;
+
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraft.network.play.client.C17PacketCustomPayload;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.network.FMLNetworkException;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
 import net.minecraftforge.fml.relauncher.Side;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.helpers.Integers;
 
-import java.io.IOException;
-import java.util.List;
+import com.google.common.collect.ConcurrentHashMultiset;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Multiset.Entry;
+import com.google.common.collect.Multisets;
 
 public class FMLProxyPacket implements Packet<INetHandler> {
     final String channel;
@@ -36,13 +58,13 @@ public class FMLProxyPacket implements Packet<INetHandler> {
     private static Multiset<String> badPackets = ConcurrentHashMultiset.create();
     private static int packetCountWarning = Integers.parseInt(System.getProperty("fml.badPacketCounter", "100"), 100);
 
-    public FMLProxyPacket(S3FPacketCustomPayload original)
+    public FMLProxyPacket(SPacketCustomPayload original)
     {
         this(original.getBufferData(), original.getChannelName());
         this.target = Side.CLIENT;
     }
 
-    public FMLProxyPacket(C17PacketCustomPayload original)
+    public FMLProxyPacket(CPacketCustomPayload original)
     {
         this(original.getBufferData(), original.getChannelName());
         this.target = Side.SERVER;
@@ -108,7 +130,7 @@ public class FMLProxyPacket implements Packet<INetHandler> {
             catch (Throwable t)
             {
                 FMLLog.log(Level.ERROR, t, "There was a critical exception handling a packet on channel %s", channel);
-                dispatcher.rejectHandshake("A fatal error has occured, this connection is terminated");
+                dispatcher.rejectHandshake("A fatal error has occurred, this connection is terminated");
             }
         }
     }
@@ -127,10 +149,11 @@ public class FMLProxyPacket implements Packet<INetHandler> {
     }
     public Packet<INetHandlerPlayServer> toC17Packet()
     {
-        return new C17PacketCustomPayload(channel, payload);
+        return new CPacketCustomPayload(channel, payload);
     }
 
     static final int PART_SIZE = 0x1000000 - 0x50; // Make it a constant so that it gets inlined below.
+    // FIXME int overflow
     public static final int MAX_LENGTH = PART_SIZE * 255;
     public List<Packet<INetHandlerPlayClient>> toS3FPackets() throws IOException
     {
@@ -139,7 +162,7 @@ public class FMLProxyPacket implements Packet<INetHandler> {
 
         if (data.length < PART_SIZE)
         {
-            ret.add(new S3FPacketCustomPayload(channel, payload));
+            ret.add(new SPacketCustomPayload(channel, new PacketBuffer(payload.duplicate())));
         }
         else
         {
@@ -152,7 +175,7 @@ public class FMLProxyPacket implements Packet<INetHandler> {
             preamble.writeString(channel);
             preamble.writeByte(parts);
             preamble.writeInt(data.length);
-            ret.add(new S3FPacketCustomPayload("FML|MP", preamble));
+            ret.add(new SPacketCustomPayload("FML|MP", preamble));
 
             int offset = 0;
             for (int x = 0; x < parts; x++)
@@ -162,7 +185,7 @@ public class FMLProxyPacket implements Packet<INetHandler> {
                 tmp[0] = (byte)(x & 0xFF);
                 System.arraycopy(data, offset, tmp, 1, tmp.length - 1);
                 offset += tmp.length - 1;
-                ret.add(new S3FPacketCustomPayload("FML|MP", new PacketBuffer(Unpooled.wrappedBuffer(tmp))));
+                ret.add(new SPacketCustomPayload("FML|MP", new PacketBuffer(Unpooled.wrappedBuffer(tmp))));
             }
         }
         return ret;

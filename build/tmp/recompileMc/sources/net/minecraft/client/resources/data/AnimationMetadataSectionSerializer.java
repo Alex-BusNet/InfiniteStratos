@@ -1,14 +1,20 @@
 package net.minecraft.client.resources.data;
 
 import com.google.common.collect.Lists;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import java.lang.reflect.Type;
+import java.util.List;
 import net.minecraft.util.JsonUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.Validate;
-
-import java.lang.reflect.Type;
-import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class AnimationMetadataSectionSerializer extends BaseMetadataSectionSerializer<AnimationMetadataSection> implements JsonSerializer<AnimationMetadataSection>
@@ -64,15 +70,15 @@ public class AnimationMetadataSectionSerializer extends BaseMetadataSectionSeria
         return new AnimationMetadataSection(list, k, l, i, flag);
     }
 
-    private AnimationFrame parseAnimationFrame(int p_110492_1_, JsonElement p_110492_2_)
+    private AnimationFrame parseAnimationFrame(int frame, JsonElement element)
     {
-        if (p_110492_2_.isJsonPrimitive())
+        if (element.isJsonPrimitive())
         {
-            return new AnimationFrame(JsonUtils.getInt(p_110492_2_, "frames[" + p_110492_1_ + "]"));
+            return new AnimationFrame(JsonUtils.getInt(element, "frames[" + frame + "]"));
         }
-        else if (p_110492_2_.isJsonObject())
+        else if (element.isJsonObject())
         {
-            JsonObject jsonobject = JsonUtils.getJsonObject(p_110492_2_, "frames[" + p_110492_1_ + "]");
+            JsonObject jsonobject = JsonUtils.getJsonObject(element, "frames[" + frame + "]");
             int i = JsonUtils.getInt(jsonobject, "time", -1);
 
             if (jsonobject.has("time"))

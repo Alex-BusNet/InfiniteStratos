@@ -1,7 +1,12 @@
 package net.minecraft.client.renderer.tileentity;
 
 import com.mojang.authlib.GameProfile;
+import java.util.UUID;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockChest;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelShield;
+import net.minecraft.client.renderer.BannerTextures;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -16,26 +21,42 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.UUID;
-
 @SideOnly(Side.CLIENT)
 public class TileEntityItemStackRenderer
 {
     public static TileEntityItemStackRenderer instance = new TileEntityItemStackRenderer();
-    private TileEntityChest field_147717_b = new TileEntityChest(0);
-    private TileEntityChest field_147718_c = new TileEntityChest(1);
-    private TileEntityEnderChest enderChest = new TileEntityEnderChest();
-    private TileEntityBanner banner = new TileEntityBanner();
-    private TileEntitySkull skull = new TileEntitySkull();
+    private final TileEntityChest chestBasic = new TileEntityChest(BlockChest.Type.BASIC);
+    private final TileEntityChest chestTrap = new TileEntityChest(BlockChest.Type.TRAP);
+    private final TileEntityEnderChest enderChest = new TileEntityEnderChest();
+    private final TileEntityBanner banner = new TileEntityBanner();
+    private final TileEntitySkull skull = new TileEntitySkull();
+    private final ModelShield modelShield = new ModelShield();
 
     public void renderByItem(ItemStack itemStackIn)
     {
-        if (itemStackIn.getItem() == Items.banner)
+        if (itemStackIn.getItem() == Items.BANNER)
         {
             this.banner.setItemValues(itemStackIn);
             TileEntityRendererDispatcher.instance.renderTileEntityAt(this.banner, 0.0D, 0.0D, 0.0D, 0.0F);
         }
-        else if (itemStackIn.getItem() == Items.skull)
+        else if (itemStackIn.getItem() == Items.SHIELD)
+        {
+            if (itemStackIn.getSubCompound("BlockEntityTag", false) != null)
+            {
+                this.banner.setItemValues(itemStackIn);
+                Minecraft.getMinecraft().getTextureManager().bindTexture(BannerTextures.SHIELD_DESIGNS.getResourceLocation(this.banner.getPatternResourceLocation(), this.banner.getPatternList(), this.banner.getColorList()));
+            }
+            else
+            {
+                Minecraft.getMinecraft().getTextureManager().bindTexture(BannerTextures.SHIELD_BASE_TEXTURE);
+            }
+
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(1.0F, -1.0F, -1.0F);
+            this.modelShield.render();
+            GlStateManager.popMatrix();
+        }
+        else if (itemStackIn.getItem() == Items.SKULL)
         {
             GameProfile gameprofile = null;
 
@@ -47,7 +68,7 @@ public class TileEntityItemStackRenderer
                 {
                     gameprofile = NBTUtil.readGameProfileFromNBT(nbttagcompound.getCompoundTag("SkullOwner"));
                 }
-                else if (nbttagcompound.hasKey("SkullOwner", 8) && nbttagcompound.getString("SkullOwner").length() > 0)
+                else if (nbttagcompound.hasKey("SkullOwner", 8) && !nbttagcompound.getString("SkullOwner").isEmpty())
                 {
                     GameProfile lvt_2_2_ = new GameProfile((UUID)null, nbttagcompound.getString("SkullOwner"));
                     gameprofile = TileEntitySkull.updateGameprofile(lvt_2_2_);
@@ -59,10 +80,8 @@ public class TileEntityItemStackRenderer
             if (TileEntitySkullRenderer.instance != null)
             {
                 GlStateManager.pushMatrix();
-                GlStateManager.translate(-0.5F, 0.0F, -0.5F);
-                GlStateManager.scale(2.0F, 2.0F, 2.0F);
                 GlStateManager.disableCull();
-                TileEntitySkullRenderer.instance.renderSkull(0.0F, 0.0F, 0.0F, EnumFacing.UP, 0.0F, itemStackIn.getMetadata(), gameprofile, -1);
+                TileEntitySkullRenderer.instance.renderSkull(0.0F, 0.0F, 0.0F, EnumFacing.UP, 0.0F, itemStackIn.getMetadata(), gameprofile, -1, 0.0F);
                 GlStateManager.enableCull();
                 GlStateManager.popMatrix();
             }
@@ -71,18 +90,18 @@ public class TileEntityItemStackRenderer
         {
             Block block = Block.getBlockFromItem(itemStackIn.getItem());
 
-            if (block == Blocks.ender_chest)
+            if (block == Blocks.ENDER_CHEST)
             {
                 TileEntityRendererDispatcher.instance.renderTileEntityAt(this.enderChest, 0.0D, 0.0D, 0.0D, 0.0F);
             }
-            else if (block == Blocks.trapped_chest)
+            else if (block == Blocks.TRAPPED_CHEST)
             {
-                TileEntityRendererDispatcher.instance.renderTileEntityAt(this.field_147718_c, 0.0D, 0.0D, 0.0D, 0.0F);
+                TileEntityRendererDispatcher.instance.renderTileEntityAt(this.chestTrap, 0.0D, 0.0D, 0.0D, 0.0F);
             }
-            else if (block != Blocks.chest) net.minecraftforge.client.ForgeHooksClient.renderTileItem(itemStackIn.getItem(), itemStackIn.getMetadata());
+            else if (block != Blocks.CHEST) net.minecraftforge.client.ForgeHooksClient.renderTileItem(itemStackIn.getItem(), itemStackIn.getMetadata());
             else
             {
-                TileEntityRendererDispatcher.instance.renderTileEntityAt(this.field_147717_b, 0.0D, 0.0D, 0.0D, 0.0F);
+                TileEntityRendererDispatcher.instance.renderTileEntityAt(this.chestBasic, 0.0D, 0.0D, 0.0D, 0.0F);
             }
         }
     }

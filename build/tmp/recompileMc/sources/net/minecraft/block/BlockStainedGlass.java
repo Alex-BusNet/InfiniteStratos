@@ -1,23 +1,22 @@
 package net.minecraft.block;
 
+import java.util.List;
+import java.util.Random;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
-import java.util.Random;
 
 public class BlockStainedGlass extends BlockBreakable
 {
@@ -27,7 +26,7 @@ public class BlockStainedGlass extends BlockBreakable
     {
         super(materialIn, false);
         this.setDefaultState(this.blockState.getBaseState().withProperty(COLOR, EnumDyeColor.WHITE));
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -60,9 +59,9 @@ public class BlockStainedGlass extends BlockBreakable
     }
 
     @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.TRANSLUCENT;
+        return BlockRenderLayer.TRANSLUCENT;
     }
 
     /**
@@ -78,7 +77,7 @@ public class BlockStainedGlass extends BlockBreakable
         return true;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -115,8 +114,8 @@ public class BlockStainedGlass extends BlockBreakable
         return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {COLOR});
+        return new BlockStateContainer(this, new IProperty[] {COLOR});
     }
 }

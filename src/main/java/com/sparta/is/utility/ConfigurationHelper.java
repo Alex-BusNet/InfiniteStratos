@@ -10,7 +10,7 @@ public class ConfigurationHelper
         Property property = configuration.get(category, name, defaultValue);
         property.setValidValues(validValues);
         property.setLanguageKey(langKey);
-        property.comment = comment + " [default: " + defaultValue + "]";
+        property.setComment(comment + " [default: " + defaultValue + "]");
         String value = property.getString();
 
         for (int i = 0; i < validValues.length; i++)

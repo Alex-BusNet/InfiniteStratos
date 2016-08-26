@@ -1,30 +1,30 @@
 package net.minecraft.realms;
 
-import net.minecraft.util.IChatComponent;
+import java.util.List;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class DisconnectedRealmsScreen extends RealmsScreen
 {
-    private String title;
-    private IChatComponent reason;
+    private final String title;
+    private final ITextComponent reason;
     private List<String> lines;
     private final RealmsScreen parent;
     private int textHeight;
 
-    public DisconnectedRealmsScreen(RealmsScreen p_i45742_1_, String p_i45742_2_, IChatComponent p_i45742_3_)
+    public DisconnectedRealmsScreen(RealmsScreen parentIn, String unlocalizedTitle, ITextComponent reasonIn)
     {
-        this.parent = p_i45742_1_;
-        this.title = getLocalizedString(p_i45742_2_);
-        this.reason = p_i45742_3_;
+        this.parent = parentIn;
+        this.title = getLocalizedString(unlocalizedTitle);
+        this.reason = reasonIn;
     }
 
     public void init()
     {
         Realms.setConnectedToRealms(false);
+        Realms.clearResourcePack();
         this.buttonsClear();
         this.lines = this.fontSplit(this.reason.getFormattedText(), this.width() - 50);
         this.textHeight = this.lines.size() * this.fontLineHeight();

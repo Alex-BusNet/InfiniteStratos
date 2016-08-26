@@ -1,33 +1,39 @@
 package net.minecraft.world;
 
+import javax.annotation.Nullable;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.biome.BiomeProviderSingle;
 import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.gen.ChunkProviderDebug;
+import net.minecraft.world.gen.ChunkProviderFlat;
+import net.minecraft.world.gen.ChunkProviderOverworld;
+import net.minecraft.world.gen.FlatGeneratorInfo;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class WorldProvider
 {
-    public static final float[] moonPhaseFactors = new float[] {1.0F, 0.75F, 0.5F, 0.25F, 0.0F, 0.25F, 0.5F, 0.75F};
+    public static final float[] MOON_PHASE_FACTORS = new float[] {1.0F, 0.75F, 0.5F, 0.25F, 0.0F, 0.25F, 0.5F, 0.75F};
     /** world object being used */
     protected World worldObj;
     private WorldType terrainType;
     private String generatorSettings;
     /** World chunk manager being used to generate chunks */
-    protected WorldChunkManager worldChunkMgr;
+    protected BiomeProvider biomeProvider;
     /** States whether the Hell world provider is used(true) or if the normal world provider is used(false) */
     protected boolean isHellWorld;
     /** A boolean that tells if a world does not have a sky. Used in calculating weather and skylight */
     protected boolean hasNoSky;
     /** Light to brightness conversion table */
     protected final float[] lightBrightnessTable = new float[16];
-    /** The id for the dimension (ex. -1: Nether, 0: Overworld, 1: The End) */
-    protected int dimensionId;
     /** Array for sunrise/sunset colors (RGBA) */
     private final float[] colorsSunriseSunset = new float[4];
 
@@ -39,7 +45,7 @@ public abstract class WorldProvider
         this.worldObj = worldIn;
         this.terrainType = worldIn.getWorldInfo().getTerrainType();
         this.generatorSettings = worldIn.getWorldInfo().getGeneratorOptions();
-        this.registerWorldChunkManager();
+        this.createBiomeProvider();
         this.generateLightBrightnessTable();
     }
 
@@ -53,22 +59,19 @@ public abstract class WorldProvider
         for (int i = 0; i <= 15; ++i)
         {
             float f1 = 1.0F - (float)i / 15.0F;
-            this.lightBrightnessTable[i] = (1.0F - f1) / (f1 * 3.0F + 1.0F) * (1.0F - f) + f;
+            this.lightBrightnessTable[i] = (1.0F - f1) / (f1 * 3.0F + 1.0F) * 1.0F + 0.0F;
         }
     }
 
     /**
      * creates a new world chunk manager for WorldProvider
      */
-    protected void registerWorldChunkManager()
+    protected void createBiomeProvider()
     {
-        this.worldChunkMgr = terrainType.getChunkManager(worldObj);
+        this.biomeProvider = terrainType.getBiomeProvider(worldObj);
     }
 
-    /**
-     * Returns a new chunk provider which generates chunks for this world
-     */
-    public IChunkProvider createChunkGenerator()
+    public IChunkGenerator createChunkGenerator()
     {
         return terrainType.getChunkGenerator(worldObj, generatorSettings);
     }
@@ -78,16 +81,17 @@ public abstract class WorldProvider
      */
     public boolean canCoordinateBeSpawn(int x, int z)
     {
-        return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)) == Blocks.grass;
+        BlockPos blockpos = new BlockPos(x, 0, z);
+        return this.worldObj.getBiomeGenForCoords(blockpos).ignorePlayerSpawnSuitability() ? true : this.worldObj.getGroundAboveSeaLevel(blockpos).getBlock() == Blocks.GRASS;
     }
 
     /**
      * Calculates the angle of sun and moon in the sky relative to a specified time (usually worldTime)
      */
-    public float calculateCelestialAngle(long p_76563_1_, float p_76563_3_)
+    public float calculateCelestialAngle(long worldTime, float partialTicks)
     {
-        int i = (int)(p_76563_1_ % 24000L);
-        float f = ((float)i + p_76563_3_) / 24000.0F - 0.25F;
+        int i = (int)(worldTime % 24000L);
+        float f = ((float)i + partialTicks) / 24000.0F - 0.25F;
 
         if (f < 0.0F)
         {
@@ -104,9 +108,9 @@ public abstract class WorldProvider
         return f;
     }
 
-    public int getMoonPhase(long p_76559_1_)
+    public int getMoonPhase(long worldTime)
     {
-        return (int)(p_76559_1_ / 24000L % 8L + 8L) % 8;
+        return (int)(worldTime / 24000L % 8L + 8L) % 8;
     }
 
     /**
@@ -120,16 +124,17 @@ public abstract class WorldProvider
     /**
      * Returns array with sunrise/sunset colors
      */
+    @Nullable
     @SideOnly(Side.CLIENT)
     public float[] calcSunriseSunsetColors(float celestialAngle, float partialTicks)
     {
         float f = 0.4F;
-        float f1 = MathHelper.cos(celestialAngle * (float)Math.PI * 2.0F) - 0.0F;
+        float f1 = MathHelper.cos(celestialAngle * ((float)Math.PI * 2F)) - 0.0F;
         float f2 = -0.0F;
 
-        if (f1 >= f2 - f && f1 <= f2 + f)
+        if (f1 >= -0.4F && f1 <= 0.4F)
         {
-            float f3 = (f1 - f2) / f * 0.5F + 0.5F;
+            float f3 = (f1 - -0.0F) / 0.4F * 0.5F + 0.5F;
             float f4 = 1.0F - (1.0F - MathHelper.sin(f3 * (float)Math.PI)) * 0.99F;
             f4 = f4 * f4;
             this.colorsSunriseSunset[0] = f3 * 0.3F + 0.7F;
@@ -148,9 +153,9 @@ public abstract class WorldProvider
      * Return Vec3D with biome specific fog color
      */
     @SideOnly(Side.CLIENT)
-    public Vec3 getFogColor(float p_76562_1_, float p_76562_2_)
+    public Vec3d getFogColor(float p_76562_1_, float p_76562_2_)
     {
-        float f = MathHelper.cos(p_76562_1_ * (float)Math.PI * 2.0F) * 2.0F + 0.5F;
+        float f = MathHelper.cos(p_76562_1_ * ((float)Math.PI * 2F)) * 2.0F + 0.5F;
         f = MathHelper.clamp_float(f, 0.0F, 1.0F);
         float f1 = 0.7529412F;
         float f2 = 0.84705883F;
@@ -158,7 +163,7 @@ public abstract class WorldProvider
         f1 = f1 * (f * 0.94F + 0.06F);
         f2 = f2 * (f * 0.94F + 0.06F);
         f3 = f3 * (f * 0.91F + 0.09F);
-        return new Vec3((double)f1, (double)f2, (double)f3);
+        return new Vec3d((double)f1, (double)f2, (double)f3);
     }
 
     /**
@@ -167,11 +172,6 @@ public abstract class WorldProvider
     public boolean canRespawnHere()
     {
         return true;
-    }
-
-    public static WorldProvider getProviderForDimension(int dimension)
-    {
-        return net.minecraftforge.common.DimensionManager.createProviderFor(dimension);
     }
 
     /**
@@ -219,16 +219,9 @@ public abstract class WorldProvider
         return false;
     }
 
-    /**
-     * Returns the dimension's name, e.g. "The End", "Nether", or "Overworld".
-     */
-    public abstract String getDimensionName();
-
-    public abstract String getInternalNameSuffix();
-
-    public WorldChunkManager getWorldChunkManager()
+    public BiomeProvider getBiomeProvider()
     {
-        return this.worldChunkMgr;
+        return this.biomeProvider;
     }
 
     public boolean doesWaterVaporize()
@@ -246,15 +239,7 @@ public abstract class WorldProvider
         return this.lightBrightnessTable;
     }
 
-    /**
-     * Gets the dimension of the provider
-     */
-    public int getDimensionId()
-    {
-        return this.dimensionId;
-    }
-
-    public WorldBorder getWorldBorder()
+    public WorldBorder createWorldBorder()
     {
         return new WorldBorder();
     }
@@ -263,16 +248,22 @@ public abstract class WorldProvider
     private net.minecraftforge.client.IRenderHandler skyRenderer = null;
     private net.minecraftforge.client.IRenderHandler cloudRenderer = null;
     private net.minecraftforge.client.IRenderHandler weatherRenderer = null;
+    private int dimensionId;
 
     /**
      * Sets the providers current dimension ID, used in default getSaveFolder()
      * Added to allow default providers to be registered for multiple dimensions.
+     * This is to denote the exact dimension ID opposed to the 'type' in WorldType
      *
      * @param dim Dimension ID
      */
     public void setDimension(int dim)
     {
         this.dimensionId = dim;
+    }
+    public int getDimension()
+    {
+        return this.dimensionId;
     }
 
     /**
@@ -376,15 +367,15 @@ public abstract class WorldProvider
     {
         BlockPos ret = this.worldObj.getSpawnPoint();
 
-        boolean isAdventure = worldObj.getWorldInfo().getGameType() == WorldSettings.GameType.ADVENTURE;
-        int spawnFuzz = terrainType.getSpawnFuzz();
+        boolean isAdventure = worldObj.getWorldInfo().getGameType() == GameType.ADVENTURE;
+        int spawnFuzz = this.worldObj instanceof WorldServer ? terrainType.getSpawnFuzz((WorldServer)this.worldObj, this.worldObj.getMinecraftServer()) : 1;
         int border = MathHelper.floor_double(worldObj.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
         if (border < spawnFuzz) spawnFuzz = border;
-        if (spawnFuzz < 1) spawnFuzz = 1;
-        int spawnFuzzHalf = spawnFuzz / 2;
 
-        if (!getHasNoSky() && !isAdventure)
+        if (!getHasNoSky() && !isAdventure && spawnFuzz != 0)
         {
+            if (spawnFuzz < 2) spawnFuzz = 2;
+            int spawnFuzzHalf = spawnFuzz / 2;
             ret = worldObj.getTopSolidOrLiquidBlock(ret.add(worldObj.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, worldObj.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
         }
 
@@ -415,11 +406,23 @@ public abstract class WorldProvider
         return 0;
     }
 
+    /**
+     * Called from {@link World#initCapabilities()}, to gather capabilities for this world.
+     * It's safe to access world here since this is called after world is registered.
+     * 
+     * On server, called directly after mapStorage and world data such as Scoreboard and VillageCollection are initialized.
+     * On client, called when world is constructed, just before world load event is called.
+     * Note that this method is always called before the world load event.
+     * @return initial holder for capabilities on the world
+     */
+    public net.minecraftforge.common.capabilities.ICapabilityProvider initCapabilities() {
+        return null;
+    }
     /*======================================= Start Moved From World =========================================*/
 
-    public BiomeGenBase getBiomeGenForCoords(BlockPos pos)
+    public Biome getBiomeForCoords(BlockPos pos)
     {
-        return worldObj.getBiomeGenForCoordsBody(pos);
+        return worldObj.getBiomeForCoordsBody(pos);
     }
 
     public boolean isDaytime()
@@ -451,15 +454,15 @@ public abstract class WorldProvider
     }
 
     @SideOnly(Side.CLIENT)
-    public Vec3 getSkyColor(net.minecraft.entity.Entity cameraEntity, float partialTicks)
+    public Vec3d getSkyColor(net.minecraft.entity.Entity cameraEntity, float partialTicks)
     {
         return worldObj.getSkyColorBody(cameraEntity, partialTicks);
     }
 
     @SideOnly(Side.CLIENT)
-    public Vec3 drawClouds(float partialTicks)
+    public Vec3d getCloudColor(float partialTicks)
     {
-        return worldObj.drawCloudsBody(partialTicks);
+        return worldObj.getCloudColorBody(partialTicks);
     }
 
     /**
@@ -570,6 +573,47 @@ public abstract class WorldProvider
     }
 
     public boolean canDoRainSnowIce(net.minecraft.world.chunk.Chunk chunk)
+    {
+        return true;
+    }
+
+    /**
+     * Called when a Player is added to the provider's world.
+     */
+    public void onPlayerAdded(EntityPlayerMP player)
+    {
+    }
+
+    /**
+     * Called when a Player is removed from the provider's world.
+     */
+    public void onPlayerRemoved(EntityPlayerMP player)
+    {
+    }
+
+    public abstract DimensionType getDimensionType();
+
+    /**
+     * Called when the world is performing a save. Only used to save the state of the Dragon Boss fight in
+     * WorldProviderEnd in Vanilla.
+     */
+    public void onWorldSave()
+    {
+    }
+
+    /**
+     * Called when the world is updating entities. Only used in WorldProviderEnd to update the DragonFightManager in
+     * Vanilla.
+     */
+    public void onWorldUpdateEntities()
+    {
+    }
+
+    /**
+     * Called to determine if the chunk at the given chunk coordinates within the provider's world can be dropped. Used
+     * in WorldProviderSurface to prevent spawn chunks from being unloaded.
+     */
+    public boolean canDropChunk(int x, int z)
     {
         return true;
     }

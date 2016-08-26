@@ -1,16 +1,17 @@
 package net.minecraft.world.chunk.storage;
 
+import java.io.IOException;
+import javax.annotation.Nullable;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-
-import java.io.IOException;
 
 public interface IChunkLoader
 {
     /**
      * Loads the specified(XZ) chunk into the specified world.
      */
+    @Nullable
     Chunk loadChunk(World worldIn, int x, int z) throws IOException;
 
     void saveChunk(World worldIn, Chunk chunkIn) throws MinecraftException, IOException;

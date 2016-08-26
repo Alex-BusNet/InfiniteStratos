@@ -7,7 +7,7 @@ public class ResourceLocation
     protected final String resourceDomain;
     protected final String resourcePath;
 
-    protected ResourceLocation(int p_i45928_1_, String... resourceName)
+    protected ResourceLocation(int unused, String... resourceName)
     {
         this.resourceDomain = org.apache.commons.lang3.StringUtils.isEmpty(resourceName[0]) ? "minecraft" : resourceName[0].toLowerCase();
         this.resourcePath = resourceName[1];
@@ -30,7 +30,7 @@ public class ResourceLocation
      */
     protected static String[] splitObjectName(String toSplit)
     {
-        String[] astring = new String[] {null, toSplit};
+        String[] astring = new String[] {"minecraft", toSplit};
         int i = toSplit.indexOf(58);
 
         if (i >= 0)

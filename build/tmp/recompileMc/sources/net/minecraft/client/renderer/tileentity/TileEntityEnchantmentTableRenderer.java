@@ -4,8 +4,8 @@ import net.minecraft.client.model.ModelBook;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntityEnchantmentTable;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -14,7 +14,7 @@ public class TileEntityEnchantmentTableRenderer extends TileEntitySpecialRendere
 {
     /** The texture for the book above the enchantment table. */
     private static final ResourceLocation TEXTURE_BOOK = new ResourceLocation("textures/entity/enchanting_table_book.png");
-    private ModelBook field_147541_c = new ModelBook();
+    private final ModelBook modelBook = new ModelBook();
 
     public void renderTileEntityAt(TileEntityEnchantmentTable te, double x, double y, double z, float partialTicks, int destroyStage)
     {
@@ -35,7 +35,7 @@ public class TileEntityEnchantmentTableRenderer extends TileEntitySpecialRendere
         }
 
         float f2 = te.bookRotationPrev + f1 * partialTicks;
-        GlStateManager.rotate(-f2 * 180.0F / (float)Math.PI, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(-f2 * (180F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(80.0F, 0.0F, 0.0F, 1.0F);
         this.bindTexture(TEXTURE_BOOK);
         float f3 = te.pageFlipPrev + (te.pageFlip - te.pageFlipPrev) * partialTicks + 0.25F;
@@ -65,7 +65,7 @@ public class TileEntityEnchantmentTableRenderer extends TileEntitySpecialRendere
 
         float f5 = te.bookSpreadPrev + (te.bookSpread - te.bookSpreadPrev) * partialTicks;
         GlStateManager.enableCull();
-        this.field_147541_c.render((Entity)null, f, f3, f4, f5, 0.0F, 0.0625F);
+        this.modelBook.render((Entity)null, f, f3, f4, f5, 0.0F, 0.0625F);
         GlStateManager.popMatrix();
     }
 }

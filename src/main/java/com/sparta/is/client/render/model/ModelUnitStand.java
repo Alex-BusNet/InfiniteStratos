@@ -3,9 +3,9 @@ package com.sparta.is.client.render.model;
 import com.sparta.is.reference.Models;
 import com.sparta.is.utility.LogHelper;
 import net.minecraftforge.client.model.IModel;
+import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.client.model.obj.OBJLoader;
 
 @SideOnly(Side.CLIENT)
 public class ModelUnitStand
@@ -16,7 +16,7 @@ public class ModelUnitStand
     {
         try
         {
-            modelUnitStand = OBJLoader.instance.loadModel(Models.UNIT_STAND);
+            modelUnitStand = OBJLoader.INSTANCE.loadModel(Models.UNIT_STAND);
         }
         catch ( Exception e )
         {
@@ -24,8 +24,8 @@ public class ModelUnitStand
         }
     }
 
-    public void render()
-    {
-        modelUnitStand.renderAll();
-    }
+//    public void render()
+//    {
+//        modelUnitStand.renderAll();
+//    }
 }

@@ -4,12 +4,12 @@ import com.sparta.is.reference.Names;
 import com.sparta.is.tileentity.TileEntityISStation;
 import com.sparta.is.tileentity.TileEntityUnitStand;
 import mcp.mobius.waila.api.*;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -28,11 +28,11 @@ public class WailaDataProvider implements IWailaDataProvider
     {
         if(accessor.getTileEntity() instanceof TileEntityISStation)
         {
-            currentTip.set(0, String.format("%s%s", SpecialChars.WHITE, StatCollector.translateToLocal(Names.Blocks.IS_UNIT_STATION)));
+            currentTip.set(0, String.format("%s%s", SpecialChars.WHITE, I18n.format(Names.Blocks.IS_UNIT_STATION)));
         }
         else if(accessor.getTileEntity() instanceof TileEntityUnitStand)
         {
-            currentTip.set(0, String.format("%s%s", SpecialChars.WHITE, StatCollector.translateToLocal(Names.Blocks.UNIT_STAND)));
+            currentTip.set(0, String.format("%s%s", SpecialChars.WHITE, I18n.format(Names.Blocks.UNIT_STAND)));
         }
         return currentTip;
     }

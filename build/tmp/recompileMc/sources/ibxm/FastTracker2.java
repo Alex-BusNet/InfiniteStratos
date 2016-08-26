@@ -1,10 +1,7 @@
 
 package ibxm;
 
-import java.io.DataInput;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 public class FastTracker2 {
 	public static boolean is_xm( byte[] header_60_bytes ) {

@@ -1,10 +1,9 @@
 package net.minecraft.item;
 
+import java.util.List;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 public class ItemCoal extends Item
 {
@@ -12,7 +11,7 @@ public class ItemCoal extends Item
     {
         this.setHasSubtypes(true);
         this.setMaxDamage(0);
-        this.setCreativeTab(CreativeTabs.tabMaterials);
+        this.setCreativeTab(CreativeTabs.MATERIALS);
     }
 
     /**

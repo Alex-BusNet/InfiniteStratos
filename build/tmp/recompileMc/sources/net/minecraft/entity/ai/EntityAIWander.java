@@ -1,15 +1,15 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 
 public class EntityAIWander extends EntityAIBase
 {
-    private EntityCreature entity;
+    private final EntityCreature entity;
     private double xPosition;
     private double yPosition;
     private double zPosition;
-    private double speed;
+    private final double speed;
     private int executionChance;
     private boolean mustUpdate;
 
@@ -44,17 +44,17 @@ public class EntityAIWander extends EntityAIBase
             }
         }
 
-        Vec3 vec3 = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+        Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
 
-        if (vec3 == null)
+        if (vec3d == null)
         {
             return false;
         }
         else
         {
-            this.xPosition = vec3.xCoord;
-            this.yPosition = vec3.yCoord;
-            this.zPosition = vec3.zCoord;
+            this.xPosition = vec3d.xCoord;
+            this.yPosition = vec3d.yCoord;
+            this.zPosition = vec3d.zCoord;
             this.mustUpdate = false;
             return true;
         }

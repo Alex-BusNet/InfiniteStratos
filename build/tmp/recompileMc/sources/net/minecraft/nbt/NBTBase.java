@@ -93,19 +93,4 @@ public abstract class NBTBase
     {
         return this.toString();
     }
-
-    public abstract static class NBTPrimitive extends NBTBase
-        {
-            public abstract long getLong();
-
-            public abstract int getInt();
-
-            public abstract short getShort();
-
-            public abstract byte getByte();
-
-            public abstract double getDouble();
-
-            public abstract float getFloat();
-        }
 }

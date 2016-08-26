@@ -1,16 +1,15 @@
 package net.minecraft.server.dedicated;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.management.ServerConfigurationManager;
+import java.io.IOException;
+import net.minecraft.server.management.PlayerList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-
 @SideOnly(Side.SERVER)
-public class DedicatedPlayerList extends ServerConfigurationManager
+public class DedicatedPlayerList extends PlayerList
 {
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -27,10 +26,10 @@ public class DedicatedPlayerList extends ServerConfigurationManager
             this.getBannedIPs().setLanServer(true);
         }
 
-        this.loadUserBansList();
-        this.saveUserBanList();
-        this.loadIpBanList();
-        this.saveIpBanList();
+        this.loadPlayerBanList();
+        this.savePlayerBanList();
+        this.loadIPBanList();
+        this.saveIPBanList();
         this.loadOpsList();
         this.readWhiteList();
         this.saveOpsList();
@@ -72,15 +71,12 @@ public class DedicatedPlayerList extends ServerConfigurationManager
         this.saveWhiteList();
     }
 
-    /**
-     * Either does nothing, or calls readWhiteList.
-     */
-    public void loadWhiteList()
+    public void reloadWhitelist()
     {
         this.readWhiteList();
     }
 
-    private void saveIpBanList()
+    private void saveIPBanList()
     {
         try
         {
@@ -92,7 +88,7 @@ public class DedicatedPlayerList extends ServerConfigurationManager
         }
     }
 
-    private void saveUserBanList()
+    private void savePlayerBanList()
     {
         try
         {
@@ -104,7 +100,7 @@ public class DedicatedPlayerList extends ServerConfigurationManager
         }
     }
 
-    private void loadIpBanList()
+    private void loadIPBanList()
     {
         try
         {
@@ -116,7 +112,7 @@ public class DedicatedPlayerList extends ServerConfigurationManager
         }
     }
 
-    private void loadUserBansList()
+    private void loadPlayerBanList()
     {
         try
         {
@@ -186,8 +182,8 @@ public class DedicatedPlayerList extends ServerConfigurationManager
         return (DedicatedServer)super.getServerInstance();
     }
 
-    public boolean func_183023_f(GameProfile p_183023_1_)
+    public boolean bypassesPlayerLimit(GameProfile profile)
     {
-        return this.getOppedPlayers().func_183026_b(p_183023_1_);
+        return this.getOppedPlayers().bypassesPlayerLimit(profile);
     }
 }

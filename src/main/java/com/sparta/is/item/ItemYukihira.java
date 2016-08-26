@@ -17,9 +17,6 @@ import com.sparta.repackage.cofh.api.energy.IEnergyContainerItem;
 import com.sparta.repackage.cofh.lib.util.helpers.EnergyHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.MathHelper;
 import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -27,11 +24,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -48,8 +45,8 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
     public int damage = 1;
     public int damageOneOff = 0;
 
-    IIcon yukihiraIcon;
-    IIcon reirakuIcon;
+//    IIcon yukihiraIcon;
+//    IIcon reirakuIcon;
 
     private static final String TEX_LOC = "is:textures/items";
 
@@ -77,13 +74,13 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
 
     protected int useEnergy(ItemStack stack, boolean simulate)
     {
-        int unbreakingLevel = MathHelper.clampI(EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, stack), 0, 4);
+        int unbreakingLevel = MathHelper.clamp(EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByID(34), stack), 0, 4);
         return extractEnergy(stack, isEmpowered(stack) ? energyPerUseOneOff * (5 - unbreakingLevel) / 5 : energyPerUse * (5 - unbreakingLevel) / 5, simulate);
     }
 
     protected int getEnergyPerUse(ItemStack stack)
     {
-        int unbreakingLevel = MathHelper.clampI(EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, stack), 0, 4);
+        int unbreakingLevel = MathHelper.clamp(EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByID(34), stack), 0, 4);
         return (isEmpowered(stack) ? energyPerUseOneOff : energyPerUse) * (5 - unbreakingLevel) / 5;
     }
 
@@ -93,9 +90,9 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
         EntityPlayer entityPlayer = (EntityPlayer) player;
         double shieldEnergy = 0.0;
 
-        if(entityPlayer.getCurrentArmor(2) != null)
+        if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != null)
         {
-            Item item = entityPlayer.getCurrentArmor(2).getItem();
+            Item item = entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem();
 
             if(item instanceof ArmorIS)
             {
@@ -144,11 +141,11 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
         {
             return;
         }
-        if(itemStack.stackTagCompound == null)
+        if(itemStack.getTagCompound() == null)
         {
             EnergyHelper.setDefaultEnergyTag(itemStack, 0);
         }
-        list.add(StringHelper.localize("info.is.charge") + ": " + itemStack.stackTagCompound.getInteger("Energy") + " / " + maxEnergy + "RF");
+        list.add(StringHelper.localize("info.is.charge") + ": " + itemStack.getTagCompound().getInteger("Energy") + " / " + maxEnergy + "RF");
 
         if(oneOff == 0)
         {
@@ -167,27 +164,27 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
 
     }
 
-    @Override
+//    @Override
     public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer entityPlayer)
     {
-        if (entityPlayer.getCurrentArmor(2) != null)
+        if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != null)
         {
             /*
              * Checks if the Player has the correct unit equipped
              */
 
-            if (entityPlayer.getCurrentArmor(2).getItem().getUnlocalizedName().equals(byakushiki.getUnlocalizedName()))
+            if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem().getUnlocalizedName().equals(byakushiki.getUnlocalizedName()))
             {
                 /*
                  * Checks if Byakushiki is in Standby mode
                  */
                 if (byakushiki.getState() == 0)
                 {
-                    entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, new Object[]{itemStack.func_151000_E()}));
+                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, new Object[]{itemStack.getItem()}));
                 }
                 else
                 {
-                    entityPlayer.setItemInUse(itemStack, this.getMaxItemUseDuration(itemStack));
+                    entityPlayer.getHeldItemMainhand().setItemDamage(itemStack.getMetadata()); //, this.getMaxItemUseDuration(itemStack));
                     return itemStack;
                 }
             }
@@ -196,20 +193,20 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
                 /*
                  * Player tried to use weapon with different unit
                  */
-                if (entityPlayer.getCurrentArmor(2).getItem() instanceof ArmorIS)
+                if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof ArmorIS)
                 {
-                    entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.INVALID_UNIT, "The Yukihira Nigata", entityPlayer.getCurrentArmor(2).getUnlocalizedName()));
+                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT, "The Yukihira Nigata", entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getUnlocalizedName()));
                 }
                 else
                 {
-                    entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, new Object[]{itemStack.func_151000_E()}));
+                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, new Object[]{itemStack.getItem()}));
                 }
             }
         }
         else
         {
 
-            entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, new Object[]{itemStack.func_151000_E()}));
+            entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, new Object[]{itemStack.getItem()}));
         }
 
         return itemStack;
@@ -259,25 +256,25 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
 
             if ( key == Key.ONE_OFF_ABILITY && oneOff != 1)
             {
-                if(entityPlayer.getCurrentArmor(2) != null)
+                if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != null)
                 {
-                    if(entityPlayer.getCurrentArmor(2).getItem() instanceof UnitByakushiki)
+                    if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof UnitByakushiki)
                     {
                         if(byakushiki.getState() != 0)
                         {
                             oneOff = 1;
                             oneOffSettings.setOneOff(1);
-                            entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.ONE_OFF_ACTIVE, "Reiraku Byakuya"));
+                            entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.ONE_OFF_ACTIVE, "Reiraku Byakuya"));
                             setEmpoweredState(itemStack, true);
                         }
                         else
                         {
-                            entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.INVALID_ACTION));
+                            entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_ACTION));
                         }
                     }
                     else
                     {
-                        entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.INVALID_UNIT, new Object[]{itemStack.func_151000_E()}, entityPlayer.getCurrentArmor(2).getUnlocalizedName()));
+                        entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT, new Object[]{itemStack.getItem()}, entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getUnlocalizedName()));
                     }
                 }
             }
@@ -285,7 +282,7 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
             {
                 oneOff = 0;
                 oneOffSettings.setOneOff(0);
-                entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.ONE_OFF_DEACTIVE, "Reiraku Byakuya"));
+                entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.ONE_OFF_DEACTIVE, "Reiraku Byakuya"));
                 setEmpoweredState(itemStack, false);
             }
 
@@ -321,18 +318,18 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
     @Override
     public int receiveEnergy(ItemStack container, int maxReceive, boolean simulate)
     {
-        if(container.stackTagCompound == null)
+        if(container.getTagCompound() == null)
         {
             EnergyHelper.setDefaultEnergyTag(container, 100);
         }
 
-        int stored = container.stackTagCompound.getInteger("Energy");
+        int stored = container.getTagCompound().getInteger("Energy");
         int receive = Math.min(maxReceive, Math.min(maxEnergy - stored, maxTransfer));
 
         if(!simulate)
         {
             stored += receive;
-            container.stackTagCompound.setInteger("Energy", stored);
+            container.getTagCompound().setInteger("Energy", stored);
         }
 
         return receive;
@@ -341,26 +338,26 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
     @Override
     public int extractEnergy(ItemStack container, int maxExtract, boolean simulate)
     {
-        if(container.stackTagCompound == null)
+        if(container.getTagCompound() == null)
         {
             EnergyHelper.setDefaultEnergyTag(container, 0);
         }
 
-        if(container.stackTagCompound.hasKey("Unbreakable"))
+        if(container.getTagCompound().hasKey("Unbreakable"))
         {
-            container.stackTagCompound.removeTag("Unbreakable");
+            container.getTagCompound().removeTag("Unbreakable");
         }
-        int stored = container.stackTagCompound.getInteger("Energy");
+        int stored = container.getTagCompound().getInteger("Energy");
         int extract = Math.min(maxExtract, stored);
 
         if(!simulate)
         {
             stored -= extract;
-            container.stackTagCompound.setInteger("Energy", stored);
+            container.getTagCompound().setInteger("Energy", stored);
 
             if(stored == 0)
             {
-                container.stackTagCompound.setInteger("oneOffActive", 0);
+                container.getTagCompound().setInteger("oneOffActive", 0);
                 oneOff = 0;
             }
         }
@@ -371,12 +368,12 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
     @Override
     public int getEnergyStored(ItemStack container)
     {
-        if(container.stackTagCompound == null)
+        if(container.getTagCompound() == null)
         {
             EnergyHelper.setDefaultEnergyTag(container, 0);
         }
 
-        return container.stackTagCompound.getInteger("Energy");
+        return container.getTagCompound().getInteger("Energy");
     }
 
     @Override
@@ -385,25 +382,25 @@ public class ItemYukihira extends ItemISEqualizer implements IKeyBound,IEnergyCo
         return maxEnergy;
     }
 
-    @Override
+//    @Override
     public boolean isEmpowered(ItemStack stack)
     {
-        return stack.stackTagCompound == null ? false : stack.stackTagCompound.getBoolean("oneOffActive");
+        return stack.getTagCompound() == null ? false : stack.getTagCompound().getBoolean("oneOffActive");
     }
 
-    @Override
+//    @Override
     public boolean setEmpoweredState(ItemStack stack, boolean state)
     {
         if(getEnergyStored(stack) > getEnergyPerUse(stack))
         {
-            stack.stackTagCompound.setBoolean("oneOffActive", true);
+            stack.getTagCompound().setBoolean("oneOffActive", true);
             return true;
         }
-        stack.stackTagCompound.setBoolean("oneOffActive", false);
+        stack.getTagCompound().setBoolean("oneOffActive", false);
         return false;
     }
 
-    @Override
+//    @Override
     public void onStateChange(EntityPlayer player, ItemStack stack)
     {
 

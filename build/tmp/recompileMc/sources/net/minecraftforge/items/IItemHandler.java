@@ -1,3 +1,22 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.items;
 
 import net.minecraft.item.ItemStack;
@@ -34,12 +53,14 @@ public interface IItemHandler
 
     /**
      * Inserts an ItemStack into the given slot and return the remainder.
+     * The ItemStack should not be modified in this function!
      * Note: This behaviour is subtly different from IFluidHandlers.fill()
      *
      * @param slot     Slot to insert into.
-     * @param stack    ItemStack to insert
+     * @param stack    ItemStack to insert.
      * @param simulate If true, the insertion is only simulated
-     * @return The remaining ItemStack that was not inserted (if the entire stack is accepted, then return null)
+     * @return The remaining ItemStack that was not inserted (if the entire stack is accepted, then return null).
+     *         May be the same as the input ItemStack if unchanged, otherwise a new ItemStack.
      **/
     ItemStack insertItem(int slot, ItemStack stack, boolean simulate);
 

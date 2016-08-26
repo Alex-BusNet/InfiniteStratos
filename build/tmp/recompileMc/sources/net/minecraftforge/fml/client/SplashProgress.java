@@ -1,34 +1,36 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.client;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.FileResourcePack;
-import net.minecraft.client.resources.FolderResourcePack;
-import net.minecraft.client.resources.IResourcePack;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.launchwrapper.Launch;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.*;
-import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
-import net.minecraftforge.fml.common.asm.FMLSanityChecker;
-import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.Level;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.Drawable;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.SharedDrawable;
-import org.lwjgl.util.glu.GLU;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Iterator;
 import java.util.Properties;
@@ -36,9 +38,41 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.GL_BGRA;
-import static org.lwjgl.opengl.GL12.GL_UNSIGNED_INT_8_8_8_8_REV;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.resources.DefaultResourcePack;
+import net.minecraft.client.resources.FileResourcePack;
+import net.minecraft.client.resources.FolderResourcePack;
+import net.minecraft.client.resources.IResource;
+import net.minecraft.client.resources.IResourcePack;
+import net.minecraft.client.resources.SimpleResource;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.launchwrapper.Launch;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.EnhancedRuntimeException;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.ICrashCallable;
+import net.minecraftforge.fml.common.ProgressManager;
+import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
+import net.minecraftforge.fml.common.asm.FMLSanityChecker;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.Level;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.Drawable;
+import org.lwjgl.opengl.SharedDrawable;
+import org.lwjgl.util.glu.GLU;
+
+import net.minecraftforge.fml.common.EnhancedRuntimeException.WrappedPrintStream;
 
 /**
  * Not a fully fleshed out API, may change in future MC versions.
@@ -213,7 +247,7 @@ public class SplashProgress
             {
                 setGL();
                 fontTexture = new Texture(fontLoc);
-                logoTexture = new Texture(logoLoc);
+                logoTexture = new Texture(logoLoc, false);
                 forgeTexture = new Texture(forgeLoc);
                 glEnable(GL_TEXTURE_2D);
                 fontRenderer = new SplashFontRenderer();
@@ -440,8 +474,8 @@ public class SplashProgress
         if (max_texture_size != -1) return max_texture_size;
         for (int i = 0x4000; i > 0; i >>= 1)
         {
-            GL11.glTexImage2D(GL11.GL_PROXY_TEXTURE_2D, 0, GL11.GL_RGBA, i, i, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null);
-            if (GL11.glGetTexLevelParameteri(GL11.GL_PROXY_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH) != 0)
+            GlStateManager.glTexImage2D(GL_PROXY_TEXTURE_2D, 0, GL_RGBA, i, i, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+            if (GlStateManager.glGetTexLevelParameteri(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH) != 0)
             {
                 max_texture_size = i;
                 return i;
@@ -536,7 +570,7 @@ public class SplashProgress
                 {
                     stream.println("SplashProgress has detected a error loading Minecraft.");
                     stream.println("This can sometimes be caused by bad video drivers.");
-                    stream.println("We have automatically disabeled the new Splash Screen in config/splash.properties.");
+                    stream.println("We have automatically disabled the new Splash Screen in config/splash.properties.");
                     stream.println("Try reloading minecraft before reporting any errors.");
                 }
             };
@@ -550,7 +584,7 @@ public class SplashProgress
                 {
                     stream.println("SplashProgress has detected a error loading Minecraft.");
                     stream.println("This can sometimes be caused by bad video drivers.");
-                    stream.println("Please try disabeling the new Splash Screen in config/splash.properties.");
+                    stream.println("Please try disabling the new Splash Screen in config/splash.properties.");
                     stream.println("After doing so, try reloading minecraft before reporting any errors.");
                 }
             };
@@ -611,11 +645,16 @@ public class SplashProgress
 
         public Texture(ResourceLocation location)
         {
+            this(location, true);
+        }
+
+        public Texture(ResourceLocation location, boolean allowRP)
+        {
             InputStream s = null;
             try
             {
                 this.location = location;
-                s = open(location);
+                s = open(location, allowRP);
                 ImageInputStream stream = ImageIO.createImageInputStream(s);
                 Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
                 if(!readers.hasNext()) throw new IOException("No suitable reader found for image" + location);
@@ -747,9 +786,10 @@ public class SplashProgress
         }
 
         @Override
-        protected InputStream getResourceInputStream(ResourceLocation location) throws IOException
+        protected IResource getResource(ResourceLocation location) throws IOException
         {
-            return Minecraft.getMinecraft().mcDefaultResourcePack.getInputStream(location);
+            DefaultResourcePack pack = Minecraft.getMinecraft().mcDefaultResourcePack;
+            return new SimpleResource(pack.getPackName(), location, pack.getInputStream(location), null, null);
         }
     }
 
@@ -771,15 +811,18 @@ public class SplashProgress
 
     public static void checkGLError(String where)
     {
-        int err = GL11.glGetError();
+        int err = glGetError();
         if (err != 0)
         {
             throw new IllegalStateException(where + ": " + GLU.gluErrorString(err));
         }
     }
 
-    private static InputStream open(ResourceLocation loc) throws IOException
+    private static InputStream open(ResourceLocation loc, boolean allowRP) throws IOException
     {
+        if (!allowRP)
+            return mcPack.getInputStream(loc);
+
         if(miscPack.resourceExists(loc))
         {
             return miscPack.getInputStream(loc);

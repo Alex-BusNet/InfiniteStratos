@@ -1,6 +1,16 @@
 package net.minecraft.crash;
 
 import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.gen.layer.IntCache;
 import net.minecraftforge.fml.relauncher.Side;
@@ -10,17 +20,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.Callable;
-
 public class CrashReport
 {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     /** Description of the crash report. */
     private final String description;
     /** The Throwable that is the "cause" for this crash and Crash Report. */
@@ -30,7 +32,8 @@ public class CrashReport
     private final List<CrashReportCategory> crashReportSections = Lists.<CrashReportCategory>newArrayList();
     /** File of crash report. */
     private File crashReportFile;
-    private boolean field_85059_f = true;
+    /** Is true when the current category is the first in the crash report */
+    private boolean firstCategoryInCrashReport = true;
     private StackTraceElement[] stacktrace = new StackTraceElement[0];
 
     public CrashReport(String descriptionIn, Throwable causeThrowable)
@@ -46,35 +49,35 @@ public class CrashReport
      */
     private void populateEnvironment()
     {
-        this.theReportCategory.addCrashSectionCallable("Minecraft Version", new Callable<String>()
+        this.theReportCategory.setDetail("Minecraft Version", new ICrashReportDetail<String>()
         {
             public String call()
             {
-                return "1.8.9";
+                return "1.10.2";
             }
         });
-        this.theReportCategory.addCrashSectionCallable("Operating System", new Callable<String>()
+        this.theReportCategory.setDetail("Operating System", new ICrashReportDetail<String>()
         {
             public String call()
             {
                 return System.getProperty("os.name") + " (" + System.getProperty("os.arch") + ") version " + System.getProperty("os.version");
             }
         });
-        this.theReportCategory.addCrashSectionCallable("Java Version", new Callable<String>()
+        this.theReportCategory.setDetail("Java Version", new ICrashReportDetail<String>()
         {
             public String call()
             {
                 return System.getProperty("java.version") + ", " + System.getProperty("java.vendor");
             }
         });
-        this.theReportCategory.addCrashSectionCallable("Java VM Version", new Callable<String>()
+        this.theReportCategory.setDetail("Java VM Version", new ICrashReportDetail<String>()
         {
             public String call()
             {
                 return System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.info") + "), " + System.getProperty("java.vm.vendor");
             }
         });
-        this.theReportCategory.addCrashSectionCallable("Memory", new Callable<String>()
+        this.theReportCategory.setDetail("Memory", new ICrashReportDetail<String>()
         {
             public String call()
             {
@@ -88,7 +91,7 @@ public class CrashReport
                 return k + " bytes (" + j1 + " MB) / " + j + " bytes (" + i1 + " MB) up to " + i + " bytes (" + l + " MB)";
             }
         });
-        this.theReportCategory.addCrashSectionCallable("JVM Flags", new Callable<String>()
+        this.theReportCategory.setDetail("JVM Flags", new ICrashReportDetail<String>()
         {
             public String call()
             {
@@ -113,7 +116,7 @@ public class CrashReport
                 return String.format("%d total; %s", new Object[] {Integer.valueOf(i), stringbuilder.toString()});
             }
         });
-        this.theReportCategory.addCrashSectionCallable("IntCache", new Callable<String>()
+        this.theReportCategory.setDetail("IntCache", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {
@@ -144,7 +147,7 @@ public class CrashReport
      */
     public void getSectionsInStringBuilder(StringBuilder builder)
     {
-        if ((this.stacktrace == null || this.stacktrace.length <= 0) && this.crashReportSections.size() > 0)
+        if ((this.stacktrace == null || this.stacktrace.length <= 0) && !this.crashReportSections.isEmpty())
         {
             this.stacktrace = (StackTraceElement[])ArrayUtils.subarray(((CrashReportCategory)this.crashReportSections.get(0)).getStackTrace(), 0, 1);
         }
@@ -152,11 +155,12 @@ public class CrashReport
         if (this.stacktrace != null && this.stacktrace.length > 0)
         {
             builder.append("-- Head --\n");
+            builder.append("Thread: ").append(Thread.currentThread().getName()).append("\n");
             builder.append("Stacktrace:\n");
 
             for (StackTraceElement stacktraceelement : this.stacktrace)
             {
-                builder.append("\t").append("at ").append(stacktraceelement.toString());
+                builder.append("\t").append("at ").append((Object)stacktraceelement);
                 builder.append("\n");
             }
 
@@ -273,19 +277,28 @@ public class CrashReport
                 toFile.getParentFile().mkdirs();
             }
 
+            FileWriter filewriter = null;
+            boolean flag1;
+
             try
             {
-                FileWriter filewriter = new FileWriter(toFile);
+                filewriter = new FileWriter(toFile);
                 filewriter.write(this.getCompleteReport());
-                filewriter.close();
                 this.crashReportFile = toFile;
-                return true;
+                boolean lvt_3_1_ = true;
+                return lvt_3_1_;
             }
             catch (Throwable throwable)
             {
-                logger.error("Could not save crash report to " + toFile, throwable);
-                return false;
+                LOGGER.error("Could not save crash report to {}", new Object[] {toFile, throwable});
+                flag1 = false;
             }
+            finally
+            {
+                IOUtils.closeQuietly((Writer)filewriter);
+            }
+
+            return flag1;
         }
     }
 
@@ -309,7 +322,7 @@ public class CrashReport
     {
         CrashReportCategory crashreportcategory = new CrashReportCategory(this, categoryName);
 
-        if (this.field_85059_f)
+        if (this.firstCategoryInCrashReport)
         {
             int i = crashreportcategory.getPrunedStackTrace(stacktraceLength);
             StackTraceElement[] astacktraceelement = this.cause.getStackTrace();
@@ -332,7 +345,7 @@ public class CrashReport
                 }
             }
 
-            this.field_85059_f = crashreportcategory.firstTwoElementsOfStackTraceMatch(stacktraceelement, stacktraceelement1);
+            this.firstCategoryInCrashReport = crashreportcategory.firstTwoElementsOfStackTraceMatch(stacktraceelement, stacktraceelement1);
 
             if (i > 0 && !this.crashReportSections.isEmpty())
             {
@@ -346,7 +359,7 @@ public class CrashReport
             }
             else
             {
-                this.field_85059_f = false;
+                this.firstCategoryInCrashReport = false;
             }
         }
 

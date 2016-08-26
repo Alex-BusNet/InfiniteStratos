@@ -1,23 +1,22 @@
 package net.minecraft.realms;
 
-import net.minecraft.client.renderer.WorldRenderer;
+import java.nio.ByteBuffer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.nio.ByteBuffer;
-
 @SideOnly(Side.CLIENT)
 public class RealmsBufferBuilder
 {
-    private WorldRenderer b;
+    private VertexBuffer b;
 
-    public RealmsBufferBuilder(WorldRenderer p_i46442_1_)
+    public RealmsBufferBuilder(VertexBuffer p_i46442_1_)
     {
         this.b = p_i46442_1_;
     }
 
-    public RealmsBufferBuilder from(WorldRenderer p_from_1_)
+    public RealmsBufferBuilder from(VertexBuffer p_from_1_)
     {
         this.b = p_from_1_;
         return this;
@@ -53,7 +52,7 @@ public class RealmsBufferBuilder
         this.b.setTranslation(p_offset_1_, p_offset_3_, p_offset_5_);
     }
 
-    public void restoreState(WorldRenderer.State p_restoreState_1_)
+    public void restoreState(VertexBuffer.State p_restoreState_1_)
     {
         this.b.setVertexState(p_restoreState_1_);
     }

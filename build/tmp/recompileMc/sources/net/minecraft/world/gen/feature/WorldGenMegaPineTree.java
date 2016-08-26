@@ -1,61 +1,65 @@
 package net.minecraft.world.gen.feature;
 
-import net.minecraft.block.*;
+import java.util.Random;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockDirt;
+import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockOldLeaf;
+import net.minecraft.block.BlockOldLog;
+import net.minecraft.block.BlockPlanks;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-
-import java.util.Random;
 
 public class WorldGenMegaPineTree extends WorldGenHugeTrees
 {
-    private static final IBlockState field_181633_e = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.SPRUCE);
-    private static final IBlockState field_181634_f = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.SPRUCE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
-    private static final IBlockState field_181635_g = Blocks.dirt.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL);
-    private boolean useBaseHeight;
+    private static final IBlockState TRUNK = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.SPRUCE);
+    private static final IBlockState LEAF = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.SPRUCE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+    private static final IBlockState PODZOL = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL);
+    private final boolean useBaseHeight;
 
     public WorldGenMegaPineTree(boolean p_i45457_1_, boolean p_i45457_2_)
     {
-        super(p_i45457_1_, 13, 15, field_181633_e, field_181634_f);
+        super(p_i45457_1_, 13, 15, TRUNK, LEAF);
         this.useBaseHeight = p_i45457_2_;
     }
 
     public boolean generate(World worldIn, Random rand, BlockPos position)
     {
-        int i = this.func_150533_a(rand);
+        int i = this.getHeight(rand);
 
-        if (!this.func_175929_a(worldIn, rand, position, i))
+        if (!this.ensureGrowable(worldIn, rand, position, i))
         {
             return false;
         }
         else
         {
-            this.func_150541_c(worldIn, position.getX(), position.getZ(), position.getY() + i, 0, rand);
+            this.createCrown(worldIn, position.getX(), position.getZ(), position.getY() + i, 0, rand);
 
             for (int j = 0; j < i; ++j)
             {
-                Block block = worldIn.getBlockState(position.up(j)).getBlock();
-
-                if (isAirLeaves(worldIn,position.up(j)))
+                if (isAirLeaves(worldIn, position.up(j)))
                 {
                     this.setBlockAndNotifyAdequately(worldIn, position.up(j), this.woodMetadata);
                 }
 
                 if (j < i - 1)
                 {
-                    if (isAirLeaves(worldIn,position.add(1, j, 0)))
+                    if (isAirLeaves(worldIn, position.add(1, j, 0)))
                     {
                         this.setBlockAndNotifyAdequately(worldIn, position.add(1, j, 0), this.woodMetadata);
                     }
 
-                    if (isAirLeaves(worldIn,position.add(1, j, 1)))
+                    if (isAirLeaves(worldIn, position.add(1, j, 1)))
                     {
                         this.setBlockAndNotifyAdequately(worldIn, position.add(1, j, 1), this.woodMetadata);
                     }
 
-                    if (isAirLeaves(worldIn,position.add(0, j, 1)))
+
+                    if (isAirLeaves(worldIn, position.add(0, j, 1)))
                     {
                         this.setBlockAndNotifyAdequately(worldIn, position.add(0, j, 1), this.woodMetadata);
                     }
@@ -66,7 +70,7 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees
         }
     }
 
-    private void func_150541_c(World worldIn, int p_150541_2_, int p_150541_3_, int p_150541_4_, int p_150541_5_, Random p_150541_6_)
+    private void createCrown(World worldIn, int p_150541_2_, int p_150541_3_, int p_150541_4_, int p_150541_5_, Random p_150541_6_)
     {
         int i = p_150541_6_.nextInt(5) + (this.useBaseHeight ? this.baseHeight : 3);
         int j = 0;
@@ -75,32 +79,32 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees
         {
             int l = p_150541_4_ - k;
             int i1 = p_150541_5_ + MathHelper.floor_float((float)l / (float)i * 3.5F);
-            this.func_175925_a(worldIn, new BlockPos(p_150541_2_, k, p_150541_3_), i1 + (l > 0 && i1 == j && (k & 1) == 0 ? 1 : 0));
+            this.growLeavesLayerStrict(worldIn, new BlockPos(p_150541_2_, k, p_150541_3_), i1 + (l > 0 && i1 == j && (k & 1) == 0 ? 1 : 0));
             j = i1;
         }
     }
 
-    public void func_180711_a(World worldIn, Random p_180711_2_, BlockPos p_180711_3_)
+    public void generateSaplings(World worldIn, Random random, BlockPos pos)
     {
-        this.func_175933_b(worldIn, p_180711_3_.west().north());
-        this.func_175933_b(worldIn, p_180711_3_.east(2).north());
-        this.func_175933_b(worldIn, p_180711_3_.west().south(2));
-        this.func_175933_b(worldIn, p_180711_3_.east(2).south(2));
+        this.placePodzolCircle(worldIn, pos.west().north());
+        this.placePodzolCircle(worldIn, pos.east(2).north());
+        this.placePodzolCircle(worldIn, pos.west().south(2));
+        this.placePodzolCircle(worldIn, pos.east(2).south(2));
 
         for (int i = 0; i < 5; ++i)
         {
-            int j = p_180711_2_.nextInt(64);
+            int j = random.nextInt(64);
             int k = j % 8;
             int l = j / 8;
 
             if (k == 0 || k == 7 || l == 0 || l == 7)
             {
-                this.func_175933_b(worldIn, p_180711_3_.add(-3 + k, 0, -3 + l));
+                this.placePodzolCircle(worldIn, pos.add(-3 + k, 0, -3 + l));
             }
         }
     }
 
-    private void func_175933_b(World worldIn, BlockPos p_175933_2_)
+    private void placePodzolCircle(World worldIn, BlockPos center)
     {
         for (int i = -2; i <= 2; ++i)
         {
@@ -108,26 +112,27 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees
             {
                 if (Math.abs(i) != 2 || Math.abs(j) != 2)
                 {
-                    this.func_175934_c(worldIn, p_175933_2_.add(i, 0, j));
+                    this.placePodzolAt(worldIn, center.add(i, 0, j));
                 }
             }
         }
     }
 
-    private void func_175934_c(World worldIn, BlockPos p_175934_2_)
+    private void placePodzolAt(World worldIn, BlockPos pos)
     {
         for (int i = 2; i >= -3; --i)
         {
-            BlockPos blockpos = p_175934_2_.up(i);
-            Block block = worldIn.getBlockState(blockpos).getBlock();
+            BlockPos blockpos = pos.up(i);
+            IBlockState iblockstate = worldIn.getBlockState(blockpos);
+            Block block = iblockstate.getBlock();
 
-            if (block.canSustainPlant(worldIn, blockpos, net.minecraft.util.EnumFacing.UP, ((net.minecraft.block.BlockSapling)Blocks.sapling)))
+            if (block.canSustainPlant(iblockstate, worldIn, blockpos, net.minecraft.util.EnumFacing.UP, ((net.minecraft.block.BlockSapling)Blocks.SAPLING)))
             {
-                this.setBlockAndNotifyAdequately(worldIn, blockpos, field_181635_g);
+                this.setBlockAndNotifyAdequately(worldIn, blockpos, PODZOL);
                 break;
             }
 
-            if (!block.isAir(worldIn, blockpos) && i < 0)
+            if (iblockstate.getMaterial() != Material.AIR && i < 0)
             {
                 break;
             }
@@ -137,7 +142,7 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees
     //Helper macro
     private boolean isAirLeaves(World world, BlockPos pos)
     {
-        net.minecraft.block.Block block = world.getBlockState(pos).getBlock();
-        return block.isAir(world, pos) || block.isLeaves(world, pos);
+        IBlockState state = world.getBlockState(pos);
+        return state.getBlock().isAir(state, world, pos) || state.getBlock().isLeaves(state, world, pos);
     }
 }

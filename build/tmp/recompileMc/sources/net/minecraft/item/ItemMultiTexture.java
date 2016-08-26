@@ -1,6 +1,7 @@
 package net.minecraft.item;
 
 import com.google.common.base.Function;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 
 public class ItemMultiTexture extends ItemBlock
@@ -21,7 +22,8 @@ public class ItemMultiTexture extends ItemBlock
     {
         this(block, block2, new Function<ItemStack, String>()
         {
-            public String apply(ItemStack p_apply_1_)
+            @Nullable
+            public String apply(@Nullable ItemStack p_apply_1_)
             {
                 int i = p_apply_1_.getMetadata();
 

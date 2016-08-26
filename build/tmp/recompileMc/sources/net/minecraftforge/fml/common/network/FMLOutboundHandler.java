@@ -1,22 +1,44 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.network;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.util.AttributeKey;
+
+import java.util.List;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetworkManager;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 public class FMLOutboundHandler extends ChannelOutboundHandlerAdapter {
     public static final AttributeKey<OutboundTarget> FML_MESSAGETARGET = AttributeKey.valueOf("fml:outboundTarget");
@@ -107,7 +129,7 @@ public class FMLOutboundHandler extends ChannelOutboundHandlerAdapter {
             public List<NetworkDispatcher> selectNetworks(Object args, ChannelHandlerContext context, FMLProxyPacket packet)
             {
                 EntityPlayerMP player = (EntityPlayerMP) args;
-                NetworkDispatcher dispatcher = player == null ? null : player.playerNetServerHandler.netManager.channel().attr(NetworkDispatcher.FML_DISPATCHER).get();
+                NetworkDispatcher dispatcher = (player == null || player instanceof FakePlayer) ? null : player.connection.netManager.channel().attr(NetworkDispatcher.FML_DISPATCHER).get();
                 return dispatcher == null ? ImmutableList.<NetworkDispatcher>of() : ImmutableList.of(dispatcher);
             }
         },
@@ -125,10 +147,10 @@ public class FMLOutboundHandler extends ChannelOutboundHandlerAdapter {
             @Override
             public List<NetworkDispatcher> selectNetworks(Object args, ChannelHandlerContext context, FMLProxyPacket packet)
             {
-                ImmutableList.Builder<NetworkDispatcher> builder = ImmutableList.<NetworkDispatcher>builder();
-                for (EntityPlayerMP player : (List<EntityPlayerMP>)FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().playerEntityList)
+                ImmutableList.Builder<NetworkDispatcher> builder = ImmutableList.builder();
+                for (EntityPlayerMP player : FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerList())
                 {
-                    NetworkDispatcher dispatcher = player.playerNetServerHandler.netManager.channel().attr(NetworkDispatcher.FML_DISPATCHER).get();
+                    NetworkDispatcher dispatcher = player.connection.netManager.channel().attr(NetworkDispatcher.FML_DISPATCHER).get();
                     if (dispatcher != null) builder.add(dispatcher);
                 }
                 return builder.build();
@@ -153,12 +175,12 @@ public class FMLOutboundHandler extends ChannelOutboundHandlerAdapter {
             public List<NetworkDispatcher> selectNetworks(Object args, ChannelHandlerContext context, FMLProxyPacket packet)
             {
                 int dimension = (Integer)args;
-                ImmutableList.Builder<NetworkDispatcher> builder = ImmutableList.<NetworkDispatcher>builder();
-                for (EntityPlayerMP player : (List<EntityPlayerMP>)FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().playerEntityList)
+                ImmutableList.Builder<NetworkDispatcher> builder = ImmutableList.builder();
+                for (EntityPlayerMP player : FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerList())
                 {
                     if (dimension == player.dimension)
                     {
-                        NetworkDispatcher dispatcher = player.playerNetServerHandler.netManager.channel().attr(NetworkDispatcher.FML_DISPATCHER).get();
+                        NetworkDispatcher dispatcher = player.connection.netManager.channel().attr(NetworkDispatcher.FML_DISPATCHER).get();
                         // Null dispatchers may exist for fake players - skip them
                         if (dispatcher != null) builder.add(dispatcher);
                     }
@@ -187,8 +209,8 @@ public class FMLOutboundHandler extends ChannelOutboundHandlerAdapter {
             public List<NetworkDispatcher> selectNetworks(Object args, ChannelHandlerContext context, FMLProxyPacket packet)
             {
                 TargetPoint tp = (TargetPoint)args;
-                ImmutableList.Builder<NetworkDispatcher> builder = ImmutableList.<NetworkDispatcher>builder();
-                for (EntityPlayerMP player : (List<EntityPlayerMP>)FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().playerEntityList)
+                ImmutableList.Builder<NetworkDispatcher> builder = ImmutableList.builder();
+                for (EntityPlayerMP player : FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerList())
                 {
                     if (player.dimension == tp.dimension)
                     {
@@ -198,7 +220,7 @@ public class FMLOutboundHandler extends ChannelOutboundHandlerAdapter {
 
                         if (d4 * d4 + d5 * d5 + d6 * d6 < tp.range * tp.range)
                         {
-                            NetworkDispatcher dispatcher = player.playerNetServerHandler.netManager.channel().attr(NetworkDispatcher.FML_DISPATCHER).get();
+                            NetworkDispatcher dispatcher = player.connection.netManager.channel().attr(NetworkDispatcher.FML_DISPATCHER).get();
                             if (dispatcher != null) builder.add(dispatcher);
                         }
                     }

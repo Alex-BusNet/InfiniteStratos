@@ -1,41 +1,37 @@
 package net.minecraft.client.renderer.tileentity;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.BlockRendererDispatcher;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.block.model.ModelManager;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureCompass;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.model.IBakedModel;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemSkull;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.storage.MapData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
 public class RenderItemFrame extends Render<EntityItemFrame>
 {
-    private static final ResourceLocation mapBackgroundTextures = new ResourceLocation("textures/map/map_background.png");
+    private static final ResourceLocation MAP_BACKGROUND_TEXTURES = new ResourceLocation("textures/map/map_background.png");
     private final Minecraft mc = Minecraft.getMinecraft();
     private final ModelResourceLocation itemFrameModel = new ModelResourceLocation("item_frame", "normal");
     private final ModelResourceLocation mapModel = new ModelResourceLocation("item_frame", "map");
-    private RenderItem itemRenderer;
+    private final RenderItem itemRenderer;
 
     public RenderItemFrame(RenderManager renderManagerIn, RenderItem itemRendererIn)
     {
@@ -44,10 +40,7 @@ public class RenderItemFrame extends Render<EntityItemFrame>
     }
 
     /**
-     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then
-     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic
-     * (Render<T extends Entity>) and this method has signature public void func_76986_a(T entity, double d, double d1,
-     * double d2, float f, float f1). But JAD is pre 1.5 so doe
+     * Renders the desired {@code T} type Entity.
      */
     public void doRender(EntityItemFrame entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
@@ -58,12 +51,12 @@ public class RenderItemFrame extends Render<EntityItemFrame>
         double d2 = (double)blockpos.getZ() - entity.posZ + z;
         GlStateManager.translate(d0 + 0.5D, d1 + 0.5D, d2 + 0.5D);
         GlStateManager.rotate(180.0F - entity.rotationYaw, 0.0F, 1.0F, 0.0F);
-        this.renderManager.renderEngine.bindTexture(TextureMap.locationBlocksTexture);
+        this.renderManager.renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         BlockRendererDispatcher blockrendererdispatcher = this.mc.getBlockRendererDispatcher();
         ModelManager modelmanager = blockrendererdispatcher.getBlockModelShapes().getModelManager();
         IBakedModel ibakedmodel;
 
-        if (entity.getDisplayedItem() != null && entity.getDisplayedItem().getItem() == Items.filled_map)
+        if (entity.getDisplayedItem() != null && entity.getDisplayedItem().getItem() == Items.FILLED_MAP)
         {
             ibakedmodel = modelmanager.getModel(this.mapModel);
         }
@@ -74,7 +67,21 @@ public class RenderItemFrame extends Render<EntityItemFrame>
 
         GlStateManager.pushMatrix();
         GlStateManager.translate(-0.5F, -0.5F, -0.5F);
+
+        if (this.renderOutlines)
+        {
+            GlStateManager.enableColorMaterial();
+            GlStateManager.enableOutlineMode(this.getTeamColor(entity));
+        }
+
         blockrendererdispatcher.getBlockModelRenderer().renderModelBrightnessColor(ibakedmodel, 1.0F, 1.0F, 1.0F, 1.0F);
+
+        if (this.renderOutlines)
+        {
+            GlStateManager.disableOutlineMode();
+            GlStateManager.disableColorMaterial();
+        }
+
         GlStateManager.popMatrix();
         GlStateManager.translate(0.0F, 0.0F, 0.4375F);
         this.renderItem(entity);
@@ -116,12 +123,12 @@ public class RenderItemFrame extends Render<EntityItemFrame>
             {
             if (item instanceof net.minecraft.item.ItemMap)
             {
-                this.renderManager.renderEngine.bindTexture(mapBackgroundTextures);
+                this.renderManager.renderEngine.bindTexture(MAP_BACKGROUND_TEXTURES);
                 GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
                 float f = 0.0078125F;
-                GlStateManager.scale(f, f, f);
+                GlStateManager.scale(0.0078125F, 0.0078125F, 0.0078125F);
                 GlStateManager.translate(-64.0F, -64.0F, 0.0F);
-                MapData mapdata = Items.filled_map.getMapData(entityitem.getEntityItem(), itemFrame.worldObj);
+                MapData mapdata = Items.FILLED_MAP.getMapData(entityitem.getEntityItem(), itemFrame.worldObj);
                 GlStateManager.translate(0.0F, 0.0F, -1.0F);
 
                 if (mapdata != null)
@@ -131,30 +138,6 @@ public class RenderItemFrame extends Render<EntityItemFrame>
             }
             else
             {
-                TextureAtlasSprite textureatlassprite = null;
-
-                if (item == Items.compass)
-                {
-                    textureatlassprite = this.mc.getTextureMapBlocks().getAtlasSprite(TextureCompass.field_176608_l);
-                    this.mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
-
-                    if (textureatlassprite instanceof TextureCompass)
-                    {
-                        TextureCompass texturecompass = (TextureCompass)textureatlassprite;
-                        double d0 = texturecompass.currentAngle;
-                        double d1 = texturecompass.angleDelta;
-                        texturecompass.currentAngle = 0.0D;
-                        texturecompass.angleDelta = 0.0D;
-                        texturecompass.updateCompass(itemFrame.worldObj, itemFrame.posX, itemFrame.posZ, (double)MathHelper.wrapAngleTo180_float((float)(180 + itemFrame.facingDirection.getHorizontalIndex() * 90)), false, true);
-                        texturecompass.currentAngle = d0;
-                        texturecompass.angleDelta = d1;
-                    }
-                    else
-                    {
-                        textureatlassprite = null;
-                    }
-                }
-
                 GlStateManager.scale(0.5F, 0.5F, 0.5F);
 
                 if (!this.itemRenderer.shouldRenderItemIn3D(entityitem.getEntityItem()) || item instanceof ItemSkull)
@@ -167,11 +150,6 @@ public class RenderItemFrame extends Render<EntityItemFrame>
                 this.itemRenderer.renderItem(entityitem.getEntityItem(), ItemCameraTransforms.TransformType.FIXED);
                 RenderHelper.disableStandardItemLighting();
                 GlStateManager.popAttrib();
-
-                if (textureatlassprite != null && textureatlassprite.getFrameCount() > 0)
-                {
-                    textureatlassprite.updateAnimation();
-                }
             }
             }
 
@@ -184,51 +162,13 @@ public class RenderItemFrame extends Render<EntityItemFrame>
     {
         if (Minecraft.isGuiEnabled() && entity.getDisplayedItem() != null && entity.getDisplayedItem().hasDisplayName() && this.renderManager.pointedEntity == entity)
         {
-            float f = 1.6F;
-            float f1 = 0.016666668F * f;
-            double d0 = entity.getDistanceSqToEntity(this.renderManager.livingPlayer);
-            float f2 = entity.isSneaking() ? 32.0F : 64.0F;
+            double d0 = entity.getDistanceSqToEntity(this.renderManager.renderViewEntity);
+            float f = entity.isSneaking() ? 32.0F : 64.0F;
 
-            if (d0 < (double)(f2 * f2))
+            if (d0 < (double)(f * f))
             {
                 String s = entity.getDisplayedItem().getDisplayName();
-
-                if (entity.isSneaking())
-                {
-                    FontRenderer fontrenderer = this.getFontRendererFromRenderManager();
-                    GlStateManager.pushMatrix();
-                    GlStateManager.translate((float)x + 0.0F, (float)y + entity.height + 0.5F, (float)z);
-                    GL11.glNormal3f(0.0F, 1.0F, 0.0F);
-                    GlStateManager.rotate(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
-                    GlStateManager.rotate(this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
-                    GlStateManager.scale(-f1, -f1, f1);
-                    GlStateManager.disableLighting();
-                    GlStateManager.translate(0.0F, 0.25F / f1, 0.0F);
-                    GlStateManager.depthMask(false);
-                    GlStateManager.enableBlend();
-                    GlStateManager.blendFunc(770, 771);
-                    Tessellator tessellator = Tessellator.getInstance();
-                    WorldRenderer worldrenderer = tessellator.getWorldRenderer();
-                    int i = fontrenderer.getStringWidth(s) / 2;
-                    GlStateManager.disableTexture2D();
-                    worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-                    worldrenderer.pos((double)(-i - 1), -1.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
-                    worldrenderer.pos((double)(-i - 1), 8.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
-                    worldrenderer.pos((double)(i + 1), 8.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
-                    worldrenderer.pos((double)(i + 1), -1.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
-                    tessellator.draw();
-                    GlStateManager.enableTexture2D();
-                    GlStateManager.depthMask(true);
-                    fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, 0, 553648127);
-                    GlStateManager.enableLighting();
-                    GlStateManager.disableBlend();
-                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-                    GlStateManager.popMatrix();
-                }
-                else
-                {
-                    this.renderLivingLabel(entity, s, x, y, z, 64);
-                }
+                this.renderLivingLabel(entity, s, x, y, z, 64);
             }
         }
     }

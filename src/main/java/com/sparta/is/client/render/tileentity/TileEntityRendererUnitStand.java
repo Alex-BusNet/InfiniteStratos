@@ -29,7 +29,7 @@ public class TileEntityRendererUnitStand extends TileEntitySpecialRenderer
             this.bindTexture(Textures.Items.UNIT_STAND);
 
             //Render
-            modelUnitStand.render();
+//            modelUnitStand.render();
 
             GL11.glPopMatrix();
         }

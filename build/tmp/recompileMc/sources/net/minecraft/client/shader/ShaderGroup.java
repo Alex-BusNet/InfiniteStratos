@@ -3,7 +3,17 @@ package net.minecraft.client.shader;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import java.io.Closeable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.IResource;
@@ -14,38 +24,31 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
 
 @SideOnly(Side.CLIENT)
 public class ShaderGroup
 {
-    private Framebuffer mainFramebuffer;
-    private IResourceManager resourceManager;
-    private String shaderGroupName;
+    private final Framebuffer mainFramebuffer;
+    private final IResourceManager resourceManager;
+    private final String shaderGroupName;
     private final List<Shader> listShaders = Lists.<Shader>newArrayList();
     private final Map<String, Framebuffer> mapFramebuffers = Maps.<String, Framebuffer>newHashMap();
     private final List<Framebuffer> listFramebuffers = Lists.<Framebuffer>newArrayList();
     private Matrix4f projectionMatrix;
     private int mainFramebufferWidth;
     private int mainFramebufferHeight;
-    private float field_148036_j;
-    private float field_148037_k;
+    private float time;
+    private float lastStamp;
 
-    public ShaderGroup(TextureManager p_i1050_1_, IResourceManager p_i1050_2_, Framebuffer p_i1050_3_, ResourceLocation p_i1050_4_) throws JsonException, IOException, JsonSyntaxException
+    public ShaderGroup(TextureManager p_i1050_1_, IResourceManager resourceManagerIn, Framebuffer mainFramebufferIn, ResourceLocation p_i1050_4_) throws JsonException, IOException, JsonSyntaxException
     {
-        this.resourceManager = p_i1050_2_;
-        this.mainFramebuffer = p_i1050_3_;
-        this.field_148036_j = 0.0F;
-        this.field_148037_k = 0.0F;
-        this.mainFramebufferWidth = p_i1050_3_.framebufferWidth;
-        this.mainFramebufferHeight = p_i1050_3_.framebufferHeight;
+        this.resourceManager = resourceManagerIn;
+        this.mainFramebuffer = mainFramebufferIn;
+        this.time = 0.0F;
+        this.lastStamp = 0.0F;
+        this.mainFramebufferWidth = mainFramebufferIn.framebufferWidth;
+        this.mainFramebufferHeight = mainFramebufferIn.framebufferHeight;
         this.shaderGroupName = p_i1050_4_.toString();
         this.resetProjectionMatrix();
         this.parseGroup(p_i1050_1_, p_i1050_4_);
@@ -54,13 +57,12 @@ public class ShaderGroup
     public void parseGroup(TextureManager p_152765_1_, ResourceLocation p_152765_2_) throws JsonException, IOException, JsonSyntaxException
     {
         JsonParser jsonparser = new JsonParser();
-        InputStream inputstream = null;
+        IResource iresource = null;
 
         try
         {
-            IResource iresource = this.resourceManager.getResource(p_152765_2_);
-            inputstream = iresource.getInputStream();
-            JsonObject jsonobject = jsonparser.parse(IOUtils.toString(inputstream, Charsets.UTF_8)).getAsJsonObject();
+            iresource = this.resourceManager.getResource(p_152765_2_);
+            JsonObject jsonobject = jsonparser.parse(IOUtils.toString(iresource.getInputStream(), Charsets.UTF_8)).getAsJsonObject();
 
             if (JsonUtils.isJsonArray(jsonobject, "targets"))
             {
@@ -75,8 +77,8 @@ public class ShaderGroup
                     }
                     catch (Exception exception1)
                     {
-                        JsonException jsonexception1 = JsonException.func_151379_a(exception1);
-                        jsonexception1.func_151380_a("targets[" + i + "]");
+                        JsonException jsonexception1 = JsonException.forException(exception1);
+                        jsonexception1.prependJsonKey("targets[" + i + "]");
                         throw jsonexception1;
                     }
 
@@ -97,8 +99,8 @@ public class ShaderGroup
                     }
                     catch (Exception exception)
                     {
-                        JsonException jsonexception2 = JsonException.func_151379_a(exception);
-                        jsonexception2.func_151380_a("passes[" + j + "]");
+                        JsonException jsonexception2 = JsonException.forException(exception);
+                        jsonexception2.prependJsonKey("passes[" + j + "]");
                         throw jsonexception2;
                     }
 
@@ -108,13 +110,13 @@ public class ShaderGroup
         }
         catch (Exception exception2)
         {
-            JsonException jsonexception = JsonException.func_151379_a(exception2);
-            jsonexception.func_151381_b(p_152765_2_.getResourcePath());
+            JsonException jsonexception = JsonException.forException(exception2);
+            jsonexception.setFilenameAndFlush(p_152765_2_.getResourcePath());
             throw jsonexception;
         }
         finally
         {
-            IOUtils.closeQuietly(inputstream);
+            IOUtils.closeQuietly((Closeable)iresource);
         }
     }
 
@@ -178,34 +180,39 @@ public class ShaderGroup
                         if (framebuffer2 == null)
                         {
                             ResourceLocation resourcelocation = new ResourceLocation("textures/effect/" + s3 + ".png");
+                            IResource iresource = null;
 
                             try
                             {
-                                this.resourceManager.getResource(resourcelocation);
+                                iresource = this.resourceManager.getResource(resourcelocation);
                             }
-                            catch (FileNotFoundException var24)
+                            catch (FileNotFoundException var29)
                             {
                                 throw new JsonException("Render target or texture \'" + s3 + "\' does not exist");
                             }
+                            finally
+                            {
+                                IOUtils.closeQuietly((Closeable)iresource);
+                            }
 
                             p_152764_1_.bindTexture(resourcelocation);
-                            ITextureObject itextureobject = p_152764_1_.getTexture(resourcelocation);
-                            int j = JsonUtils.getInt(jsonobject1, "width");
-                            int k = JsonUtils.getInt(jsonobject1, "height");
-                            boolean flag = JsonUtils.getBoolean(jsonobject1, "bilinear");
+                            ITextureObject lvt_20_1_ = p_152764_1_.getTexture(resourcelocation);
+                            int lvt_21_1_ = JsonUtils.getInt(jsonobject1, "width");
+                            int lvt_22_1_ = JsonUtils.getInt(jsonobject1, "height");
+                            boolean lvt_23_1_ = JsonUtils.getBoolean(jsonobject1, "bilinear");
 
-                            if (flag)
+                            if (lvt_23_1_)
                             {
-                                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-                                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+                                GlStateManager.glTexParameteri(3553, 10241, 9729);
+                                GlStateManager.glTexParameteri(3553, 10240, 9729);
                             }
                             else
                             {
-                                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-                                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+                                GlStateManager.glTexParameteri(3553, 10241, 9728);
+                                GlStateManager.glTexParameteri(3553, 10240, 9728);
                             }
 
-                            shader.addAuxFramebuffer(s4, Integer.valueOf(itextureobject.getGlTextureId()), j, k);
+                            shader.addAuxFramebuffer(s4, Integer.valueOf(lvt_20_1_.getGlTextureId()), lvt_21_1_, lvt_22_1_);
                         }
                         else
                         {
@@ -214,8 +221,8 @@ public class ShaderGroup
                     }
                     catch (Exception exception1)
                     {
-                        JsonException jsonexception = JsonException.func_151379_a(exception1);
-                        jsonexception.func_151380_a("auxtargets[" + i + "]");
+                        JsonException jsonexception = JsonException.forException(exception1);
+                        jsonexception.prependJsonKey("auxtargets[" + i + "]");
                         throw jsonexception;
                     }
 
@@ -237,8 +244,8 @@ public class ShaderGroup
                     }
                     catch (Exception exception)
                     {
-                        JsonException jsonexception1 = JsonException.func_151379_a(exception);
-                        jsonexception1.func_151380_a("uniforms[" + l + "]");
+                        JsonException jsonexception1 = JsonException.forException(exception);
+                        jsonexception1.prependJsonKey("uniforms[" + l + "]");
                         throw jsonexception1;
                     }
 
@@ -271,8 +278,8 @@ public class ShaderGroup
                 }
                 catch (Exception exception)
                 {
-                    JsonException jsonexception = JsonException.func_151379_a(exception);
-                    jsonexception.func_151380_a("values[" + i + "]");
+                    JsonException jsonexception = JsonException.forException(exception);
+                    jsonexception.prependJsonKey("values[" + i + "]");
                     throw jsonexception;
                 }
 
@@ -370,24 +377,24 @@ public class ShaderGroup
 
     public void loadShaderGroup(float partialTicks)
     {
-        if (partialTicks < this.field_148037_k)
+        if (partialTicks < this.lastStamp)
         {
-            this.field_148036_j += 1.0F - this.field_148037_k;
-            this.field_148036_j += partialTicks;
+            this.time += 1.0F - this.lastStamp;
+            this.time += partialTicks;
         }
         else
         {
-            this.field_148036_j += partialTicks - this.field_148037_k;
+            this.time += partialTicks - this.lastStamp;
         }
 
-        for (this.field_148037_k = partialTicks; this.field_148036_j > 20.0F; this.field_148036_j -= 20.0F)
+        for (this.lastStamp = partialTicks; this.time > 20.0F; this.time -= 20.0F)
         {
             ;
         }
 
         for (Shader shader : this.listShaders)
         {
-            shader.loadShader(this.field_148036_j / 20.0F);
+            shader.loadShader(this.time / 20.0F);
         }
     }
 

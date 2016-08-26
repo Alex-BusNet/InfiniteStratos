@@ -1,6 +1,5 @@
 package net.minecraft.world;
 
-import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -10,7 +9,7 @@ public final class WorldSettings
     /** The seed for the map. */
     private final long seed;
     /** The EnumGameType. */
-    private final WorldSettings.GameType theGameType;
+    private final GameType theGameType;
     /** Switch for the map features. 'true' for enabled, 'false' for disabled. */
     private final boolean mapFeaturesEnabled;
     /** True if hardcore mode is enabled */
@@ -20,11 +19,11 @@ public final class WorldSettings
     private boolean commandsAllowed;
     /** True if the Bonus Chest is enabled. */
     private boolean bonusChestEnabled;
-    private String worldName;
+    private String generatorOptions;
 
-    public WorldSettings(long seedIn, WorldSettings.GameType gameType, boolean enableMapFeatures, boolean hardcoreMode, WorldType worldTypeIn)
+    public WorldSettings(long seedIn, GameType gameType, boolean enableMapFeatures, boolean hardcoreMode, WorldType worldTypeIn)
     {
-        this.worldName = "";
+        this.generatorOptions = "";
         this.seed = seedIn;
         this.theGameType = gameType;
         this.mapFeaturesEnabled = enableMapFeatures;
@@ -46,9 +45,9 @@ public final class WorldSettings
         return this;
     }
 
-    public WorldSettings setWorldName(String name)
+    public WorldSettings setGeneratorOptions(String options)
     {
-        this.worldName = name;
+        this.generatorOptions = options;
         return this;
     }
 
@@ -81,7 +80,7 @@ public final class WorldSettings
     /**
      * Gets the game type.
      */
-    public WorldSettings.GameType getGameType()
+    public GameType getGameType()
     {
         return this.theGameType;
     }
@@ -118,133 +117,13 @@ public final class WorldSettings
     /**
      * Gets the GameType by ID
      */
-    public static WorldSettings.GameType getGameTypeById(int id)
+    public static GameType getGameTypeById(int id)
     {
-        return WorldSettings.GameType.getByID(id);
+        return GameType.getByID(id);
     }
 
-    public String getWorldName()
+    public String getGeneratorOptions()
     {
-        return this.worldName;
-    }
-
-    public static enum GameType
-    {
-        NOT_SET(-1, ""),
-        SURVIVAL(0, "survival"),
-        CREATIVE(1, "creative"),
-        ADVENTURE(2, "adventure"),
-        SPECTATOR(3, "spectator");
-
-        int id;
-        String name;
-
-        private GameType(int typeId, String nameIn)
-        {
-            this.id = typeId;
-            this.name = nameIn;
-        }
-
-        /**
-         * Returns the ID of this game type
-         */
-        public int getID()
-        {
-            return this.id;
-        }
-
-        /**
-         * Returns the name of this game type
-         */
-        public String getName()
-        {
-            return this.name;
-        }
-
-        /**
-         * Configures the player capabilities based on the game type
-         */
-        public void configurePlayerCapabilities(PlayerCapabilities capabilities)
-        {
-            if (this == CREATIVE)
-            {
-                capabilities.allowFlying = true;
-                capabilities.isCreativeMode = true;
-                capabilities.disableDamage = true;
-            }
-            else if (this == SPECTATOR)
-            {
-                capabilities.allowFlying = true;
-                capabilities.isCreativeMode = false;
-                capabilities.disableDamage = true;
-                capabilities.isFlying = true;
-            }
-            else
-            {
-                capabilities.allowFlying = false;
-                capabilities.isCreativeMode = false;
-                capabilities.disableDamage = false;
-                capabilities.isFlying = false;
-            }
-
-            capabilities.allowEdit = !this.isAdventure();
-        }
-
-        /**
-         * Returns true if this is the ADVENTURE game type
-         */
-        public boolean isAdventure()
-        {
-            return this == ADVENTURE || this == SPECTATOR;
-        }
-
-        /**
-         * Returns true if this is the CREATIVE game type
-         */
-        public boolean isCreative()
-        {
-            return this == CREATIVE;
-        }
-
-        /**
-         * Returns true if this is the SURVIVAL or ADVENTURE game type
-         */
-        public boolean isSurvivalOrAdventure()
-        {
-            return this == SURVIVAL || this == ADVENTURE;
-        }
-
-        /**
-         * Returns the game type with the specified ID, or SURVIVAL if none found. Args: id
-         */
-        public static WorldSettings.GameType getByID(int idIn)
-        {
-            for (WorldSettings.GameType worldsettings$gametype : values())
-            {
-                if (worldsettings$gametype.id == idIn)
-                {
-                    return worldsettings$gametype;
-                }
-            }
-
-            return SURVIVAL;
-        }
-
-        /**
-         * Returns the game type with the specified name, or SURVIVAL if none found. This is case sensitive. Args: name
-         */
-        @SideOnly(Side.CLIENT)
-        public static WorldSettings.GameType getByName(String p_77142_0_)
-        {
-            for (WorldSettings.GameType worldsettings$gametype : values())
-            {
-                if (worldsettings$gametype.name.equals(p_77142_0_))
-                {
-                    return worldsettings$gametype;
-                }
-            }
-
-            return SURVIVAL;
-        }
+        return this.generatorOptions;
     }
 }

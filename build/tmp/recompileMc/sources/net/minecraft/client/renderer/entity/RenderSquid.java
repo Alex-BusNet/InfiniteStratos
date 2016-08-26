@@ -10,7 +10,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderSquid extends RenderLiving<EntitySquid>
 {
-    private static final ResourceLocation squidTextures = new ResourceLocation("textures/entity/squid.png");
+    private static final ResourceLocation SQUID_TEXTURES = new ResourceLocation("textures/entity/squid.png");
 
     public RenderSquid(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn)
     {
@@ -22,13 +22,13 @@ public class RenderSquid extends RenderLiving<EntitySquid>
      */
     protected ResourceLocation getEntityTexture(EntitySquid entity)
     {
-        return squidTextures;
+        return SQUID_TEXTURES;
     }
 
-    protected void rotateCorpse(EntitySquid bat, float p_77043_2_, float p_77043_3_, float partialTicks)
+    protected void rotateCorpse(EntitySquid entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks)
     {
-        float f = bat.prevSquidPitch + (bat.squidPitch - bat.prevSquidPitch) * partialTicks;
-        float f1 = bat.prevSquidYaw + (bat.squidYaw - bat.prevSquidYaw) * partialTicks;
+        float f = entityLiving.prevSquidPitch + (entityLiving.squidPitch - entityLiving.prevSquidPitch) * partialTicks;
+        float f1 = entityLiving.prevSquidYaw + (entityLiving.squidYaw - entityLiving.prevSquidYaw) * partialTicks;
         GlStateManager.translate(0.0F, 0.5F, 0.0F);
         GlStateManager.rotate(180.0F - p_77043_3_, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(f, 1.0F, 0.0F, 0.0F);

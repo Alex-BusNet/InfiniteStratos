@@ -1,6 +1,7 @@
 package net.minecraft.client.gui;
 
 import io.netty.buffer.Unpooled;
+import java.io.IOException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -11,9 +12,9 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ContainerMerchant;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.client.C17PacketCustomPayload;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
@@ -22,16 +23,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-
 @SideOnly(Side.CLIENT)
 public class GuiMerchant extends GuiContainer
 {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     /** The GUI texture for the villager merchant GUI. */
     private static final ResourceLocation MERCHANT_GUI_TEXTURE = new ResourceLocation("textures/gui/container/villager.png");
     /** The current IMerchant instance in use for this specific merchant. */
-    private IMerchant merchant;
+    private final IMerchant merchant;
     /** The button which proceeds to the next available merchant recipe. */
     private GuiMerchant.MerchantButton nextButton;
     /** Returns to the previous Merchant recipe if one is applicable. */
@@ -39,7 +38,7 @@ public class GuiMerchant extends GuiContainer
     /** The integer value corresponding to the currently selected merchant recipe. */
     private int selectedMerchantRecipe;
     /** The chat component utilized by this GuiMerchant instance. */
-    private IChatComponent chatComponent;
+    private final ITextComponent chatComponent;
 
     public GuiMerchant(InventoryPlayer p_i45500_1_, IMerchant p_i45500_2_, World worldIn)
     {
@@ -57,14 +56,14 @@ public class GuiMerchant extends GuiContainer
         super.initGui();
         int i = (this.width - this.xSize) / 2;
         int j = (this.height - this.ySize) / 2;
-        this.buttonList.add(this.nextButton = new GuiMerchant.MerchantButton(1, i + 120 + 27, j + 24 - 1, true));
-        this.buttonList.add(this.previousButton = new GuiMerchant.MerchantButton(2, i + 36 - 19, j + 24 - 1, false));
+        this.nextButton = (GuiMerchant.MerchantButton)this.func_189646_b(new GuiMerchant.MerchantButton(1, i + 120 + 27, j + 24 - 1, true));
+        this.previousButton = (GuiMerchant.MerchantButton)this.func_189646_b(new GuiMerchant.MerchantButton(2, i + 36 - 19, j + 24 - 1, false));
         this.nextButton.enabled = false;
         this.previousButton.enabled = false;
     }
 
     /**
-     * Draw the foreground layer for the GuiContainer (everything in front of the items). Args : mouseX, mouseY
+     * Draw the foreground layer for the GuiContainer (everything in front of the items)
      */
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
@@ -124,12 +123,12 @@ public class GuiMerchant extends GuiContainer
             ((ContainerMerchant)this.inventorySlots).setCurrentRecipeIndex(this.selectedMerchantRecipe);
             PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
             packetbuffer.writeInt(this.selectedMerchantRecipe);
-            this.mc.getNetHandler().addToSendQueue(new C17PacketCustomPayload("MC|TrSel", packetbuffer));
+            this.mc.getConnection().sendPacket(new CPacketCustomPayload("MC|TrSel", packetbuffer));
         }
     }
 
     /**
-     * Args : renderPartialTicks, mouseX, mouseY
+     * Draws the background layer of this container (behind the items).
      */
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
     {
@@ -163,7 +162,7 @@ public class GuiMerchant extends GuiContainer
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
@@ -232,12 +231,12 @@ public class GuiMerchant extends GuiContainer
     @SideOnly(Side.CLIENT)
     static class MerchantButton extends GuiButton
         {
-            private final boolean field_146157_o;
+            private final boolean forward;
 
             public MerchantButton(int buttonID, int x, int y, boolean p_i1095_4_)
             {
                 super(buttonID, x, y, 12, 19, "");
-                this.field_146157_o = p_i1095_4_;
+                this.forward = p_i1095_4_;
             }
 
             /**
@@ -262,7 +261,7 @@ public class GuiMerchant extends GuiContainer
                         j += this.width;
                     }
 
-                    if (!this.field_146157_o)
+                    if (!this.forward)
                     {
                         i += this.height;
                     }

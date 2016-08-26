@@ -1,17 +1,23 @@
-package net.minecraftforge.client.model;
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import net.minecraft.client.renderer.block.model.ModelBlockDefinition;
-import net.minecraft.client.resources.model.ModelRotation;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.FMLLog;
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.tuple.Pair;
+package net.minecraftforge.client.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,7 +25,27 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+
+import net.minecraft.client.renderer.block.model.ModelBlockDefinition;
+import net.minecraft.client.renderer.block.model.ModelRotation;
+import net.minecraft.client.renderer.block.model.Variant;
+import net.minecraft.client.renderer.block.model.VariantList;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.model.IModelState;
+import net.minecraftforge.common.model.TRSRTransformation;
+
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class BlockStateLoader
 {
@@ -53,11 +79,11 @@ public class BlockStateLoader
             {
                 case 1: // Version 1
                     ForgeBlockStateV1 v1 = GSON.fromJson(reader, ForgeBlockStateV1.class);
-                    List<ModelBlockDefinition.Variants> variants = Lists.newArrayList();
+                    Map<String, VariantList> variants = Maps.newHashMap();
 
                     for (Entry<String, Collection<ForgeBlockStateV1.Variant>> entry : v1.variants.asMap().entrySet())
                     {   // Convert Version1 variants into vanilla variants for the ModelBlockDefinition.
-                        List<ModelBlockDefinition.Variant> mcVars = Lists.newArrayList();
+                        List<Variant> mcVars = Lists.newArrayList();
                         for (ForgeBlockStateV1.Variant var : entry.getValue())
                         {
                             boolean uvLock = var.getUvLock().or(false);
@@ -66,14 +92,14 @@ public class BlockStateLoader
                             int weight = var.getWeight().or(1);
 
                             if (var.getModel() != null && var.getSubmodels().size() == 0 && var.getTextures().size() == 0 && var.getCustomData().size() == 0 && var.getState().orNull() instanceof ModelRotation)
-                                mcVars.add(new ModelBlockDefinition.Variant(var.getModel(), (ModelRotation)var.getState().get(), uvLock, weight));
+                                mcVars.add(new Variant(var.getModel(), (ModelRotation)var.getState().get(), uvLock, weight));
                             else
                                 mcVars.add(new ForgeVariant(var.getModel(), var.getState().or(TRSRTransformation.identity()), uvLock, smooth, gui3d, weight, var.getTextures(), var.getOnlyPartsVariant(), var.getCustomData()));
                         }
-                        variants.add(new ModelBlockDefinition.Variants(entry.getKey(), mcVars));
+                        variants.put(entry.getKey(), new VariantList(mcVars));
                     }
 
-                    return new ModelBlockDefinition(variants);
+                    return new ModelBlockDefinition(variants, null);
 
                 default: //Unknown version.. try loading it as normal.
                     return vanillaGSON.fromJson(reader, ModelBlockDefinition.class);
@@ -102,12 +128,6 @@ public class BlockStateLoader
         private final ResourceLocation model;
         private final ImmutableMap<String, String> customData;
 
-        @Deprecated // remove in 1.9
-        public SubModel(IModelState state, boolean uvLock, ImmutableMap<String, String> textures, ResourceLocation model, ImmutableMap<String, String> customData)
-        {
-            this(state, uvLock, true, true, textures, model, customData);
-        }
-
         public SubModel(IModelState state, boolean uvLock, boolean smooth, boolean gui3d, ImmutableMap<String, String> textures, ResourceLocation model, ImmutableMap<String, String> customData)
         {
             this.state = state;
@@ -126,7 +146,7 @@ public class BlockStateLoader
         public ImmutableMap<String, String> getCustomData() { return customData; }
     }
 
-    private static class ForgeVariant extends ModelBlockDefinition.Variant implements ISmartVariant
+    private static class ForgeVariant extends Variant implements ISmartVariant
     {
         private final ImmutableMap<String, String> textures;
         private final ImmutableMap<String, SubModel> parts;
@@ -146,67 +166,46 @@ public class BlockStateLoader
             this.gui3d = gui3d;
         }
 
-        private IModel runModelHooks(IModel base, boolean smooth, boolean gui3d, ImmutableMap<String, String> textureMap, ImmutableMap<String, String> customData)
+        private IModel runModelHooks(IModel base, boolean smooth, boolean gui3d, boolean uvlock, ImmutableMap<String, String> textureMap, ImmutableMap<String, String> customData)
         {
-            if (!customData.isEmpty() && base instanceof IModelCustomData)
-            {
-                base = ((IModelCustomData<?>)base).process(customData);
-            }
-
-            if (!textureMap.isEmpty() && base instanceof IRetexturableModel)
-            {
-                base = ((IRetexturableModel<?>)base).retexture(textureMap);
-            }
-
-            if (base instanceof IModelSimpleProperties<?>)
-            {
-                base = ((IModelSimpleProperties<?>) base).smoothLighting(smooth).gui3d(gui3d);
-            }
-
+            base = ModelProcessingHelper.customData(base, customData);
+            base = ModelProcessingHelper.retexture(base, textureMap);
+            base = ModelProcessingHelper.smoothLighting(base, smooth);
+            base = ModelProcessingHelper.gui3d(base, gui3d);
+            base = ModelProcessingHelper.uvlock(base, uvlock);
             return base;
         }
 
         /**
-         * Used to replace the base model with a retextured model containing submodels.
+         * Used to replace the base model with a re-textured model containing sub-models.
          */
         @Override
-        public IModel process(IModel base, ModelLoader loader)
+        public IModel process(IModel base)
         {
             int size = parts.size();
-            boolean hasBase = base != loader.getMissingModel();
+            // FIXME: should missing base be handled this way?
+            boolean hasBase = base != ModelLoaderRegistry.getMissingModel();
 
             if (hasBase)
             {
-                base = runModelHooks(base, smooth, gui3d, textures, customData);
+                base = runModelHooks(base, smooth, gui3d, this.isUvLock(), textures, customData);
 
                 if (size <= 0)
                     return base;
             }
 
-            // Apply rotation of base model to submodels.
+            // Apply rotation of base model to sub-models.
             // If baseRot is non-null, then that rotation will be applied instead of the base model's rotation.
-            // This is used to allow replacing base model with a submodel when there is no base model for a variant.
+            // This is used to allow replacing base model with a sub-model when there is no base model for a variant.
             IModelState baseTr = getState();
             ImmutableMap.Builder<String, Pair<IModel, IModelState>> models = ImmutableMap.builder();
             for (Entry<String, SubModel> entry : parts.entrySet())
             {
                 SubModel part = entry.getValue();
 
-                IModel model = null;
-                try
-                {
-                    model = loader.getModel(part.getModelLocation());
-                }
-                catch (IOException e)
-                {
-                    FMLLog.warning("Unable to load block sub-model: \'" + part.getModelLocation() /*+ "\' for variant: \'" + parent*/ + "\': " + e.toString());
-                    model = loader.getMissingModel(); // Will make it look weird, but that is good.
-                }
+                IModel model = ModelLoaderRegistry.getModelOrLogError(part.getModelLocation(), "Unable to load block sub-model: \'" + part.getModelLocation());
 
-                IModelState partState = new ModelStateComposition(baseTr, part.getState());
-                if (part.isUVLock()) partState = new ModelLoader.UVLock(partState);
-
-                models.put(entry.getKey(), Pair.<IModel, IModelState>of(runModelHooks(model, part.smooth, part.gui3d, part.getTextures(), part.getCustomData()), partState));
+                models.put(entry.getKey(), Pair.<IModel, IModelState>of(runModelHooks(model, part.smooth, part.gui3d, part.uvLock, part.getTextures(), part.getCustomData()), part.getState()));
             }
 
             return new MultiModel(getModelLocation(), hasBase ? base : null, baseTr, models.build());

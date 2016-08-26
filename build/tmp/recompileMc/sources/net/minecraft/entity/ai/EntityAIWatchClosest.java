@@ -12,7 +12,7 @@ public class EntityAIWatchClosest extends EntityAIBase
     /** This is the Maximum distance that the AI will look for the Entity */
     protected float maxDistanceForPlayer;
     private int lookTime;
-    private float chance;
+    private final float chance;
     protected Class <? extends Entity > watchedClass;
 
     public EntityAIWatchClosest(EntityLiving entitylivingIn, Class <? extends Entity > watchTargetClass, float maxDistance)
@@ -91,7 +91,7 @@ public class EntityAIWatchClosest extends EntityAIBase
      */
     public void updateTask()
     {
-        this.theWatcher.getLookHelper().setLookPosition(this.closestEntity.posX, this.closestEntity.posY + (double)this.closestEntity.getEyeHeight(), this.closestEntity.posZ, 10.0F, (float)this.theWatcher.getVerticalFaceSpeed());
+        this.theWatcher.getLookHelper().setLookPosition(this.closestEntity.posX, this.closestEntity.posY + (double)this.closestEntity.getEyeHeight(), this.closestEntity.posZ, (float)this.theWatcher.getHorizontalFaceSpeed(), (float)this.theWatcher.getVerticalFaceSpeed());
         --this.lookTime;
     }
 }

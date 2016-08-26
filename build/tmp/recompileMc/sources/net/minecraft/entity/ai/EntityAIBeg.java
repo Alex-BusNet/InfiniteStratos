@@ -4,14 +4,15 @@ import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 public class EntityAIBeg extends EntityAIBase
 {
-    private EntityWolf theWolf;
+    private final EntityWolf theWolf;
     private EntityPlayer thePlayer;
-    private World worldObject;
-    private float minPlayerDistance;
+    private final World worldObject;
+    private final float minPlayerDistance;
     private int timeoutCounter;
 
     public EntityAIBeg(EntityWolf wolf, float minDistance)
@@ -71,7 +72,24 @@ public class EntityAIBeg extends EntityAIBase
      */
     private boolean hasPlayerGotBoneInHand(EntityPlayer player)
     {
-        ItemStack itemstack = player.inventory.getCurrentItem();
-        return itemstack == null ? false : (!this.theWolf.isTamed() && itemstack.getItem() == Items.bone ? true : this.theWolf.isBreedingItem(itemstack));
+        for (EnumHand enumhand : EnumHand.values())
+        {
+            ItemStack itemstack = player.getHeldItem(enumhand);
+
+            if (itemstack != null)
+            {
+                if (this.theWolf.isTamed() && itemstack.getItem() == Items.BONE)
+                {
+                    return true;
+                }
+
+                if (this.theWolf.isBreedingItem(itemstack))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

@@ -1,22 +1,22 @@
 package net.minecraft.client.resources.data;
 
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class PackMetadataSection implements IMetadataSection
 {
-    private final IChatComponent packDescription;
+    private final ITextComponent packDescription;
     private final int packFormat;
 
-    public PackMetadataSection(IChatComponent p_i1034_1_, int p_i1034_2_)
+    public PackMetadataSection(ITextComponent packDescriptionIn, int packFormatIn)
     {
-        this.packDescription = p_i1034_1_;
-        this.packFormat = p_i1034_2_;
+        this.packDescription = packDescriptionIn;
+        this.packFormat = packFormatIn;
     }
 
-    public IChatComponent getPackDescription()
+    public ITextComponent getPackDescription()
     {
         return this.packDescription;
     }

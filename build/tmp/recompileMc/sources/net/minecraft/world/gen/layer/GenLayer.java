@@ -1,13 +1,9 @@
 package net.minecraft.world.gen.layer;
 
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.util.ReportedException;
+import net.minecraft.init.Biomes;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.ChunkProviderSettings;
-
-import java.util.concurrent.Callable;
 
 public abstract class GenLayer
 {
@@ -44,13 +40,12 @@ public abstract class GenLayer
         GenLayerAddMushroomIsland genlayeraddmushroomisland = new GenLayerAddMushroomIsland(5L, genlayeraddisland3);
         GenLayerDeepOcean genlayerdeepocean = new GenLayerDeepOcean(4L, genlayeraddmushroomisland);
         GenLayer genlayer4 = GenLayerZoom.magnify(1000L, genlayerdeepocean, 0);
-        ChunkProviderSettings chunkprovidersettings = null;
         int i = 4;
         int j = i;
 
-        if (p_180781_2_ == WorldType.CUSTOMIZED && p_180781_3_.length() > 0)
+        if (p_180781_2_ == WorldType.CUSTOMIZED && !p_180781_3_.isEmpty())
         {
-            chunkprovidersettings = ChunkProviderSettings.Factory.jsonToFactory(p_180781_3_).func_177864_b();
+            ChunkProviderSettings chunkprovidersettings = ChunkProviderSettings.Factory.jsonToFactory(p_180781_3_).build();
             i = chunkprovidersettings.biomeSize;
             j = chunkprovidersettings.riverSize;
         }
@@ -145,7 +140,7 @@ public abstract class GenLayer
     }
 
     /**
-     * returns a LCG pseudo random number from [0, x). Args: int x
+     * Generates a pseudo random number between 0 and another integer.
      */
     protected int nextInt(int p_75902_1_)
     {
@@ -173,41 +168,11 @@ public abstract class GenLayer
         {
             return true;
         }
-        else if (biomeIDA != BiomeGenBase.mesaPlateau_F.biomeID && biomeIDA != BiomeGenBase.mesaPlateau.biomeID)
-        {
-            final BiomeGenBase biomegenbase = BiomeGenBase.getBiome(biomeIDA);
-            final BiomeGenBase biomegenbase1 = BiomeGenBase.getBiome(biomeIDB);
-
-            try
-            {
-                return biomegenbase != null && biomegenbase1 != null ? biomegenbase.isEqualTo(biomegenbase1) : false;
-            }
-            catch (Throwable throwable)
-            {
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Comparing biomes");
-                CrashReportCategory crashreportcategory = crashreport.makeCategory("Biomes being compared");
-                crashreportcategory.addCrashSection("Biome A ID", Integer.valueOf(biomeIDA));
-                crashreportcategory.addCrashSection("Biome B ID", Integer.valueOf(biomeIDB));
-                crashreportcategory.addCrashSectionCallable("Biome A", new Callable<String>()
-                {
-                    public String call() throws Exception
-                    {
-                        return String.valueOf((Object)biomegenbase);
-                    }
-                });
-                crashreportcategory.addCrashSectionCallable("Biome B", new Callable<String>()
-                {
-                    public String call() throws Exception
-                    {
-                        return String.valueOf((Object)biomegenbase1);
-                    }
-                });
-                throw new ReportedException(crashreport);
-            }
-        }
         else
         {
-            return biomeIDB == BiomeGenBase.mesaPlateau_F.biomeID || biomeIDB == BiomeGenBase.mesaPlateau.biomeID;
+            Biome biome = Biome.getBiome(biomeIDA);
+            Biome biome1 = Biome.getBiome(biomeIDB);
+            return biome != null && biome1 != null ? (biome != Biomes.MESA_ROCK && biome != Biomes.MESA_CLEAR_ROCK ? biome == biome1 || biome.getBiomeClass() == biome1.getBiomeClass() : biome1 == Biomes.MESA_ROCK || biome1 == Biomes.MESA_CLEAR_ROCK) : false;
         }
     }
 
@@ -216,7 +181,7 @@ public abstract class GenLayer
      */
     protected static boolean isBiomeOceanic(int p_151618_0_)
     {
-        return net.minecraftforge.common.BiomeManager.oceanBiomes.contains(BiomeGenBase.getBiome(p_151618_0_));
+        return net.minecraftforge.common.BiomeManager.oceanBiomes.contains(Biome.getBiome(p_151618_0_));
     }
 
     /**
@@ -254,7 +219,7 @@ public abstract class GenLayer
     {
         net.minecraftforge.event.terraingen.WorldTypeEvent.BiomeSize event = new net.minecraftforge.event.terraingen.WorldTypeEvent.BiomeSize(worldType, original);
         net.minecraftforge.common.MinecraftForge.TERRAIN_GEN_BUS.post(event);
-        return event.newSize;
+        return event.getNewSize();
     }
     /* ========================================= FORGE END ======================================*/
 }

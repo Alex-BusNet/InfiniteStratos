@@ -3,13 +3,17 @@ package net.minecraft.entity.item;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -24,19 +28,24 @@ public class EntityMinecartTNT extends EntityMinecart
         super(worldIn);
     }
 
-    public EntityMinecartTNT(World worldIn, double p_i1728_2_, double p_i1728_4_, double p_i1728_6_)
+    public EntityMinecartTNT(World worldIn, double x, double y, double z)
     {
-        super(worldIn, p_i1728_2_, p_i1728_4_, p_i1728_6_);
+        super(worldIn, x, y, z);
     }
 
-    public EntityMinecart.EnumMinecartType getMinecartType()
+    public static void func_189674_a(DataFixer p_189674_0_)
     {
-        return EntityMinecart.EnumMinecartType.TNT;
+        EntityMinecart.func_189669_a(p_189674_0_, "MinecartTNT");
+    }
+
+    public EntityMinecart.Type getType()
+    {
+        return EntityMinecart.Type.TNT;
     }
 
     public IBlockState getDefaultDisplayTile()
     {
-        return Blocks.tnt.getDefaultState();
+        return Blocks.TNT.getDefaultState();
     }
 
     /**
@@ -87,17 +96,17 @@ public class EntityMinecartTNT extends EntityMinecart
         return super.attackEntityFrom(source, amount);
     }
 
-    public void killMinecart(DamageSource p_94095_1_)
+    public void killMinecart(DamageSource source)
     {
-        super.killMinecart(p_94095_1_);
+        super.killMinecart(source);
         double d0 = this.motionX * this.motionX + this.motionZ * this.motionZ;
 
-        if (!p_94095_1_.isExplosion() && this.worldObj.getGameRules().getBoolean("doEntityDrops"))
+        if (!source.isExplosion() && this.worldObj.getGameRules().getBoolean("doEntityDrops"))
         {
-            this.entityDropItem(new ItemStack(Blocks.tnt, 1), 0.0F);
+            this.entityDropItem(new ItemStack(Blocks.TNT, 1), 0.0F);
         }
 
-        if (p_94095_1_.isFireDamage() || p_94095_1_.isExplosion() || d0 >= 0.009999999776482582D)
+        if (source.isFireDamage() || source.isExplosion() || d0 >= 0.009999999776482582D)
         {
             this.explodeCart(d0);
         }
@@ -134,7 +143,7 @@ public class EntityMinecartTNT extends EntityMinecart
     }
 
     /**
-     * Called every tick the minecart is on an activator rail. Args: x, y, z, is the rail receiving power
+     * Called every tick the minecart is on an activator rail.
      */
     public void onActivatorRailPass(int x, int y, int z, boolean receivingPower)
     {
@@ -170,7 +179,7 @@ public class EntityMinecartTNT extends EntityMinecart
 
             if (!this.isSilent())
             {
-                this.worldObj.playSoundAtEntity(this, "game.tnt.primed", 1.0F, 1.0F);
+                this.worldObj.playSound((EntityPlayer)null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_TNT_PRIMED, SoundCategory.BLOCKS, 1.0F, 1.0F);
             }
         }
     }
@@ -208,22 +217,22 @@ public class EntityMinecartTNT extends EntityMinecart
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    protected void readEntityFromNBT(NBTTagCompound tagCompund)
+    protected void readEntityFromNBT(NBTTagCompound compound)
     {
-        super.readEntityFromNBT(tagCompund);
+        super.readEntityFromNBT(compound);
 
-        if (tagCompund.hasKey("TNTFuse", 99))
+        if (compound.hasKey("TNTFuse", 99))
         {
-            this.minecartTNTFuse = tagCompund.getInteger("TNTFuse");
+            this.minecartTNTFuse = compound.getInteger("TNTFuse");
         }
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    protected void writeEntityToNBT(NBTTagCompound tagCompound)
+    protected void writeEntityToNBT(NBTTagCompound compound)
     {
-        super.writeEntityToNBT(tagCompound);
-        tagCompound.setInteger("TNTFuse", this.minecartTNTFuse);
+        super.writeEntityToNBT(compound);
+        compound.setInteger("TNTFuse", this.minecartTNTFuse);
     }
 }

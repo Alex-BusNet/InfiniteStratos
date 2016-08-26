@@ -1,9 +1,9 @@
 package net.minecraft.world;
 
-import net.minecraft.util.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import javax.annotation.concurrent.Immutable;
+import net.minecraft.util.math.MathHelper;
 
+@Immutable
 public class DifficultyInstance
 {
     private final EnumDifficulty worldDifficulty;
@@ -15,10 +15,14 @@ public class DifficultyInstance
         this.additionalDifficulty = this.calculateAdditionalDifficulty(worldDifficulty, worldTime, chunkInhabitedTime, moonPhaseFactor);
     }
 
-    @SideOnly(Side.CLIENT)
     public float getAdditionalDifficulty()
     {
         return this.additionalDifficulty;
+    }
+
+    public boolean func_190083_c()
+    {
+        return this.additionalDifficulty >= (float)EnumDifficulty.HARD.ordinal();
     }
 
     public float getClampedAdditionalDifficulty()

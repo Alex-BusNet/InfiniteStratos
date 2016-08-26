@@ -1,15 +1,38 @@
-package net.minecraftforge.fml.client;
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-import net.minecraft.client.gui.*;
-import net.minecraft.world.WorldSettings;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.common.StartupQuery;
-import net.minecraftforge.fml.common.ZipperUtil;
-import org.apache.logging.log4j.Level;
+package net.minecraftforge.fml.client;
 
 import java.io.File;
 import java.io.IOException;
+
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiLabel;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiYesNo;
+import net.minecraft.client.gui.GuiYesNoCallback;
+import net.minecraft.world.WorldSettings;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.StartupQuery;
+import net.minecraftforge.fml.common.ZipperUtil;
+
+import org.apache.logging.log4j.Level;
 
 public class GuiOldSaveLoadConfirm extends GuiYesNo implements GuiYesNoCallback {
 
@@ -27,7 +50,7 @@ public class GuiOldSaveLoadConfirm extends GuiYesNo implements GuiYesNoCallback 
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
@@ -41,12 +64,12 @@ public class GuiOldSaveLoadConfirm extends GuiYesNo implements GuiYesNoCallback 
 
         for (k = 0; k < this.buttonList.size(); ++k)
         {
-            ((GuiButton)this.buttonList.get(k)).drawButton(this.mc, mouseX, mouseY);
+            this.buttonList.get(k).drawButton(this.mc, mouseX, mouseY);
         }
 
         for (k = 0; k < this.labelList.size(); ++k)
         {
-            ((GuiLabel)this.labelList.get(k)).drawLabel(this.mc, mouseX, mouseY);
+            this.labelList.get(k).drawLabel(this.mc, mouseX, mouseY);
         }
     }
     /**
@@ -57,7 +80,6 @@ public class GuiOldSaveLoadConfirm extends GuiYesNo implements GuiYesNoCallback 
     {
         if (button.id == 1)
         {
-            ObfuscationReflectionHelper.setPrivateValue(GuiSelectWorld.class, (GuiSelectWorld)parentScreen, false, "field_"+"146634_i");
             FMLClientHandler.instance().showGuiScreen(parent);
         }
         else
@@ -85,7 +107,7 @@ public class GuiOldSaveLoadConfirm extends GuiYesNo implements GuiYesNoCallback 
 
             try
             {
-                mc.launchIntegratedServer(dirName, saveName, (WorldSettings)null);
+                mc.launchIntegratedServer(dirName, saveName, null);
             }
             catch (StartupQuery.AbortedException e)
             {

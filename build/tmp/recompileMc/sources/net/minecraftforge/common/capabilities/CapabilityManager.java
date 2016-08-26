@@ -1,15 +1,23 @@
-package net.minecraftforge.common.capabilities;
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.minecraftforge.common.util.EnumHelper;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.common.discovery.ASMDataTable;
-import org.apache.logging.log4j.Level;
-import org.objectweb.asm.Type;
+package net.minecraftforge.common.capabilities;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -17,6 +25,19 @@ import java.lang.reflect.Modifier;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import org.apache.logging.log4j.Level;
+import org.objectweb.asm.Type;
+
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import net.minecraftforge.common.util.EnumHelper;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.discovery.ASMDataTable;
 
 public enum CapabilityManager
 {
@@ -40,7 +61,7 @@ public enum CapabilityManager
             public T call() throws Exception
             {
                 try {
-                    return (T)implementation.newInstance();
+                    return implementation.newInstance();
                 } catch (InstantiationException e) {
                     Throwables.propagate(e);
                 } catch (IllegalAccessException e) {
@@ -58,7 +79,7 @@ public enum CapabilityManager
      *
      * @param type The Interface to be registered
      * @param storage A default implementation of the storage handler.
-     * @param factor A Factory that will produce new instances of the default implementation.
+     * @param factory A Factory that will produce new instances of the default implementation.
      */
     public <T> void register(Class<T> type, Capability.IStorage<T> storage, Callable<? extends T> factory)
     {

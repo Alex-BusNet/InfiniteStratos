@@ -1,12 +1,16 @@
 package net.minecraft.client.resources;
 
 import com.google.common.collect.Sets;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Set;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
-
-import java.io.*;
-import java.util.Set;
 
 @SideOnly(Side.CLIENT)
 public class FolderResourcePack extends AbstractResourcePack
@@ -37,13 +41,13 @@ public class FolderResourcePack extends AbstractResourcePack
             {
                 String s = getRelativeName(file1, file2);
 
-                if (!s.equals(s.toLowerCase()))
+                if (s.equals(s.toLowerCase()))
                 {
-                    this.logNameNotLowercase(s);
+                    set.add(s.substring(0, s.length() - 1));
                 }
                 else
                 {
-                    set.add(s.substring(0, s.length() - 1));
+                    this.logNameNotLowercase(s);
                 }
             }
         }

@@ -19,17 +19,6 @@
  */
 package net.minecraftforge.gradle;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.io.Files;
-import net.minecraft.launchwrapper.IClassTransformer;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.apache.logging.log4j.Level;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,6 +32,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+
+import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.LaunchClassLoader;
+
+import org.apache.logging.log4j.Level;
+
+import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 
 public class GradleForgeHacks
 {

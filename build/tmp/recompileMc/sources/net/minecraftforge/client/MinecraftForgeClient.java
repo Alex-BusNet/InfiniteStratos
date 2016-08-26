@@ -1,3 +1,22 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 /**
  * This software is provided under the terms of the Minecraft Forge Public
  * License v1.0.
@@ -5,17 +24,19 @@
 
 package net.minecraftforge.client;
 
+import java.util.BitSet;
+import java.util.concurrent.TimeUnit;
+
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ChunkCache;
+import net.minecraft.world.World;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import net.minecraft.client.renderer.RegionRenderCache;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.world.World;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.BitSet;
-import java.util.concurrent.TimeUnit;
 
 public class MinecraftForgeClient
 {
@@ -24,7 +45,7 @@ public class MinecraftForgeClient
         return ForgeHooksClient.renderPass;
     }
 
-    public static EnumWorldBlockLayer getRenderLayer()
+    public static BlockRenderLayer getRenderLayer()
     {
         return ForgeHooksClient.renderLayer.get();
     }
@@ -66,24 +87,24 @@ public class MinecraftForgeClient
         }
     }
 
-    private static final LoadingCache<Pair<World, BlockPos>, RegionRenderCache> regionCache = CacheBuilder.newBuilder()
+    private static final LoadingCache<Pair<World, BlockPos>, ChunkCache> regionCache = CacheBuilder.newBuilder()
         .maximumSize(500)
         .concurrencyLevel(5)
         .expireAfterAccess(1, TimeUnit.SECONDS)
-        .build(new CacheLoader<Pair<World, BlockPos>, RegionRenderCache>()
+        .build(new CacheLoader<Pair<World, BlockPos>, ChunkCache>()
         {
-            public RegionRenderCache load(Pair<World, BlockPos> key) throws Exception
+            public ChunkCache load(Pair<World, BlockPos> key) throws Exception
             {
-                return new RegionRenderCache(key.getLeft(), key.getRight().add(-1, -1, -1), key.getRight().add(16, 16, 16), 1);
+                return new ChunkCache(key.getLeft(), key.getRight().add(-1, -1, -1), key.getRight().add(16, 16, 16), 1);
             }
         });
 
-    public static void onRebuildChunk(World world, BlockPos position, RegionRenderCache cache)
+    public static void onRebuildChunk(World world, BlockPos position, ChunkCache cache)
     {
         regionCache.put(Pair.of(world, position), cache);
     }
 
-    public static RegionRenderCache getRegionRenderCache(World world, BlockPos pos)
+    public static ChunkCache getRegionRenderCache(World world, BlockPos pos)
     {
         int x = pos.getX() & ~0xF;
         int y = pos.getY() & ~0xF;

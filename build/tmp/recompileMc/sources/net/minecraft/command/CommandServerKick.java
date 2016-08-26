@@ -1,10 +1,11 @@
 package net.minecraft.command;
 
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-
-import java.util.List;
+import net.minecraft.util.math.BlockPos;
 
 public class CommandServerKick extends CommandBase
 {
@@ -26,8 +27,6 @@ public class CommandServerKick extends CommandBase
 
     /**
      * Gets the usage string for the command.
-     *  
-     * @param sender The command sender that executed the command
      */
     public String getCommandUsage(ICommandSender sender)
     {
@@ -35,16 +34,13 @@ public class CommandServerKick extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
-     *  
-     * @param sender The command sender that executed the command
-     * @param args The arguments that were passed
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length > 0 && args[0].length() > 1)
         {
-            EntityPlayerMP entityplayermp = MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(args[0]);
+            EntityPlayerMP entityplayermp = server.getPlayerList().getPlayerByUsername(args[0]);
             String s = "Kicked by an operator.";
             boolean flag = false;
 
@@ -60,15 +56,15 @@ public class CommandServerKick extends CommandBase
                     flag = true;
                 }
 
-                entityplayermp.playerNetServerHandler.kickPlayerFromServer(s);
+                entityplayermp.connection.kickPlayerFromServer(s);
 
                 if (flag)
                 {
-                    notifyOperators(sender, this, "commands.kick.success.reason", new Object[] {entityplayermp.getName(), s});
+                    notifyCommandListener(sender, this, "commands.kick.success.reason", new Object[] {entityplayermp.getName(), s});
                 }
                 else
                 {
-                    notifyOperators(sender, this, "commands.kick.success", new Object[] {entityplayermp.getName()});
+                    notifyCommandListener(sender, this, "commands.kick.success", new Object[] {entityplayermp.getName()});
                 }
             }
         }
@@ -78,8 +74,8 @@ public class CommandServerKick extends CommandBase
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames()) : null;
+        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.<String>emptyList();
     }
 }

@@ -3,8 +3,8 @@ package net.minecraft.tileentity;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class TileEntityNote extends TileEntity
@@ -14,10 +14,12 @@ public class TileEntityNote extends TileEntity
     /** stores the latest redstone state */
     public boolean previousRedstoneState;
 
-    public void writeToNBT(NBTTagCompound compound)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
         compound.setByte("note", this.note);
+        compound.setBoolean("powered", this.previousRedstoneState);
+        return compound;
     }
 
     public void readFromNBT(NBTTagCompound compound)
@@ -25,6 +27,7 @@ public class TileEntityNote extends TileEntity
         super.readFromNBT(compound);
         this.note = compound.getByte("note");
         this.note = (byte)MathHelper.clamp_int(this.note, 0, 24);
+        this.previousRedstoneState = compound.getBoolean("powered");
     }
 
     /**
@@ -38,34 +41,34 @@ public class TileEntityNote extends TileEntity
         this.markDirty();
     }
 
-    public void triggerNote(World worldIn, BlockPos p_175108_2_)
+    public void triggerNote(World worldIn, BlockPos posIn)
     {
-        if (worldIn.getBlockState(p_175108_2_.up()).getBlock().getMaterial() == Material.air)
+        if (worldIn.getBlockState(posIn.up()).getMaterial() == Material.AIR)
         {
-            Material material = worldIn.getBlockState(p_175108_2_.down()).getBlock().getMaterial();
+            Material material = worldIn.getBlockState(posIn.down()).getMaterial();
             int i = 0;
 
-            if (material == Material.rock)
+            if (material == Material.ROCK)
             {
                 i = 1;
             }
 
-            if (material == Material.sand)
+            if (material == Material.SAND)
             {
                 i = 2;
             }
 
-            if (material == Material.glass)
+            if (material == Material.GLASS)
             {
                 i = 3;
             }
 
-            if (material == Material.wood)
+            if (material == Material.WOOD)
             {
                 i = 4;
             }
 
-            worldIn.addBlockEvent(p_175108_2_, Blocks.noteblock, i, this.note);
+            worldIn.addBlockEvent(posIn, Blocks.NOTEBLOCK, i, this.note);
         }
     }
 }

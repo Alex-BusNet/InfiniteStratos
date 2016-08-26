@@ -1,3 +1,22 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 /**
  * This software is provided under the terms of the Minecraft Forge Public
  * License v1.0.
@@ -5,21 +24,44 @@
 
 package net.minecraftforge.common.config;
 
-import com.google.common.base.CharMatcher;
-import com.google.common.collect.ImmutableSet;
-import net.minecraftforge.fml.client.config.GuiConfigEntries.IConfigEntry;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.relauncher.FMLInjectionData;
+import static net.minecraftforge.common.config.Property.Type.BOOLEAN;
+import static net.minecraftforge.common.config.Property.Type.DOUBLE;
+import static net.minecraftforge.common.config.Property.Type.INTEGER;
+import static net.minecraftforge.common.config.Property.Type.STRING;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PushbackInputStream;
+import java.io.Reader;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static net.minecraftforge.common.config.Property.Type.*;
+import com.google.common.base.CharMatcher;
+import com.google.common.collect.ImmutableSet;
+
+import net.minecraftforge.fml.client.config.GuiConfig;
+import net.minecraftforge.fml.client.config.GuiConfigEntries;
+import net.minecraftforge.fml.client.config.GuiConfigEntries.IConfigEntry;
+import net.minecraftforge.fml.client.config.IConfigElement;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.relauncher.FMLInjectionData;
 
 /**
  * This class offers advanced configurations capabilities, allowing to provide
@@ -94,7 +136,7 @@ public class Configuration
                 File fileBak = new File(file.getAbsolutePath() + "_" +
                         new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".errored");
                 FMLLog.severe("An exception occurred while loading config file %s. This file will be renamed to %s " +
-                		"and a new config file will be generated.", file.getName(), fileBak.getName());
+                        "and a new config file will be generated.", file.getName(), fileBak.getName());
                 e.printStackTrace();
 
                 file.renameTo(fileBak);
@@ -146,7 +188,7 @@ public class Configuration
      */
     public Property get(String category, String key, boolean defaultValue)
     {
-        return get(category, key, defaultValue, (String) null);
+        return get(category, key, defaultValue, null);
     }
 
     /**
@@ -181,7 +223,7 @@ public class Configuration
      */
     public Property get(String category, String key, boolean[] defaultValues)
     {
-        return get(category, key, defaultValues, (String) null);
+        return get(category, key, defaultValues, null);
     }
 
     /**
@@ -248,7 +290,7 @@ public class Configuration
      */
     public Property get(String category, String key, int defaultValue)
     {
-        return get(category, key, defaultValue, (String) null, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        return get(category, key, defaultValue, null, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
 
     /**
@@ -301,7 +343,7 @@ public class Configuration
      */
     public Property get(String category, String key, int[] defaultValues)
     {
-        return get(category, key, defaultValues, (String) null);
+        return get(category, key, defaultValues, null);
     }
 
     /**
@@ -390,7 +432,7 @@ public class Configuration
      */
     public Property get(String category, String key, double defaultValue)
     {
-        return get(category, key, defaultValue, (String) null);
+        return get(category, key, defaultValue, null);
     }
 
     /**
@@ -533,7 +575,7 @@ public class Configuration
      */
     public Property get(String category, String key, String defaultValue)
     {
-        return get(category, key, defaultValue, (String) null);
+        return get(category, key, defaultValue, null);
     }
 
     /**
@@ -595,7 +637,7 @@ public class Configuration
      */
     public Property get(String category, String key, String[] defaultValues)
     {
-        return get(category, key, defaultValues, (String) null, false, -1, (Pattern) null);
+        return get(category, key, defaultValues, null, false, -1, null);
     }
 
     /**
@@ -609,7 +651,7 @@ public class Configuration
      */
     public Property get(String category, String key, String[] defaultValues, String comment)
     {
-        return get(category, key, defaultValues, comment, false, -1, (Pattern) null);
+        return get(category, key, defaultValues, comment, false, -1, null);
     }
 
     /**
@@ -668,11 +710,6 @@ public class Configuration
      */
     public Property get(String category, String key, String defaultValue, String comment, Property.Type type)
     {
-        if (!caseSensitiveCustomCategories)
-        {
-            category = category.toLowerCase(Locale.ENGLISH);
-        }
-
         ConfigCategory cat = getCategory(category);
 
         if (cat.containsKey(key))
@@ -686,7 +723,7 @@ public class Configuration
             }
 
             prop.setDefaultValue(defaultValue);
-            prop.comment = comment;
+            prop.setComment(comment);
             return prop;
         }
         else if (defaultValue != null)
@@ -695,7 +732,7 @@ public class Configuration
             prop.setValue(defaultValue); //Set and mark as dirty to signify it should save
             cat.put(key, prop);
             prop.setDefaultValue(defaultValue);
-            prop.comment = comment;
+            prop.setComment(comment);
             return prop;
         }
         else
@@ -716,11 +753,6 @@ public class Configuration
      */
     public Property get(String category, String key, String[] defaultValues, String comment, Property.Type type)
     {
-        if (!caseSensitiveCustomCategories)
-        {
-            category = category.toLowerCase(Locale.ENGLISH);
-        }
-
         ConfigCategory cat = getCategory(category);
 
         if (cat.containsKey(key))
@@ -734,7 +766,7 @@ public class Configuration
             }
 
             prop.setDefaultValues(defaultValues);
-            prop.comment = comment;
+            prop.setComment(comment);
 
             return prop;
         }
@@ -742,7 +774,7 @@ public class Configuration
         {
             Property prop = new Property(key, defaultValues, type);
             prop.setDefaultValues(defaultValues);
-            prop.comment = comment;
+            prop.setComment(comment);
             cat.put(key, prop);
             return prop;
         }
@@ -760,11 +792,15 @@ public class Configuration
 
     public boolean hasCategory(String category)
     {
+        if (!caseSensitiveCustomCategories)
+            category = category.toLowerCase(Locale.ENGLISH);
         return categories.get(category) != null;
     }
 
     public boolean hasKey(String category, String key)
     {
+        if (!caseSensitiveCustomCategories)
+            category = category.toLowerCase(Locale.ENGLISH);
         ConfigCategory cat = categories.get(category);
         return cat != null && cat.containsKey(key);
     }
@@ -857,7 +893,7 @@ public class Configuration
                         }
                         else if (Character.isWhitespace(line.charAt(i)))
                         {
-                            // ignore space charaters
+                            // ignore space characters
                         }
                         else
                         {
@@ -886,6 +922,8 @@ public class Configuration
                                     if (tmpList != null) // allow special characters as part of string lists
                                         break;
                                     name = line.substring(nameStart, nameEnd + 1);
+                                    if (!caseSensitiveCustomCategories)
+                                        name = name.toLowerCase(Locale.ENGLISH);
                                     String qualifiedName = ConfigCategory.getQualifiedName(name, currentCat);
 
                                     ConfigCategory cat = categories.get(qualifiedName);
@@ -907,7 +945,7 @@ public class Configuration
                                         break;
                                     if (currentCat == null)
                                     {
-                                        throw new RuntimeException(String.format("Config file corrupt, attepted to close to many categories '%s:%d'", fileName, lineNum));
+                                        throw new RuntimeException(String.format("Config file corrupt, attempted to close to many categories '%s:%d'", fileName, lineNum));
                                     }
                                     currentCat = currentCat.parent;
                                     break;
@@ -1099,6 +1137,9 @@ public class Configuration
 
     public ConfigCategory getCategory(String category)
     {
+        if (!caseSensitiveCustomCategories)
+            category = category.toLowerCase(Locale.ENGLISH);
+
         ConfigCategory ret = categories.get(category);
 
         if (ret == null)
@@ -1168,8 +1209,6 @@ public class Configuration
      */
     public Configuration setCategoryComment(String category, String comment)
     {
-        if (!caseSensitiveCustomCategories)
-            category = category.toLowerCase(Locale.ENGLISH);
         getCategory(category).setComment(comment);
         return this;
     }
@@ -1187,23 +1226,24 @@ public class Configuration
      */
     public Configuration setCategoryLanguageKey(String category, String langKey)
     {
-        if (!caseSensitiveCustomCategories)
-            category = category.toLowerCase(Locale.ENGLISH);
         getCategory(category).setLanguageKey(langKey);
         return this;
     }
 
     /**
      * Sets the custom IConfigEntry class that should be used in place of the standard entry class (which is just a button that
-     * navigates into the category). This class MUST provide a constructor with the following parameter types: {@code GuiConfig} (the parent
-     * GuiConfig screen will be provided), {@code GuiPropertyList} (the parent GuiPropertyList will be provided), {@code IConfigElement}
+     * navigates into the category). This class MUST provide a constructor with the following parameter types: {@link GuiConfig} (the parent
+     * GuiConfig screen will be provided), {@link GuiConfigEntries} (the parent GuiConfigEntries will be provided), {@link IConfigElement}
      * (the IConfigElement for this Property will be provided).
+     *
+     * @see GuiConfigEntries.ListEntryBase
+     * @see GuiConfigEntries.StringEntry
+     * @see GuiConfigEntries.BooleanEntry
+     * @see GuiConfigEntries.DoubleEntry
+     * @see GuiConfigEntries.IntegerEntry
      */
     public Configuration setCategoryConfigEntryClass(String category, Class<? extends IConfigEntry> clazz)
     {
-
-        if (!caseSensitiveCustomCategories)
-            category = category.toLowerCase(Locale.ENGLISH);
         getCategory(category).setConfigEntryClass(clazz);
         return this;
     }
@@ -1215,8 +1255,6 @@ public class Configuration
      */
     public Configuration setCategoryRequiresWorldRestart(String category, boolean requiresWorldRestart)
     {
-        if (!caseSensitiveCustomCategories)
-            category = category.toLowerCase(Locale.ENGLISH);
         getCategory(category).setRequiresWorldRestart(requiresWorldRestart);
         return this;
     }
@@ -1229,8 +1267,6 @@ public class Configuration
      */
     public Configuration setCategoryRequiresMcRestart(String category, boolean requiresMcRestart)
     {
-        if (!caseSensitiveCustomCategories)
-            category = category.toLowerCase(Locale.ENGLISH);
         getCategory(category).setRequiresMcRestart(requiresMcRestart);
         return this;
     }
@@ -1241,8 +1277,6 @@ public class Configuration
      */
     public Configuration setCategoryPropertyOrder(String category, List<String> propOrder)
     {
-        if (!caseSensitiveCustomCategories)
-            category = category.toLowerCase(Locale.ENGLISH);
         getCategory(category).setPropertyOrder(propOrder);
         return this;
     }
@@ -1310,7 +1344,7 @@ public class Configuration
                 size = 4;
             }
             else if (bom32 == 0xFFFE0000) //This will never happen as it'll be caught by UTF-16LE,
-            {                             //but if anyone ever runs across a 32LE file, i'd like to disect it.
+            {                             //but if anyone ever runs across a 32LE file, i'd like to dissect it.
                 enc = "UTF-32LE";
                 size = 4;
             }
@@ -1497,7 +1531,7 @@ public class Configuration
         Property prop = this.get(category, name, defaultValue);
         prop.setLanguageKey(langKey);
         prop.setValidationPattern(pattern);
-        prop.comment = comment + " [default: " + defaultValue + "]";
+        prop.setComment(comment + " [default: " + defaultValue + "]");
         return prop.getString();
     }
 
@@ -1532,7 +1566,7 @@ public class Configuration
         Property prop = this.get(category, name, defaultValue);
         prop.setValidValues(validValues);
         prop.setLanguageKey(langKey);
-        prop.comment = comment + " [default: " + defaultValue + "]";
+        prop.setComment(comment + " [default: " + defaultValue + "]");
         return prop.getString();
     }
 
@@ -1541,13 +1575,13 @@ public class Configuration
      *
      * @param name Name of the property.
      * @param category Category of the property.
-     * @param defaultValue Default value of the property.
+     * @param defaultValues Default values of the property.
      * @param comment A brief description what the property does.
      * @return The value of the new string property.
      */
     public String[] getStringList(String name, String category, String[] defaultValues, String comment)
     {
-        return getStringList(name, category, defaultValues, comment, (String[]) null, name);
+        return getStringList(name, category, defaultValues, comment, null, name);
     }
 
     /**
@@ -1578,7 +1612,7 @@ public class Configuration
         Property prop = this.get(category, name, defaultValue);
         prop.setLanguageKey(langKey);
         prop.setValidValues(validValues);
-        prop.comment = comment + " [default: " + prop.getDefault() + "]";
+        prop.setComment(comment + " [default: " + prop.getDefault() + "]");
         return prop.getStringList();
     }
 
@@ -1610,7 +1644,7 @@ public class Configuration
     {
         Property prop = this.get(category, name, defaultValue);
         prop.setLanguageKey(langKey);
-        prop.comment = comment + " [default: " + defaultValue + "]";
+        prop.setComment(comment + " [default: " + defaultValue + "]");
         return prop.getBoolean(defaultValue);
     }
 
@@ -1646,7 +1680,7 @@ public class Configuration
     {
         Property prop = this.get(category, name, defaultValue);
         prop.setLanguageKey(langKey);
-        prop.comment = comment + " [range: " + minValue + " ~ " + maxValue + ", default: " + defaultValue + "]";
+        prop.setComment(comment + " [range: " + minValue + " ~ " + maxValue + ", default: " + defaultValue + "]");
         prop.setMinValue(minValue);
         prop.setMaxValue(maxValue);
         return prop.getInt(defaultValue) < minValue ? minValue : (prop.getInt(defaultValue) > maxValue ? maxValue : prop.getInt(defaultValue));
@@ -1684,7 +1718,7 @@ public class Configuration
     {
         Property prop = this.get(category, name, Float.toString(defaultValue), name);
         prop.setLanguageKey(langKey);
-        prop.comment = comment + " [range: " + minValue + " ~ " + maxValue + ", default: " + defaultValue + "]";
+        prop.setComment(comment + " [range: " + minValue + " ~ " + maxValue + ", default: " + defaultValue + "]");
         prop.setMinValue(minValue);
         prop.setMaxValue(maxValue);
         try

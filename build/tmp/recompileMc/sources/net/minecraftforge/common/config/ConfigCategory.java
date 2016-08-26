@@ -1,3 +1,22 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 /**
  * This software is provided under the terms of the Minecraft Forge Public
  * License v1.0.
@@ -5,17 +24,25 @@
 
 package net.minecraftforge.common.config;
 
+import static net.minecraftforge.common.config.Configuration.COMMENT_SEPARATOR;
+import static net.minecraftforge.common.config.Configuration.NEW_LINE;
+import static net.minecraftforge.common.config.Configuration.allowedProperties;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
 import net.minecraftforge.fml.client.config.GuiConfigEntries.IConfigEntry;
-
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.*;
-
-import static net.minecraftforge.common.config.Configuration.*;
 
 public class ConfigCategory implements Map<String, Property>
 {
@@ -278,7 +305,7 @@ public class ConfigCategory implements Map<String, Property>
         {
             Property prop = props[x];
 
-            if (prop.comment != null && !prop.comment.isEmpty())
+            if (prop.getComment() != null && !prop.getComment().isEmpty())
             {
                 if (x != 0)
                 {
@@ -286,7 +313,7 @@ public class ConfigCategory implements Map<String, Property>
                 }
 
                 Splitter splitter = Splitter.onPattern("\r?\n");
-                for (String commentLine : splitter.split(prop.comment))
+                for (String commentLine : splitter.split(prop.getComment()))
                 {
                     write(out, pad1, "# ", commentLine);
                 }

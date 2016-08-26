@@ -1,18 +1,19 @@
 package net.minecraft.inventory;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 
 public class InventoryMerchant implements IInventory
 {
     private final IMerchant theMerchant;
-    private ItemStack[] theInventory = new ItemStack[3];
+    private final ItemStack[] theInventory = new ItemStack[3];
     private final EntityPlayer thePlayer;
     private MerchantRecipe currentRecipe;
     private int currentRecipeIndex;
@@ -34,6 +35,7 @@ public class InventoryMerchant implements IInventory
     /**
      * Returns the stack in the given slot.
      */
+    @Nullable
     public ItemStack getStackInSlot(int index)
     {
         return this.theInventory[index];
@@ -42,80 +44,47 @@ public class InventoryMerchant implements IInventory
     /**
      * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
      */
+    @Nullable
     public ItemStack decrStackSize(int index, int count)
     {
-        if (this.theInventory[index] != null)
+        if (index == 2 && this.theInventory[index] != null)
         {
-            if (index == 2)
-            {
-                ItemStack itemstack2 = this.theInventory[index];
-                this.theInventory[index] = null;
-                return itemstack2;
-            }
-            else if (this.theInventory[index].stackSize <= count)
-            {
-                ItemStack itemstack1 = this.theInventory[index];
-                this.theInventory[index] = null;
-
-                if (this.inventoryResetNeededOnSlotChange(index))
-                {
-                    this.resetRecipeAndSlots();
-                }
-
-                return itemstack1;
-            }
-            else
-            {
-                ItemStack itemstack = this.theInventory[index].splitStack(count);
-
-                if (this.theInventory[index].stackSize == 0)
-                {
-                    this.theInventory[index] = null;
-                }
-
-                if (this.inventoryResetNeededOnSlotChange(index))
-                {
-                    this.resetRecipeAndSlots();
-                }
-
-                return itemstack;
-            }
+            return ItemStackHelper.getAndSplit(this.theInventory, index, this.theInventory[index].stackSize);
         }
         else
         {
-            return null;
+            ItemStack itemstack = ItemStackHelper.getAndSplit(this.theInventory, index, count);
+
+            if (itemstack != null && this.inventoryResetNeededOnSlotChange(index))
+            {
+                this.resetRecipeAndSlots();
+            }
+
+            return itemstack;
         }
     }
 
     /**
      * if par1 slot has changed, does resetRecipeAndSlots need to be called?
      */
-    private boolean inventoryResetNeededOnSlotChange(int p_70469_1_)
+    private boolean inventoryResetNeededOnSlotChange(int slotIn)
     {
-        return p_70469_1_ == 0 || p_70469_1_ == 1;
+        return slotIn == 0 || slotIn == 1;
     }
 
     /**
      * Removes a stack from the given slot and returns it.
      */
+    @Nullable
     public ItemStack removeStackFromSlot(int index)
     {
-        if (this.theInventory[index] != null)
-        {
-            ItemStack itemstack = this.theInventory[index];
-            this.theInventory[index] = null;
-            return itemstack;
-        }
-        else
-        {
-            return null;
-        }
+        return ItemStackHelper.getAndRemove(this.theInventory, index);
     }
 
     /**
      * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
      */
-    public void setInventorySlotContents(int index, ItemStack stack)
+    public void setInventorySlotContents(int index, @Nullable ItemStack stack)
     {
         this.theInventory[index] = stack;
 
@@ -149,9 +118,9 @@ public class InventoryMerchant implements IInventory
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
-        return (IChatComponent)(this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName(), new Object[0]));
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
     }
 
     /**

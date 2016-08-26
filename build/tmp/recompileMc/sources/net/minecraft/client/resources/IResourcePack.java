@@ -1,15 +1,14 @@
 package net.minecraft.client.resources;
 
-import net.minecraft.client.resources.data.IMetadataSection;
-import net.minecraft.client.resources.data.IMetadataSerializer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
+import net.minecraft.client.resources.data.IMetadataSection;
+import net.minecraft.client.resources.data.MetadataSerializer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public interface IResourcePack
@@ -20,7 +19,7 @@ public interface IResourcePack
 
     Set<String> getResourceDomains();
 
-    <T extends IMetadataSection> T getPackMetadata(IMetadataSerializer p_135058_1_, String p_135058_2_) throws IOException;
+    <T extends IMetadataSection> T getPackMetadata(MetadataSerializer metadataSerializer, String metadataSectionName) throws IOException;
 
     BufferedImage getPackImage() throws IOException;
 

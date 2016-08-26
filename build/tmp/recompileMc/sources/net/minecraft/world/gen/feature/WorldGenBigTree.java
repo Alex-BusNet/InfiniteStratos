@@ -1,17 +1,17 @@
 package net.minecraft.world.gen.feature;
 
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLog;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-
-import java.util.List;
-import java.util.Random;
 
 public class WorldGenBigTree extends WorldGenAbstractTree
 {
@@ -28,11 +28,11 @@ public class WorldGenBigTree extends WorldGenAbstractTree
     int heightLimitLimit = 12;
     /** Sets the distance limit for how far away the generator will populate leaves from the base leaf node. */
     int leafDistanceLimit = 4;
-    List<WorldGenBigTree.FoliageCoordinates> field_175948_j;
+    List<WorldGenBigTree.FoliageCoordinates> foliageCoords;
 
-    public WorldGenBigTree(boolean p_i2008_1_)
+    public WorldGenBigTree(boolean notify)
     {
-        super(p_i2008_1_);
+        super(notify);
     }
 
     /**
@@ -56,8 +56,8 @@ public class WorldGenBigTree extends WorldGenAbstractTree
 
         int j = this.basePos.getY() + this.height;
         int k = this.heightLimit - this.leafDistanceLimit;
-        this.field_175948_j = Lists.<WorldGenBigTree.FoliageCoordinates>newArrayList();
-        this.field_175948_j.add(new WorldGenBigTree.FoliageCoordinates(this.basePos.up(k), j));
+        this.foliageCoords = Lists.<WorldGenBigTree.FoliageCoordinates>newArrayList();
+        this.foliageCoords.add(new WorldGenBigTree.FoliageCoordinates(this.basePos.up(k), j));
 
         for (; k >= 0; --k)
         {
@@ -84,7 +84,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree
 
                         if (this.checkBlockLine(blockpos2, blockpos) == -1)
                         {
-                            this.field_175948_j.add(new WorldGenBigTree.FoliageCoordinates(blockpos, blockpos2.getY()));
+                            this.foliageCoords.add(new WorldGenBigTree.FoliageCoordinates(blockpos, blockpos2.getY()));
                         }
                     }
                 }
@@ -92,7 +92,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree
         }
     }
 
-    void func_181631_a(BlockPos p_181631_1_, float p_181631_2_, IBlockState p_181631_3_)
+    void crosSection(BlockPos pos, float p_181631_2_, IBlockState p_181631_3_)
     {
         int i = (int)((double)p_181631_2_ + 0.618D);
 
@@ -102,10 +102,10 @@ public class WorldGenBigTree extends WorldGenAbstractTree
             {
                 if (Math.pow((double)Math.abs(j) + 0.5D, 2.0D) + Math.pow((double)Math.abs(k) + 0.5D, 2.0D) <= (double)(p_181631_2_ * p_181631_2_))
                 {
-                    BlockPos blockpos = p_181631_1_.add(j, 0, k);
-                    net.minecraft.block.state.IBlockState state = this.world.getBlockState(blockpos);
+                    BlockPos blockpos = pos.add(j, 0, k);
+                    IBlockState state = this.world.getBlockState(blockpos);
 
-                    if (state.getBlock().isAir(this.world, blockpos) || state.getBlock().isLeaves(this.world, blockpos))
+                    if (state.getBlock().isAir(state, world, blockpos) || state.getBlock().isLeaves(state, world, blockpos))
                     {
                         this.setBlockAndNotifyAdequately(this.world, blockpos, p_181631_3_);
                     }
@@ -117,16 +117,16 @@ public class WorldGenBigTree extends WorldGenAbstractTree
     /**
      * Gets the rough size of a layer of the tree.
      */
-    float layerSize(int p_76490_1_)
+    float layerSize(int y)
     {
-        if ((float)p_76490_1_ < (float)this.heightLimit * 0.3F)
+        if ((float)y < (float)this.heightLimit * 0.3F)
         {
             return -1.0F;
         }
         else
         {
             float f = (float)this.heightLimit / 2.0F;
-            float f1 = f - (float)p_76490_1_;
+            float f1 = f - (float)y;
             float f2 = MathHelper.sqrt_float(f * f - f1 * f1);
 
             if (f1 == 0.0F)
@@ -142,9 +142,9 @@ public class WorldGenBigTree extends WorldGenAbstractTree
         }
     }
 
-    float leafSize(int p_76495_1_)
+    float leafSize(int y)
     {
-        return p_76495_1_ >= 0 && p_76495_1_ < this.leafDistanceLimit ? (p_76495_1_ != 0 && p_76495_1_ != this.leafDistanceLimit - 1 ? 3.0F : 2.0F) : -1.0F;
+        return y >= 0 && y < this.leafDistanceLimit ? (y != 0 && y != this.leafDistanceLimit - 1 ? 3.0F : 2.0F) : -1.0F;
     }
 
     /**
@@ -154,11 +154,11 @@ public class WorldGenBigTree extends WorldGenAbstractTree
     {
         for (int i = 0; i < this.leafDistanceLimit; ++i)
         {
-            this.func_181631_a(pos.up(i), this.leafSize(i), Blocks.leaves.getDefaultState().withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false)));
+            this.crosSection(pos.up(i), this.leafSize(i), Blocks.LEAVES.getDefaultState().withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false)));
         }
     }
 
-    void func_175937_a(BlockPos p_175937_1_, BlockPos p_175937_2_, Block p_175937_3_)
+    void limb(BlockPos p_175937_1_, BlockPos p_175937_2_, Block p_175937_3_)
     {
         BlockPos blockpos = p_175937_2_.add(-p_175937_1_.getX(), -p_175937_1_.getY(), -p_175937_1_.getZ());
         int i = this.getGreatestDistance(blockpos);
@@ -169,7 +169,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree
         for (int j = 0; j <= i; ++j)
         {
             BlockPos blockpos1 = p_175937_1_.add((double)(0.5F + (float)j * f), (double)(0.5F + (float)j * f1), (double)(0.5F + (float)j * f2));
-            BlockLog.EnumAxis blocklog$enumaxis = this.func_175938_b(p_175937_1_, blockpos1);
+            BlockLog.EnumAxis blocklog$enumaxis = this.getLogAxis(p_175937_1_, blockpos1);
             this.setBlockAndNotifyAdequately(this.world, blockpos1, p_175937_3_.getDefaultState().withProperty(BlockLog.LOG_AXIS, blocklog$enumaxis));
         }
     }
@@ -185,7 +185,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree
         return k > i && k > j ? k : (j > i ? j : i);
     }
 
-    private BlockLog.EnumAxis func_175938_b(BlockPos p_175938_1_, BlockPos p_175938_2_)
+    private BlockLog.EnumAxis getLogAxis(BlockPos p_175938_1_, BlockPos p_175938_2_)
     {
         BlockLog.EnumAxis blocklog$enumaxis = BlockLog.EnumAxis.Y;
         int i = Math.abs(p_175938_2_.getX() - p_175938_1_.getX());
@@ -212,7 +212,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree
      */
     void generateLeaves()
     {
-        for (WorldGenBigTree.FoliageCoordinates worldgenbigtree$foliagecoordinates : this.field_175948_j)
+        for (WorldGenBigTree.FoliageCoordinates worldgenbigtree$foliagecoordinates : this.foliageCoords)
         {
             this.generateLeafNode(worldgenbigtree$foliagecoordinates);
         }
@@ -234,14 +234,14 @@ public class WorldGenBigTree extends WorldGenAbstractTree
     {
         BlockPos blockpos = this.basePos;
         BlockPos blockpos1 = this.basePos.up(this.height);
-        Block block = Blocks.log;
-        this.func_175937_a(blockpos, blockpos1, block);
+        Block block = Blocks.LOG;
+        this.limb(blockpos, blockpos1, block);
 
         if (this.trunkSize == 2)
         {
-            this.func_175937_a(blockpos.east(), blockpos1.east(), block);
-            this.func_175937_a(blockpos.east().south(), blockpos1.east().south(), block);
-            this.func_175937_a(blockpos.south(), blockpos1.south(), block);
+            this.limb(blockpos.east(), blockpos1.east(), block);
+            this.limb(blockpos.east().south(), blockpos1.east().south(), block);
+            this.limb(blockpos.south(), blockpos1.south(), block);
         }
     }
 
@@ -250,14 +250,14 @@ public class WorldGenBigTree extends WorldGenAbstractTree
      */
     void generateLeafNodeBases()
     {
-        for (WorldGenBigTree.FoliageCoordinates worldgenbigtree$foliagecoordinates : this.field_175948_j)
+        for (WorldGenBigTree.FoliageCoordinates worldgenbigtree$foliagecoordinates : this.foliageCoords)
         {
-            int i = worldgenbigtree$foliagecoordinates.func_177999_q();
+            int i = worldgenbigtree$foliagecoordinates.getBranchBase();
             BlockPos blockpos = new BlockPos(this.basePos.getX(), i, this.basePos.getZ());
 
             if (!blockpos.equals(worldgenbigtree$foliagecoordinates) && this.leafNodeNeedsBase(i - this.basePos.getY()))
             {
-                this.func_175937_a(blockpos, worldgenbigtree$foliagecoordinates, Blocks.log);
+                this.limb(blockpos, worldgenbigtree$foliagecoordinates, Blocks.LOG);
             }
         }
     }
@@ -294,7 +294,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree
         }
     }
 
-    public void func_175904_e()
+    public void setDecorationDefaults()
     {
         this.leafDistanceLimit = 5;
     }
@@ -334,7 +334,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree
     {
         BlockPos down = this.basePos.down();
         net.minecraft.block.state.IBlockState state = this.world.getBlockState(down);
-        boolean isSoil = state.getBlock().canSustainPlant(this.world, down, net.minecraft.util.EnumFacing.UP, ((net.minecraft.block.BlockSapling)Blocks.sapling));
+        boolean isSoil = state.getBlock().canSustainPlant(state, this.world, down, net.minecraft.util.EnumFacing.UP, ((net.minecraft.block.BlockSapling)Blocks.SAPLING));
 
         if (!isSoil)
         {
@@ -362,17 +362,17 @@ public class WorldGenBigTree extends WorldGenAbstractTree
 
     static class FoliageCoordinates extends BlockPos
         {
-            private final int field_178000_b;
+            private final int branchBase;
 
-            public FoliageCoordinates(BlockPos p_i45635_1_, int p_i45635_2_)
+            public FoliageCoordinates(BlockPos pos, int p_i45635_2_)
             {
-                super(p_i45635_1_.getX(), p_i45635_1_.getY(), p_i45635_1_.getZ());
-                this.field_178000_b = p_i45635_2_;
+                super(pos.getX(), pos.getY(), pos.getZ());
+                this.branchBase = p_i45635_2_;
             }
 
-            public int func_177999_q()
+            public int getBranchBase()
             {
-                return this.field_178000_b;
+                return this.branchBase;
             }
         }
 }

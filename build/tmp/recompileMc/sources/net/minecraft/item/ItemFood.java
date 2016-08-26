@@ -1,9 +1,16 @@
 package net.minecraft.item;
 
+import javax.annotation.Nullable;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
 
 public class ItemFood extends Item
@@ -18,11 +25,7 @@ public class ItemFood extends Item
     /** If this field is true, the food can be consumed even if the player don't need to eat. */
     private boolean alwaysEdible;
     /** represents the potion effect that will occurr upon eating this food. Set by setPotionEffect */
-    private int potionId;
-    /** set by setPotionEffect */
-    private int potionDuration;
-    /** set by setPotionEffect */
-    private int potionAmplifier;
+    private PotionEffect potionId;
     /** probably of the set potion effect occurring */
     private float potionEffectProbability;
 
@@ -32,7 +35,7 @@ public class ItemFood extends Item
         this.healAmount = amount;
         this.isWolfsFavoriteMeat = isWolfFood;
         this.saturationModifier = saturation;
-        this.setCreativeTab(CreativeTabs.tabFood);
+        this.setCreativeTab(CreativeTabs.FOOD);
     }
 
     public ItemFood(int amount, boolean isWolfFood)
@@ -44,21 +47,28 @@ public class ItemFood extends Item
      * Called when the player finishes using this Item (E.g. finishes eating.). Not called when the player stops using
      * the Item before the action is complete.
      */
-    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityPlayer playerIn)
+    @Nullable
+    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityLivingBase entityLiving)
     {
         --stack.stackSize;
-        playerIn.getFoodStats().addStats(this, stack);
-        worldIn.playSoundAtEntity(playerIn, "random.burp", 0.5F, worldIn.rand.nextFloat() * 0.1F + 0.9F);
-        this.onFoodEaten(stack, worldIn, playerIn);
-        playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
+
+        if (entityLiving instanceof EntityPlayer)
+        {
+            EntityPlayer entityplayer = (EntityPlayer)entityLiving;
+            entityplayer.getFoodStats().addStats(this, stack);
+            worldIn.playSound((EntityPlayer)null, entityplayer.posX, entityplayer.posY, entityplayer.posZ, SoundEvents.ENTITY_PLAYER_BURP, SoundCategory.PLAYERS, 0.5F, worldIn.rand.nextFloat() * 0.1F + 0.9F);
+            this.onFoodEaten(stack, worldIn, entityplayer);
+            entityplayer.addStat(StatList.getObjectUseStats(this));
+        }
+
         return stack;
     }
 
     protected void onFoodEaten(ItemStack stack, World worldIn, EntityPlayer player)
     {
-        if (!worldIn.isRemote && this.potionId > 0 && worldIn.rand.nextFloat() < this.potionEffectProbability)
+        if (!worldIn.isRemote && this.potionId != null && worldIn.rand.nextFloat() < this.potionEffectProbability)
         {
-            player.addPotionEffect(new PotionEffect(this.potionId, this.potionDuration * 20, this.potionAmplifier));
+            player.addPotionEffect(new PotionEffect(this.potionId));
         }
     }
 
@@ -78,17 +88,17 @@ public class ItemFood extends Item
         return EnumAction.EAT;
     }
 
-    /**
-     * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
-     */
-    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn)
+    public ActionResult<ItemStack> onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand)
     {
         if (playerIn.canEat(this.alwaysEdible))
         {
-            playerIn.setItemInUse(itemStackIn, this.getMaxItemUseDuration(itemStackIn));
+            playerIn.setActiveHand(hand);
+            return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
         }
-
-        return itemStackIn;
+        else
+        {
+            return new ActionResult(EnumActionResult.FAIL, itemStackIn);
+        }
     }
 
     public int getHealAmount(ItemStack stack)
@@ -109,16 +119,10 @@ public class ItemFood extends Item
         return this.isWolfsFavoriteMeat;
     }
 
-    /**
-     * sets a potion effect on the item. Args: int potionId, int duration (will be multiplied by 20), int amplifier,
-     * float probability of effect happening
-     */
-    public ItemFood setPotionEffect(int id, int duration, int amplifier, float probability)
+    public ItemFood setPotionEffect(PotionEffect p_185070_1_, float p_185070_2_)
     {
-        this.potionId = id;
-        this.potionDuration = duration;
-        this.potionAmplifier = amplifier;
-        this.potionEffectProbability = probability;
+        this.potionId = p_185070_1_;
+        this.potionEffectProbability = p_185070_2_;
         return this;
     }
 

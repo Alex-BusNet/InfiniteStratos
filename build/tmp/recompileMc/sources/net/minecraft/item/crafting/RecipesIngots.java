@@ -8,22 +8,22 @@ import net.minecraft.item.ItemStack;
 
 public class RecipesIngots
 {
-    private Object[][] recipeItems = new Object[][] {{Blocks.gold_block, new ItemStack(Items.gold_ingot, 9)}, {Blocks.iron_block, new ItemStack(Items.iron_ingot, 9)}, {Blocks.diamond_block, new ItemStack(Items.diamond, 9)}, {Blocks.emerald_block, new ItemStack(Items.emerald, 9)}, {Blocks.lapis_block, new ItemStack(Items.dye, 9, EnumDyeColor.BLUE.getDyeDamage())}, {Blocks.redstone_block, new ItemStack(Items.redstone, 9)}, {Blocks.coal_block, new ItemStack(Items.coal, 9, 0)}, {Blocks.hay_block, new ItemStack(Items.wheat, 9)}, {Blocks.slime_block, new ItemStack(Items.slime_ball, 9)}};
+    private final Object[][] recipeItems = new Object[][] {{Blocks.GOLD_BLOCK, new ItemStack(Items.GOLD_INGOT, 9)}, {Blocks.IRON_BLOCK, new ItemStack(Items.IRON_INGOT, 9)}, {Blocks.DIAMOND_BLOCK, new ItemStack(Items.DIAMOND, 9)}, {Blocks.EMERALD_BLOCK, new ItemStack(Items.EMERALD, 9)}, {Blocks.LAPIS_BLOCK, new ItemStack(Items.DYE, 9, EnumDyeColor.BLUE.getDyeDamage())}, {Blocks.REDSTONE_BLOCK, new ItemStack(Items.REDSTONE, 9)}, {Blocks.COAL_BLOCK, new ItemStack(Items.COAL, 9, 0)}, {Blocks.HAY_BLOCK, new ItemStack(Items.WHEAT, 9)}, {Blocks.SLIME_BLOCK, new ItemStack(Items.SLIME_BALL, 9)}};
 
     /**
      * Adds the ingot recipes to the CraftingManager.
      */
-    public void addRecipes(CraftingManager p_77590_1_)
+    public void addRecipes(CraftingManager manager)
     {
-        for (int i = 0; i < this.recipeItems.length; ++i)
+        for (Object[] aobject : this.recipeItems)
         {
-            Block block = (Block)this.recipeItems[i][0];
-            ItemStack itemstack = (ItemStack)this.recipeItems[i][1];
-            p_77590_1_.addRecipe(new ItemStack(block), new Object[] {"###", "###", "###", '#', itemstack});
-            p_77590_1_.addRecipe(itemstack, new Object[] {"#", '#', block});
+            Block block = (Block)aobject[0];
+            ItemStack itemstack = (ItemStack)aobject[1];
+            manager.addRecipe(new ItemStack(block), new Object[] {"###", "###", "###", '#', itemstack});
+            manager.addRecipe(itemstack, new Object[] {"#", '#', block});
         }
 
-        p_77590_1_.addRecipe(new ItemStack(Items.gold_ingot), new Object[] {"###", "###", "###", '#', Items.gold_nugget});
-        p_77590_1_.addRecipe(new ItemStack(Items.gold_nugget, 9), new Object[] {"#", '#', Items.gold_ingot});
+        manager.addRecipe(new ItemStack(Items.GOLD_INGOT), new Object[] {"###", "###", "###", '#', Items.GOLD_NUGGET});
+        manager.addRecipe(new ItemStack(Items.GOLD_NUGGET, 9), new Object[] {"#", '#', Items.GOLD_INGOT});
     }
 }

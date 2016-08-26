@@ -11,7 +11,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RealmsButton
 {
     protected static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
-    private GuiButtonRealmsProxy proxy;
+    private final GuiButtonRealmsProxy proxy;
 
     public RealmsButton(int buttonId, int x, int y, String text)
     {
@@ -87,6 +87,6 @@ public class RealmsButton
 
     public int getYImage(boolean p_getYImage_1_)
     {
-        return this.proxy.func_154312_c(p_getYImage_1_);
+        return this.proxy.getYImage(p_getYImage_1_);
     }
 }

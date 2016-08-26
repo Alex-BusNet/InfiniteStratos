@@ -1,12 +1,12 @@
 package net.minecraft.enchantment;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentArrowInfinite extends Enchantment
 {
-    public EnchantmentArrowInfinite(int enchID, ResourceLocation enchName, int enchWeight)
+    public EnchantmentArrowInfinite(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
     {
-        super(enchID, enchName, enchWeight, EnumEnchantmentType.BOW);
+        super(rarityIn, EnumEnchantmentType.BOW, slots);
         this.setName("arrowInfinite");
     }
 

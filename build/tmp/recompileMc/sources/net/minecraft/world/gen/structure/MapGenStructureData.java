@@ -20,12 +20,10 @@ public class MapGenStructureData extends WorldSavedData
         this.tagCompound = nbt.getCompoundTag("Features");
     }
 
-    /**
-     * write data to NBTTagCompound from this MapDataBase, similar to Entities and TileEntities
-     */
-    public void writeToNBT(NBTTagCompound nbt)
+    public NBTTagCompound writeToNBT(NBTTagCompound p_189551_1_)
     {
-        nbt.setTag("Features", this.tagCompound);
+        p_189551_1_.setTag("Features", this.tagCompound);
+        return p_189551_1_;
     }
 
     /**

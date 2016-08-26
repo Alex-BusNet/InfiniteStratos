@@ -1,3 +1,22 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.items;
 
 import net.minecraft.block.BlockDropper;
@@ -7,19 +26,19 @@ import net.minecraft.tileentity.IHopper;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.tileentity.TileEntityHopper;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class VanillaInventoryCodeHooks
 {
-
-    public static boolean extractHook(IHopper dest)
+    //Return: Null if we did nothing {no IItemHandler}, True if we moved an item, False if we moved no items
+    public static Boolean extractHook(IHopper dest)
     {
         TileEntity tileEntity = dest.getWorld().getTileEntity(new BlockPos(dest.getXPos(), dest.getYPos() + 1, dest.getZPos()));
 
         if (tileEntity == null || !tileEntity.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.DOWN))
-            return false;
+            return null;
 
         IItemHandler handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.DOWN);
 
@@ -48,7 +67,7 @@ public class VanillaInventoryCodeHooks
             }
         }
 
-        return true;
+        return false;
     }
 
     public static boolean dropperInsertHook(World world, BlockPos pos, TileEntityDispenser dropper, int slot, ItemStack stack)

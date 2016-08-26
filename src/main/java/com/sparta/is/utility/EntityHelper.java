@@ -5,6 +5,7 @@ import com.sparta.is.reference.Reference;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -15,7 +16,7 @@ public class EntityHelper
         if(entityLivingBase instanceof EntityPlayer)
         {
             EntityPlayer player = (EntityPlayer)entityLivingBase;
-            ItemStack item_slot = player.getCurrentArmor(slot);
+            ItemStack item_slot = player.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
 
             if((item_slot != null) && (item_slot.getItem() instanceof ArmorIS))
             {

@@ -1,26 +1,28 @@
 package net.minecraft.block;
 
+import java.util.List;
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityEndPortal;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
-import java.util.Random;
-
 public class BlockEndPortal extends BlockContainer
 {
+    protected static final AxisAlignedBB END_PORTAL_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.75D, 1.0D);
+
     protected BlockEndPortal(Material materialIn)
     {
         super(materialIn);
@@ -35,34 +37,30 @@ public class BlockEndPortal extends BlockContainer
         return new TileEntityEndPortal();
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        float f = 0.0625F;
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, f, 1.0F);
+        return END_PORTAL_AABB;
     }
 
     @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return side == EnumFacing.DOWN ? super.shouldSideBeRendered(worldIn, pos, side) : false;
+        return side == EnumFacing.DOWN ? super.shouldSideBeRendered(blockState, blockAccess, pos, side) : false;
     }
 
-    /**
-     * Add all collision boxes of this Block to the list that intersect with the given mask.
-     */
-    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
+    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn)
     {
     }
 
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -80,14 +78,14 @@ public class BlockEndPortal extends BlockContainer
      */
     public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
     {
-        if (entityIn.ridingEntity == null && entityIn.riddenByEntity == null && !worldIn.isRemote)
+        if (!entityIn.isRiding() && !entityIn.isBeingRidden() && entityIn.isNonBoss() && !worldIn.isRemote && entityIn.getEntityBoundingBox().intersectsWith(state.getBoundingBox(worldIn, pos).offset(pos)))
         {
-            entityIn.travelToDimension(1);
+            entityIn.changeDimension(1);
         }
     }
 
     @SideOnly(Side.CLIENT)
-    public void randomDisplayTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
     {
         double d0 = (double)((float)pos.getX() + rand.nextFloat());
         double d1 = (double)((float)pos.getY() + 0.8F);
@@ -95,11 +93,11 @@ public class BlockEndPortal extends BlockContainer
         double d3 = 0.0D;
         double d4 = 0.0D;
         double d5 = 0.0D;
-        worldIn.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5, new int[0]);
+        worldIn.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, 0.0D, 0.0D, 0.0D, new int[0]);
     }
 
-    @SideOnly(Side.CLIENT)
-    public Item getItem(World worldIn, BlockPos pos)
+    @Nullable
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
         return null;
     }
@@ -109,6 +107,6 @@ public class BlockEndPortal extends BlockContainer
      */
     public MapColor getMapColor(IBlockState state)
     {
-        return MapColor.blackColor;
+        return MapColor.BLACK;
     }
 }

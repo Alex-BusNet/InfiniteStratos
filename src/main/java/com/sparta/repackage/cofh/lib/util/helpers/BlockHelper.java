@@ -8,8 +8,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.LinkedList;
@@ -81,51 +82,52 @@ public final class BlockHelper {
 
 	static { // TODO: review which of these can be removed in favor of the
 				// vanilla handler
-		rotateType[Block.getIdFromBlock(Blocks.bed)] = RotationType.PREVENT;
+		rotateType[Block.getIdFromBlock(Blocks.BED)] = RotationType.PREVENT;
 
-		rotateType[Block.getIdFromBlock(Blocks.stone_slab)] = RotationType.SLAB;
-		rotateType[Block.getIdFromBlock(Blocks.wooden_slab)] = RotationType.SLAB;
+		rotateType[Block.getIdFromBlock(Blocks.STONE_SLAB)] = RotationType.SLAB;
+		rotateType[Block.getIdFromBlock(Blocks.WOODEN_SLAB)] = RotationType.SLAB;
 
-		rotateType[Block.getIdFromBlock(Blocks.rail)] = RotationType.RAIL;
-		rotateType[Block.getIdFromBlock(Blocks.golden_rail)] = RotationType.RAIL;
-		rotateType[Block.getIdFromBlock(Blocks.detector_rail)] = RotationType.RAIL;
-		rotateType[Block.getIdFromBlock(Blocks.activator_rail)] = RotationType.RAIL;
+		rotateType[Block.getIdFromBlock(Blocks.RAIL)] = RotationType.RAIL;
+		rotateType[Block.getIdFromBlock(Blocks.GOLDEN_RAIL)] = RotationType.RAIL;
+		rotateType[Block.getIdFromBlock(Blocks.DETECTOR_RAIL)] = RotationType.RAIL;
+		rotateType[Block.getIdFromBlock(Blocks.ACTIVATOR_RAIL)] = RotationType.RAIL;
 
-		rotateType[Block.getIdFromBlock(Blocks.pumpkin)] = RotationType.PUMPKIN;
-		rotateType[Block.getIdFromBlock(Blocks.lit_pumpkin)] = RotationType.PUMPKIN;
+		rotateType[Block.getIdFromBlock(Blocks.PUMPKIN)] = RotationType.PUMPKIN;
+		rotateType[Block.getIdFromBlock(Blocks.LIT_PUMPKIN)] = RotationType.PUMPKIN;
 
-		rotateType[Block.getIdFromBlock(Blocks.furnace)] = RotationType.FOUR_WAY;
-		rotateType[Block.getIdFromBlock(Blocks.lit_furnace)] = RotationType.FOUR_WAY;
-		rotateType[Block.getIdFromBlock(Blocks.ender_chest)] = RotationType.FOUR_WAY;
+		rotateType[Block.getIdFromBlock(Blocks.FURNACE)] = RotationType.FOUR_WAY;
+		rotateType[Block.getIdFromBlock(Blocks.LIT_FURNACE)] = RotationType.FOUR_WAY;
+		rotateType[Block.getIdFromBlock(Blocks.ENDER_CHEST)] = RotationType.FOUR_WAY;
 
-		rotateType[Block.getIdFromBlock(Blocks.trapped_chest)] = RotationType.CHEST;
-		rotateType[Block.getIdFromBlock(Blocks.chest)] = RotationType.CHEST;
+		rotateType[Block.getIdFromBlock(Blocks.TRAPPED_CHEST)] = RotationType.CHEST;
+		rotateType[Block.getIdFromBlock(Blocks.CHEST)] = RotationType.CHEST;
 
-		rotateType[Block.getIdFromBlock(Blocks.dispenser)] = RotationType.SIX_WAY;
-		rotateType[Block.getIdFromBlock(Blocks.sticky_piston)] = RotationType.SIX_WAY;
-		rotateType[Block.getIdFromBlock(Blocks.piston)] = RotationType.SIX_WAY;
-		rotateType[Block.getIdFromBlock(Blocks.hopper)] = RotationType.SIX_WAY;
-		rotateType[Block.getIdFromBlock(Blocks.dropper)] = RotationType.SIX_WAY;
+		rotateType[Block.getIdFromBlock(Blocks.DISPENSER)] = RotationType.SIX_WAY;
 
-		rotateType[Block.getIdFromBlock(Blocks.unpowered_repeater)] = RotationType.REDSTONE;
-		rotateType[Block.getIdFromBlock(Blocks.unpowered_comparator)] = RotationType.REDSTONE;
-		rotateType[Block.getIdFromBlock(Blocks.powered_repeater)] = RotationType.REDSTONE;
-		rotateType[Block.getIdFromBlock(Blocks.powered_comparator)] = RotationType.REDSTONE;
+		rotateType[Block.getIdFromBlock(Blocks.STICKY_PISTON)] = RotationType.SIX_WAY;
+		rotateType[Block.getIdFromBlock(Blocks.PISTON)] = RotationType.SIX_WAY;
+		rotateType[Block.getIdFromBlock(Blocks.HOPPER)] = RotationType.SIX_WAY;
+		rotateType[Block.getIdFromBlock(Blocks.DROPPER)] = RotationType.SIX_WAY;
 
-		rotateType[Block.getIdFromBlock(Blocks.lever)] = RotationType.LEVER;
+		rotateType[Block.getIdFromBlock(Blocks.UNPOWERED_REPEATER)] = RotationType.REDSTONE;
+		rotateType[Block.getIdFromBlock(Blocks.UNPOWERED_COMPARATOR)] = RotationType.REDSTONE;
+		rotateType[Block.getIdFromBlock(Blocks.POWERED_REPEATER)] = RotationType.REDSTONE;
+		rotateType[Block.getIdFromBlock(Blocks.POWERED_COMPARATOR)] = RotationType.REDSTONE;
 
-		rotateType[Block.getIdFromBlock(Blocks.standing_sign)] = RotationType.SIGN;
+		rotateType[Block.getIdFromBlock(Blocks.LEVER)] = RotationType.LEVER;
 
-		rotateType[Block.getIdFromBlock(Blocks.oak_stairs)] = RotationType.STAIRS;
-		rotateType[Block.getIdFromBlock(Blocks.stone_stairs)] = RotationType.STAIRS;
-		rotateType[Block.getIdFromBlock(Blocks.brick_stairs)] = RotationType.STAIRS;
-		rotateType[Block.getIdFromBlock(Blocks.stone_brick_stairs)] = RotationType.STAIRS;
-		rotateType[Block.getIdFromBlock(Blocks.nether_brick_stairs)] = RotationType.STAIRS;
-		rotateType[Block.getIdFromBlock(Blocks.sandstone_stairs)] = RotationType.STAIRS;
-		rotateType[Block.getIdFromBlock(Blocks.spruce_stairs)] = RotationType.STAIRS;
-		rotateType[Block.getIdFromBlock(Blocks.birch_stairs)] = RotationType.STAIRS;
-		rotateType[Block.getIdFromBlock(Blocks.jungle_stairs)] = RotationType.STAIRS;
-		rotateType[Block.getIdFromBlock(Blocks.quartz_stairs)] = RotationType.STAIRS;
+		rotateType[Block.getIdFromBlock(Blocks.STANDING_SIGN)] = RotationType.SIGN;
+
+		rotateType[Block.getIdFromBlock(Blocks.OAK_STAIRS)] = RotationType.STAIRS;
+		rotateType[Block.getIdFromBlock(Blocks.STONE_STAIRS)] = RotationType.STAIRS;
+		rotateType[Block.getIdFromBlock(Blocks.BRICK_STAIRS)] = RotationType.STAIRS;
+		rotateType[Block.getIdFromBlock(Blocks.STONE_BRICK_STAIRS)] = RotationType.STAIRS;
+		rotateType[Block.getIdFromBlock(Blocks.NETHER_BRICK_STAIRS)] = RotationType.STAIRS;
+		rotateType[Block.getIdFromBlock(Blocks.SANDSTONE_STAIRS)] = RotationType.STAIRS;
+		rotateType[Block.getIdFromBlock(Blocks.SPRUCE_STAIRS)] = RotationType.STAIRS;
+		rotateType[Block.getIdFromBlock(Blocks.BIRCH_STAIRS)] = RotationType.STAIRS;
+		rotateType[Block.getIdFromBlock(Blocks.JUNGLE_STAIRS)] = RotationType.STAIRS;
+		rotateType[Block.getIdFromBlock(Blocks.QUARTZ_STAIRS)] = RotationType.STAIRS;
 	}
 
 	public static int getMicroBlockAngle(int side, float hitX, float hitY, float hitZ) {
@@ -196,9 +198,8 @@ public final class BlockHelper {
 
 			blockPos.add(0, y, 0);
 			block = world.getBlockState(blockPos).getBlock();
-		} while (block.isAir(world, blockPos) || block.isReplaceable(world, blockPos) || block.isLeaves(world, blockPos) || block.isFoliage(world, blockPos)
-				|| block.canBeReplacedByLeaves(world, blockPos
-		));
+		} while ((world.getBlockState(blockPos).getBlock() == Blocks.AIR) || block.isReplaceable(world, blockPos) || (world.getBlockState(blockPos).getBlock() == Blocks.LEAVES) || block.isFoliage(world, blockPos)
+				|| block.canBeReplacedByLeaves(world.getBlockState(blockPos), world, blockPos));
 		return y;
 	}
 
@@ -214,43 +215,43 @@ public final class BlockHelper {
 
 			blockPos.add(0, y, 0);
 			block = world.getBlockState(blockPos).getBlock();
-		} while (block.isAir(world, blockPos));
+		} while (world.getBlockState(blockPos).getBlock() == Blocks.AIR);
 		return y;
 	}
 
-	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player, double distance, boolean fluid) {
-
-		Vec3 posVec = new Vec3(player.posX, player.posY, player.posZ);
-		Vec3 lookVec = player.getLook(1);
-		posVec.addVector(0, player.getEyeHeight(), 0);
-		lookVec = posVec.addVector(lookVec.xCoord * distance, lookVec.yCoord * distance, lookVec.zCoord * distance);
-		return player.worldObj.rayTraceBlocks(posVec, lookVec, fluid);
-	}
-
-	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player, double distance) {
-
-		return getCurrentMovingObjectPosition(player, distance, false);
-	}
-
-	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player, boolean fluid) {
-
-		return getCurrentMovingObjectPosition(player, player.capabilities.isCreativeMode ? 5.0F : 4.5F, fluid);
-	}
-
-	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player) {
-
-		return getCurrentMovingObjectPosition(player, player.capabilities.isCreativeMode ? 5.0F : 4.5F, false);
-	}
-
-	public static int getCurrentMousedOverSide(EntityPlayer player) {
-
-		MovingObjectPosition mouseOver = getCurrentMovingObjectPosition(player);
-		return mouseOver == null ? 0 : mouseOver.sideHit.ordinal();
-	}
+//	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player, double distance, boolean fluid) {
+//
+//		Vec3 posVec = new Vec3(player.posX, player.posY, player.posZ);
+//		Vec3 lookVec = player.getLook(1);
+//		posVec.addVector(0, player.getEyeHeight(), 0);
+//		lookVec = posVec.addVector(lookVec.xCoord * distance, lookVec.yCoord * distance, lookVec.zCoord * distance);
+//		return player.worldObj.rayTraceBlocks(posVec, lookVec, fluid);
+//	}
+//
+//	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player, double distance) {
+//
+//		return getCurrentMovingObjectPosition(player, distance, false);
+//	}
+//
+//	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player, boolean fluid) {
+//
+//		return getCurrentMovingObjectPosition(player, player.capabilities.isCreativeMode ? 5.0F : 4.5F, fluid);
+//	}
+//
+//	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player) {
+//
+//		return getCurrentMovingObjectPosition(player, player.capabilities.isCreativeMode ? 5.0F : 4.5F, false);
+//	}
+//
+//	public static int getCurrentMousedOverSide(EntityPlayer player) {
+//
+//		MovingObjectPosition mouseOver = getCurrentMovingObjectPosition(player);
+//		return mouseOver == null ? 0 : mouseOver.sideHit.ordinal();
+//	}
 
 	public static int determineXZPlaceFacing(EntityLivingBase living) {
 
-		int quadrant = MathHelper.floor_double(living.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
+		int quadrant = MathHelper.floor(living.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
 
 		switch (quadrant) {
 		case 0:
@@ -316,12 +317,12 @@ public final class BlockHelper {
 	public static Block getAdjacentBlock(World world, BlockPos blockPos, EnumFacing dir) {
 
 		blockPos.add(dir.getFrontOffsetX(), dir.getFrontOffsetY(), dir.getFrontOffsetZ());
-		return world == null || world.isAirBlock(blockPos) ? Blocks.air : world.getBlockState(blockPos).getBlock();
+		return world == null || world.isAirBlock(blockPos) ? Blocks.AIR : world.getBlockState(blockPos).getBlock();
 	}
 
 	public static Block getAdjacentBlock(World world, BlockPos blockPos, int side) {
 
-		return world == null ? Blocks.air : getAdjacentBlock(world, blockPos, EnumFacing.getFront(side));
+		return world == null ? Blocks.AIR : getAdjacentBlock(world, blockPos, EnumFacing.getFront(side));
 	}
 
 	/* Safe Tile Entity Retrieval */
@@ -353,24 +354,24 @@ public final class BlockHelper {
 	}
 
 	/* COORDINATE TRANSFORM */
-	public static int[] getAdjacentCoordinatesForSide(MovingObjectPosition pos) {
-
-		return getAdjacentCoordinatesForSide(pos.getBlockPos().getX(), pos.getBlockPos().getY(), pos.getBlockPos().getZ(), pos.sideHit.getIndex());
-	}
+//	public static int[] getAdjacentCoordinatesForSide(MovingObjectPosition pos) {
+//
+//		return getAdjacentCoordinatesForSide(pos.getBlockPos().getX(), pos.getBlockPos().getY(), pos.getBlockPos().getZ(), pos.sideHit.getIndex());
+//	}
 
 	public static int[] getAdjacentCoordinatesForSide(int x, int y, int z, int side) {
 
 		return new int[] { x + SIDE_COORD_MOD[side][0], y + SIDE_COORD_MOD[side][1], z + SIDE_COORD_MOD[side][2] };
 	}
 
-	public static AxisAlignedBB getAdjacentAABBForSide(MovingObjectPosition pos) {
-
-		return getAdjacentAABBForSide(pos.getBlockPos().getX(), pos.getBlockPos().getY(), pos.getBlockPos().getZ(), pos.sideHit.getIndex());
-	}
+//	public static AxisAlignedBB getAdjacentAABBForSide(MovingObjectPosition pos) {
+//
+//		return getAdjacentAABBForSide(pos.getBlockPos().getX(), pos.getBlockPos().getY(), pos.getBlockPos().getZ(), pos.sideHit.getIndex());
+//	}
 
 	public static AxisAlignedBB getAdjacentAABBForSide(int x, int y, int z, int side) {
 
-		return AxisAlignedBB.fromBounds(x + SIDE_COORD_MOD[side][0], y + SIDE_COORD_MOD[side][1], z + SIDE_COORD_MOD[side][2],
+		return new AxisAlignedBB(x + SIDE_COORD_MOD[side][0], y + SIDE_COORD_MOD[side][1], z + SIDE_COORD_MOD[side][2],
 				x + SIDE_COORD_AABB[side][0], y + SIDE_COORD_AABB[side][1], z + SIDE_COORD_AABB[side][2]);
 	}
 
@@ -540,7 +541,7 @@ public final class BlockHelper {
 	{
 		Block block = worldObj.getBlockState(blockPos).getBlock();
 
-		if (block.getBlockHardness(worldObj, blockPos) == -1)
+		if (block.getBlockHardness(worldObj.getBlockState(blockPos), worldObj, blockPos) == -1)
 		{
 			return new LinkedList<ItemStack>();
 		}
@@ -559,10 +560,10 @@ public final class BlockHelper {
 		if (!doBreak) {
 			return stacks;
 		}
-		worldObj.playAuxSFXAtEntity(player, 2001, blockPos, Block.getIdFromBlock(block) + (meta << 12));
+		//worldObj.playAuxSFXAtEntity(player, 2001, blockPos, Block.getIdFromBlock(block) + (meta << 12));
 		worldObj.setBlockToAir(blockPos);
 
-		List<EntityItem> result = worldObj.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.fromBounds(blockPos.getX() - 2, blockPos.getY() - 2, blockPos.getZ() - 2, blockPos.getX() + 3, blockPos.getY() + 3, blockPos.getZ() + 3));
+		List<EntityItem> result = worldObj.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(blockPos.getX() - 2, blockPos.getY() - 2, blockPos.getZ() - 2, blockPos.getX() + 3, blockPos.getY() + 3, blockPos.getZ() + 3));
 		for (int i = 0; i < result.size(); i++) {
 			EntityItem entity = result.get(i);
 			if (entity.isDead || entity.getEntityItem().stackSize <= 0) {

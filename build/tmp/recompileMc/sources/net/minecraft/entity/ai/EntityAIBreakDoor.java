@@ -85,7 +85,7 @@ public class EntityAIBreakDoor extends EntityAIDoorInteract
 
         if (this.theEntity.getRNG().nextInt(20) == 0)
         {
-            this.theEntity.worldObj.playAuxSFX(1010, this.doorPosition, 0);
+            this.theEntity.worldObj.playEvent(1019, this.doorPosition, 0);
         }
 
         ++this.breakingTime;
@@ -100,8 +100,8 @@ public class EntityAIBreakDoor extends EntityAIDoorInteract
         if (this.breakingTime == 240 && this.theEntity.worldObj.getDifficulty() == EnumDifficulty.HARD)
         {
             this.theEntity.worldObj.setBlockToAir(this.doorPosition);
-            this.theEntity.worldObj.playAuxSFX(1012, this.doorPosition, 0);
-            this.theEntity.worldObj.playAuxSFX(2001, this.doorPosition, Block.getIdFromBlock(this.doorBlock));
+            this.theEntity.worldObj.playEvent(1021, this.doorPosition, 0);
+            this.theEntity.worldObj.playEvent(2001, this.doorPosition, Block.getIdFromBlock(this.doorBlock));
         }
     }
 }

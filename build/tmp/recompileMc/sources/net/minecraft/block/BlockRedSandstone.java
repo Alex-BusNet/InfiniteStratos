@@ -1,9 +1,10 @@
 package net.minecraft.block;
 
+import java.util.List;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -12,17 +13,15 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
-
 public class BlockRedSandstone extends Block
 {
     public static final PropertyEnum<BlockRedSandstone.EnumType> TYPE = PropertyEnum.<BlockRedSandstone.EnumType>create("type", BlockRedSandstone.EnumType.class);
 
     public BlockRedSandstone()
     {
-        super(Material.rock, BlockSand.EnumType.RED_SAND.getMapColor());
+        super(Material.ROCK, BlockSand.EnumType.RED_SAND.getMapColor());
         this.setDefaultState(this.blockState.getBaseState().withProperty(TYPE, BlockRedSandstone.EnumType.DEFAULT));
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -62,9 +61,9 @@ public class BlockRedSandstone extends Block
         return ((BlockRedSandstone.EnumType)state.getValue(TYPE)).getMetadata();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {TYPE});
+        return new BlockStateContainer(this, new IProperty[] {TYPE});
     }
 
     public static enum EnumType implements IStringSerializable

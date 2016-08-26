@@ -1,7 +1,9 @@
 package net.minecraft.entity.monster;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.passive.IAnimals;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
 public abstract class EntityGolem extends EntityCreature implements IAnimals
@@ -15,28 +17,22 @@ public abstract class EntityGolem extends EntityCreature implements IAnimals
     {
     }
 
-    /**
-     * Returns the sound this mob makes while it's alive.
-     */
-    protected String getLivingSound()
+    @Nullable
+    protected SoundEvent getAmbientSound()
     {
-        return "none";
+        return null;
     }
 
-    /**
-     * Returns the sound this mob makes when it is hurt.
-     */
-    protected String getHurtSound()
+    @Nullable
+    protected SoundEvent getHurtSound()
     {
-        return "none";
+        return null;
     }
 
-    /**
-     * Returns the sound this mob makes on death.
-     */
-    protected String getDeathSound()
+    @Nullable
+    protected SoundEvent getDeathSound()
     {
-        return "none";
+        return null;
     }
 
     /**

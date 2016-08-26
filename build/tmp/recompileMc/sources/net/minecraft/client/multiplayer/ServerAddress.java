@@ -1,13 +1,12 @@
 package net.minecraft.client.multiplayer;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
+import java.net.IDN;
+import java.util.Hashtable;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
-import java.net.IDN;
-import java.util.Hashtable;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ServerAddress
@@ -15,15 +14,22 @@ public class ServerAddress
     private final String ipAddress;
     private final int serverPort;
 
-    private ServerAddress(String p_i1192_1_, int p_i1192_2_)
+    private ServerAddress(String address, int port)
     {
-        this.ipAddress = p_i1192_1_;
-        this.serverPort = p_i1192_2_;
+        this.ipAddress = address;
+        this.serverPort = port;
     }
 
     public String getIP()
     {
-        return IDN.toASCII(this.ipAddress);
+        try
+        {
+            return IDN.toASCII(this.ipAddress);
+        }
+        catch (IllegalArgumentException var2)
+        {
+            return "";
+        }
     }
 
     public int getPort()
@@ -31,26 +37,26 @@ public class ServerAddress
         return this.serverPort;
     }
 
-    public static ServerAddress fromString(String p_78860_0_)
+    public static ServerAddress fromString(String addrString)
     {
-        if (p_78860_0_ == null)
+        if (addrString == null)
         {
             return null;
         }
         else
         {
-            String[] astring = p_78860_0_.split(":");
+            String[] astring = addrString.split(":");
 
-            if (p_78860_0_.startsWith("["))
+            if (addrString.startsWith("["))
             {
-                int i = p_78860_0_.indexOf("]");
+                int i = addrString.indexOf("]");
 
                 if (i > 0)
                 {
-                    String s = p_78860_0_.substring(1, i);
-                    String s1 = p_78860_0_.substring(i + 1).trim();
+                    String s = addrString.substring(1, i);
+                    String s1 = addrString.substring(i + 1).trim();
 
-                    if (s1.startsWith(":") && s1.length() > 0)
+                    if (s1.startsWith(":") && !s1.isEmpty())
                     {
                         s1 = s1.substring(1);
                         astring = new String[] {s, s1};
@@ -64,7 +70,7 @@ public class ServerAddress
 
             if (astring.length > 2)
             {
-                astring = new String[] {p_78860_0_};
+                astring = new String[] {addrString};
             }
 
             String s2 = astring[0];
@@ -90,7 +96,7 @@ public class ServerAddress
         {
             String s = "com.sun.jndi.dns.DnsContextFactory";
             Class.forName("com.sun.jndi.dns.DnsContextFactory");
-            Hashtable hashtable = new Hashtable();
+            Hashtable<String, String> hashtable = new Hashtable();
             hashtable.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
             hashtable.put("java.naming.provider.url", "dns:");
             hashtable.put("com.sun.jndi.dns.timeout.retries", "1");
@@ -105,15 +111,15 @@ public class ServerAddress
         }
     }
 
-    private static int parseIntWithDefault(String p_78862_0_, int p_78862_1_)
+    private static int parseIntWithDefault(String value, int defaultValue)
     {
         try
         {
-            return Integer.parseInt(p_78862_0_.trim());
+            return Integer.parseInt(value.trim());
         }
         catch (Exception var3)
         {
-            return p_78862_1_;
+            return defaultValue;
         }
     }
 }

@@ -6,7 +6,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 
 public class TileEntityUnitStand extends TileEntityIS implements IInventory
 {
@@ -149,7 +149,7 @@ public class TileEntityUnitStand extends TileEntityIS implements IInventory
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbtTagCompound)
+    public NBTTagCompound writeToNBT(NBTTagCompound nbtTagCompound)
     {
         super.writeToNBT(nbtTagCompound);
 
@@ -167,6 +167,8 @@ public class TileEntityUnitStand extends TileEntityIS implements IInventory
         }
 
         nbtTagCompound.setTag("Items", tagList);
+
+        return nbtTagCompound;
     }
 
     @Override
@@ -195,7 +197,7 @@ public class TileEntityUnitStand extends TileEntityIS implements IInventory
     }
 
     @Override
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
         return null;
     }

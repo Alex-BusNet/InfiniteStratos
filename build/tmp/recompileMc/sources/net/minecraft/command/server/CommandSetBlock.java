@@ -1,18 +1,24 @@
 package net.minecraft.command.server;
 
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.*;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.CommandResultStats;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.List;
 
 public class CommandSetBlock extends CommandBase
 {
@@ -34,8 +40,6 @@ public class CommandSetBlock extends CommandBase
 
     /**
      * Gets the usage string for the command.
-     *  
-     * @param sender The command sender that executed the command
      */
     public String getCommandUsage(ICommandSender sender)
     {
@@ -43,12 +47,9 @@ public class CommandSetBlock extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
-     *  
-     * @param sender The command sender that executed the command
-     * @param args The arguments that were passed
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 4)
         {
@@ -96,17 +97,17 @@ public class CommandSetBlock extends CommandBase
 
                 if (args.length >= 6)
                 {
-                    if (args[5].equals("destroy"))
+                    if ("destroy".equals(args[5]))
                     {
                         world.destroyBlock(blockpos, true);
 
-                        if (block == Blocks.air)
+                        if (block == Blocks.AIR)
                         {
-                            notifyOperators(sender, this, "commands.setblock.success", new Object[0]);
+                            notifyCommandListener(sender, this, "commands.setblock.success", new Object[0]);
                             return;
                         }
                     }
-                    else if (args[5].equals("keep") && !world.isAirBlock(blockpos))
+                    else if ("keep".equals(args[5]) && !world.isAirBlock(blockpos))
                     {
                         throw new CommandException("commands.setblock.noChange", new Object[0]);
                     }
@@ -121,7 +122,7 @@ public class CommandSetBlock extends CommandBase
                         ((IInventory)tileentity1).clear();
                     }
 
-                    world.setBlockState(blockpos, Blocks.air.getDefaultState(), block == Blocks.air ? 2 : 4);
+                    world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), block == Blocks.AIR ? 2 : 4);
                 }
 
                 IBlockState iblockstate = block.getStateFromMeta(i);
@@ -147,14 +148,14 @@ public class CommandSetBlock extends CommandBase
 
                     world.notifyNeighborsRespectDebug(blockpos, iblockstate.getBlock());
                     sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 1);
-                    notifyOperators(sender, this, "commands.setblock.success", new Object[0]);
+                    notifyCommandListener(sender, this, "commands.setblock.success", new Object[0]);
                 }
             }
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length > 0 && args.length <= 3 ? func_175771_a(args, 0, pos) : (args.length == 4 ? getListOfStringsMatchingLastWord(args, Block.blockRegistry.getKeys()) : (args.length == 6 ? getListOfStringsMatchingLastWord(args, new String[] {"replace", "destroy", "keep"}): null));
+        return args.length > 0 && args.length <= 3 ? getTabCompletionCoordinate(args, 0, pos) : (args.length == 4 ? getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys()) : (args.length == 6 ? getListOfStringsMatchingLastWord(args, new String[] {"replace", "destroy", "keep"}): Collections.<String>emptyList()));
     }
 }

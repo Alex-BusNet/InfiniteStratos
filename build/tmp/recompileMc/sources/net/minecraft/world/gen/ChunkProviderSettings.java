@@ -1,10 +1,19 @@
 package net.minecraft.world.gen;
 
-import com.google.gson.*;
-import net.minecraft.util.JsonUtils;
-import net.minecraft.world.biome.BiomeGenBase;
-
+import com.google.common.annotations.VisibleForTesting;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
+import net.minecraft.init.Biomes;
+import net.minecraft.util.JsonUtils;
+import net.minecraft.world.biome.Biome;
 
 public class ChunkProviderSettings
 {
@@ -171,6 +180,7 @@ public class ChunkProviderSettings
 
     public static class Factory
         {
+            @VisibleForTesting
             static final Gson JSON_ADAPTER = (new GsonBuilder()).registerTypeAdapter(ChunkProviderSettings.Factory.class, new ChunkProviderSettings.Serializer()).create();
             public float coordinateScale = 684.412F;
             public float heightScale = 684.412F;
@@ -185,9 +195,9 @@ public class ChunkProviderSettings
             public float baseSize = 8.5F;
             public float stretchY = 12.0F;
             public float biomeDepthWeight = 1.0F;
-            public float biomeDepthOffset = 0.0F;
+            public float biomeDepthOffset;
             public float biomeScaleWeight = 1.0F;
-            public float biomeScaleOffset = 0.0F;
+            public float biomeScaleOffset;
             public int seaLevel = 63;
             public boolean useCaves = true;
             public boolean useDungeons = true;
@@ -202,49 +212,49 @@ public class ChunkProviderSettings
             public int waterLakeChance = 4;
             public boolean useLavaLakes = true;
             public int lavaLakeChance = 80;
-            public boolean useLavaOceans = false;
+            public boolean useLavaOceans;
             public int fixedBiome = -1;
             public int biomeSize = 4;
             public int riverSize = 4;
             public int dirtSize = 33;
             public int dirtCount = 10;
-            public int dirtMinHeight = 0;
+            public int dirtMinHeight;
             public int dirtMaxHeight = 256;
             public int gravelSize = 33;
             public int gravelCount = 8;
-            public int gravelMinHeight = 0;
+            public int gravelMinHeight;
             public int gravelMaxHeight = 256;
             public int graniteSize = 33;
             public int graniteCount = 10;
-            public int graniteMinHeight = 0;
+            public int graniteMinHeight;
             public int graniteMaxHeight = 80;
             public int dioriteSize = 33;
             public int dioriteCount = 10;
-            public int dioriteMinHeight = 0;
+            public int dioriteMinHeight;
             public int dioriteMaxHeight = 80;
             public int andesiteSize = 33;
             public int andesiteCount = 10;
-            public int andesiteMinHeight = 0;
+            public int andesiteMinHeight;
             public int andesiteMaxHeight = 80;
             public int coalSize = 17;
             public int coalCount = 20;
-            public int coalMinHeight = 0;
+            public int coalMinHeight;
             public int coalMaxHeight = 128;
             public int ironSize = 9;
             public int ironCount = 20;
-            public int ironMinHeight = 0;
+            public int ironMinHeight;
             public int ironMaxHeight = 64;
             public int goldSize = 9;
             public int goldCount = 2;
-            public int goldMinHeight = 0;
+            public int goldMinHeight;
             public int goldMaxHeight = 32;
             public int redstoneSize = 8;
             public int redstoneCount = 8;
-            public int redstoneMinHeight = 0;
+            public int redstoneMinHeight;
             public int redstoneMaxHeight = 16;
             public int diamondSize = 8;
             public int diamondCount = 1;
-            public int diamondMinHeight = 0;
+            public int diamondMinHeight;
             public int diamondMaxHeight = 16;
             public int lapisSize = 7;
             public int lapisCount = 1;
@@ -253,7 +263,7 @@ public class ChunkProviderSettings
 
             public static ChunkProviderSettings.Factory jsonToFactory(String p_177865_0_)
             {
-                if (p_177865_0_.length() == 0)
+                if (p_177865_0_.isEmpty())
                 {
                     return new ChunkProviderSettings.Factory();
                 }
@@ -261,7 +271,7 @@ public class ChunkProviderSettings
                 {
                     try
                     {
-                        return (ChunkProviderSettings.Factory)JSON_ADAPTER.fromJson(p_177865_0_, ChunkProviderSettings.Factory.class);
+                        return (ChunkProviderSettings.Factory)JsonUtils.gsonDeserialize(JSON_ADAPTER, p_177865_0_, ChunkProviderSettings.Factory.class);
                     }
                     catch (Exception var2)
                     {
@@ -277,10 +287,10 @@ public class ChunkProviderSettings
 
             public Factory()
             {
-                this.func_177863_a();
+                this.setDefaults();
             }
 
-            public void func_177863_a()
+            public void setDefaults()
             {
                 this.coordinateScale = 684.412F;
                 this.heightScale = 684.412F;
@@ -381,22 +391,22 @@ public class ChunkProviderSettings
 
             public int hashCode()
             {
-                int i = this.coordinateScale != 0.0F ? Float.floatToIntBits(this.coordinateScale) : 0;
-                i = 31 * i + (this.heightScale != 0.0F ? Float.floatToIntBits(this.heightScale) : 0);
-                i = 31 * i + (this.upperLimitScale != 0.0F ? Float.floatToIntBits(this.upperLimitScale) : 0);
-                i = 31 * i + (this.lowerLimitScale != 0.0F ? Float.floatToIntBits(this.lowerLimitScale) : 0);
-                i = 31 * i + (this.depthNoiseScaleX != 0.0F ? Float.floatToIntBits(this.depthNoiseScaleX) : 0);
-                i = 31 * i + (this.depthNoiseScaleZ != 0.0F ? Float.floatToIntBits(this.depthNoiseScaleZ) : 0);
-                i = 31 * i + (this.depthNoiseScaleExponent != 0.0F ? Float.floatToIntBits(this.depthNoiseScaleExponent) : 0);
-                i = 31 * i + (this.mainNoiseScaleX != 0.0F ? Float.floatToIntBits(this.mainNoiseScaleX) : 0);
-                i = 31 * i + (this.mainNoiseScaleY != 0.0F ? Float.floatToIntBits(this.mainNoiseScaleY) : 0);
-                i = 31 * i + (this.mainNoiseScaleZ != 0.0F ? Float.floatToIntBits(this.mainNoiseScaleZ) : 0);
-                i = 31 * i + (this.baseSize != 0.0F ? Float.floatToIntBits(this.baseSize) : 0);
-                i = 31 * i + (this.stretchY != 0.0F ? Float.floatToIntBits(this.stretchY) : 0);
-                i = 31 * i + (this.biomeDepthWeight != 0.0F ? Float.floatToIntBits(this.biomeDepthWeight) : 0);
-                i = 31 * i + (this.biomeDepthOffset != 0.0F ? Float.floatToIntBits(this.biomeDepthOffset) : 0);
-                i = 31 * i + (this.biomeScaleWeight != 0.0F ? Float.floatToIntBits(this.biomeScaleWeight) : 0);
-                i = 31 * i + (this.biomeScaleOffset != 0.0F ? Float.floatToIntBits(this.biomeScaleOffset) : 0);
+                int i = this.coordinateScale == 0.0F ? 0 : Float.floatToIntBits(this.coordinateScale);
+                i = 31 * i + (this.heightScale == 0.0F ? 0 : Float.floatToIntBits(this.heightScale));
+                i = 31 * i + (this.upperLimitScale == 0.0F ? 0 : Float.floatToIntBits(this.upperLimitScale));
+                i = 31 * i + (this.lowerLimitScale == 0.0F ? 0 : Float.floatToIntBits(this.lowerLimitScale));
+                i = 31 * i + (this.depthNoiseScaleX == 0.0F ? 0 : Float.floatToIntBits(this.depthNoiseScaleX));
+                i = 31 * i + (this.depthNoiseScaleZ == 0.0F ? 0 : Float.floatToIntBits(this.depthNoiseScaleZ));
+                i = 31 * i + (this.depthNoiseScaleExponent == 0.0F ? 0 : Float.floatToIntBits(this.depthNoiseScaleExponent));
+                i = 31 * i + (this.mainNoiseScaleX == 0.0F ? 0 : Float.floatToIntBits(this.mainNoiseScaleX));
+                i = 31 * i + (this.mainNoiseScaleY == 0.0F ? 0 : Float.floatToIntBits(this.mainNoiseScaleY));
+                i = 31 * i + (this.mainNoiseScaleZ == 0.0F ? 0 : Float.floatToIntBits(this.mainNoiseScaleZ));
+                i = 31 * i + (this.baseSize == 0.0F ? 0 : Float.floatToIntBits(this.baseSize));
+                i = 31 * i + (this.stretchY == 0.0F ? 0 : Float.floatToIntBits(this.stretchY));
+                i = 31 * i + (this.biomeDepthWeight == 0.0F ? 0 : Float.floatToIntBits(this.biomeDepthWeight));
+                i = 31 * i + (this.biomeDepthOffset == 0.0F ? 0 : Float.floatToIntBits(this.biomeDepthOffset));
+                i = 31 * i + (this.biomeScaleWeight == 0.0F ? 0 : Float.floatToIntBits(this.biomeScaleWeight));
+                i = 31 * i + (this.biomeScaleOffset == 0.0F ? 0 : Float.floatToIntBits(this.biomeScaleOffset));
                 i = 31 * i + this.seaLevel;
                 i = 31 * i + (this.useCaves ? 1 : 0);
                 i = 31 * i + (this.useDungeons ? 1 : 0);
@@ -462,7 +472,7 @@ public class ChunkProviderSettings
                 return i;
             }
 
-            public ChunkProviderSettings func_177864_b()
+            public ChunkProviderSettings build()
             {
                 return new ChunkProviderSettings(this);
             }
@@ -512,7 +522,7 @@ public class ChunkProviderSettings
 
                     if (chunkprovidersettings$factory.fixedBiome < 38 && chunkprovidersettings$factory.fixedBiome >= -1)
                     {
-                        if (chunkprovidersettings$factory.fixedBiome >= BiomeGenBase.hell.biomeID)
+                        if (chunkprovidersettings$factory.fixedBiome >= Biome.getIdForBiome(Biomes.HELL))
                         {
                             chunkprovidersettings$factory.fixedBiome += 2;
                         }

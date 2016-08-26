@@ -1,10 +1,33 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.client.model;
+
+import java.util.Map;
+
+import net.minecraftforge.common.model.IModelPart;
+import net.minecraftforge.common.model.IModelState;
+import net.minecraftforge.common.model.TRSRTransformation;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-
-import java.util.Map;
 
 /*
  * Simple implementation of IModelState via a map and a default value. Provides a full state for each part.
@@ -27,7 +50,7 @@ public class MapModelState implements IModelState
 
     public MapModelState(Map<Wrapper, IModelState> map, IModelState def)
     {
-        this.map = ImmutableMap.<Wrapper, IModelState>copyOf(map);
+        this.map = ImmutableMap.copyOf(map);
         this.def = def;
     }
 	

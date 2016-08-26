@@ -1,36 +1,40 @@
 package net.minecraft.block;
 
+import java.util.List;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
-
 public class BlockCarpet extends Block
 {
     public static final PropertyEnum<EnumDyeColor> COLOR = PropertyEnum.<EnumDyeColor>create("color", EnumDyeColor.class);
+    protected static final AxisAlignedBB CARPET_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.0625D, 1.0D);
 
     protected BlockCarpet()
     {
-        super(Material.carpet);
+        super(Material.CARPET);
         this.setDefaultState(this.blockState.getBaseState().withProperty(COLOR, EnumDyeColor.WHITE));
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.0625F, 1.0F);
         this.setTickRandomly(true);
-        this.setCreativeTab(CreativeTabs.tabDecorations);
-        this.setBlockBoundsFromMeta(0);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
+    }
+
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        return CARPET_AABB;
     }
 
     /**
@@ -44,34 +48,14 @@ public class BlockCarpet extends Block
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
-    }
-
-    /**
-     * Sets the block's bounds for rendering it as an item
-     */
-    public void setBlockBoundsForItemRender()
-    {
-        this.setBlockBoundsFromMeta(0);
-    }
-
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
-    {
-        this.setBlockBoundsFromMeta(0);
-    }
-
-    protected void setBlockBoundsFromMeta(int meta)
-    {
-        int i = 0;
-        float f = (float)(1 * (1 + i)) / 16.0F;
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, f, 1.0F);
     }
 
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
@@ -80,9 +64,11 @@ public class BlockCarpet extends Block
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn)
     {
         this.checkForDrop(worldIn, pos, state);
     }
@@ -107,9 +93,9 @@ public class BlockCarpet extends Block
     }
 
     @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return side == EnumFacing.UP ? true : super.shouldSideBeRendered(worldIn, pos, side);
+        return side == EnumFacing.UP ? true : (blockAccess.getBlockState(pos.offset(side)).getBlock() == this ? true : super.shouldSideBeRendered(blockState, blockAccess, pos, side));
     }
 
     /**
@@ -149,8 +135,8 @@ public class BlockCarpet extends Block
         return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {COLOR});
+        return new BlockStateContainer(this, new IProperty[] {COLOR});
     }
 }

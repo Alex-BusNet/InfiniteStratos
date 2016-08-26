@@ -1,29 +1,37 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2014 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors (this class):
- *     bspkrs - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.client.config;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiListExtended;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.client.config.GuiConfigEntries.ArrayEntry;
 import net.minecraftforge.fml.common.FMLLog;
-import org.lwjgl.input.Keyboard;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.lwjgl.input.Keyboard;
 
 import static net.minecraftforge.fml.client.config.GuiUtils.INVALID;
 import static net.minecraftforge.fml.client.config.GuiUtils.VALID;
@@ -133,7 +141,7 @@ public class GuiEditArrayEntries extends GuiListExtended
     public void addNewEntry(int index)
     {
         if (configElement.isList() && configElement.getType() == ConfigGuiType.BOOLEAN)
-            listEntries.add(index, new BooleanEntry(this.owningGui, this, this.configElement, Boolean.valueOf(true)));
+            listEntries.add(index, new BooleanEntry(this.owningGui, this, this.configElement, true));
         else if (configElement.isList() && configElement.getType() == ConfigGuiType.INTEGER)
             listEntries.add(index, new IntegerEntry(this.owningGui, this, this.configElement, 0));
         else if (configElement.isList() && configElement.getType() == ConfigGuiType.DOUBLE)
@@ -501,7 +509,8 @@ public class GuiEditArrayEntries extends GuiListExtended
         }
 
         /**
-         * Returns true if the mouse has been pressed on this control.
+         * Called when the mouse is clicked within this entry. Returning true means that something within this entry was
+         * clicked and the list should not be dragged.
          */
         @Override
         public boolean mousePressed(int index, int x, int y, int mouseEvent, int relativeX, int relativeY)
@@ -530,7 +539,7 @@ public class GuiEditArrayEntries extends GuiListExtended
         @Override
         public Object getValue()
         {
-            return Boolean.valueOf(value);
+            return value;
         }
     }
 
@@ -571,7 +580,7 @@ public class GuiEditArrayEntries extends GuiListExtended
         {
             if (this.getValue() != null && this.isValidated)
                 owningEntryList.mc.fontRendererObj.drawString(
-                        isValidValue ? EnumChatFormatting.GREEN + VALID : EnumChatFormatting.RED + INVALID,
+                        isValidValue ? TextFormatting.GREEN + VALID : TextFormatting.RED + INVALID,
                         listWidth / 4 - owningEntryList.mc.fontRendererObj.getStringWidth(VALID) - 2,
                         y + slotHeight / 2 - owningEntryList.mc.fontRendererObj.FONT_HEIGHT / 2,
                         16777215);
@@ -609,7 +618,8 @@ public class GuiEditArrayEntries extends GuiListExtended
         }
 
         /**
-         * Returns true if the mouse has been pressed on this control.
+         * Called when the mouse is clicked within this entry. Returning true means that something within this entry was
+         * clicked and the list should not be dragged.
          */
         @Override
         public boolean mousePressed(int index, int x, int y, int mouseEvent, int relativeX, int relativeY)

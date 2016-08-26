@@ -1,15 +1,39 @@
-package net.minecraftforge.common.util;
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.reflect.TypeParameter;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.*;
+package net.minecraftforge.common.util;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.reflect.TypeParameter;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 public class JsonUtils
 {
@@ -21,16 +45,16 @@ public class JsonUtils
         public ImmutableList<?> deserialize(JsonElement json, Type type, JsonDeserializationContext context) throws JsonParseException
         {
             final Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
-            final Type parameterizedType = listOf(typeArguments[0]).getType();
-            final List<?> list = context.deserialize(json, parameterizedType);
+            final Type parametrizedType = listOf(typeArguments[0]).getType();
+            final List<?> list = context.deserialize(json, parametrizedType);
             return ImmutableList.copyOf(list);
         }
 
         public JsonElement serialize(ImmutableList<?> src, Type type, JsonSerializationContext context)
         {
             final Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
-            final Type parameterizedType = listOf(typeArguments[0]).getType();
-            return context.serialize(src, parameterizedType);
+            final Type parametrizedType = listOf(typeArguments[0]).getType();
+            return context.serialize(src, parametrizedType);
         }
     }
 

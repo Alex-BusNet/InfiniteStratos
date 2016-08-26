@@ -11,7 +11,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class GuiDispenser extends GuiContainer
 {
-    private static final ResourceLocation dispenserGuiTextures = new ResourceLocation("textures/gui/container/dispenser.png");
+    private static final ResourceLocation DISPENSER_GUI_TEXTURES = new ResourceLocation("textures/gui/container/dispenser.png");
     /** The player inventory bound to this GUI. */
     private final InventoryPlayer playerInventory;
     /** The inventory contained within the corresponding Dispenser. */
@@ -25,7 +25,7 @@ public class GuiDispenser extends GuiContainer
     }
 
     /**
-     * Draw the foreground layer for the GuiContainer (everything in front of the items). Args : mouseX, mouseY
+     * Draw the foreground layer for the GuiContainer (everything in front of the items)
      */
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
@@ -35,12 +35,12 @@ public class GuiDispenser extends GuiContainer
     }
 
     /**
-     * Args : renderPartialTicks, mouseX, mouseY
+     * Draws the background layer of this container (behind the items).
      */
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
     {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(dispenserGuiTextures);
+        this.mc.getTextureManager().bindTexture(DISPENSER_GUI_TEXTURES);
         int i = (this.width - this.xSize) / 2;
         int j = (this.height - this.ySize) / 2;
         this.drawTexturedModalRect(i, j, 0, 0, this.xSize, this.ySize);

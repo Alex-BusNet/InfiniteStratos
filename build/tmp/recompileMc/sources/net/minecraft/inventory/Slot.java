@@ -1,5 +1,6 @@
 package net.minecraft.inventory;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
@@ -68,7 +69,7 @@ public class Slot
     /**
      * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
      */
-    public boolean isItemValid(ItemStack stack)
+    public boolean isItemValid(@Nullable ItemStack stack)
     {
         return true;
     }
@@ -76,6 +77,7 @@ public class Slot
     /**
      * Helper fnct to get the stack in the slot.
      */
+    @Nullable
     public ItemStack getStack()
     {
         return this.inventory.getStackInSlot(this.slotIndex);
@@ -92,7 +94,7 @@ public class Slot
     /**
      * Helper method to put a stack in the slot.
      */
-    public void putStack(ItemStack stack)
+    public void putStack(@Nullable ItemStack stack)
     {
         this.inventory.setInventorySlotContents(this.slotIndex, stack);
         this.onSlotChanged();
@@ -120,6 +122,7 @@ public class Slot
         return this.getSlotStackLimit();
     }
 
+    @Nullable
     @SideOnly(Side.CLIENT)
     public String getSlotTexture()
     {
@@ -172,7 +175,7 @@ public class Slot
     @SideOnly(Side.CLIENT)
     public net.minecraft.util.ResourceLocation getBackgroundLocation()
     {
-        return (backgroundLocation == null ? net.minecraft.client.renderer.texture.TextureMap.locationBlocksTexture : backgroundLocation);
+        return (backgroundLocation == null ? net.minecraft.client.renderer.texture.TextureMap.LOCATION_BLOCKS_TEXTURE : backgroundLocation);
     }
 
     /**
@@ -218,6 +221,16 @@ public class Slot
     {
         /** The index of the slot in the inventory. */
         return slotIndex;
+    }
+
+    /**
+     * Checks if the other slot is in the same inventory, by comparing the inventory reference.
+     * @param other
+     * @return true if the other slot is in the same inventory
+     */
+    public boolean isSameInventory(Slot other)
+    {
+        return this.inventory == other.inventory;
     }
     /*========================================= FORGE END =====================================*/
 }

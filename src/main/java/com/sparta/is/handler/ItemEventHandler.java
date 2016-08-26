@@ -13,7 +13,7 @@ public class ItemEventHandler
     @SubscribeEvent
     public void onItemTossEvent(ItemTossEvent itemTossEvent)
     {
-        NBTHelper.clearStatefulNBTTags(itemTossEvent.entityItem.getEntityItem());
+        NBTHelper.clearStatefulNBTTags(itemTossEvent.getEntityItem().getEntityItem());
 
         //NOOP
     }
@@ -27,13 +27,13 @@ public class ItemEventHandler
     @SubscribeEvent
     public void onEntityItemPickupEvent(EntityItemPickupEvent entityItemPickupEvent)
     {
-        NBTHelper.clearStatefulNBTTags(entityItemPickupEvent.item.getEntityItem());
+        NBTHelper.clearStatefulNBTTags(entityItemPickupEvent.getItem().getEntityItem());
     }
 
     @SubscribeEvent
     public void onPlayerDropsEvent(PlayerDropsEvent playerDropsEvent)
     {
-        for (EntityItem entityItem : playerDropsEvent.drops)
+        for (EntityItem entityItem : playerDropsEvent.getDrops())
         {
             NBTHelper.clearStatefulNBTTags(entityItem.getEntityItem());
         }

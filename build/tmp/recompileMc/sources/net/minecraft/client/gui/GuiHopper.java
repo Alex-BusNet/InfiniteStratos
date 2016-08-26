@@ -16,9 +16,9 @@ public class GuiHopper extends GuiContainer
     /** The ResourceLocation containing the gui texture for the hopper */
     private static final ResourceLocation HOPPER_GUI_TEXTURE = new ResourceLocation("textures/gui/container/hopper.png");
     /** The player inventory currently bound to this GUI instance */
-    private IInventory playerInventory;
+    private final IInventory playerInventory;
     /** The hopper inventory bound to this GUI instance */
-    private IInventory hopperInventory;
+    private final IInventory hopperInventory;
 
     public GuiHopper(InventoryPlayer playerInv, IInventory hopperInv)
     {
@@ -30,7 +30,7 @@ public class GuiHopper extends GuiContainer
     }
 
     /**
-     * Draw the foreground layer for the GuiContainer (everything in front of the items). Args : mouseX, mouseY
+     * Draw the foreground layer for the GuiContainer (everything in front of the items)
      */
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
@@ -39,7 +39,7 @@ public class GuiHopper extends GuiContainer
     }
 
     /**
-     * Args : renderPartialTicks, mouseX, mouseY
+     * Draws the background layer of this container (behind the items).
      */
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
     {

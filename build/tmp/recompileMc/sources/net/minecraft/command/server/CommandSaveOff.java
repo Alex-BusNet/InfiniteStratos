@@ -18,8 +18,6 @@ public class CommandSaveOff extends CommandBase
 
     /**
      * Gets the usage string for the command.
-     *  
-     * @param sender The command sender that executed the command
      */
     public String getCommandUsage(ICommandSender sender)
     {
@@ -27,21 +25,17 @@ public class CommandSaveOff extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
-     *  
-     * @param sender The command sender that executed the command
-     * @param args The arguments that were passed
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
-        MinecraftServer minecraftserver = MinecraftServer.getServer();
         boolean flag = false;
 
-        for (int i = 0; i < minecraftserver.worldServers.length; ++i)
+        for (int i = 0; i < server.worldServers.length; ++i)
         {
-            if (minecraftserver.worldServers[i] != null)
+            if (server.worldServers[i] != null)
             {
-                WorldServer worldserver = minecraftserver.worldServers[i];
+                WorldServer worldserver = server.worldServers[i];
 
                 if (!worldserver.disableLevelSaving)
                 {
@@ -53,7 +47,7 @@ public class CommandSaveOff extends CommandBase
 
         if (flag)
         {
-            notifyOperators(sender, this, "commands.save.disabled", new Object[0]);
+            notifyCommandListener(sender, this, "commands.save.disabled", new Object[0]);
         }
         else
         {

@@ -1,3 +1,22 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.items;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -9,7 +28,7 @@ import net.minecraft.item.ItemStack;
 public class SlotItemHandler extends Slot
 {
     private static IInventory emptyInventory = new InventoryBasic("[Null]", true, 0);
-    public final IItemHandler itemHandler;
+    private final IItemHandler itemHandler;
     private final int index;
 
     public SlotItemHandler(IItemHandler itemHandler, int index, int xPosition, int yPosition)
@@ -27,7 +46,7 @@ public class SlotItemHandler extends Slot
     {
         if (stack == null)
             return false;
-        ItemStack remainder = this.itemHandler.insertItem(index, stack, true);
+        ItemStack remainder = this.getItemHandler().insertItem(index, stack, true);
         return remainder == null || remainder.stackSize < stack.stackSize;
     }
 
@@ -37,7 +56,7 @@ public class SlotItemHandler extends Slot
     @Override
     public ItemStack getStack()
     {
-        return this.itemHandler.getStackInSlot(index);
+        return this.getItemHandler().getStackInSlot(index);
     }
 
     // Override if your IItemHandler does not implement IItemHandlerModifiable
@@ -47,7 +66,7 @@ public class SlotItemHandler extends Slot
     @Override
     public void putStack(ItemStack stack)
     {
-        ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(index, stack);
+        ((IItemHandlerModifiable) this.getItemHandler()).setStackInSlot(index, stack);
         this.onSlotChanged();
     }
 
@@ -65,8 +84,8 @@ public class SlotItemHandler extends Slot
     {
         ItemStack maxAdd = stack.copy();
         maxAdd.stackSize = maxAdd.getMaxStackSize();
-        ItemStack currentStack = this.itemHandler.getStackInSlot(index);
-        ItemStack remainder = this.itemHandler.insertItem(index, maxAdd, true);
+        ItemStack currentStack = this.getItemHandler().getStackInSlot(index);
+        ItemStack remainder = this.getItemHandler().insertItem(index, maxAdd, true);
 
         int current = currentStack == null ? 0 : currentStack.stackSize;
         int added = maxAdd.stackSize - (remainder != null ? remainder.stackSize : 0);
@@ -79,7 +98,7 @@ public class SlotItemHandler extends Slot
     @Override
     public boolean canTakeStack(EntityPlayer playerIn)
     {
-        return this.itemHandler.extractItem(index, 1, true) != null;
+        return this.getItemHandler().extractItem(index, 1, true) != null;
     }
 
     /**
@@ -89,6 +108,17 @@ public class SlotItemHandler extends Slot
     @Override
     public ItemStack decrStackSize(int amount)
     {
-        return this.itemHandler.extractItem(index, amount, false);
+        return this.getItemHandler().extractItem(index, amount, false);
+    }
+
+    public IItemHandler getItemHandler()
+    {
+        return itemHandler;
+    }
+
+    @Override
+    public boolean isSameInventory(Slot other)
+    {
+        return other instanceof SlotItemHandler && ((SlotItemHandler) other).getItemHandler() == this.itemHandler;
     }
 }

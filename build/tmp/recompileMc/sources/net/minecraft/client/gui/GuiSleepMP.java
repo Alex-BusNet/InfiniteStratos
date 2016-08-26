@@ -1,12 +1,11 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.network.play.client.C0BPacketEntityAction;
+import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.io.IOException;
 
 @SideOnly(Side.CLIENT)
 public class GuiSleepMP extends GuiChat
@@ -66,7 +65,7 @@ public class GuiSleepMP extends GuiChat
 
     private void wakeFromSleep()
     {
-        NetHandlerPlayClient nethandlerplayclient = this.mc.thePlayer.sendQueue;
-        nethandlerplayclient.addToSendQueue(new C0BPacketEntityAction(this.mc.thePlayer, C0BPacketEntityAction.Action.STOP_SLEEPING));
+        NetHandlerPlayClient nethandlerplayclient = this.mc.thePlayer.connection;
+        nethandlerplayclient.sendPacket(new CPacketEntityAction(this.mc.thePlayer, CPacketEntityAction.Action.STOP_SLEEPING));
     }
 }

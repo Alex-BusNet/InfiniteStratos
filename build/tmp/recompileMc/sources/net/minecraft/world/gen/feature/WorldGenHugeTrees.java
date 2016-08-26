@@ -1,12 +1,12 @@
 package net.minecraft.world.gen.feature;
 
+import java.util.Random;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.Random;
 
 public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
 {
@@ -18,34 +18,40 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
     protected final IBlockState leavesMetadata;
     protected int extraRandomHeight;
 
-    public WorldGenHugeTrees(boolean p_i46447_1_, int p_i46447_2_, int p_i46447_3_, IBlockState p_i46447_4_, IBlockState p_i46447_5_)
+    public WorldGenHugeTrees(boolean notify, int baseHeightIn, int extraRandomHeightIn, IBlockState woodMetadataIn, IBlockState leavesMetadataIn)
     {
-        super(p_i46447_1_);
-        this.baseHeight = p_i46447_2_;
-        this.extraRandomHeight = p_i46447_3_;
-        this.woodMetadata = p_i46447_4_;
-        this.leavesMetadata = p_i46447_5_;
+        super(notify);
+        this.baseHeight = baseHeightIn;
+        this.extraRandomHeight = extraRandomHeightIn;
+        this.woodMetadata = woodMetadataIn;
+        this.leavesMetadata = leavesMetadataIn;
     }
 
-    protected int func_150533_a(Random p_150533_1_)
+    /**
+     * calculates the height based on this trees base height and its extra random height
+     */
+    protected int getHeight(Random rand)
     {
-        int i = p_150533_1_.nextInt(3) + this.baseHeight;
+        int i = rand.nextInt(3) + this.baseHeight;
 
         if (this.extraRandomHeight > 1)
         {
-            i += p_150533_1_.nextInt(this.extraRandomHeight);
+            i += rand.nextInt(this.extraRandomHeight);
         }
 
         return i;
     }
 
-    private boolean func_175926_c(World worldIn, BlockPos p_175926_2_, int p_175926_3_)
+    /**
+     * returns whether or not there is space for a tree to grow at a certain position
+     */
+    private boolean isSpaceAt(World worldIn, BlockPos leavesPos, int height)
     {
         boolean flag = true;
 
-        if (p_175926_2_.getY() >= 1 && p_175926_2_.getY() + p_175926_3_ + 1 <= 256)
+        if (leavesPos.getY() >= 1 && leavesPos.getY() + height + 1 <= 256)
         {
-            for (int i = 0; i <= 1 + p_175926_3_; ++i)
+            for (int i = 0; i <= 1 + height; ++i)
             {
                 int j = 2;
 
@@ -53,7 +59,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
                 {
                     j = 1;
                 }
-                else if (i >= 1 + p_175926_3_ - 2)
+                else if (i >= 1 + height - 2)
                 {
                     j = 2;
                 }
@@ -62,7 +68,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
                 {
                     for (int l = -j; l <= j && flag; ++l)
                     {
-                        if (p_175926_2_.getY() + i < 0 || p_175926_2_.getY() + i >= 256 || !this.isReplaceable(worldIn,p_175926_2_.add(k, i, l)))
+                        if (leavesPos.getY() + i < 0 || leavesPos.getY() + i >= 256 || !this.isReplaceable(worldIn,leavesPos.add(k, i, l)))
                         {
                             flag = false;
                         }
@@ -78,18 +84,22 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
         }
     }
 
-    private boolean func_175927_a(BlockPos p_175927_1_, World worldIn)
+    /**
+     * returns whether or not there is dirt underneath the block where the tree will be grown.
+     * It also generates dirt around the block in a 2x2 square if there is dirt underneath the blockpos.
+     */
+    private boolean ensureDirtsUnderneath(BlockPos pos, World worldIn)
     {
-        BlockPos blockpos = p_175927_1_.down();
-        Block block = worldIn.getBlockState(blockpos).getBlock();
-        boolean isSoil = block.canSustainPlant(worldIn, blockpos, net.minecraft.util.EnumFacing.UP, ((net.minecraft.block.BlockSapling)Blocks.sapling));
+        BlockPos blockpos = pos.down();
+        IBlockState state = worldIn.getBlockState(blockpos);
+        boolean isSoil = state.getBlock().canSustainPlant(state, worldIn, blockpos, net.minecraft.util.EnumFacing.UP, ((net.minecraft.block.BlockSapling)Blocks.SAPLING));
 
-        if (isSoil && p_175927_1_.getY() >= 2)
+        if (isSoil && pos.getY() >= 2)
         {
-            this.onPlantGrow(worldIn, blockpos, p_175927_1_);
-            this.onPlantGrow(worldIn, blockpos.east(), p_175927_1_);
-            this.onPlantGrow(worldIn, blockpos.south(), p_175927_1_);
-            this.onPlantGrow(worldIn, blockpos.south().east(), p_175927_1_);
+            this.onPlantGrow(worldIn, blockpos, pos);
+            this.onPlantGrow(worldIn, blockpos.east(), pos);
+            this.onPlantGrow(worldIn, blockpos.south(), pos);
+            this.onPlantGrow(worldIn, blockpos.south().east(), pos);
             return true;
         }
         else
@@ -98,28 +108,35 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
         }
     }
 
-    protected boolean func_175929_a(World worldIn, Random p_175929_2_, BlockPos p_175929_3_, int p_175929_4_)
+    /**
+     * returns whether or not a tree can grow at a specific position.
+     * If it can, it generates surrounding dirt underneath.
+     */
+    protected boolean ensureGrowable(World worldIn, Random rand, BlockPos treePos, int p_175929_4_)
     {
-        return this.func_175926_c(worldIn, p_175929_3_, p_175929_4_) && this.func_175927_a(p_175929_3_, worldIn);
+        return this.isSpaceAt(worldIn, treePos, p_175929_4_) && this.ensureDirtsUnderneath(treePos, worldIn);
     }
 
-    protected void func_175925_a(World worldIn, BlockPos p_175925_2_, int p_175925_3_)
+    /**
+     * grow leaves in a circle with the outsides being within the circle
+     */
+    protected void growLeavesLayerStrict(World worldIn, BlockPos layerCenter, int width)
     {
-        int i = p_175925_3_ * p_175925_3_;
+        int i = width * width;
 
-        for (int j = -p_175925_3_; j <= p_175925_3_ + 1; ++j)
+        for (int j = -width; j <= width + 1; ++j)
         {
-            for (int k = -p_175925_3_; k <= p_175925_3_ + 1; ++k)
+            for (int k = -width; k <= width + 1; ++k)
             {
                 int l = j - 1;
                 int i1 = k - 1;
 
                 if (j * j + k * k <= i || l * l + i1 * i1 <= i || j * j + i1 * i1 <= i || l * l + k * k <= i)
                 {
-                    BlockPos blockpos = p_175925_2_.add(j, 0, k);
-                    net.minecraft.block.state.IBlockState state = worldIn.getBlockState(blockpos);
+                    BlockPos blockpos = layerCenter.add(j, 0, k);
+                    IBlockState state = worldIn.getBlockState(blockpos);
 
-                    if (state.getBlock().isAir(worldIn, blockpos) || state.getBlock().isLeaves(worldIn, blockpos))
+                    if (state.getBlock().isAir(state, worldIn, blockpos) || state.getBlock().isLeaves(state, worldIn, blockpos))
                     {
                         this.setBlockAndNotifyAdequately(worldIn, blockpos, this.leavesMetadata);
                     }
@@ -128,20 +145,23 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
         }
     }
 
-    protected void func_175928_b(World worldIn, BlockPos p_175928_2_, int p_175928_3_)
+    /**
+     * grow leaves in a circle
+     */
+    protected void growLeavesLayer(World worldIn, BlockPos layerCenter, int width)
     {
-        int i = p_175928_3_ * p_175928_3_;
+        int i = width * width;
 
-        for (int j = -p_175928_3_; j <= p_175928_3_; ++j)
+        for (int j = -width; j <= width; ++j)
         {
-            for (int k = -p_175928_3_; k <= p_175928_3_; ++k)
+            for (int k = -width; k <= width; ++k)
             {
                 if (j * j + k * k <= i)
                 {
-                    BlockPos blockpos = p_175928_2_.add(j, 0, k);
-                    Block block = worldIn.getBlockState(blockpos).getBlock();
+                    BlockPos blockpos = layerCenter.add(j, 0, k);
+                    IBlockState state = worldIn.getBlockState(blockpos);
 
-                    if (block.isAir(worldIn, blockpos) || block.isLeaves(worldIn, blockpos))
+                    if (state.getBlock().isAir(state, worldIn, blockpos) || state.getBlock().isLeaves(state, worldIn, blockpos))
                     {
                         this.setBlockAndNotifyAdequately(worldIn, blockpos, this.leavesMetadata);
                     }
@@ -153,6 +173,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
     //Just a helper macro
     private void onPlantGrow(World world, BlockPos pos, BlockPos source)
     {
-        world.getBlockState(pos).getBlock().onPlantGrow(world, pos, source);
+        IBlockState state = world.getBlockState(pos);
+        state.getBlock().onPlantGrow(state, world, pos, source);
     }
 }

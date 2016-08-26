@@ -1,9 +1,6 @@
 package ibxm;
 
-import java.io.DataInput;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 public class ProTracker {
 	public static boolean is_mod( byte[] header_1084_bytes ) {

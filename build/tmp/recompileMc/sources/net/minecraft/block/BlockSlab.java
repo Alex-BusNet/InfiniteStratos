@@ -1,42 +1,32 @@
 package net.minecraft.block;
 
+import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
-import java.util.Random;
-
 public abstract class BlockSlab extends Block
 {
     public static final PropertyEnum<BlockSlab.EnumBlockHalf> HALF = PropertyEnum.<BlockSlab.EnumBlockHalf>create("half", BlockSlab.EnumBlockHalf.class);
+    protected static final AxisAlignedBB AABB_BOTTOM_HALF = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.5D, 1.0D);
+    protected static final AxisAlignedBB AABB_TOP_HALF = new AxisAlignedBB(0.0D, 0.5D, 0.0D, 1.0D, 1.0D, 1.0D);
 
     public BlockSlab(Material materialIn)
     {
         super(materialIn);
-
-        if (this.isDouble())
-        {
-            this.fullBlock = true;
-        }
-        else
-        {
-            this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.5F, 1.0F);
-        }
-
+        this.fullBlock = this.isDouble();
         this.setLightOpacity(255);
     }
 
@@ -45,71 +35,38 @@ public abstract class BlockSlab extends Block
         return false;
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        if (this.isDouble())
-        {
-            this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-        }
-        else
-        {
-            IBlockState iblockstate = worldIn.getBlockState(pos);
-
-            if (iblockstate.getBlock() == this)
-            {
-                if (iblockstate.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP)
-                {
-                    this.setBlockBounds(0.0F, 0.5F, 0.0F, 1.0F, 1.0F, 1.0F);
-                }
-                else
-                {
-                    this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.5F, 1.0F);
-                }
-            }
-        }
+        return this.isDouble() ? FULL_BLOCK_AABB : (state.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP ? AABB_TOP_HALF : AABB_BOTTOM_HALF);
     }
 
     /**
-     * Sets the block's bounds for rendering it as an item
+     * Checks if an IBlockState represents a block that is opaque and a full cube.
      */
-    public void setBlockBoundsForItemRender()
+    public boolean isFullyOpaque(IBlockState state)
     {
-        if (this.isDouble())
-        {
-            this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-        }
-        else
-        {
-            this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.5F, 1.0F);
-        }
-    }
-
-    /**
-     * Add all collision boxes of this Block to the list that intersect with the given mask.
-     */
-    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
-    {
-        this.setBlockBoundsBasedOnState(worldIn, pos);
-        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
+        return ((BlockSlab)state.getBlock()).isDouble() || state.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP;
     }
 
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return this.isDouble();
     }
 
     @Override
-    public boolean doesSideBlockRendering(IBlockAccess world, BlockPos pos, EnumFacing face)
-	{
-        if ( isOpaqueCube() )
+    public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
+    {
+        if (net.minecraftforge.common.ForgeModContainer.disableStairSlabCulling)
+            return super.doesSideBlockRendering(state, world, pos, face);
+
+        if ( state.isOpaqueCube() )
             return true;
-        
-        // face is on the block being rendered, not this block.
-        EnumBlockHalf side = world.getBlockState(pos).getValue(HALF);
-        return (side == EnumBlockHalf.TOP && face == EnumFacing.DOWN) || (side == EnumBlockHalf.BOTTOM && face == EnumFacing.UP);
+
+        EnumBlockHalf side = state.getValue(HALF);
+        return (side == EnumBlockHalf.TOP && face == EnumFacing.UP) || (side == EnumBlockHalf.BOTTOM && face == EnumFacing.DOWN);
     }
 
     /**
@@ -130,30 +87,37 @@ public abstract class BlockSlab extends Block
         return this.isDouble() ? 2 : 1;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return this.isDouble();
     }
 
     @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
         if (this.isDouble())
         {
-            return super.shouldSideBeRendered(worldIn, pos, side);
+            return super.shouldSideBeRendered(blockState, blockAccess, pos, side);
         }
-        else if (side != EnumFacing.UP && side != EnumFacing.DOWN && !super.shouldSideBeRendered(worldIn, pos, side))
+        else if (side != EnumFacing.UP && side != EnumFacing.DOWN && !super.shouldSideBeRendered(blockState, blockAccess, pos, side))
         {
             return false;
         }
-        // additional logic breaks doesSideBlockRendering and is no longer useful.
-        return super.shouldSideBeRendered(worldIn, pos, side);
+        else if (false) // Forge: Additional logic breaks doesSideBlockRendering and is no longer useful.
+        {
+            IBlockState iblockstate = blockAccess.getBlockState(pos.offset(side));
+            boolean flag = isHalfSlab(iblockstate) && iblockstate.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP;
+            boolean flag1 = isHalfSlab(blockState) && blockState.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP;
+            return flag1 ? (side == EnumFacing.DOWN ? true : (side == EnumFacing.UP && super.shouldSideBeRendered(blockState, blockAccess, pos, side) ? true : !isHalfSlab(iblockstate) || !flag)) : (side == EnumFacing.UP ? true : (side == EnumFacing.DOWN && super.shouldSideBeRendered(blockState, blockAccess, pos, side) ? true : !isHalfSlab(iblockstate) || flag));
+        }
+        return super.shouldSideBeRendered(blockState, blockAccess, pos, side);
     }
 
     @SideOnly(Side.CLIENT)
-    protected static boolean isSlab(Block blockIn)
+    protected static boolean isHalfSlab(IBlockState state)
     {
-        return blockIn == Blocks.stone_slab || blockIn == Blocks.wooden_slab || blockIn == Blocks.stone_slab2;
+        Block block = state.getBlock();
+        return block == Blocks.STONE_SLAB || block == Blocks.WOODEN_SLAB || block == Blocks.STONE_SLAB2 || block == Blocks.PURPUR_SLAB;
     }
 
     /**
@@ -161,16 +125,11 @@ public abstract class BlockSlab extends Block
      */
     public abstract String getUnlocalizedName(int meta);
 
-    public int getDamageValue(World worldIn, BlockPos pos)
-    {
-        return super.getDamageValue(worldIn, pos) & 7;
-    }
-
     public abstract boolean isDouble();
 
     public abstract IProperty<?> getVariantProperty();
 
-    public abstract Object getVariant(ItemStack stack);
+    public abstract Comparable<?> getTypeForItem(ItemStack stack);
 
     public static enum EnumBlockHalf implements IStringSerializable
     {

@@ -4,8 +4,9 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -14,15 +15,15 @@ public class BlockSlime extends BlockBreakable
 {
     public BlockSlime()
     {
-        super(Material.clay, false, MapColor.grassColor);
-        this.setCreativeTab(CreativeTabs.tabDecorations);
+        super(Material.CLAY, false, MapColor.GRASS);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
         this.slipperiness = 0.8F;
     }
 
     @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.TRANSLUCENT;
+        return BlockRenderLayer.TRANSLUCENT;
     }
 
     /**
@@ -53,13 +54,18 @@ public class BlockSlime extends BlockBreakable
         else if (entityIn.motionY < 0.0D)
         {
             entityIn.motionY = -entityIn.motionY;
+
+            if (!(entityIn instanceof EntityLivingBase))
+            {
+                entityIn.motionY *= 0.8D;
+            }
         }
     }
 
     /**
      * Triggered whenever an entity collides with this block (enters into the block)
      */
-    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, Entity entityIn)
+    public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn)
     {
         if (Math.abs(entityIn.motionY) < 0.1D && !entityIn.isSneaking())
         {
@@ -68,6 +74,6 @@ public class BlockSlime extends BlockBreakable
             entityIn.motionZ *= d0;
         }
 
-        super.onEntityCollidedWithBlock(worldIn, pos, entityIn);
+        super.onEntityWalk(worldIn, pos, entityIn);
     }
 }

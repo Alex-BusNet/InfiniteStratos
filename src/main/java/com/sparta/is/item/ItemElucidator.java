@@ -1,13 +1,9 @@
 package com.sparta.is.item;
 
-import com.sparta.is.armor.ArmorIS;
 import com.sparta.is.armor.UnitKuroAkiko;
-import com.sparta.is.reference.Messages;
 import com.sparta.is.reference.Names;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.world.World;
 
 public class ItemElucidator extends ItemISEqualizer /*implements IEnergyContainerItem*/
@@ -100,53 +96,53 @@ public class ItemElucidator extends ItemISEqualizer /*implements IEnergyContaine
 //
 //    }
 
-    @Override
-    public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer entityPlayer)
-    {
-        if (entityPlayer.getCurrentArmor(2) != null)
-        {
-            /*
-             * Checks if the Player has the correct unit equipped
-             */
-
-            if (entityPlayer.getCurrentArmor(2).getItem().getUnlocalizedName().equals(kuroAkiko.getUnlocalizedName()))
-            {
-                /*
-                 * Checks if Kuro Akiko is in Standby mode
-                 */
-                if (kuroAkiko.getState() == 0)
-                {
-                    entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, "the Elucidator"));
-                }
-                else
-                {
-                    entityPlayer.setItemInUse(itemStack, this.getMaxItemUseDuration(itemStack));
-                    return itemStack;
-                }
-            }
-            else
-            {
-                /*
-                 * Player tried to use weapon with different unit
-                 */
-                if (entityPlayer.getCurrentArmor(2).getItem() instanceof ArmorIS)
-                {
-                    entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.INVALID_UNIT, "The Elucidator", entityPlayer.getCurrentArmor(2).getItem().getItemStackDisplayName(entityPlayer.getCurrentArmor(2))));
-                }
-                else
-                {
-                    entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, "The Elucidator"));
-                }
-            }
-        }
-        else
-        {
-
-            entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, itemStack));
-        }
-
-        return itemStack;
-    }
+//    @Override
+//    public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer entityPlayer)
+//    {
+//        if (entityPlayer.getCurrentArmor(2) != null)
+//        {
+//            /*
+//             * Checks if the Player has the correct unit equipped
+//             */
+//
+//            if (entityPlayer.getCurrentArmor(2).getItem().getUnlocalizedName().equals(kuroAkiko.getUnlocalizedName()))
+//            {
+//                /*
+//                 * Checks if Kuro Akiko is in Standby mode
+//                 */
+//                if (kuroAkiko.getState() == 0)
+//                {
+//                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, "the Elucidator"));
+//                }
+//                else
+//                {
+//                    entityPlayer.setItemInUse(itemStack, this.getMaxItemUseDuration(itemStack));
+//                    return itemStack;
+//                }
+//            }
+//            else
+//            {
+//                /*
+//                 * Player tried to use weapon with different unit
+//                 */
+//                if (entityPlayer.getCurrentArmor(2).getItem() instanceof ArmorIS)
+//                {
+//                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT, "The Elucidator", entityPlayer.getCurrentArmor(2).getItem().getItemStackDisplayName(entityPlayer.getCurrentArmor(2))));
+//                }
+//                else
+//                {
+//                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, "The Elucidator"));
+//                }
+//            }
+//        }
+//        else
+//        {
+//
+//            entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, itemStack));
+//        }
+//
+//        return itemStack;
+//    }
 
 //    @Override
 //    public void getSubItems(Item item, CreativeTabs tabs, List list)

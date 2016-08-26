@@ -1,25 +1,53 @@
-package net.minecraftforge.client.model.pipeline;
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-import com.google.common.base.Objects;
-import net.minecraft.block.Block;
-import net.minecraft.client.renderer.EntityRenderer;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.renderer.vertex.VertexFormatElement;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.IBlockAccess;
+package net.minecraftforge.client.model.pipeline;
 
 import javax.vecmath.Vector3f;
 
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.client.renderer.vertex.VertexFormatElement;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
+
+import com.google.common.base.Objects;
+
 public class VertexLighterFlat extends QuadGatheringTransformer
 {
-    protected final BlockInfo blockInfo = new BlockInfo();
+    protected final BlockInfo blockInfo;
     private int tint = -1;
+    private boolean diffuse = true;
 
     protected int posIndex = -1;
     protected int normalIndex = -1;
     protected int colorIndex = -1;
     protected int lightmapIndex = -1;
+
+    public VertexLighterFlat(BlockColors colors)
+    {
+        this.blockInfo = new BlockInfo(colors);
+    }
 
     @Override
     public void setParent(IVertexConsumer parent)
@@ -141,6 +169,14 @@ public class VertexLighterFlat extends QuadGatheringTransformer
                 if(skyLight > lightmap[v][1]) lightmap[v][1] = skyLight;
             }
             updateColor(normal[v], color[v], x, y, z, tint, multiplier);
+            if(diffuse)
+            {
+                float d = LightUtil.diffuseLight(normal[v][0], normal[v][1], normal[v][2]);
+                for(int i = 0; i < 3; i++)
+                {
+                    color[v][i] *= d;
+                }
+            }
             if(EntityRenderer.anaglyphEnable)
             {
                 applyAnaglyph(color[v]);
@@ -153,7 +189,7 @@ public class VertexLighterFlat extends QuadGatheringTransformer
                 switch(element.getUsage())
                 {
                     case POSITION:
-                        // position adding moved to WorldRendererConsumer due to x and z not fitting completely into a float
+                        // position adding moved to VertexBufferConsumer due to x and z not fitting completely into a float
                         /*float[] pos = new float[4];
                         System.arraycopy(position[v], 0, pos, 0, position[v].length);
                         pos[0] += blockInfo.getBlockPos().getX();
@@ -196,7 +232,7 @@ public class VertexLighterFlat extends QuadGatheringTransformer
         float e2 = 0.95f;
         BlockPos pos = blockInfo.getBlockPos();
 
-        boolean full = blockInfo.getBlock().isFullCube();
+        boolean full = blockInfo.getState().isFullCube();
 
         if((full || y < -e1) && normal[1] < -e2) pos = pos.down();
         if((full || y >  e1) && normal[1] >  e2) pos = pos.up();
@@ -205,7 +241,7 @@ public class VertexLighterFlat extends QuadGatheringTransformer
         if((full || x < -e1) && normal[0] < -e2) pos = pos.west();
         if((full || x >  e1) && normal[0] >  e2) pos = pos.east();
 
-        int brightness = blockInfo.getBlock().getMixedBrightnessForBlock(blockInfo.getWorld(), pos);
+        int brightness = blockInfo.getState().getPackedLightmapCoords(blockInfo.getWorld(), pos);
 
         lightmap[0] = ((float)((brightness >> 0x04) & 0xF) * 0x20) / 0xFFFF;
         lightmap[1] = ((float)((brightness >> 0x14) & 0xF) * 0x20) / 0xFFFF;
@@ -227,16 +263,20 @@ public class VertexLighterFlat extends QuadGatheringTransformer
     }
     public void setQuadOrientation(EnumFacing orientation) {}
     public void setQuadCulled() {}
-    public void setQuadColored() {}
+    public void setTexture( TextureAtlasSprite texture ) {}
+    public void setApplyDiffuseLighting(boolean diffuse)
+    {
+        this.diffuse = diffuse;
+    }
 
     public void setWorld(IBlockAccess world)
     {
         blockInfo.setWorld(world);
     }
 
-    public void setBlock(Block block)
+    public void setState(IBlockState state)
     {
-        blockInfo.setBlock(block);
+        blockInfo.setState(state);
     }
 
     public void setBlockPos(BlockPos blockPos)

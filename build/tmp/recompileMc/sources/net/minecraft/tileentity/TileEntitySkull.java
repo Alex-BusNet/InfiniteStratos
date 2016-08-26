@@ -2,25 +2,44 @@ package net.minecraft.tileentity;
 
 import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.properties.Property;
+import java.util.UUID;
+import javax.annotation.Nullable;
+import net.minecraft.block.BlockSkull;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.UUID;
-
-public class TileEntitySkull extends TileEntity
+public class TileEntitySkull extends TileEntity implements ITickable
 {
     private int skullType;
     private int skullRotation;
-    private GameProfile playerProfile = null;
+    private GameProfile playerProfile;
+    private int dragonAnimatedTicks;
+    private boolean dragonAnimated;
+    private static PlayerProfileCache profileCache;
+    private static MinecraftSessionService sessionService;
 
-    public void writeToNBT(NBTTagCompound compound)
+    public static void setProfileCache(PlayerProfileCache profileCacheIn)
+    {
+        profileCache = profileCacheIn;
+    }
+
+    public static void setSessionService(MinecraftSessionService sessionServiceIn)
+    {
+        sessionService = sessionServiceIn;
+    }
+
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
         compound.setByte("SkullType", (byte)(this.skullType & 255));
@@ -32,6 +51,8 @@ public class TileEntitySkull extends TileEntity
             NBTUtil.writeGameProfile(nbttagcompound, this.playerProfile);
             compound.setTag("Owner", nbttagcompound);
         }
+
+        return compound;
     }
 
     public void readFromNBT(NBTTagCompound compound)
@@ -59,20 +80,46 @@ public class TileEntitySkull extends TileEntity
         }
     }
 
+    /**
+     * Like the old updateEntity(), except more generic.
+     */
+    public void update()
+    {
+        if (this.skullType == 5)
+        {
+            if (this.worldObj.isBlockPowered(this.pos))
+            {
+                this.dragonAnimated = true;
+                ++this.dragonAnimatedTicks;
+            }
+            else
+            {
+                this.dragonAnimated = false;
+            }
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    public float getAnimationProgress(float p_184295_1_)
+    {
+        return this.dragonAnimated ? (float)this.dragonAnimatedTicks + p_184295_1_ : (float)this.dragonAnimatedTicks;
+    }
+
+    @Nullable
     public GameProfile getPlayerProfile()
     {
         return this.playerProfile;
     }
 
-    /**
-     * Allows for a specialized description packet to be created. This is often used to sync tile entity data from the
-     * server to the client easily. For example this is used by signs to synchronise the text to be displayed.
-     */
-    public Packet getDescriptionPacket()
+    @Nullable
+    public SPacketUpdateTileEntity getUpdatePacket()
     {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        this.writeToNBT(nbttagcompound);
-        return new S35PacketUpdateTileEntity(this.pos, 4, nbttagcompound);
+        return new SPacketUpdateTileEntity(this.pos, 4, this.getUpdateTag());
+    }
+
+    public NBTTagCompound getUpdateTag()
+    {
+        return this.writeToNBT(new NBTTagCompound());
     }
 
     public void setType(int type)
@@ -81,7 +128,7 @@ public class TileEntitySkull extends TileEntity
         this.playerProfile = null;
     }
 
-    public void setPlayerProfile(GameProfile playerProfile)
+    public void setPlayerProfile(@Nullable GameProfile playerProfile)
     {
         this.skullType = 3;
         this.playerProfile = playerProfile;
@@ -102,13 +149,9 @@ public class TileEntitySkull extends TileEntity
             {
                 return input;
             }
-            else if (MinecraftServer.getServer() == null)
+            else if (profileCache != null && sessionService != null)
             {
-                return input;
-            }
-            else
-            {
-                GameProfile gameprofile = MinecraftServer.getServer().getPlayerProfileCache().getGameProfileForUsername(input.getName());
+                GameProfile gameprofile = profileCache.getGameProfileForUsername(input.getName());
 
                 if (gameprofile == null)
                 {
@@ -120,11 +163,15 @@ public class TileEntitySkull extends TileEntity
 
                     if (property == null)
                     {
-                        gameprofile = MinecraftServer.getServer().getMinecraftSessionService().fillProfileProperties(gameprofile, true);
+                        gameprofile = sessionService.fillProfileProperties(gameprofile, true);
                     }
 
                     return gameprofile;
                 }
+            }
+            else
+            {
+                return input;
             }
         }
         else
@@ -147,5 +194,21 @@ public class TileEntitySkull extends TileEntity
     public void setSkullRotation(int rotation)
     {
         this.skullRotation = rotation;
+    }
+
+    public void func_189668_a(Mirror p_189668_1_)
+    {
+        if (this.worldObj != null && this.worldObj.getBlockState(this.getPos()).getValue(BlockSkull.FACING) == EnumFacing.UP)
+        {
+            this.skullRotation = p_189668_1_.mirrorRotation(this.skullRotation, 16);
+        }
+    }
+
+    public void func_189667_a(Rotation p_189667_1_)
+    {
+        if (this.worldObj != null && this.worldObj.getBlockState(this.getPos()).getValue(BlockSkull.FACING) == EnumFacing.UP)
+        {
+            this.skullRotation = p_189667_1_.rotate(this.skullRotation, 16);
+        }
     }
 }

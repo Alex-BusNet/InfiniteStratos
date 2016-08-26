@@ -128,7 +128,7 @@ public class TileEntityIS extends TileEntity implements ITickable
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbtTagCompound)
+    public NBTTagCompound writeToNBT(NBTTagCompound nbtTagCompound)
     {
         super.writeToNBT(nbtTagCompound);
 
@@ -151,6 +151,7 @@ public class TileEntityIS extends TileEntity implements ITickable
             nbtTagCompound.setString( "customName", this.customName );
         }
 
+        return nbtTagCompound;
     }
 
     public boolean hasCustomName()
@@ -163,7 +164,7 @@ public class TileEntityIS extends TileEntity implements ITickable
         return ownerUUID != null;
     }
 
-    @Override
+//    @Override
     public Packet getDescriptionPacket()
     {
         return PacketHandler.INSTANCE.getPacketFrom(new MessageTileEntityIS(this));

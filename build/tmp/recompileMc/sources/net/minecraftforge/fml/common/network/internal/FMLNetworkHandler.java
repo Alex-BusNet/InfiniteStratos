@@ -1,44 +1,26 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.common.network.internal;
 
-import com.google.common.collect.Lists;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.embedded.EmbeddedChannel;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
-import net.minecraft.server.management.ServerConfigurationManager;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.fml.common.*;
-import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
-import net.minecraftforge.fml.common.network.FMLOutboundHandler;
-import net.minecraftforge.fml.common.network.FMLOutboundHandler.OutboundTarget;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.handshake.FMLHandshakeMessage;
-import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
-import net.minecraftforge.fml.common.network.internal.FMLMessage.CompleteHandshake;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
-import net.minecraftforge.fml.common.registry.EntityRegistry.EntityRegistration;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.logging.log4j.core.helpers.Integers;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -46,13 +28,45 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Container;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.world.World;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.FMLContainer;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
+import net.minecraftforge.fml.common.network.FMLOutboundHandler;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.FMLOutboundHandler.OutboundTarget;
+import net.minecraftforge.fml.common.network.handshake.FMLHandshakeMessage;
+import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
+import net.minecraftforge.fml.common.network.internal.FMLMessage.CompleteHandshake;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.common.registry.EntityRegistry.EntityRegistration;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import org.apache.logging.log4j.core.helpers.Integers;
+
+import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 public class FMLNetworkHandler
 {
     public static final int READ_TIMEOUT = Integers.parseInt(System.getProperty("fml.readTimeout","30"),30);
     public static final int LOGIN_TIMEOUT = Integers.parseInt(System.getProperty("fml.loginTimeout","600"),600);
     private static EnumMap<Side, FMLEmbeddedChannel> channelPair;
 
-    public static void fmlServerHandshake(ServerConfigurationManager scm, NetworkManager manager, EntityPlayerMP player)
+    public static void fmlServerHandshake(PlayerList scm, NetworkManager manager, EntityPlayerMP player)
     {
         NetworkDispatcher dispatcher = NetworkDispatcher.allocAndSet(manager, scm);
         dispatcher.serverToClientHandshake(player);
@@ -83,7 +97,8 @@ public class FMLNetworkHandler
                 embeddedChannel.writeOutbound(openGui);
                 entityPlayerMP.openContainer = remoteGuiContainer;
                 entityPlayerMP.openContainer.windowId = windowId;
-                entityPlayerMP.openContainer.onCraftGuiOpened(entityPlayerMP);
+                entityPlayerMP.openContainer.addListener(entityPlayerMP);
+                net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(entityPlayer, entityPlayer.openContainer));
             }
         }
         else if (entityPlayer instanceof FakePlayer)
@@ -97,17 +112,9 @@ public class FMLNetworkHandler
         }
         else
         {
-            FMLLog.fine("Invalid attempt to open a local GUI on a dedicated server. This is likely a bug. GUIID: %s,%d", mc.getModId(), modGuiId);
+            FMLLog.fine("Invalid attempt to open a local GUI on a dedicated server. This is likely a bug. GUI ID: %s,%d", mc.getModId(), modGuiId);
         }
 
-    }
-
-    public static void makeEntitySpawnAdjustment(Entity entity, EntityPlayerMP player, int serverX, int serverY, int serverZ)
-    {
-        EmbeddedChannel embeddedChannel = channelPair.get(Side.SERVER);
-        embeddedChannel.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(OutboundTarget.PLAYER);
-        embeddedChannel.attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(player);
-        embeddedChannel.writeOutbound(new FMLMessage.EntityAdjustMessage(entity, serverX, serverY, serverZ));
     }
 
     public static Packet<?> getEntitySpawningPacket(Entity entity)

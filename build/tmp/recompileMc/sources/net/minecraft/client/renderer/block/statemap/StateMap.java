@@ -2,17 +2,17 @@ package net.minecraft.client.renderer.block.statemap;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.block.Block;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class StateMap extends StateMapperBase
@@ -21,7 +21,7 @@ public class StateMap extends StateMapperBase
     private final String suffix;
     private final List < IProperty<? >> ignored;
 
-    private StateMap(IProperty<?> name, String suffix, List < IProperty<? >> ignored)
+    private StateMap(@Nullable IProperty<?> name, @Nullable String suffix, List < IProperty<? >> ignored)
     {
         this.name = name;
         this.suffix = suffix;
@@ -30,16 +30,16 @@ public class StateMap extends StateMapperBase
 
     protected ModelResourceLocation getModelResourceLocation(IBlockState state)
     {
-        Map<IProperty, Comparable> map = Maps.<IProperty, Comparable>newLinkedHashMap(state.getProperties());
+        Map < IProperty<?>, Comparable<? >> map = Maps. < IProperty<?>, Comparable<? >> newLinkedHashMap(state.getProperties());
         String s;
 
         if (this.name == null)
         {
-            s = ((ResourceLocation)Block.blockRegistry.getNameForObject(state.getBlock())).toString();
+            s = ((ResourceLocation)Block.REGISTRY.getNameForObject(state.getBlock())).toString();
         }
         else
         {
-            s = String.format("%s:%s", ((ResourceLocation)Block.blockRegistry.getNameForObject(state.getBlock())).getResourceDomain(), ((IProperty)this.name).getName((Comparable)map.remove(this.name)));
+            s = String.format("%s:%s", Block.REGISTRY.getNameForObject(state.getBlock()).getResourceDomain(), this.removeName(this.name, map));
         }
 
         if (this.suffix != null)
@@ -53,6 +53,11 @@ public class StateMap extends StateMapperBase
         }
 
         return new ModelResourceLocation(s, this.getPropertyString(map));
+    }
+
+    private <T extends Comparable<T>> String removeName(IProperty<T> p_187490_1_, Map < IProperty<?>, Comparable<? >> p_187490_2_)
+    {
+        return p_187490_1_.getName((T)p_187490_2_.remove(this.name));
     }
 
     @SideOnly(Side.CLIENT)

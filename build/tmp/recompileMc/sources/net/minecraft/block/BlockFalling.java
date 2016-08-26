@@ -1,14 +1,16 @@
 package net.minecraft.block;
 
+import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.Random;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockFalling extends Block
 {
@@ -16,8 +18,8 @@ public class BlockFalling extends Block
 
     public BlockFalling()
     {
-        super(Material.sand);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        super(Material.SAND);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     public BlockFalling(Material materialIn)
@@ -31,9 +33,11 @@ public class BlockFalling extends Block
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn)
     {
         worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
     }
@@ -48,11 +52,11 @@ public class BlockFalling extends Block
 
     private void checkFallable(World worldIn, BlockPos pos)
     {
-        if (canFallInto(worldIn, pos.down()) && pos.getY() >= 0)
+        if ((worldIn.isAirBlock(pos.down()) || canFallThrough(worldIn.getBlockState(pos.down()))) && pos.getY() >= 0)
         {
             int i = 32;
 
-            if (!fallInstantly && worldIn.isAreaLoaded(pos.add(-i, -i, -i), pos.add(i, i, i)))
+            if (!fallInstantly && worldIn.isAreaLoaded(pos.add(-32, -32, -32), pos.add(32, 32, 32)))
             {
                 if (!worldIn.isRemote)
                 {
@@ -63,17 +67,18 @@ public class BlockFalling extends Block
             }
             else
             {
+                IBlockState state = worldIn.getBlockState(pos);
                 worldIn.setBlockToAir(pos);
                 BlockPos blockpos;
 
-                for (blockpos = pos.down(); canFallInto(worldIn, blockpos) && blockpos.getY() > 0; blockpos = blockpos.down())
+                for (blockpos = pos.down(); (worldIn.isAirBlock(blockpos) || canFallThrough(worldIn.getBlockState(blockpos))) && blockpos.getY() > 0; blockpos = blockpos.down())
                 {
                     ;
                 }
 
                 if (blockpos.getY() > 0)
                 {
-                    worldIn.setBlockState(blockpos.up(), this.getDefaultState());
+                    worldIn.setBlockState(blockpos.up(), state); //Forge: Fix loss of state information during world gen.
                 }
             }
         }
@@ -91,15 +96,37 @@ public class BlockFalling extends Block
         return 2;
     }
 
-    public static boolean canFallInto(World worldIn, BlockPos pos)
+    public static boolean canFallThrough(IBlockState state)
     {
-        if (worldIn.isAirBlock(pos)) return true;
-        Block block = worldIn.getBlockState(pos).getBlock();
-        Material material = block.blockMaterial;
-        return block == Blocks.fire || material == Material.air || material == Material.water || material == Material.lava;
+        Block block = state.getBlock();
+        Material material = state.getMaterial();
+        return block == Blocks.FIRE || material == Material.AIR || material == Material.WATER || material == Material.LAVA;
     }
 
     public void onEndFalling(World worldIn, BlockPos pos)
     {
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
+    {
+        if (rand.nextInt(16) == 0)
+        {
+            BlockPos blockpos = pos.down();
+
+            if (canFallThrough(worldIn.getBlockState(blockpos)))
+            {
+                double d0 = (double)((float)pos.getX() + rand.nextFloat());
+                double d1 = (double)pos.getY() - 0.05D;
+                double d2 = (double)((float)pos.getZ() + rand.nextFloat());
+                worldIn.spawnParticle(EnumParticleTypes.FALLING_DUST, d0, d1, d2, 0.0D, 0.0D, 0.0D, new int[] {Block.getStateId(stateIn)});
+            }
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    public int func_189876_x(IBlockState p_189876_1_)
+    {
+        return -16777216;
     }
 }

@@ -1,50 +1,50 @@
 package net.minecraft.stats;
 
-import net.minecraft.event.HoverEvent;
-import net.minecraft.scoreboard.IScoreObjectiveCriteria;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.IJsonSerializable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
+import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.ScoreCriteriaStat;
+import net.minecraft.util.IJsonSerializable;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.HoverEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class StatBase
 {
     /** The Stat ID */
     public final String statId;
     /** The Stat name */
-    private final IChatComponent statName;
+    private final ITextComponent statName;
     public boolean isIndependent;
-    private final IStatType type;
-    private final IScoreObjectiveCriteria field_150957_c;
-    private Class <? extends IJsonSerializable > field_150956_d;
-    private static NumberFormat numberFormat = NumberFormat.getIntegerInstance(Locale.US);
+    private final IStatType formatter;
+    private final IScoreCriteria objectiveCriteria;
+    private Class <? extends IJsonSerializable > serializableClazz;
+    private static final NumberFormat numberFormat = NumberFormat.getIntegerInstance(Locale.US);
     public static IStatType simpleStatType = new IStatType()
     {
         /**
          * Formats a given stat for human consumption.
          */
         @SideOnly(Side.CLIENT)
-        public String format(int p_75843_1_)
+        public String format(int number)
         {
-            return StatBase.numberFormat.format((long)p_75843_1_);
+            return StatBase.numberFormat.format((long)number);
         }
     };
-    private static DecimalFormat decimalFormat = new DecimalFormat("########0.00");
+    private static final DecimalFormat decimalFormat = new DecimalFormat("########0.00");
     public static IStatType timeStatType = new IStatType()
     {
         /**
          * Formats a given stat for human consumption.
          */
         @SideOnly(Side.CLIENT)
-        public String format(int p_75843_1_)
+        public String format(int number)
         {
-            double d0 = (double)p_75843_1_ / 20.0D;
+            double d0 = (double)number / 20.0D;
             double d1 = d0 / 60.0D;
             double d2 = d1 / 60.0D;
             double d3 = d2 / 24.0D;
@@ -58,35 +58,35 @@ public class StatBase
          * Formats a given stat for human consumption.
          */
         @SideOnly(Side.CLIENT)
-        public String format(int p_75843_1_)
+        public String format(int number)
         {
-            double d0 = (double)p_75843_1_ / 100.0D;
+            double d0 = (double)number / 100.0D;
             double d1 = d0 / 1000.0D;
-            return d1 > 0.5D ? StatBase.decimalFormat.format(d1) + " km" : (d0 > 0.5D ? StatBase.decimalFormat.format(d0) + " m" : p_75843_1_ + " cm");
+            return d1 > 0.5D ? StatBase.decimalFormat.format(d1) + " km" : (d0 > 0.5D ? StatBase.decimalFormat.format(d0) + " m" : number + " cm");
         }
     };
-    public static IStatType field_111202_k = new IStatType()
+    public static IStatType divideByTen = new IStatType()
     {
         /**
          * Formats a given stat for human consumption.
          */
         @SideOnly(Side.CLIENT)
-        public String format(int p_75843_1_)
+        public String format(int number)
         {
-            return StatBase.decimalFormat.format((double)p_75843_1_ * 0.1D);
+            return StatBase.decimalFormat.format((double)number * 0.1D);
         }
     };
 
-    public StatBase(String statIdIn, IChatComponent statNameIn, IStatType typeIn)
+    public StatBase(String statIdIn, ITextComponent statNameIn, IStatType formatterIn)
     {
         this.statId = statIdIn;
         this.statName = statNameIn;
-        this.type = typeIn;
-        this.field_150957_c = new ObjectiveStat(this);
-        IScoreObjectiveCriteria.INSTANCES.put(this.field_150957_c.getName(), this.field_150957_c);
+        this.formatter = formatterIn;
+        this.objectiveCriteria = new ScoreCriteriaStat(this);
+        IScoreCriteria.INSTANCES.put(this.objectiveCriteria.getName(), this.objectiveCriteria);
     }
 
-    public StatBase(String statIdIn, IChatComponent statNameIn)
+    public StatBase(String statIdIn, ITextComponent statNameIn)
     {
         this(statIdIn, statNameIn, simpleStatType);
     }
@@ -106,14 +106,14 @@ public class StatBase
      */
     public StatBase registerStat()
     {
-        if (StatList.oneShotStats.containsKey(this.statId))
+        if (StatList.ID_TO_STAT_MAP.containsKey(this.statId))
         {
-            throw new RuntimeException("Duplicate stat id: \"" + ((StatBase)StatList.oneShotStats.get(this.statId)).statName + "\" and \"" + this.statName + "\" at id " + this.statId);
+            throw new RuntimeException("Duplicate stat id: \"" + ((StatBase)StatList.ID_TO_STAT_MAP.get(this.statId)).statName + "\" and \"" + this.statName + "\" at id " + this.statId);
         }
         else
         {
-            StatList.allStats.add(this);
-            StatList.oneShotStats.put(this.statId, this);
+            StatList.ALL_STATS.add(this);
+            StatList.ID_TO_STAT_MAP.put(this.statId, this);
             return this;
         }
     }
@@ -127,25 +127,28 @@ public class StatBase
     }
 
     @SideOnly(Side.CLIENT)
-    public String format(int p_75968_1_)
+    public String format(int number)
     {
-        return this.type.format(p_75968_1_);
+        return this.formatter.format(number);
     }
 
-    public IChatComponent getStatName()
+    public ITextComponent getStatName()
     {
-        IChatComponent ichatcomponent = this.statName.createCopy();
-        ichatcomponent.getChatStyle().setColor(EnumChatFormatting.GRAY);
-        ichatcomponent.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ACHIEVEMENT, new ChatComponentText(this.statId)));
-        return ichatcomponent;
+        ITextComponent itextcomponent = this.statName.createCopy();
+        itextcomponent.getStyle().setColor(TextFormatting.GRAY);
+        itextcomponent.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ACHIEVEMENT, new TextComponentString(this.statId)));
+        return itextcomponent;
     }
 
-    public IChatComponent func_150955_j()
+    /**
+     * 1.8.9
+     */
+    public ITextComponent createChatComponent()
     {
-        IChatComponent ichatcomponent = this.getStatName();
-        IChatComponent ichatcomponent1 = (new ChatComponentText("[")).appendSibling(ichatcomponent).appendText("]");
-        ichatcomponent1.setChatStyle(ichatcomponent.getChatStyle());
-        return ichatcomponent1;
+        ITextComponent itextcomponent = this.getStatName();
+        ITextComponent itextcomponent1 = (new TextComponentString("[")).appendSibling(itextcomponent).appendText("]");
+        itextcomponent1.setStyle(itextcomponent.getStyle());
+        return itextcomponent1;
     }
 
     public boolean equals(Object p_equals_1_)
@@ -172,22 +175,25 @@ public class StatBase
 
     public String toString()
     {
-        return "Stat{id=" + this.statId + ", nameId=" + this.statName + ", awardLocallyOnly=" + this.isIndependent + ", formatter=" + this.type + ", objectiveCriteria=" + this.field_150957_c + '}';
+        return "Stat{id=" + this.statId + ", nameId=" + this.statName + ", awardLocallyOnly=" + this.isIndependent + ", formatter=" + this.formatter + ", objectiveCriteria=" + this.objectiveCriteria + '}';
     }
 
-    public IScoreObjectiveCriteria func_150952_k()
+    /**
+     * 1.8.9
+     */
+    public IScoreCriteria getCriteria()
     {
-        return this.field_150957_c;
+        return this.objectiveCriteria;
     }
 
-    public Class <? extends IJsonSerializable > func_150954_l()
+    public Class <? extends IJsonSerializable > getSerializableClazz()
     {
-        return this.field_150956_d;
+        return this.serializableClazz;
     }
 
-    public StatBase func_150953_b(Class <? extends IJsonSerializable > p_150953_1_)
+    public StatBase setSerializableClazz(Class <? extends IJsonSerializable > clazz)
     {
-        this.field_150956_d = p_150953_1_;
+        this.serializableClazz = clazz;
         return this;
     }
 }

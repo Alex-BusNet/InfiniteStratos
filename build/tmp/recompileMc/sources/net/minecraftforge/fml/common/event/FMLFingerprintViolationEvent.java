@@ -1,22 +1,29 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.common.event;
 
-import com.google.common.collect.ImmutableSet;
-import net.minecraftforge.fml.common.Mod;
-
 import java.io.File;
 import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
+import net.minecraftforge.fml.common.Mod;
 
 
 /**
@@ -25,10 +32,10 @@ import java.util.Set;
  */
 public class FMLFingerprintViolationEvent extends FMLEvent {
 
-    public final boolean isDirectory;
-    public final Set<String> fingerprints;
-    public final File source;
-    public final String expectedFingerprint;
+    private final boolean isDirectory;
+    private final Set<String> fingerprints;
+    private final File source;
+    private final String expectedFingerprint;
 
     public FMLFingerprintViolationEvent(boolean isDirectory, File source, ImmutableSet<String> fingerprints, String expectedFingerprint)
     {
@@ -38,4 +45,9 @@ public class FMLFingerprintViolationEvent extends FMLEvent {
         this.fingerprints = fingerprints;
         this.expectedFingerprint = expectedFingerprint;
     }
+
+    public boolean isDirectory() { return isDirectory; }
+    public Set<String> getFingerprints() { return fingerprints; }
+    public File getSource() { return source; }
+    public String getExpectedFingerprint() { return expectedFingerprint; }
 }

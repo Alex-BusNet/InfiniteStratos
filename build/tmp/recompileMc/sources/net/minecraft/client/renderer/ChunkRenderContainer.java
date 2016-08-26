@@ -1,13 +1,12 @@
 package net.minecraft.client.renderer;
 
 import com.google.common.collect.Lists;
+import java.util.List;
 import net.minecraft.client.renderer.chunk.RenderChunk;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public abstract class ChunkRenderContainer
@@ -33,10 +32,10 @@ public abstract class ChunkRenderContainer
         GlStateManager.translate((float)((double)blockpos.getX() - this.viewEntityX), (float)((double)blockpos.getY() - this.viewEntityY), (float)((double)blockpos.getZ() - this.viewEntityZ));
     }
 
-    public void addRenderChunk(RenderChunk renderChunkIn, EnumWorldBlockLayer layer)
+    public void addRenderChunk(RenderChunk renderChunkIn, BlockRenderLayer layer)
     {
         this.renderChunks.add(renderChunkIn);
     }
 
-    public abstract void renderChunkLayer(EnumWorldBlockLayer layer);
+    public abstract void renderChunkLayer(BlockRenderLayer layer);
 }

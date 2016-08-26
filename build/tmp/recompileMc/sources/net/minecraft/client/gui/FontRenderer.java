@@ -3,13 +3,21 @@ package net.minecraft.client.gui;
 import com.ibm.icu.text.ArabicShaping;
 import com.ibm.icu.text.ArabicShapingException;
 import com.ibm.icu.text.Bidi;
+import java.awt.image.BufferedImage;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.client.settings.GameSettings;
@@ -17,32 +25,23 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
-import org.lwjgl.opengl.GL11;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
 
 @SideOnly(Side.CLIENT)
 public class FontRenderer implements IResourceManagerReloadListener
 {
-    private static final ResourceLocation[] unicodePageLocations = new ResourceLocation[256];
+    private static final ResourceLocation[] UNICODE_PAGE_LOCATIONS = new ResourceLocation[256];
     /** Array of width of all the characters in default.png */
-    protected int[] charWidth = new int[256];
+    protected final int[] charWidth = new int[256];
     /** the height in pixels of default text */
     public int FONT_HEIGHT = 9;
     public Random fontRandom = new Random();
     /** Array of the start/end column (in upper/lower nibble) for every glyph in the /font directory. */
-    protected byte[] glyphWidth = new byte[65536];
+    protected final byte[] glyphWidth = new byte[65536];
     /**
      * Array of RGB triplets defining the 16 standard chat colors followed by 16 darker version of the same colors for
      * drop shadows.
      */
-    private int[] colorCode = new int[32];
+    private final int[] colorCode = new int[32];
     protected final ResourceLocation locationFontTexture;
     /** The RenderEngine used to load and setup glyph textures. */
     private final TextureManager renderEngine;
@@ -125,72 +124,13 @@ public class FontRenderer implements IResourceManagerReloadListener
 
     private void readFontTexture()
     {
+        IResource iresource = null;
         BufferedImage bufferedimage;
 
         try
         {
-            bufferedimage = TextureUtil.readBufferedImage(getResourceInputStream(this.locationFontTexture));
-        }
-        catch (IOException ioexception)
-        {
-            throw new RuntimeException(ioexception);
-        }
-
-        int i = bufferedimage.getWidth();
-        int j = bufferedimage.getHeight();
-        int[] aint = new int[i * j];
-        bufferedimage.getRGB(0, 0, i, j, aint, 0, i);
-        int k = j / 16;
-        int l = i / 16;
-        int i1 = 1;
-        float f = 8.0F / (float)l;
-
-        for (int j1 = 0; j1 < 256; ++j1)
-        {
-            int k1 = j1 % 16;
-            int l1 = j1 / 16;
-
-            if (j1 == 32)
-            {
-                this.charWidth[j1] = 3 + i1;
-            }
-
-            int i2;
-
-            for (i2 = l - 1; i2 >= 0; --i2)
-            {
-                int j2 = k1 * l + i2;
-                boolean flag = true;
-
-                for (int k2 = 0; k2 < k && flag; ++k2)
-                {
-                    int l2 = (l1 * l + k2) * i;
-
-                    if ((aint[j2 + l2] >> 24 & 255) != 0)
-                    {
-                        flag = false;
-                    }
-                }
-
-                if (!flag)
-                {
-                    break;
-                }
-            }
-
-            ++i2;
-            this.charWidth[j1] = (int)(0.5D + (double)((float)i2 * f)) + i1;
-        }
-    }
-
-    private void readGlyphSizes()
-    {
-        InputStream inputstream = null;
-
-        try
-        {
-            inputstream = getResourceInputStream(new ResourceLocation("font/glyph_sizes.bin"));
-            inputstream.read(this.glyphWidth);
+            iresource = getResource(this.locationFontTexture);
+            bufferedimage = TextureUtil.readBufferedImage(iresource.getInputStream());
         }
         catch (IOException ioexception)
         {
@@ -198,11 +138,79 @@ public class FontRenderer implements IResourceManagerReloadListener
         }
         finally
         {
-            IOUtils.closeQuietly(inputstream);
+            IOUtils.closeQuietly((Closeable)iresource);
+        }
+
+        int lvt_3_1_ = bufferedimage.getWidth();
+        int lvt_4_1_ = bufferedimage.getHeight();
+        int[] lvt_5_1_ = new int[lvt_3_1_ * lvt_4_1_];
+        bufferedimage.getRGB(0, 0, lvt_3_1_, lvt_4_1_, lvt_5_1_, 0, lvt_3_1_);
+        int lvt_6_1_ = lvt_4_1_ / 16;
+        int lvt_7_1_ = lvt_3_1_ / 16;
+        boolean lvt_8_1_ = true;
+        float lvt_9_1_ = 8.0F / (float)lvt_7_1_;
+
+        for (int lvt_10_1_ = 0; lvt_10_1_ < 256; ++lvt_10_1_)
+        {
+            int j1 = lvt_10_1_ % 16;
+            int k1 = lvt_10_1_ / 16;
+
+            if (lvt_10_1_ == 32)
+            {
+                this.charWidth[lvt_10_1_] = 4;
+            }
+
+            int l1;
+
+            for (l1 = lvt_7_1_ - 1; l1 >= 0; --l1)
+            {
+                int i2 = j1 * lvt_7_1_ + l1;
+                boolean flag1 = true;
+
+                for (int j2 = 0; j2 < lvt_6_1_ && flag1; ++j2)
+                {
+                    int k2 = (k1 * lvt_7_1_ + j2) * lvt_3_1_;
+
+                    if ((lvt_5_1_[i2 + k2] >> 24 & 255) != 0)
+                    {
+                        flag1 = false;
+                    }
+                }
+
+                if (!flag1)
+                {
+                    break;
+                }
+            }
+
+            ++l1;
+            this.charWidth[lvt_10_1_] = (int)(0.5D + (double)((float)l1 * lvt_9_1_)) + 1;
         }
     }
 
-    private float func_181559_a(char ch, boolean italic)
+    private void readGlyphSizes()
+    {
+        IResource iresource = null;
+
+        try
+        {
+            iresource = getResource(new ResourceLocation("font/glyph_sizes.bin"));
+            iresource.getInputStream().read(this.glyphWidth);
+        }
+        catch (IOException ioexception)
+        {
+            throw new RuntimeException(ioexception);
+        }
+        finally
+        {
+            IOUtils.closeQuietly((Closeable)iresource);
+        }
+    }
+
+    /**
+     * Render the given char
+     */
+    private float renderChar(char ch, boolean italic)
     {
         if (ch == 32)
         {
@@ -226,27 +234,27 @@ public class FontRenderer implements IResourceManagerReloadListener
         bindTexture(this.locationFontTexture);
         int l = this.charWidth[ch];
         float f = (float)l - 0.01F;
-        GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-        GL11.glTexCoord2f((float)i / 128.0F, (float)j / 128.0F);
-        GL11.glVertex3f(this.posX + (float)k, this.posY, 0.0F);
-        GL11.glTexCoord2f((float)i / 128.0F, ((float)j + 7.99F) / 128.0F);
-        GL11.glVertex3f(this.posX - (float)k, this.posY + 7.99F, 0.0F);
-        GL11.glTexCoord2f(((float)i + f - 1.0F) / 128.0F, (float)j / 128.0F);
-        GL11.glVertex3f(this.posX + f - 1.0F + (float)k, this.posY, 0.0F);
-        GL11.glTexCoord2f(((float)i + f - 1.0F) / 128.0F, ((float)j + 7.99F) / 128.0F);
-        GL11.glVertex3f(this.posX + f - 1.0F - (float)k, this.posY + 7.99F, 0.0F);
-        GL11.glEnd();
+        GlStateManager.glBegin(5);
+        GlStateManager.glTexCoord2f((float)i / 128.0F, (float)j / 128.0F);
+        GlStateManager.glVertex3f(this.posX + (float)k, this.posY, 0.0F);
+        GlStateManager.glTexCoord2f((float)i / 128.0F, ((float)j + 7.99F) / 128.0F);
+        GlStateManager.glVertex3f(this.posX - (float)k, this.posY + 7.99F, 0.0F);
+        GlStateManager.glTexCoord2f(((float)i + f - 1.0F) / 128.0F, (float)j / 128.0F);
+        GlStateManager.glVertex3f(this.posX + f - 1.0F + (float)k, this.posY, 0.0F);
+        GlStateManager.glTexCoord2f(((float)i + f - 1.0F) / 128.0F, ((float)j + 7.99F) / 128.0F);
+        GlStateManager.glVertex3f(this.posX + f - 1.0F - (float)k, this.posY + 7.99F, 0.0F);
+        GlStateManager.glEnd();
         return (float)l;
     }
 
     private ResourceLocation getUnicodePageLocation(int page)
     {
-        if (unicodePageLocations[page] == null)
+        if (UNICODE_PAGE_LOCATIONS[page] == null)
         {
-            unicodePageLocations[page] = new ResourceLocation(String.format("textures/font/unicode_page_%02x.png", new Object[] {Integer.valueOf(page)}));
+            UNICODE_PAGE_LOCATIONS[page] = new ResourceLocation(String.format("textures/font/unicode_page_%02x.png", new Object[] {Integer.valueOf(page)}));
         }
 
-        return unicodePageLocations[page];
+        return UNICODE_PAGE_LOCATIONS[page];
     }
 
     /**
@@ -262,32 +270,34 @@ public class FontRenderer implements IResourceManagerReloadListener
      */
     protected float renderUnicodeChar(char ch, boolean italic)
     {
-        if (this.glyphWidth[ch] == 0)
+        int i = this.glyphWidth[ch] & 255;
+
+        if (i == 0)
         {
             return 0.0F;
         }
         else
         {
-            int i = ch / 256;
-            this.loadGlyphTexture(i);
-            int j = this.glyphWidth[ch] >>> 4;
-            int k = this.glyphWidth[ch] & 15;
-            float f = (float)j;
-            float f1 = (float)(k + 1);
+            int j = ch / 256;
+            this.loadGlyphTexture(j);
+            int k = i >>> 4;
+            int l = i & 15;
+            float f = (float)k;
+            float f1 = (float)(l + 1);
             float f2 = (float)(ch % 16 * 16) + f;
             float f3 = (float)((ch & 255) / 16 * 16);
             float f4 = f1 - f - 0.02F;
             float f5 = italic ? 1.0F : 0.0F;
-            GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-            GL11.glTexCoord2f(f2 / 256.0F, f3 / 256.0F);
-            GL11.glVertex3f(this.posX + f5, this.posY, 0.0F);
-            GL11.glTexCoord2f(f2 / 256.0F, (f3 + 15.98F) / 256.0F);
-            GL11.glVertex3f(this.posX - f5, this.posY + 7.99F, 0.0F);
-            GL11.glTexCoord2f((f2 + f4) / 256.0F, f3 / 256.0F);
-            GL11.glVertex3f(this.posX + f4 / 2.0F + f5, this.posY, 0.0F);
-            GL11.glTexCoord2f((f2 + f4) / 256.0F, (f3 + 15.98F) / 256.0F);
-            GL11.glVertex3f(this.posX + f4 / 2.0F - f5, this.posY + 7.99F, 0.0F);
-            GL11.glEnd();
+            GlStateManager.glBegin(5);
+            GlStateManager.glTexCoord2f(f2 / 256.0F, f3 / 256.0F);
+            GlStateManager.glVertex3f(this.posX + f5, this.posY, 0.0F);
+            GlStateManager.glTexCoord2f(f2 / 256.0F, (f3 + 15.98F) / 256.0F);
+            GlStateManager.glVertex3f(this.posX - f5, this.posY + 7.99F, 0.0F);
+            GlStateManager.glTexCoord2f((f2 + f4) / 256.0F, f3 / 256.0F);
+            GlStateManager.glVertex3f(this.posX + f4 / 2.0F + f5, this.posY, 0.0F);
+            GlStateManager.glTexCoord2f((f2 + f4) / 256.0F, (f3 + 15.98F) / 256.0F);
+            GlStateManager.glVertex3f(this.posX + f4 / 2.0F - f5, this.posY + 7.99F, 0.0F);
+            GlStateManager.glEnd();
             return (f1 - f) / 2.0F + 1.0F;
         }
     }
@@ -458,7 +468,7 @@ public class FontRenderer implements IResourceManagerReloadListener
                     this.posY -= f1;
                 }
 
-                float f = this.func_181559_a(c0, this.italicStyle);
+                float f = this.renderChar(c0, this.italicStyle);
 
                 if (flag)
                 {
@@ -476,7 +486,7 @@ public class FontRenderer implements IResourceManagerReloadListener
                         this.posY -= f1;
                     }
 
-                    this.func_181559_a(c0, this.italicStyle);
+                    this.renderChar(c0, this.italicStyle);
                     this.posX -= f1;
 
                     if (flag)
@@ -500,13 +510,13 @@ public class FontRenderer implements IResourceManagerReloadListener
                 if (this.strikethroughStyle)
                 {
                     Tessellator tessellator = Tessellator.getInstance();
-                    WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+                    VertexBuffer vertexbuffer = tessellator.getBuffer();
                     GlStateManager.disableTexture2D();
-                    worldrenderer.begin(7, DefaultVertexFormats.POSITION);
-                    worldrenderer.pos((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D).endVertex();
-                    worldrenderer.pos((double)(this.posX + f), (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D).endVertex();
-                    worldrenderer.pos((double)(this.posX + f), (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D).endVertex();
-                    worldrenderer.pos((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D).endVertex();
+                    vertexbuffer.begin(7, DefaultVertexFormats.POSITION);
+                    vertexbuffer.pos((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D).endVertex();
+                    vertexbuffer.pos((double)(this.posX + f), (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D).endVertex();
+                    vertexbuffer.pos((double)(this.posX + f), (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D).endVertex();
+                    vertexbuffer.pos((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D).endVertex();
                     tessellator.draw();
                     GlStateManager.enableTexture2D();
                 }
@@ -514,14 +524,14 @@ public class FontRenderer implements IResourceManagerReloadListener
                 if (this.underlineStyle)
                 {
                     Tessellator tessellator1 = Tessellator.getInstance();
-                    WorldRenderer worldrenderer1 = tessellator1.getWorldRenderer();
+                    VertexBuffer vertexbuffer1 = tessellator1.getBuffer();
                     GlStateManager.disableTexture2D();
-                    worldrenderer1.begin(7, DefaultVertexFormats.POSITION);
+                    vertexbuffer1.begin(7, DefaultVertexFormats.POSITION);
                     int l = this.underlineStyle ? -1 : 0;
-                    worldrenderer1.pos((double)(this.posX + (float)l), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D).endVertex();
-                    worldrenderer1.pos((double)(this.posX + f), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D).endVertex();
-                    worldrenderer1.pos((double)(this.posX + f), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D).endVertex();
-                    worldrenderer1.pos((double)(this.posX + (float)l), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D).endVertex();
+                    vertexbuffer1.pos((double)(this.posX + (float)l), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D).endVertex();
+                    vertexbuffer1.pos((double)(this.posX + f), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D).endVertex();
+                    vertexbuffer1.pos((double)(this.posX + f), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D).endVertex();
+                    vertexbuffer1.pos((double)(this.posX + (float)l), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D).endVertex();
                     tessellator1.draw();
                     GlStateManager.enableTexture2D();
                 }
@@ -657,12 +667,11 @@ public class FontRenderer implements IResourceManagerReloadListener
             }
             else if (this.glyphWidth[character] != 0)
             {
-                int j = this.glyphWidth[character] >>> 4;
-                int k = this.glyphWidth[character] & 15;
-
-
-                ++k;
-                return (k - j) / 2 + 1;
+                int j = this.glyphWidth[character] & 255;
+                int k = j >>> 4;
+                int l = j & 15;
+                ++l;
+                return (l - k) / 2 + 1;
             }
             else
             {
@@ -784,9 +793,9 @@ public class FontRenderer implements IResourceManagerReloadListener
     /**
      * Returns the width of the wordwrapped String (maximum length is parameter k)
      */
-    public int splitStringWidth(String p_78267_1_, int p_78267_2_)
+    public int splitStringWidth(String str, int maxLength)
     {
-        return this.FONT_HEIGHT * this.listFormattedStringToWidth(p_78267_1_, p_78267_2_).size();
+        return this.FONT_HEIGHT * this.listFormattedStringToWidth(str, maxLength).size();
     }
 
     /**
@@ -976,13 +985,14 @@ public class FontRenderer implements IResourceManagerReloadListener
         renderEngine.bindTexture(location);
     }
 
-    protected InputStream getResourceInputStream(ResourceLocation location) throws IOException
+    protected IResource getResource(ResourceLocation location) throws IOException
     {
-        return Minecraft.getMinecraft().getResourceManager().getResource(location).getInputStream();
+        return Minecraft.getMinecraft().getResourceManager().getResource(location);
     }
 
     public int getColorCode(char character)
     {
-        return this.colorCode["0123456789abcdef".indexOf(character)];
+        int i = "0123456789abcdef".indexOf(character);
+        return i >= 0 && i < this.colorCode.length ? this.colorCode[i] : -1;
     }
 }

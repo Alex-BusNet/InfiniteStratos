@@ -1,18 +1,13 @@
 package net.minecraft.item;
 
+import java.util.List;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
-import java.util.Random;
 
 public class ItemEnchantedBook extends Item
 {
@@ -35,7 +30,7 @@ public class ItemEnchantedBook extends Item
      */
     public EnumRarity getRarity(ItemStack stack)
     {
-        return this.getEnchantments(stack).tagCount() > 0 ? EnumRarity.UNCOMMON : super.getRarity(stack);
+        return this.getEnchantments(stack).hasNoTags() ? super.getRarity(stack) : EnumRarity.UNCOMMON;
     }
 
     public NBTTagList getEnchantments(ItemStack stack)
@@ -60,9 +55,9 @@ public class ItemEnchantedBook extends Item
                 int j = nbttaglist.getCompoundTagAt(i).getShort("id");
                 int k = nbttaglist.getCompoundTagAt(i).getShort("lvl");
 
-                if (Enchantment.getEnchantmentById(j) != null)
+                if (Enchantment.getEnchantmentByID(j) != null)
                 {
-                    tooltip.add(Enchantment.getEnchantmentById(j).getTranslatedName(k));
+                    tooltip.add(Enchantment.getEnchantmentByID(j).getTranslatedName(k));
                 }
             }
         }
@@ -80,7 +75,7 @@ public class ItemEnchantedBook extends Item
         {
             NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
 
-            if (nbttagcompound.getShort("id") == enchantment.enchantmentobj.effectId)
+            if (Enchantment.getEnchantmentByID(nbttagcompound.getShort("id")) == enchantment.enchantmentobj)
             {
                 if (nbttagcompound.getShort("lvl") < enchantment.enchantmentLevel)
                 {
@@ -95,7 +90,7 @@ public class ItemEnchantedBook extends Item
         if (flag)
         {
             NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-            nbttagcompound1.setShort("id", (short)enchantment.enchantmentobj.effectId);
+            nbttagcompound1.setShort("id", (short)Enchantment.getEnchantmentID(enchantment.enchantmentobj));
             nbttagcompound1.setShort("lvl", (short)enchantment.enchantmentLevel);
             nbttaglist.appendTag(nbttagcompound1);
         }
@@ -125,17 +120,5 @@ public class ItemEnchantedBook extends Item
         {
             list.add(this.getEnchantedItemStack(new EnchantmentData(enchantment, i)));
         }
-    }
-
-    public WeightedRandomChestContent getRandom(Random rand)
-    {
-        return this.getRandom(rand, 1, 1, 1);
-    }
-
-    public WeightedRandomChestContent getRandom(Random rand, int minChance, int maxChance, int weight)
-    {
-        ItemStack itemstack = new ItemStack(Items.book, 1, 0);
-        EnchantmentHelper.addRandomEnchantment(rand, itemstack, 30);
-        return new WeightedRandomChestContent(itemstack, minChance, maxChance, weight);
     }
 }

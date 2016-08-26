@@ -1,5 +1,7 @@
 package net.minecraft.entity.ai.attributes;
 
+import javax.annotation.Nullable;
+
 public interface IAttribute
 {
     String getAttributeUnlocalizedName();
@@ -10,5 +12,6 @@ public interface IAttribute
 
     boolean getShouldWatch();
 
-    IAttribute func_180372_d();
+    @Nullable
+    IAttribute getParent();
 }

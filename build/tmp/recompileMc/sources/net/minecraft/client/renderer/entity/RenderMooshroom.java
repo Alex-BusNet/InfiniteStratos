@@ -10,7 +10,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderMooshroom extends RenderLiving<EntityMooshroom>
 {
-    private static final ResourceLocation mooshroomTextures = new ResourceLocation("textures/entity/cow/mooshroom.png");
+    private static final ResourceLocation MOOSHROOM_TEXTURES = new ResourceLocation("textures/entity/cow/mooshroom.png");
 
     public RenderMooshroom(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn)
     {
@@ -23,6 +23,6 @@ public class RenderMooshroom extends RenderLiving<EntityMooshroom>
      */
     protected ResourceLocation getEntityTexture(EntityMooshroom entity)
     {
-        return mooshroomTextures;
+        return MOOSHROOM_TEXTURES;
     }
 }

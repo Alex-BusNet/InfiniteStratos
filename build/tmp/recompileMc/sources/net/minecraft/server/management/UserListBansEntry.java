@@ -2,11 +2,10 @@ package net.minecraft.server.management;
 
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
-
 import java.util.Date;
 import java.util.UUID;
 
-public class UserListBansEntry extends BanEntry<GameProfile>
+public class UserListBansEntry extends UserListEntryBan<GameProfile>
 {
     public UserListBansEntry(GameProfile profile)
     {
@@ -36,8 +35,6 @@ public class UserListBansEntry extends BanEntry<GameProfile>
     /**
      * Convert a {@linkplain com.google.gson.JsonObject JsonObject} into a {@linkplain com.mojang.authlib.GameProfile}.
      * The json object must have {@code uuid} and {@code name} attributes or {@code null} will be returned.
-     *  
-     * @param json The json object
      */
     private static GameProfile toGameProfile(JsonObject json)
     {

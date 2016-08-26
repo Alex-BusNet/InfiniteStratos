@@ -5,7 +5,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.IProgressUpdate;
@@ -18,14 +18,15 @@ public class LoadingScreenRenderer implements IProgressUpdate
 {
     private String message = "";
     /** A reference to the Minecraft object. */
-    private Minecraft mc;
+    private final Minecraft mc;
     /** The text currently displayed (i.e. the argument to the last call to printText or func_73722_d) */
     private String currentlyDisplayedText = "";
     /** The system's time represented in milliseconds. */
     private long systemTime = Minecraft.getSystemTime();
-    private boolean field_73724_e;
-    private ScaledResolution scaledResolution;
-    private Framebuffer framebuffer;
+    /** True if the loading ended with a success */
+    private boolean loadingSuccess;
+    private final ScaledResolution scaledResolution;
+    private final Framebuffer framebuffer;
 
     public LoadingScreenRenderer(Minecraft mcIn)
     {
@@ -41,7 +42,7 @@ public class LoadingScreenRenderer implements IProgressUpdate
      */
     public void resetProgressAndMessage(String message)
     {
-        this.field_73724_e = false;
+        this.loadingSuccess = false;
         this.displayString(message);
     }
 
@@ -50,7 +51,7 @@ public class LoadingScreenRenderer implements IProgressUpdate
      */
     public void displaySavingString(String message)
     {
-        this.field_73724_e = true;
+        this.loadingSuccess = true;
         this.displayString(message);
     }
 
@@ -60,7 +61,7 @@ public class LoadingScreenRenderer implements IProgressUpdate
 
         if (!this.mc.running)
         {
-            if (!this.field_73724_e)
+            if (!this.loadingSuccess)
             {
                 throw new MinecraftError();
             }
@@ -95,7 +96,7 @@ public class LoadingScreenRenderer implements IProgressUpdate
     {
         if (!this.mc.running)
         {
-            if (!this.field_73724_e)
+            if (!this.loadingSuccess)
             {
                 throw new MinecraftError();
             }
@@ -110,13 +111,13 @@ public class LoadingScreenRenderer implements IProgressUpdate
     }
 
     /**
-     * Updates the progress bar on the loading screen to the specified amount. Args: loadProgress
+     * Updates the progress bar on the loading screen to the specified amount.
      */
     public void setLoadingProgress(int progress)
     {
         if (!this.mc.running)
         {
-            if (!this.field_73724_e)
+            if (!this.loadingSuccess)
             {
                 throw new MinecraftError();
             }
@@ -160,38 +161,38 @@ public class LoadingScreenRenderer implements IProgressUpdate
                 if (!net.minecraftforge.fml.client.FMLClientHandler.instance().handleLoadingScreen(scaledresolution)) //FML Don't render while FML's pre-screen is rendering
                 {
                 Tessellator tessellator = Tessellator.getInstance();
-                WorldRenderer worldrenderer = tessellator.getWorldRenderer();
-                this.mc.getTextureManager().bindTexture(Gui.optionsBackground);
+                VertexBuffer vertexbuffer = tessellator.getBuffer();
+                this.mc.getTextureManager().bindTexture(Gui.OPTIONS_BACKGROUND);
                 float f = 32.0F;
-                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-                worldrenderer.pos(0.0D, (double)l, 0.0D).tex(0.0D, (double)((float)l / f)).color(64, 64, 64, 255).endVertex();
-                worldrenderer.pos((double)k, (double)l, 0.0D).tex((double)((float)k / f), (double)((float)l / f)).color(64, 64, 64, 255).endVertex();
-                worldrenderer.pos((double)k, 0.0D, 0.0D).tex((double)((float)k / f), 0.0D).color(64, 64, 64, 255).endVertex();
-                worldrenderer.pos(0.0D, 0.0D, 0.0D).tex(0.0D, 0.0D).color(64, 64, 64, 255).endVertex();
+                vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                vertexbuffer.pos(0.0D, (double)l, 0.0D).tex(0.0D, (double)((float)l / 32.0F)).color(64, 64, 64, 255).endVertex();
+                vertexbuffer.pos((double)k, (double)l, 0.0D).tex((double)((float)k / 32.0F), (double)((float)l / 32.0F)).color(64, 64, 64, 255).endVertex();
+                vertexbuffer.pos((double)k, 0.0D, 0.0D).tex((double)((float)k / 32.0F), 0.0D).color(64, 64, 64, 255).endVertex();
+                vertexbuffer.pos(0.0D, 0.0D, 0.0D).tex(0.0D, 0.0D).color(64, 64, 64, 255).endVertex();
                 tessellator.draw();
 
                 if (progress >= 0)
                 {
                     int i1 = 100;
                     int j1 = 2;
-                    int k1 = k / 2 - i1 / 2;
+                    int k1 = k / 2 - 50;
                     int l1 = l / 2 + 16;
                     GlStateManager.disableTexture2D();
-                    worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-                    worldrenderer.pos((double)k1, (double)l1, 0.0D).color(128, 128, 128, 255).endVertex();
-                    worldrenderer.pos((double)k1, (double)(l1 + j1), 0.0D).color(128, 128, 128, 255).endVertex();
-                    worldrenderer.pos((double)(k1 + i1), (double)(l1 + j1), 0.0D).color(128, 128, 128, 255).endVertex();
-                    worldrenderer.pos((double)(k1 + i1), (double)l1, 0.0D).color(128, 128, 128, 255).endVertex();
-                    worldrenderer.pos((double)k1, (double)l1, 0.0D).color(128, 255, 128, 255).endVertex();
-                    worldrenderer.pos((double)k1, (double)(l1 + j1), 0.0D).color(128, 255, 128, 255).endVertex();
-                    worldrenderer.pos((double)(k1 + progress), (double)(l1 + j1), 0.0D).color(128, 255, 128, 255).endVertex();
-                    worldrenderer.pos((double)(k1 + progress), (double)l1, 0.0D).color(128, 255, 128, 255).endVertex();
+                    vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+                    vertexbuffer.pos((double)k1, (double)l1, 0.0D).color(128, 128, 128, 255).endVertex();
+                    vertexbuffer.pos((double)k1, (double)(l1 + 2), 0.0D).color(128, 128, 128, 255).endVertex();
+                    vertexbuffer.pos((double)(k1 + 100), (double)(l1 + 2), 0.0D).color(128, 128, 128, 255).endVertex();
+                    vertexbuffer.pos((double)(k1 + 100), (double)l1, 0.0D).color(128, 128, 128, 255).endVertex();
+                    vertexbuffer.pos((double)k1, (double)l1, 0.0D).color(128, 255, 128, 255).endVertex();
+                    vertexbuffer.pos((double)k1, (double)(l1 + 2), 0.0D).color(128, 255, 128, 255).endVertex();
+                    vertexbuffer.pos((double)(k1 + progress), (double)(l1 + 2), 0.0D).color(128, 255, 128, 255).endVertex();
+                    vertexbuffer.pos((double)(k1 + progress), (double)l1, 0.0D).color(128, 255, 128, 255).endVertex();
                     tessellator.draw();
                     GlStateManager.enableTexture2D();
                 }
 
                 GlStateManager.enableBlend();
-                GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+                GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
                 this.mc.fontRendererObj.drawStringWithShadow(this.currentlyDisplayedText, (float)((k - this.mc.fontRendererObj.getStringWidth(this.currentlyDisplayedText)) / 2), (float)(l / 2 - 4 - 16), 16777215);
                 this.mc.fontRendererObj.drawStringWithShadow(this.message, (float)((k - this.mc.fontRendererObj.getStringWidth(this.message)) / 2), (float)(l / 2 - 4 + 8), 16777215);
                 }

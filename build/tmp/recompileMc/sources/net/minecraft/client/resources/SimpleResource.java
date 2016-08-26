@@ -3,32 +3,34 @@ package net.minecraft.client.resources;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Map;
+import javax.annotation.Nullable;
 import net.minecraft.client.resources.data.IMetadataSection;
-import net.minecraft.client.resources.data.IMetadataSerializer;
+import net.minecraft.client.resources.data.MetadataSerializer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Map;
-
 @SideOnly(Side.CLIENT)
-public class SimpleResource implements IResource
+public class SimpleResource implements IResource, Closeable
 {
     private final Map<String, IMetadataSection> mapMetadataSections = Maps.<String, IMetadataSection>newHashMap();
     private final String resourcePackName;
     private final ResourceLocation srResourceLocation;
     private final InputStream resourceInputStream;
     private final InputStream mcmetaInputStream;
-    private final IMetadataSerializer srMetadataSerializer;
+    private final MetadataSerializer srMetadataSerializer;
     private boolean mcmetaJsonChecked;
     private JsonObject mcmetaJson;
 
-    public SimpleResource(String resourcePackNameIn, ResourceLocation srResourceLocationIn, InputStream resourceInputStreamIn, InputStream mcmetaInputStreamIn, IMetadataSerializer srMetadataSerializerIn)
+    public SimpleResource(String resourcePackNameIn, ResourceLocation srResourceLocationIn, InputStream resourceInputStreamIn, InputStream mcmetaInputStreamIn, MetadataSerializer srMetadataSerializerIn)
     {
         this.resourcePackName = resourcePackNameIn;
         this.srResourceLocation = srResourceLocationIn;
@@ -52,7 +54,8 @@ public class SimpleResource implements IResource
         return this.mcmetaInputStream != null;
     }
 
-    public <T extends IMetadataSection> T getMetadata(String p_110526_1_)
+    @Nullable
+    public <T extends IMetadataSection> T getMetadata(String sectionName)
     {
         if (!this.hasMetadata())
         {
@@ -76,11 +79,11 @@ public class SimpleResource implements IResource
                 }
             }
 
-            T t = (T)this.mapMetadataSections.get(p_110526_1_);
+            T t = (T)this.mapMetadataSections.get(sectionName);
 
             if (t == null)
             {
-                t = this.srMetadataSerializer.parseMetadataSection(p_110526_1_, this.mcmetaJson);
+                t = this.srMetadataSerializer.parseMetadataSection(sectionName, this.mcmetaJson);
             }
 
             return t;
@@ -139,5 +142,15 @@ public class SimpleResource implements IResource
         int i = this.resourcePackName != null ? this.resourcePackName.hashCode() : 0;
         i = 31 * i + (this.srResourceLocation != null ? this.srResourceLocation.hashCode() : 0);
         return i;
+    }
+
+    public void close() throws IOException
+    {
+        this.resourceInputStream.close();
+
+        if (this.mcmetaInputStream != null)
+        {
+            this.mcmetaInputStream.close();
+        }
     }
 }

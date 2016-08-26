@@ -1,11 +1,11 @@
 package com.sparta.is.init;
 
+import com.sparta.is.InfiniteStratos;
 import com.sparta.is.block.*;
 import com.sparta.is.reference.Names;
-import com.sparta.is.reference.Reference;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
-@GameRegistry.ObjectHolder(Reference.MOD_ID)
+@GameRegistry.ObjectHolder(InfiniteStratos.MOD_ID)
 public class ModBlocks
 {
     public static final BlockIS flag = new BlockFlag();

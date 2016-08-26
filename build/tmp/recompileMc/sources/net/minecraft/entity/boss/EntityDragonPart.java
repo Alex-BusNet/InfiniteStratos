@@ -26,14 +26,14 @@ public class EntityDragonPart extends Entity
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    protected void readEntityFromNBT(NBTTagCompound tagCompund)
+    protected void readEntityFromNBT(NBTTagCompound compound)
     {
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    protected void writeEntityToNBT(NBTTagCompound tagCompound)
+    protected void writeEntityToNBT(NBTTagCompound compound)
     {
     }
 

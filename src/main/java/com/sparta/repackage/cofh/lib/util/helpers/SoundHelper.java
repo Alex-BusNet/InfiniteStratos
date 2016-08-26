@@ -1,6 +1,6 @@
 package com.sparta.repackage.cofh.lib.util.helpers;
 
-import com.sparta.repackage.cofh.lib.audio.SoundBase;
+
 
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SoundHandler;
@@ -33,7 +33,7 @@ public class SoundHelper {
 
 	public static void playSound(String soundName, float x, float y, float z, float volume, float pitch) {
 
-		soundManager.playSound(new SoundBase(soundName, volume, pitch, x, y, z));
+		//soundManager.playSound(new SoundBase(soundName, volume, pitch, x, y, z));
 	}
 
 }

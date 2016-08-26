@@ -1,3 +1,11 @@
+import java.io.File;
+import java.lang.reflect.Field;
+import java.net.Proxy;
+import java.util.List;
+import java.util.Map;
+
+import net.minecraftforge.gradle.GradleStartCommon;
+
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.gson.GsonBuilder;
@@ -6,13 +14,6 @@ import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
-import net.minecraftforge.gradle.GradleStartCommon;
-
-import java.io.File;
-import java.lang.reflect.Field;
-import java.net.Proxy;
-import java.util.List;
-import java.util.Map;
 
 public class GradleStart extends GradleStartCommon
 {
@@ -40,8 +41,8 @@ public class GradleStart extends GradleStartCommon
     @Override
     protected void setDefaultArguments(Map<String, String> argMap)
     {
-        argMap.put("version",        "1.8.9");
-        argMap.put("assetIndex",     "1.8");
+        argMap.put("version",        "1.10.2");
+        argMap.put("assetIndex",     "1.10");
         argMap.put("assetsDir",      "C:/Users/Alex/.gradle/caches/minecraft/assets");
         argMap.put("accessToken",    "FML");
         argMap.put("userProperties", "{}");
@@ -67,7 +68,7 @@ public class GradleStart extends GradleStartCommon
     private static void hackNatives()
     {
         String paths = System.getProperty("java.library.path");
-        String nativesDir = "C:/Users/Alex/.gradle/caches/minecraft/net/minecraft/natives/1.8.9";
+        String nativesDir = "C:/Users/Alex/.gradle/caches/minecraft/net/minecraft/natives/1.10.2";
         
         if (Strings.isNullOrEmpty(paths))
             paths = nativesDir;

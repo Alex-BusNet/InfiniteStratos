@@ -1,22 +1,37 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2014 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors (this class):
- *     bspkrs - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.client.config;
+
+import static net.minecraftforge.fml.client.config.GuiUtils.RESET_CHAR;
+import static net.minecraftforge.fml.client.config.GuiUtils.UNDO_CHAR;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.config.GuiConfigEntries.IConfigEntry;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -24,14 +39,8 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEve
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.PostConfigChangedEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
+
 import org.lwjgl.input.Keyboard;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static net.minecraftforge.fml.client.config.GuiUtils.RESET_CHAR;
-import static net.minecraftforge.fml.client.config.GuiUtils.UNDO_CHAR;
 
 /**
  * This class is the base GuiScreen for all config GUI screens. It can be extended by mods to provide the top-level config screen
@@ -256,7 +265,7 @@ public class GuiConfig extends GuiScreen
                         {
                             flag = false;
                             mc.displayGuiScreen(new GuiMessageDialog(parentScreen, "fml.configgui.gameRestartTitle",
-                                    new ChatComponentText(I18n.format("fml.configgui.gameRestartRequired")), "fml.configgui.confirmRestartMessage"));
+                                    new TextComponentString(I18n.format("fml.configgui.gameRestartRequired")), "fml.configgui.confirmRestartMessage"));
                         }
 
                         if (this.parentScreen instanceof GuiConfig)
@@ -305,7 +314,7 @@ public class GuiConfig extends GuiScreen
     }
 
     /**
-     * Called when a mouse button is released.  Args : mouseX, mouseY, releaseButton
+     * Called when a mouse button is released.
      */
     @Override
     protected void mouseReleased(int x, int y, int mouseEvent)
@@ -340,7 +349,7 @@ public class GuiConfig extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
@@ -353,9 +362,9 @@ public class GuiConfig extends GuiScreen
         if (title2 != null)
         {
             int strWidth = mc.fontRendererObj.getStringWidth(title2);
-            int elipsisWidth = mc.fontRendererObj.getStringWidth("...");
-            if (strWidth > width - 6 && strWidth > elipsisWidth)
-                title2 = mc.fontRendererObj.trimStringToWidth(title2, width - 6 - elipsisWidth).trim() + "...";
+            int ellipsisWidth = mc.fontRendererObj.getStringWidth("...");
+            if (strWidth > width - 6 && strWidth > ellipsisWidth)
+                title2 = mc.fontRendererObj.trimStringToWidth(title2, width - 6 - ellipsisWidth).trim() + "...";
             this.drawCenteredString(this.fontRendererObj, title2, this.width / 2, 18, 16777215);
         }
 
@@ -364,15 +373,15 @@ public class GuiConfig extends GuiScreen
         super.drawScreen(mouseX, mouseY, partialTicks);
         this.entryList.drawScreenPost(mouseX, mouseY, partialTicks);
         if (this.undoHoverChecker.checkHover(mouseX, mouseY))
-            this.drawToolTip(this.mc.fontRendererObj.listFormattedStringToWidth(I18n.format("fml.configgui.tooltip.undoAll"), 300), mouseX, mouseY);
+            this.drawToolTip(Arrays.asList(I18n.format("fml.configgui.tooltip.undoAll").split("\n")), mouseX, mouseY);
         if (this.resetHoverChecker.checkHover(mouseX, mouseY))
-            this.drawToolTip(this.mc.fontRendererObj.listFormattedStringToWidth(I18n.format("fml.configgui.tooltip.resetAll"), 300), mouseX, mouseY);
+            this.drawToolTip(Arrays.asList(I18n.format("fml.configgui.tooltip.resetAll").split("\n")), mouseX, mouseY);
         if (this.checkBoxHoverChecker.checkHover(mouseX, mouseY))
-            this.drawToolTip(this.mc.fontRendererObj.listFormattedStringToWidth(I18n.format("fml.configgui.tooltip.applyGlobally"), 300), mouseX, mouseY);
+            this.drawToolTip(Arrays.asList(I18n.format("fml.configgui.tooltip.applyGlobally").split("\n")), mouseX, mouseY);
     }
 
     public void drawToolTip(List<String> stringList, int x, int y)
     {
-        this.drawHoveringText(stringList, x, y);
+        GuiUtils.drawHoveringText(stringList, x, y, width, height, 300, fontRendererObj);
     }
 }

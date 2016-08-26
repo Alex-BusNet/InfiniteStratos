@@ -1,13 +1,13 @@
 package net.minecraft.world.storage;
 
+import java.io.File;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
+import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.io.File;
 
 @SideOnly(Side.CLIENT)
 public class SaveHandlerMP implements ISaveHandler
@@ -70,17 +70,14 @@ public class SaveHandlerMP implements ISaveHandler
     }
 
     /**
-     * Returns the name of the directory where world information is saved.
-     */
-    public String getWorldDirectoryName()
-    {
-        return "none";
-    }
-
-    /**
      * Gets the File object corresponding to the base directory of this world.
      */
     public File getWorldDirectory()
+    {
+        return null;
+    }
+
+    public TemplateManager getStructureTemplateManager()
     {
         return null;
     }

@@ -5,6 +5,7 @@ import com.sparta.is.reference.Names;
 import com.sparta.repackage.cofh.api.energy.IEnergyContainerItem;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.ISpecialArmor;
@@ -13,27 +14,27 @@ public class ArmorByakushikiChest extends ArmorIS implements IEnergyContainerIte
 {
     public ArmorByakushikiChest()
     {
-        super(Material.Armor.IS_ARMOR, 1, "Armor");
+        super(Material.Armor.IS_ARMOR, EntityEquipmentSlot.CHEST, "Armor");
         this.setUnlocalizedName(Names.Parts.BYAKUSHIKI_CHEST);
     }
 
-    @Override
-    public boolean isEmpowered(ItemStack stack)
-    {
-        return false;
-    }
-
-    @Override
-    public boolean setEmpoweredState(ItemStack stack, boolean state)
-    {
-        return false;
-    }
-
-    @Override
-    public void onStateChange(EntityPlayer player, ItemStack stack)
-    {
-
-    }
+//    @Override
+//    public boolean isEmpowered(ItemStack stack)
+//    {
+//        return false;
+//    }
+//
+//    @Override
+//    public boolean setEmpoweredState(ItemStack stack, boolean state)
+//    {
+//        return false;
+//    }
+//
+//    @Override
+//    public void onStateChange(EntityPlayer player, ItemStack stack)
+//    {
+//
+//    }
 
     @Override
     public int receiveEnergy(ItemStack container, int maxReceive, boolean simulate)

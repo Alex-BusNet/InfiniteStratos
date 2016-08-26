@@ -1,12 +1,11 @@
 package net.minecraft.client.gui;
 
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.ResourcePackListEntry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class GuiResourcePackSelected extends GuiResourcePackList

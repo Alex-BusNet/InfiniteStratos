@@ -2,8 +2,8 @@ package net.minecraft.client.renderer.entity;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.entity.passive.EntityRabbit;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -29,9 +29,9 @@ public class RenderRabbit extends RenderLiving<EntityRabbit>
      */
     protected ResourceLocation getEntityTexture(EntityRabbit entity)
     {
-        String s = EnumChatFormatting.getTextWithoutFormattingCodes(entity.getName());
+        String s = TextFormatting.getTextWithoutFormattingCodes(entity.getName());
 
-        if (s != null && s.equals("Toast"))
+        if (s != null && "Toast".equals(s))
         {
             return TOAST;
         }

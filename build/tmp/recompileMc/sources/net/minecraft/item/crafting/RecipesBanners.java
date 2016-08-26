@@ -1,5 +1,6 @@
 package net.minecraft.item.crafting;
 
+import javax.annotation.Nullable;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
@@ -15,15 +16,15 @@ public class RecipesBanners
     /**
      * Adds the banner recipes to the CraftingManager.
      */
-    void addRecipes(CraftingManager p_179534_1_)
+    void addRecipes(CraftingManager manager)
     {
         for (EnumDyeColor enumdyecolor : EnumDyeColor.values())
         {
-            p_179534_1_.addRecipe(new ItemStack(Items.banner, 1, enumdyecolor.getDyeDamage()), new Object[] {"###", "###", " | ", '#', new ItemStack(Blocks.wool, 1, enumdyecolor.getMetadata()), '|', Items.stick});
+            manager.addRecipe(new ItemStack(Items.BANNER, 1, enumdyecolor.getDyeDamage()), new Object[] {"###", "###", " | ", '#', new ItemStack(Blocks.WOOL, 1, enumdyecolor.getMetadata()), '|', Items.STICK});
         }
 
-        p_179534_1_.addRecipe(new RecipesBanners.RecipeDuplicatePattern());
-        p_179534_1_.addRecipe(new RecipesBanners.RecipeAddPattern());
+        manager.addRecipe(new RecipesBanners.RecipeDuplicatePattern());
+        manager.addRecipe(new RecipesBanners.RecipeAddPattern());
     }
 
     public static class RecipeAddPattern implements IRecipe
@@ -43,7 +44,7 @@ public class RecipesBanners
                 {
                     ItemStack itemstack = inv.getStackInSlot(i);
 
-                    if (itemstack != null && itemstack.getItem() == Items.banner)
+                    if (itemstack != null && itemstack.getItem() == Items.BANNER)
                     {
                         if (flag)
                         {
@@ -65,13 +66,14 @@ public class RecipesBanners
                 }
                 else
                 {
-                    return this.func_179533_c(inv) != null;
+                    return this.matchPatterns(inv) != null;
                 }
             }
 
             /**
              * Returns an Item that is the result of this recipe
              */
+            @Nullable
             public ItemStack getCraftingResult(InventoryCrafting inv)
             {
                 ItemStack itemstack = null;
@@ -80,7 +82,7 @@ public class RecipesBanners
                 {
                     ItemStack itemstack1 = inv.getStackInSlot(i);
 
-                    if (itemstack1 != null && itemstack1.getItem() == Items.banner)
+                    if (itemstack1 != null && itemstack1.getItem() == Items.BANNER)
                     {
                         itemstack = itemstack1.copy();
                         itemstack.stackSize = 1;
@@ -88,7 +90,7 @@ public class RecipesBanners
                     }
                 }
 
-                TileEntityBanner.EnumBannerPattern tileentitybanner$enumbannerpattern = this.func_179533_c(inv);
+                TileEntityBanner.EnumBannerPattern tileentitybanner$enumbannerpattern = this.matchPatterns(inv);
 
                 if (tileentitybanner$enumbannerpattern != null)
                 {
@@ -98,15 +100,16 @@ public class RecipesBanners
                     {
                         ItemStack itemstack2 = inv.getStackInSlot(j);
 
-                        if (itemstack2 != null && itemstack2.getItem() == Items.dye)
+                        int color = getColor(itemstack2);
+                        if (color != -1)
                         {
-                            k = itemstack2.getMetadata();
+                            k = color;
                             break;
                         }
                     }
 
                     NBTTagCompound nbttagcompound1 = itemstack.getSubCompound("BlockEntityTag", true);
-                    NBTTagList nbttaglist = null;
+                    NBTTagList nbttaglist;
 
                     if (nbttagcompound1.hasKey("Patterns", 9))
                     {
@@ -135,6 +138,7 @@ public class RecipesBanners
                 return 10;
             }
 
+            @Nullable
             public ItemStack getRecipeOutput()
             {
                 return null;
@@ -153,7 +157,8 @@ public class RecipesBanners
                 return aitemstack;
             }
 
-            private TileEntityBanner.EnumBannerPattern func_179533_c(InventoryCrafting p_179533_1_)
+            @Nullable
+            private TileEntityBanner.EnumBannerPattern matchPatterns(InventoryCrafting invCrafting)
             {
                 for (TileEntityBanner.EnumBannerPattern tileentitybanner$enumbannerpattern : TileEntityBanner.EnumBannerPattern.values())
                 {
@@ -166,13 +171,13 @@ public class RecipesBanners
                             boolean flag1 = false;
                             boolean flag2 = false;
 
-                            for (int i = 0; i < p_179533_1_.getSizeInventory() && flag; ++i)
+                            for (int i = 0; i < invCrafting.getSizeInventory() && flag; ++i)
                             {
-                                ItemStack itemstack = p_179533_1_.getStackInSlot(i);
+                                ItemStack itemstack = invCrafting.getStackInSlot(i);
 
-                                if (itemstack != null && itemstack.getItem() != Items.banner)
+                                if (itemstack != null && itemstack.getItem() != Items.BANNER)
                                 {
-                                    if (itemstack.getItem() == Items.dye)
+                                    if (isDye(itemstack))
                                     {
                                         if (flag2)
                                         {
@@ -200,19 +205,19 @@ public class RecipesBanners
                                 flag = false;
                             }
                         }
-                        else if (p_179533_1_.getSizeInventory() == tileentitybanner$enumbannerpattern.getCraftingLayers().length * tileentitybanner$enumbannerpattern.getCraftingLayers()[0].length())
+                        else if (invCrafting.getSizeInventory() == tileentitybanner$enumbannerpattern.getCraftingLayers().length * tileentitybanner$enumbannerpattern.getCraftingLayers()[0].length())
                         {
                             int j = -1;
 
-                            for (int k = 0; k < p_179533_1_.getSizeInventory() && flag; ++k)
+                            for (int k = 0; k < invCrafting.getSizeInventory() && flag; ++k)
                             {
                                 int l = k / 3;
                                 int i1 = k % 3;
-                                ItemStack itemstack1 = p_179533_1_.getStackInSlot(k);
+                                ItemStack itemstack1 = invCrafting.getStackInSlot(k);
 
-                                if (itemstack1 != null && itemstack1.getItem() != Items.banner)
+                                if (itemstack1 != null && itemstack1.getItem() != Items.BANNER)
                                 {
-                                    if (itemstack1.getItem() != Items.dye)
+                                    if (!isDye(itemstack1))
                                     {
                                         flag = false;
                                         break;
@@ -253,6 +258,38 @@ public class RecipesBanners
 
                 return null;
             }
+
+            private static String[] colors = { "Black", "Red", "Green", "Brown", "Blue", "Purple", "Cyan", "LightGray", "Gray", "Pink", "Lime", "Yellow", "LightBlue", "Magenta", "Orange", "White" };
+            @SuppressWarnings("unchecked") //Why java...
+            private static java.util.List<ItemStack>[] colored = new java.util.List[colors.length];
+            private static java.util.List<ItemStack> dyes;
+            private static boolean hasInit = false;
+            private static void init()
+            {
+                if (hasInit) return;
+                for (int x = 0; x < colors.length; x++)
+                    colored[x] = net.minecraftforge.oredict.OreDictionary.getOres("dye" + colors[x]);
+                dyes = net.minecraftforge.oredict.OreDictionary.getOres("dye");
+                hasInit = true;
+            }
+            private boolean isDye(ItemStack stack)
+            {
+                init();
+                for (ItemStack ore : dyes)
+                    if (net.minecraftforge.oredict.OreDictionary.itemMatches(ore, stack, false))
+                        return true;
+                return false;
+            }
+            private int getColor(ItemStack stack)
+            {
+                init();
+                if (stack == null) return -1;
+                for (int x = 0; x < colored.length; x++)
+                    for (ItemStack ore : colored[x])
+                        if (net.minecraftforge.oredict.OreDictionary.itemMatches(ore, stack, true))
+                            return x;
+                return -1;
+            }
         }
 
     public static class RecipeDuplicatePattern implements IRecipe
@@ -275,7 +312,7 @@ public class RecipesBanners
 
                     if (itemstack2 != null)
                     {
-                        if (itemstack2.getItem() != Items.banner)
+                        if (itemstack2.getItem() != Items.BANNER)
                         {
                             return false;
                         }
@@ -333,6 +370,7 @@ public class RecipesBanners
             /**
              * Returns an Item that is the result of this recipe
              */
+            @Nullable
             public ItemStack getCraftingResult(InventoryCrafting inv)
             {
                 for (int i = 0; i < inv.getSizeInventory(); ++i)
@@ -358,6 +396,7 @@ public class RecipesBanners
                 return 2;
             }
 
+            @Nullable
             public ItemStack getRecipeOutput()
             {
                 return null;

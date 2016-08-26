@@ -1,16 +1,15 @@
 package net.minecraft.network.rcon;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SideOnly(Side.SERVER)
 public class RConThreadClient extends RConThreadBase
@@ -21,9 +20,9 @@ public class RConThreadClient extends RConThreadBase
     /** The client's Socket connection */
     private Socket clientSocket;
     /** A buffer for incoming Socket data */
-    private byte[] buffer = new byte[1460];
+    private final byte[] buffer = new byte[1460];
     /** The RCon password */
-    private String rconPassword;
+    private final String rconPassword;
 
     RConThreadClient(IServer p_i1537_1_, Socket socket)
     {
@@ -99,7 +98,7 @@ public class RConThreadClient extends RConThreadBase
                             String s = RConUtils.getBytesAsString(this.buffer, j, i);
                             int j1 = j + s.length();
 
-                            if (0 != s.length() && s.equals(this.rconPassword))
+                            if (!s.isEmpty() && s.equals(this.rconPassword))
                             {
                                 this.loggedIn = true;
                                 this.sendResponse(l, 2, "");

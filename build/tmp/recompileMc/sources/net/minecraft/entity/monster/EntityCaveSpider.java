@@ -1,14 +1,19 @@
 package net.minecraft.entity.monster;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.potion.Potion;
+import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityCaveSpider extends EntitySpider
 {
@@ -18,10 +23,15 @@ public class EntityCaveSpider extends EntitySpider
         this.setSize(0.7F, 0.5F);
     }
 
+    public static void func_189775_b(DataFixer p_189775_0_)
+    {
+        EntityLiving.func_189752_a(p_189775_0_, "CaveSpider");
+    }
+
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(12.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(12.0D);
     }
 
     public boolean attackEntityAsMob(Entity entityIn)
@@ -43,7 +53,7 @@ public class EntityCaveSpider extends EntitySpider
 
                 if (i > 0)
                 {
-                    ((EntityLivingBase)entityIn).addPotionEffect(new PotionEffect(Potion.poison.id, i * 20, 0));
+                    ((EntityLivingBase)entityIn).addPotionEffect(new PotionEffect(MobEffects.POISON, i * 20, 0));
                 }
             }
 
@@ -59,7 +69,8 @@ public class EntityCaveSpider extends EntitySpider
      * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
      * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory
      */
-    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData livingdata)
+    @Nullable
+    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata)
     {
         return livingdata;
     }
@@ -67,5 +78,11 @@ public class EntityCaveSpider extends EntitySpider
     public float getEyeHeight()
     {
         return 0.45F;
+    }
+
+    @Nullable
+    protected ResourceLocation getLootTable()
+    {
+        return LootTableList.ENTITIES_CAVE_SPIDER;
     }
 }

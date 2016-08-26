@@ -1,12 +1,11 @@
 package net.minecraft.stats;
 
 import com.google.common.collect.Lists;
+import java.util.List;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.JsonSerializableSet;
-
-import java.util.List;
 
 public class AchievementList
 {
@@ -18,72 +17,47 @@ public class AchievementList
     public static int maxDisplayColumn;
     /** Is the biggest row used to display a achievement on the GUI. */
     public static int maxDisplayRow;
-    public static List<Achievement> achievementList = Lists.<Achievement>newArrayList();
-    /** Is the 'open inventory' achievement. */
-    public static Achievement openInventory = (new Achievement("achievement.openInventory", "openInventory", 0, 0, Items.book, (Achievement)null)).initIndependentStat().registerStat();
-    /** Is the 'getting wood' achievement. */
-    public static Achievement mineWood = (new Achievement("achievement.mineWood", "mineWood", 2, 1, Blocks.log, openInventory)).registerStat();
-    /** Is the 'benchmarking' achievement. */
-    public static Achievement buildWorkBench = (new Achievement("achievement.buildWorkBench", "buildWorkBench", 4, -1, Blocks.crafting_table, mineWood)).registerStat();
-    /** Is the 'time to mine' achievement. */
-    public static Achievement buildPickaxe = (new Achievement("achievement.buildPickaxe", "buildPickaxe", 4, 2, Items.wooden_pickaxe, buildWorkBench)).registerStat();
-    /** Is the 'hot topic' achievement. */
-    public static Achievement buildFurnace = (new Achievement("achievement.buildFurnace", "buildFurnace", 3, 4, Blocks.furnace, buildPickaxe)).registerStat();
-    /** Is the 'acquire hardware' achievement. */
-    public static Achievement acquireIron = (new Achievement("achievement.acquireIron", "acquireIron", 1, 4, Items.iron_ingot, buildFurnace)).registerStat();
+    public static final List<Achievement> ACHIEVEMENTS = Lists.<Achievement>newArrayList();
+    public static final Achievement OPEN_INVENTORY = (new Achievement("achievement.openInventory", "openInventory", 0, 0, Items.BOOK, (Achievement)null)).initIndependentStat().registerStat();
+    public static final Achievement MINE_WOOD = (new Achievement("achievement.mineWood", "mineWood", 2, 1, Blocks.LOG, OPEN_INVENTORY)).registerStat();
+    public static final Achievement BUILD_WORK_BENCH = (new Achievement("achievement.buildWorkBench", "buildWorkBench", 4, -1, Blocks.CRAFTING_TABLE, MINE_WOOD)).registerStat();
+    public static final Achievement BUILD_PICKAXE = (new Achievement("achievement.buildPickaxe", "buildPickaxe", 4, 2, Items.WOODEN_PICKAXE, BUILD_WORK_BENCH)).registerStat();
+    public static final Achievement BUILD_FURNACE = (new Achievement("achievement.buildFurnace", "buildFurnace", 3, 4, Blocks.FURNACE, BUILD_PICKAXE)).registerStat();
+    public static final Achievement ACQUIRE_IRON = (new Achievement("achievement.acquireIron", "acquireIron", 1, 4, Items.IRON_INGOT, BUILD_FURNACE)).registerStat();
     /** Is the 'time to farm' achievement. */
-    public static Achievement buildHoe = (new Achievement("achievement.buildHoe", "buildHoe", 2, -3, Items.wooden_hoe, buildWorkBench)).registerStat();
-    /** Is the 'bake bread' achievement. */
-    public static Achievement makeBread = (new Achievement("achievement.makeBread", "makeBread", -1, -3, Items.bread, buildHoe)).registerStat();
+    public static final Achievement BUILD_HOE = (new Achievement("achievement.buildHoe", "buildHoe", 2, -3, Items.WOODEN_HOE, BUILD_WORK_BENCH)).registerStat();
+    public static final Achievement MAKE_BREAD = (new Achievement("achievement.makeBread", "makeBread", -1, -3, Items.BREAD, BUILD_HOE)).registerStat();
     /** Is the 'the lie' achievement. */
-    public static Achievement bakeCake = (new Achievement("achievement.bakeCake", "bakeCake", 0, -5, Items.cake, buildHoe)).registerStat();
-    /** Is the 'getting a upgrade' achievement. */
-    public static Achievement buildBetterPickaxe = (new Achievement("achievement.buildBetterPickaxe", "buildBetterPickaxe", 6, 2, Items.stone_pickaxe, buildPickaxe)).registerStat();
+    public static final Achievement BAKE_CAKE = (new Achievement("achievement.bakeCake", "bakeCake", 0, -5, Items.CAKE, BUILD_HOE)).registerStat();
+    public static final Achievement BUILD_BETTER_PICKAXE = (new Achievement("achievement.buildBetterPickaxe", "buildBetterPickaxe", 6, 2, Items.STONE_PICKAXE, BUILD_PICKAXE)).registerStat();
     /** Is the 'delicious fish' achievement. */
-    public static Achievement cookFish = (new Achievement("achievement.cookFish", "cookFish", 2, 6, Items.cooked_fish, buildFurnace)).registerStat();
-    /** Is the 'on a rail' achievement */
-    public static Achievement onARail = (new Achievement("achievement.onARail", "onARail", 2, 3, Blocks.rail, acquireIron)).setSpecial().registerStat();
-    /** Is the 'time to strike' achievement. */
-    public static Achievement buildSword = (new Achievement("achievement.buildSword", "buildSword", 6, -1, Items.wooden_sword, buildWorkBench)).registerStat();
-    /** Is the 'monster hunter' achievement. */
-    public static Achievement killEnemy = (new Achievement("achievement.killEnemy", "killEnemy", 8, -1, Items.bone, buildSword)).registerStat();
+    public static final Achievement COOK_FISH = (new Achievement("achievement.cookFish", "cookFish", 2, 6, Items.COOKED_FISH, BUILD_FURNACE)).registerStat();
+    public static final Achievement ON_A_RAIL = (new Achievement("achievement.onARail", "onARail", 2, 3, Blocks.RAIL, ACQUIRE_IRON)).setSpecial().registerStat();
+    public static final Achievement BUILD_SWORD = (new Achievement("achievement.buildSword", "buildSword", 6, -1, Items.WOODEN_SWORD, BUILD_WORK_BENCH)).registerStat();
+    public static final Achievement KILL_ENEMY = (new Achievement("achievement.killEnemy", "killEnemy", 8, -1, Items.BONE, BUILD_SWORD)).registerStat();
     /** is the 'cow tipper' achievement. */
-    public static Achievement killCow = (new Achievement("achievement.killCow", "killCow", 7, -3, Items.leather, buildSword)).registerStat();
-    /** Is the 'when pig fly' achievement. */
-    public static Achievement flyPig = (new Achievement("achievement.flyPig", "flyPig", 9, -3, Items.saddle, killCow)).setSpecial().registerStat();
-    /** The achievement for killing a Skeleton from 50 meters aways. */
-    public static Achievement snipeSkeleton = (new Achievement("achievement.snipeSkeleton", "snipeSkeleton", 7, 0, Items.bow, killEnemy)).setSpecial().registerStat();
-    /** Is the 'DIAMONDS!' achievement */
-    public static Achievement diamonds = (new Achievement("achievement.diamonds", "diamonds", -1, 5, Blocks.diamond_ore, acquireIron)).registerStat();
-    public static Achievement diamondsToYou = (new Achievement("achievement.diamondsToYou", "diamondsToYou", -1, 2, Items.diamond, diamonds)).registerStat();
-    /** Is the 'We Need to Go Deeper' achievement */
-    public static Achievement portal = (new Achievement("achievement.portal", "portal", -1, 7, Blocks.obsidian, diamonds)).registerStat();
+    public static final Achievement KILL_COW = (new Achievement("achievement.killCow", "killCow", 7, -3, Items.LEATHER, BUILD_SWORD)).registerStat();
+    public static final Achievement FLY_PIG = (new Achievement("achievement.flyPig", "flyPig", 9, -3, Items.SADDLE, KILL_COW)).setSpecial().registerStat();
+    public static final Achievement SNIPE_SKELETON = (new Achievement("achievement.snipeSkeleton", "snipeSkeleton", 7, 0, Items.BOW, KILL_ENEMY)).setSpecial().registerStat();
+    public static final Achievement DIAMONDS = (new Achievement("achievement.diamonds", "diamonds", -1, 5, Blocks.DIAMOND_ORE, ACQUIRE_IRON)).registerStat();
+    public static final Achievement DIAMONDS_TO_YOU = (new Achievement("achievement.diamondsToYou", "diamondsToYou", -1, 2, Items.DIAMOND, DIAMONDS)).registerStat();
+    public static final Achievement PORTAL = (new Achievement("achievement.portal", "portal", -1, 7, Blocks.OBSIDIAN, DIAMONDS)).registerStat();
     /** Is the 'Return to Sender' achievement */
-    public static Achievement ghast = (new Achievement("achievement.ghast", "ghast", -4, 8, Items.ghast_tear, portal)).setSpecial().registerStat();
-    /** Is the 'Into Fire' achievement */
-    public static Achievement blazeRod = (new Achievement("achievement.blazeRod", "blazeRod", 0, 9, Items.blaze_rod, portal)).registerStat();
-    /** Is the 'Local Brewery' achievement */
-    public static Achievement potion = (new Achievement("achievement.potion", "potion", 2, 8, Items.potionitem, blazeRod)).registerStat();
+    public static final Achievement GHAST = (new Achievement("achievement.ghast", "ghast", -4, 8, Items.GHAST_TEAR, PORTAL)).setSpecial().registerStat();
+    public static final Achievement BLAZE_ROD = (new Achievement("achievement.blazeRod", "blazeRod", 0, 9, Items.BLAZE_ROD, PORTAL)).registerStat();
+    public static final Achievement POTION = (new Achievement("achievement.potion", "potion", 2, 8, Items.POTIONITEM, BLAZE_ROD)).registerStat();
     /** Is the 'The End?' achievement */
-    public static Achievement theEnd = (new Achievement("achievement.theEnd", "theEnd", 3, 10, Items.ender_eye, blazeRod)).setSpecial().registerStat();
-    /** Is the 'The End.' achievement */
-    public static Achievement theEnd2 = (new Achievement("achievement.theEnd2", "theEnd2", 4, 13, Blocks.dragon_egg, theEnd)).setSpecial().registerStat();
-    /** Is the 'Enchanter' achievement */
-    public static Achievement enchantments = (new Achievement("achievement.enchantments", "enchantments", -4, 4, Blocks.enchanting_table, diamonds)).registerStat();
-    public static Achievement overkill = (new Achievement("achievement.overkill", "overkill", -4, 1, Items.diamond_sword, enchantments)).setSpecial().registerStat();
-    /** Is the 'Librarian' achievement */
-    public static Achievement bookcase = (new Achievement("achievement.bookcase", "bookcase", -3, 6, Blocks.bookshelf, enchantments)).registerStat();
-    /** Is the 'Repopulation' achievement */
-    public static Achievement breedCow = (new Achievement("achievement.breedCow", "breedCow", 7, -5, Items.wheat, killCow)).registerStat();
-    /** Is the 'The Beginning?' achievement */
-    public static Achievement spawnWither = (new Achievement("achievement.spawnWither", "spawnWither", 7, 12, new ItemStack(Items.skull, 1, 1), theEnd2)).registerStat();
-    /** Is the 'The Beginning.' achievement */
-    public static Achievement killWither = (new Achievement("achievement.killWither", "killWither", 7, 10, Items.nether_star, spawnWither)).registerStat();
-    /** Is the 'Beaconator' achievement */
-    public static Achievement fullBeacon = (new Achievement("achievement.fullBeacon", "fullBeacon", 7, 8, Blocks.beacon, killWither)).setSpecial().registerStat();
-    /** Is the 'Adventuring Time' achievement */
-    public static Achievement exploreAllBiomes = (new Achievement("achievement.exploreAllBiomes", "exploreAllBiomes", 4, 8, Items.diamond_boots, theEnd)).func_150953_b(JsonSerializableSet.class).setSpecial().registerStat();
-    public static Achievement overpowered = (new Achievement("achievement.overpowered", "overpowered", 6, 4, new ItemStack(Items.golden_apple, 1, 1), buildBetterPickaxe)).setSpecial().registerStat();
+    public static final Achievement THE_END = (new Achievement("achievement.theEnd", "theEnd", 3, 10, Items.ENDER_EYE, BLAZE_ROD)).setSpecial().registerStat();
+    public static final Achievement THE_END2 = (new Achievement("achievement.theEnd2", "theEnd2", 4, 13, Blocks.DRAGON_EGG, THE_END)).setSpecial().registerStat();
+    public static final Achievement ENCHANTMENTS = (new Achievement("achievement.enchantments", "enchantments", -4, 4, Blocks.ENCHANTING_TABLE, DIAMONDS)).registerStat();
+    public static final Achievement OVERKILL = (new Achievement("achievement.overkill", "overkill", -4, 1, Items.DIAMOND_SWORD, ENCHANTMENTS)).setSpecial().registerStat();
+    public static final Achievement BOOKCASE = (new Achievement("achievement.bookcase", "bookcase", -3, 6, Blocks.BOOKSHELF, ENCHANTMENTS)).registerStat();
+    public static final Achievement BREED_COW = (new Achievement("achievement.breedCow", "breedCow", 7, -5, Items.WHEAT, KILL_COW)).registerStat();
+    public static final Achievement SPAWN_WITHER = (new Achievement("achievement.spawnWither", "spawnWither", 7, 12, new ItemStack(Items.SKULL, 1, 1), THE_END2)).registerStat();
+    public static final Achievement KILL_WITHER = (new Achievement("achievement.killWither", "killWither", 7, 10, Items.NETHER_STAR, SPAWN_WITHER)).registerStat();
+    public static final Achievement FULL_BEACON = (new Achievement("achievement.fullBeacon", "fullBeacon", 7, 8, Blocks.BEACON, KILL_WITHER)).setSpecial().registerStat();
+    public static final Achievement EXPLORE_ALL_BIOMES = (new Achievement("achievement.exploreAllBiomes", "exploreAllBiomes", 4, 8, Items.DIAMOND_BOOTS, THE_END)).setSerializableClazz(JsonSerializableSet.class).setSpecial().registerStat();
+    public static final Achievement OVERPOWERED = (new Achievement("achievement.overpowered", "overpowered", 6, 4, new ItemStack(Items.GOLDEN_APPLE, 1, 1), BUILD_BETTER_PICKAXE)).setSpecial().registerStat();
 
     /**
      * A stub functions called to make the static initializer for this class run.

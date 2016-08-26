@@ -1,5 +1,6 @@
 package net.minecraft.item.crafting;
 
+import javax.annotation.Nullable;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
@@ -11,7 +12,7 @@ public class RecipesMapExtending extends ShapedRecipes
 {
     public RecipesMapExtending()
     {
-        super(3, 3, new ItemStack[] {new ItemStack(Items.paper), new ItemStack(Items.paper), new ItemStack(Items.paper), new ItemStack(Items.paper), new ItemStack(Items.filled_map, 0, 32767), new ItemStack(Items.paper), new ItemStack(Items.paper), new ItemStack(Items.paper), new ItemStack(Items.paper)}, new ItemStack(Items.map, 0, 0));
+        super(3, 3, new ItemStack[] {new ItemStack(Items.PAPER), new ItemStack(Items.PAPER), new ItemStack(Items.PAPER), new ItemStack(Items.PAPER), new ItemStack(Items.FILLED_MAP, 0, 32767), new ItemStack(Items.PAPER), new ItemStack(Items.PAPER), new ItemStack(Items.PAPER), new ItemStack(Items.PAPER)}, new ItemStack(Items.MAP, 0, 0));
     }
 
     /**
@@ -31,7 +32,7 @@ public class RecipesMapExtending extends ShapedRecipes
             {
                 ItemStack itemstack1 = inv.getStackInSlot(i);
 
-                if (itemstack1 != null && itemstack1.getItem() == Items.filled_map)
+                if (itemstack1 != null && itemstack1.getItem() == Items.FILLED_MAP)
                 {
                     itemstack = itemstack1;
                 }
@@ -43,7 +44,7 @@ public class RecipesMapExtending extends ShapedRecipes
             }
             else
             {
-                MapData mapdata = Items.filled_map.getMapData(itemstack, worldIn);
+                MapData mapdata = Items.FILLED_MAP.getMapData(itemstack, worldIn);
                 return mapdata == null ? false : mapdata.scale < 4;
             }
         }
@@ -52,6 +53,7 @@ public class RecipesMapExtending extends ShapedRecipes
     /**
      * Returns an Item that is the result of this recipe
      */
+    @Nullable
     public ItemStack getCraftingResult(InventoryCrafting inv)
     {
         ItemStack itemstack = null;
@@ -60,7 +62,7 @@ public class RecipesMapExtending extends ShapedRecipes
         {
             ItemStack itemstack1 = inv.getStackInSlot(i);
 
-            if (itemstack1 != null && itemstack1.getItem() == Items.filled_map)
+            if (itemstack1 != null && itemstack1.getItem() == Items.FILLED_MAP)
             {
                 itemstack = itemstack1;
             }
@@ -74,7 +76,7 @@ public class RecipesMapExtending extends ShapedRecipes
             itemstack.setTagCompound(new NBTTagCompound());
         }
 
-        itemstack.getTagCompound().setBoolean("map_is_scaling", true);
+        itemstack.getTagCompound().setInteger("map_scale_direction", 1);
         return itemstack;
     }
 }

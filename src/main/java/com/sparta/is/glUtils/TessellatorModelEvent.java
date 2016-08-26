@@ -1,6 +1,7 @@
 package com.sparta.is.glUtils;
 
-import cpw.mods.fml.common.eventhandler.Event;
+
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 public class TessellatorModelEvent extends Event
 {

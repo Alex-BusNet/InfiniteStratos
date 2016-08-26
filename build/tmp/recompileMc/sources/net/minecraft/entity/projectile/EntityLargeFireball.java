@@ -4,7 +4,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -32,14 +33,14 @@ public class EntityLargeFireball extends EntityFireball
     /**
      * Called when this EntityFireball hits a block or entity.
      */
-    protected void onImpact(MovingObjectPosition movingObject)
+    protected void onImpact(RayTraceResult result)
     {
         if (!this.worldObj.isRemote)
         {
-            if (movingObject.entityHit != null)
+            if (result.entityHit != null)
             {
-                movingObject.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 6.0F);
-                this.applyEnchantments(this.shootingEntity, movingObject.entityHit);
+                result.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 6.0F);
+                this.applyEnchantments(this.shootingEntity, result.entityHit);
             }
 
             boolean flag = this.worldObj.getGameRules().getBoolean("mobGriefing");
@@ -48,25 +49,30 @@ public class EntityLargeFireball extends EntityFireball
         }
     }
 
+    public static void func_189744_a(DataFixer p_189744_0_)
+    {
+        EntityFireball.func_189743_a(p_189744_0_, "Fireball");
+    }
+
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound tagCompound)
+    public void writeEntityToNBT(NBTTagCompound compound)
     {
-        super.writeEntityToNBT(tagCompound);
-        tagCompound.setInteger("ExplosionPower", this.explosionPower);
+        super.writeEntityToNBT(compound);
+        compound.setInteger("ExplosionPower", this.explosionPower);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound tagCompund)
+    public void readEntityFromNBT(NBTTagCompound compound)
     {
-        super.readEntityFromNBT(tagCompund);
+        super.readEntityFromNBT(compound);
 
-        if (tagCompund.hasKey("ExplosionPower", 99))
+        if (compound.hasKey("ExplosionPower", 99))
         {
-            this.explosionPower = tagCompund.getInteger("ExplosionPower");
+            this.explosionPower = compound.getInteger("ExplosionPower");
         }
     }
 }

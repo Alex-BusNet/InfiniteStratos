@@ -1,11 +1,10 @@
 package net.minecraft.client.renderer.texture;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 @SideOnly(Side.CLIENT)
 public class DynamicTexture extends AbstractTexture

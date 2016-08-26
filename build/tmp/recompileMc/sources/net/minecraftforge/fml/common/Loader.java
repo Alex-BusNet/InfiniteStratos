@@ -1,61 +1,91 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.common;
-
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.collect.*;
-import com.google.common.collect.Multiset.Entry;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.fml.common.LoaderState.ModState;
-import net.minecraftforge.fml.common.ModContainer.Disableable;
-import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
-import net.minecraftforge.fml.common.discovery.ModDiscoverer;
-import net.minecraftforge.fml.common.event.FMLInterModComms;
-import net.minecraftforge.fml.common.event.FMLLoadEvent;
-import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
-import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent.MissingMapping;
-import net.minecraftforge.fml.common.event.FMLModIdMappingEvent;
-import net.minecraftforge.fml.common.functions.ArtifactVersionNameFunction;
-import net.minecraftforge.fml.common.functions.ModIdFunction;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry.Type;
-import net.minecraftforge.fml.common.registry.ItemStackHolderInjector;
-import net.minecraftforge.fml.common.registry.ObjectHolderRegistry;
-import net.minecraftforge.fml.common.registry.PersistentRegistryManager;
-import net.minecraftforge.fml.common.toposort.ModSorter;
-import net.minecraftforge.fml.common.toposort.ModSortingException;
-import net.minecraftforge.fml.common.toposort.ModSortingException.SortingExceptionData;
-import net.minecraftforge.fml.common.toposort.TopologicalSort;
-import net.minecraftforge.fml.common.versioning.ArtifactVersion;
-import net.minecraftforge.fml.common.versioning.VersionParser;
-import net.minecraftforge.fml.relauncher.ModListHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import org.apache.logging.log4j.Level;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.fml.common.LoaderState.ModState;
+import net.minecraftforge.fml.common.ModContainer.Disableable;
+import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
+import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.common.discovery.ModDiscoverer;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
+import net.minecraftforge.fml.common.event.FMLLoadEvent;
+import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
+import net.minecraftforge.fml.common.event.FMLModIdMappingEvent;
+import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent.MissingMapping;
+import net.minecraftforge.fml.common.functions.ArtifactVersionNameFunction;
+import net.minecraftforge.fml.common.functions.ModIdFunction;
+import net.minecraftforge.fml.common.registry.*;
+import net.minecraftforge.fml.common.registry.GameRegistry.Type;
+import net.minecraftforge.fml.common.toposort.ModSorter;
+import net.minecraftforge.fml.common.toposort.ModSortingException;
+import net.minecraftforge.fml.common.toposort.TopologicalSort;
+import net.minecraftforge.fml.common.toposort.ModSortingException.SortingExceptionData;
+import net.minecraftforge.fml.common.versioning.ArtifactVersion;
+import net.minecraftforge.fml.common.versioning.VersionParser;
+import net.minecraftforge.fml.relauncher.ModListHelper;
+import net.minecraftforge.fml.relauncher.Side;
+
+import org.apache.logging.log4j.Level;
+
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Multiset.Entry;
+import com.google.common.collect.Multisets;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
+import com.google.common.collect.TreeMultimap;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * The loader class performs the actual loading of the mod code from disk.
@@ -91,7 +121,7 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class Loader
 {
-    public static final String MC_VERSION = "1.8.9";
+    public static final String MC_VERSION = net.minecraftforge.common.ForgeVersion.mcVersion;
     private static final Splitter DEPENDENCYPARTSPLITTER = Splitter.on(":").omitEmptyStrings().trimResults();
     private static final Splitter DEPENDENCYSPLITTER = Splitter.on(";").omitEmptyStrings().trimResults();
     /**
@@ -139,6 +169,7 @@ public class Loader
     private File forcedModFile;
     private ModDiscoverer discoverer;
     private ProgressBar progressBar;
+    public final boolean java8;
 
     public static Loader instance()
     {
@@ -165,8 +196,16 @@ public class Loader
 
     private Loader()
     {
+        String[] ver = System.getProperty("java.version").split("\\.");
+        int major = Integer.parseInt(ver[1]);
+        java8 = major > 7;
+        if (!java8)
+        {
+            FMLLog.severe("The game is not running with Java 8. Forge recommends Java 8 for maximum compatibility with mods");
+        }
+
         modClassLoader = new ModClassLoader(getClass().getClassLoader());
-        if (!mccversion.equals(MC_VERSION))
+        if (mccversion !=null && !mccversion.equals(MC_VERSION))
         {
             FMLLog.severe("This version of FML is built for Minecraft %s, we have detected Minecraft %s in your minecraft jar file", mccversion, MC_VERSION);
             throw new LoaderException(String.format("This version of FML is built for Minecraft %s, we have detected Minecraft %s in your minecraft jar file", mccversion, MC_VERSION));
@@ -304,8 +343,9 @@ public class Loader
      * Finally, if they are successfully loaded as classes, they are then added
      * to the available mod list.
      */
-    private ModDiscoverer identifyMods()
+    private ModDiscoverer identifyMods(List<String> additionalContainers)
     {
+        injectedContainers.addAll(additionalContainers);
         FMLLog.fine("Building injected Mod Containers %s", injectedContainers);
         // Add in the MCP mod container
         mods.add(new InjectedModContainer(mcp,new File("minecraft.jar")));
@@ -318,7 +358,7 @@ public class Loader
             }
             catch (Exception e)
             {
-                FMLLog.log(Level.ERROR, e, "A problem occured instantiating the injected mod container %s", cont);
+                FMLLog.log(Level.ERROR, e, "A problem occurred instantiating the injected mod container %s", cont);
                 throw new LoaderException(e);
             }
             mods.add(new InjectedModContainer(mc,mc.getSource()));
@@ -450,11 +490,25 @@ public class Loader
     }
 
     /**
+     * Used to setup a testharness with a single dummy mod instance for use with various testing hooks
+     * @param dummycontainer A dummy container that will be returned as "active" for all queries
+     */
+    public void setupTestHarness(ModContainer dummycontainer)
+    {
+        modController = new LoadController(this);
+        mods = Lists.newArrayList(dummycontainer);
+        modController.transition(LoaderState.LOADING, false);
+        modController.transition(LoaderState.CONSTRUCTING, false);
+        ObjectHolderRegistry.INSTANCE.findObjectHolders(new ASMDataTable());
+        modController.forceActiveContainer(dummycontainer);
+    }
+    /**
      * Called from the hook to start mod loading. We trigger the
      * {@link #identifyMods()} and Constructing, Preinitalization, and Initalization phases here. Finally,
      * the mod list is frozen completely and is consider immutable from then on.
+     * @param injectedModContainers containers to inject
      */
-    public void loadMods()
+    public void loadMods(List<String> injectedModContainers)
     {
         progressBar = ProgressManager.push("Loading", 7);
         progressBar.step("Constructing Mods");
@@ -463,10 +517,11 @@ public class Loader
         namedMods = Maps.newHashMap();
         modController = new LoadController(this);
         modController.transition(LoaderState.LOADING, false);
-        discoverer = identifyMods();
+        discoverer = identifyMods(injectedModContainers);
         ModAPIManager.INSTANCE.manageAPI(modClassLoader, discoverer);
         disableRequestedMods();
         modController.distributeStateMessage(FMLLoadEvent.class);
+        checkJavaCompatibility();
         sortModList();
         ModAPIManager.INSTANCE.cleanupAPIContainers(modController.getActiveModList());
         ModAPIManager.INSTANCE.cleanupAPIContainers(mods);
@@ -519,6 +574,24 @@ public class Loader
         }
         progressBar.step("Initializing mods Phase 1");
         modController.transition(LoaderState.PREINITIALIZATION, false);
+    }
+
+
+    private void checkJavaCompatibility()
+    {
+        if (java8) return;
+        List<ModContainer> j8mods = Lists.newArrayList();
+        for (ModContainer mc : getActiveModList())
+        {
+            if (mc.getClassVersion() >= 52)
+            {
+                j8mods.add(mc);
+            }
+        }
+        if (!j8mods.isEmpty())
+        {
+            throw new Java8VersionException(j8mods);
+        }
     }
 
     public void preinitializeMods()
@@ -683,7 +756,7 @@ public class Loader
             // before elements are things we are loaded before (so they are our dependants)
             if ("required-before".equals(instruction) || "before".equals(instruction))
             {
-            	dependants.add(VersionParser.parseVersionReference(target));
+                dependants.add(VersionParser.parseVersionReference(target));
             }
             // after elements are things that load before we do (so they are out dependencies)
             else if ("required-after".equals(instruction) || "after".equals(instruction))
@@ -892,10 +965,12 @@ public class Loader
      * Fire a FMLMissingMappingsEvent to let mods determine how blocks/items defined in the world
      * save, but missing from the runtime, are to be handled.
      *
-     * @param missing Map containing missing names with their associated id, blocks need to come before items for remapping.
+     * @param missingBlocks Map containing the missing block names with their associated id. Remapped blocks will be removed from it.
+     * @param missingItems Map containing the missing block names with their associated id. Remapped items will be removed from it.
      * @param isLocalWorld Whether this is executing for a world load (local/server) or a client.
-     * @param gameData GameData instance where the new map's config is to be loaded into.
-     * @return List with the mapping results.
+     * @param remapBlocks Returns a map containing the remapped block names and an array containing the original and new id for the block.
+     * @param remapItems Returns a map containing the remapped item names and an array containing the original and new id for the item.
+     * @return List with the names of the failed remappings.
      */
     public List<String> fireMissingMappingEvent(Map<ResourceLocation, Integer> missingBlocks, Map<ResourceLocation, Integer> missingItems, boolean isLocalWorld, Map<ResourceLocation, Integer[]> remapBlocks, Map<ResourceLocation, Integer[]> remapItems)
     {
@@ -957,12 +1032,15 @@ public class Loader
             }
         }
 
-        return PersistentRegistryManager.processIdRematches(missingMappings.values(), isLocalWorld, remapBlocks, remapItems);
+        return PersistentRegistryManager.processIdRematches(missingMappings.values(), isLocalWorld, missingBlocks, missingItems, remapBlocks, remapItems);
     }
 
     public void fireRemapEvent(Map<ResourceLocation, Integer[]> remapBlocks, Map<ResourceLocation, Integer[]> remapItems, boolean isFreezing)
     {
-	    modController.propogateStateMessage(new FMLModIdMappingEvent(remapBlocks, remapItems, isFreezing));
+        if (modController!=null)
+        {
+            modController.propogateStateMessage(new FMLModIdMappingEvent(remapBlocks, remapItems, isFreezing));
+        }
     }
 
     public void runtimeDisableMod(String modId)

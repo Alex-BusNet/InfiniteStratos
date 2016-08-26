@@ -1,9 +1,37 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 /**
  * This software is provided under the terms of the Minecraft Forge Public
  * License v1.0.
  */
 
 package net.minecraftforge.client.gui;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -16,18 +44,22 @@ import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.IModGuiFactory;
-import net.minecraftforge.fml.client.config.*;
+import net.minecraftforge.fml.client.config.ConfigGuiType;
+import net.minecraftforge.fml.client.config.DummyConfigElement;
 import net.minecraftforge.fml.client.config.DummyConfigElement.DummyCategoryElement;
-import net.minecraftforge.fml.client.config.GuiConfigEntries.BooleanEntry;
+import net.minecraftforge.fml.client.config.GuiConfig;
+import net.minecraftforge.fml.client.config.GuiConfigEntries;
 import net.minecraftforge.fml.client.config.GuiConfigEntries.CategoryEntry;
 import net.minecraftforge.fml.client.config.GuiConfigEntries.IConfigEntry;
 import net.minecraftforge.fml.client.config.GuiConfigEntries.SelectValueEntry;
+import net.minecraftforge.fml.client.config.GuiConfigEntries.BooleanEntry;
+import net.minecraftforge.fml.client.config.IConfigElement;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
-
-import java.util.*;
-
 import static net.minecraftforge.common.ForgeModContainer.VERSION_CHECK_CAT;
+
+import net.minecraftforge.fml.client.IModGuiFactory.RuntimeOptionCategoryElement;
+import net.minecraftforge.fml.client.IModGuiFactory.RuntimeOptionGuiHandler;
 
 /**
  * This is the base GuiConfig screen class that all the other Forge-specific config screens will be called from.

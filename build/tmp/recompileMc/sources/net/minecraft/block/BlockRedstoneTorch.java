@@ -2,25 +2,29 @@ package net.minecraft.block;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
-import net.minecraft.util.BlockPos;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 public class BlockRedstoneTorch extends BlockTorch
 {
-    private static Map<World, List<BlockRedstoneTorch.Toggle>> toggles = Maps.<World, List<BlockRedstoneTorch.Toggle>>newHashMap();
+    private static final Map<World, List<BlockRedstoneTorch.Toggle>> toggles = Maps.<World, List<BlockRedstoneTorch.Toggle>>newHashMap();
     private final boolean isOn;
 
     private boolean isBurnedOut(World worldIn, BlockPos pos, boolean turnOff)
@@ -94,9 +98,9 @@ public class BlockRedstoneTorch extends BlockTorch
         }
     }
 
-    public int getWeakPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return this.isOn && state.getValue(FACING) != side ? 15 : 0;
+        return this.isOn && blockState.getValue(FACING) != side ? 15 : 0;
     }
 
     private boolean shouldBeOff(World worldIn, BlockPos pos, IBlockState state)
@@ -126,11 +130,11 @@ public class BlockRedstoneTorch extends BlockTorch
         {
             if (flag)
             {
-                worldIn.setBlockState(pos, Blocks.unlit_redstone_torch.getDefaultState().withProperty(FACING, state.getValue(FACING)), 3);
+                worldIn.setBlockState(pos, Blocks.UNLIT_REDSTONE_TORCH.getDefaultState().withProperty(FACING, state.getValue(FACING)), 3);
 
                 if (this.isBurnedOut(worldIn, pos, true))
                 {
-                    worldIn.playSoundEffect((double)((float)pos.getX() + 0.5F), (double)((float)pos.getY() + 0.5F), (double)((float)pos.getZ() + 0.5F), "random.fizz", 0.5F, 2.6F + (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.8F);
+                    worldIn.playSound((EntityPlayer)null, pos, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.8F);
 
                     for (int i = 0; i < 5; ++i)
                     {
@@ -146,14 +150,16 @@ public class BlockRedstoneTorch extends BlockTorch
         }
         else if (!flag && !this.isBurnedOut(worldIn, pos, false))
         {
-            worldIn.setBlockState(pos, Blocks.redstone_torch.getDefaultState().withProperty(FACING, state.getValue(FACING)), 3);
+            worldIn.setBlockState(pos, Blocks.REDSTONE_TORCH.getDefaultState().withProperty(FACING, state.getValue(FACING)), 3);
         }
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn)
     {
         if (!this.onNeighborChangeInternal(worldIn, pos, state))
         {
@@ -164,36 +170,37 @@ public class BlockRedstoneTorch extends BlockTorch
         }
     }
 
-    public int getStrongPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
+    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return side == EnumFacing.DOWN ? this.getWeakPower(worldIn, pos, state, side) : 0;
+        return side == EnumFacing.DOWN ? blockState.getWeakPower(blockAccess, pos, side) : 0;
     }
 
     /**
      * Get the Item that this Block should drop when harvested.
      */
+    @Nullable
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Item.getItemFromBlock(Blocks.redstone_torch);
+        return Item.getItemFromBlock(Blocks.REDSTONE_TORCH);
     }
 
     /**
      * Can this block provide power. Only wire currently seems to have this change based on its state.
      */
-    public boolean canProvidePower()
+    public boolean canProvidePower(IBlockState state)
     {
         return true;
     }
 
     @SideOnly(Side.CLIENT)
-    public void randomDisplayTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
     {
         if (this.isOn)
         {
             double d0 = (double)pos.getX() + 0.5D + (rand.nextDouble() - 0.5D) * 0.2D;
             double d1 = (double)pos.getY() + 0.7D + (rand.nextDouble() - 0.5D) * 0.2D;
             double d2 = (double)pos.getZ() + 0.5D + (rand.nextDouble() - 0.5D) * 0.2D;
-            EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
+            EnumFacing enumfacing = (EnumFacing)stateIn.getValue(FACING);
 
             if (enumfacing.getAxis().isHorizontal())
             {
@@ -208,15 +215,14 @@ public class BlockRedstoneTorch extends BlockTorch
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    public Item getItem(World worldIn, BlockPos pos)
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
-        return Item.getItemFromBlock(Blocks.redstone_torch);
+        return new ItemStack(Blocks.REDSTONE_TORCH);
     }
 
     public boolean isAssociatedBlock(Block other)
     {
-        return other == Blocks.unlit_redstone_torch || other == Blocks.redstone_torch;
+        return other == Blocks.UNLIT_REDSTONE_TORCH || other == Blocks.REDSTONE_TORCH;
     }
 
     static class Toggle

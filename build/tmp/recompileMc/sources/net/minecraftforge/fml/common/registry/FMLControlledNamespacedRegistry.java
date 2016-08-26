@@ -1,25 +1,60 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.registry;
 
-import com.google.common.base.Throwables;
-import com.google.common.collect.*;
-import net.minecraft.util.ObjectIntIdentityMap;
-import net.minecraft.util.RegistryNamespacedDefaultedByKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.common.functions.GenericIterableFactory;
-import net.minecraftforge.fml.common.registry.RegistryDelegate.Delegate;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.Level;
 
-import java.lang.reflect.Field;
-import java.util.*;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.RegistryNamespacedDefaultedByKey;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.functions.GenericIterableFactory;
+import net.minecraftforge.fml.common.registry.RegistryDelegate.Delegate;
 
-public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaultedByKey<ResourceLocation, I>
+import net.minecraftforge.fml.common.registry.IForgeRegistry.AddCallback;
+import net.minecraftforge.fml.common.registry.IForgeRegistry.ClearCallback;
+import net.minecraftforge.fml.common.registry.IForgeRegistry.CreateCallback;
+import net.minecraftforge.fml.common.registry.IForgeRegistry.SubstitutionCallback;
+
+public class FMLControlledNamespacedRegistry<I extends IForgeRegistryEntry<I>> extends RegistryNamespacedDefaultedByKey<ResourceLocation, I> implements IForgeRegistry<I>
 {
     public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("fml.debugRegistryEntries", "false"));
     private final Class<I> superType;
     private final boolean isDelegated;
-    private final Field delegateAccessor;
     private ResourceLocation optionalDefaultKey;
     private I optionalDefaultObject;
     private int maxId;
@@ -34,6 +69,10 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
      */
     private final BiMap<ResourceLocation, I> persistentSubstitutions = HashBiMap.create();
     /**
+     * Substitution originals - these are the originals that are being substituted
+     */
+    private final BiMap<ResourceLocation, I> substitutionOriginals = HashBiMap.create();
+    /**
      * This is the current active substitution set for a particular world. It will change as worlds come and go.
      */
     private final BiMap<ResourceLocation, I> activeSubstitutions = HashBiMap.create();
@@ -46,43 +85,33 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
 
     private final BitSet availabilityMap;
 
+    private final Map<ResourceLocation,?> slaves = Maps.newHashMap();
+
     private final AddCallback<I> addCallback;
 
-    public interface AddCallback<T>
-    {
-        public void onAdd(T obj, int id);
-    }
+    private final ClearCallback<I> clearCallback;
 
-    FMLControlledNamespacedRegistry(ResourceLocation defaultKey, int maxIdValue, int minIdValue, Class<I> type, boolean isDelegated)
-    {
-        this(defaultKey, maxIdValue, minIdValue, type, isDelegated, null);
-    }
+    private final CreateCallback<I> createCallback;
 
-    FMLControlledNamespacedRegistry(ResourceLocation defaultKey, int maxIdValue, int minIdValue, Class<I> type, boolean isDelegated, AddCallback<I> callback)
+    private final SubstitutionCallback<I> substitutionCallback;
+
+    FMLControlledNamespacedRegistry(ResourceLocation defaultKey, int minIdValue, int maxIdValue, Class<I> type, BiMap<ResourceLocation, ? extends IForgeRegistry<?>> registries, AddCallback<I> addCallback, ClearCallback<I> clearCallback, CreateCallback<I> createCallback, SubstitutionCallback<I> substitutionCallback)
     {
         super(defaultKey);
         this.superType = type;
         this.optionalDefaultKey = defaultKey;
-        this.maxId = maxIdValue;
         this.minId = minIdValue;
+        this.maxId = maxIdValue;
         this.availabilityMap = new BitSet(maxIdValue + 1);
-        this.isDelegated = isDelegated;
-        if (this.isDelegated)
+        this.isDelegated = IForgeRegistryEntry.Impl.class.isAssignableFrom(type);
+        this.addCallback = addCallback;
+        this.clearCallback = clearCallback;
+        this.createCallback = createCallback;
+        this.substitutionCallback = substitutionCallback;
+        if (createCallback != null)
         {
-            try
-            {
-                this.delegateAccessor = type.getField("delegate");
-            } catch (NoSuchFieldException e)
-            {
-                FMLLog.log(Level.ERROR, e, "Delegate class identified with missing delegate field");
-                throw Throwables.propagate(e);
-            }
+            createCallback.onCreate(slaves, registries);
         }
-        else
-        {
-            this.delegateAccessor = null;
-        }
-        this.addCallback = callback;
     }
 
     void validateContent(ResourceLocation registryName)
@@ -145,7 +174,9 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
         {
             throw new IllegalArgumentException("incompatible registry");
         }
-
+        final Map<ResourceLocation, Object> slaves = Maps.newHashMap(this.slaves);
+        slaves.put(PersistentRegistryManager.SUBSTITUTION_ORIGINALS, substitutionOriginals);
+        if (this.clearCallback!=null) this.clearCallback.onClear(this, slaves);
         this.optionalDefaultKey = otherRegistry.optionalDefaultKey;
         this.maxId = otherRegistry.maxId;
         this.minId = otherRegistry.minId;
@@ -154,17 +185,25 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
         this.persistentSubstitutions.clear();
         this.persistentSubstitutions.putAll(otherRegistry.getPersistentSubstitutions());
         this.activeSubstitutions.clear();
+        this.substitutionOriginals.clear();
         this.dummiedLocations.clear();
         this.dummiedLocations.addAll(otherRegistry.dummiedLocations);
 
-        underlyingIntegerMap = new ObjectIntIdentityMap<I>();
+        underlyingIntegerMap.clear();
         registryObjects.clear();
 
         for (I thing : otherRegistry.typeSafeIterable())
         {
-            addObjectRaw(otherRegistry.getId(thing), otherRegistry.getNameForObject(thing), thing);
+            ResourceLocation name = otherRegistry.getNameForObject(thing);
+            if (otherRegistry.activeSubstitutions.containsKey(name)) // If this is subed, use the orig, the loop below will reinstate the sub.
+                addObjectRaw(otherRegistry.getId(thing), name, otherRegistry.substitutionOriginals.get(name));
+            else
+                addObjectRaw(otherRegistry.getId(thing), name, thing);
         }
-        this.activeSubstitutions.putAll(otherRegistry.activeSubstitutions);
+        for (ResourceLocation resloc : otherRegistry.activeSubstitutions.keySet())
+        {
+            activateSubstitution(resloc);
+        }
     }
 
     // public api
@@ -190,9 +229,6 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
      */
     /**
      * Register an object on this registry.
-     *  
-     * @param key The key of the registry entry
-     * @param value The value of the registry entry
      */
     @Override
     @Deprecated
@@ -271,10 +307,7 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
      */
     public int getId(I thing)
     {
-        /**
-         * Gets the integer ID we use to identify the given object.
-         */
-        return getIDForObject(thing);
+        return getIDForObjectBypass(thing);
     }
 
     /**
@@ -467,9 +500,13 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
         addObjectRaw(idToUse, name, thing);
         if (isDelegated)
         {
-            getExistingDelegate(thing).setResourceName(name);
+            getExistingDelegate(thing).setName(name);
         }
-        this.dummiedLocations.remove(name);
+
+        if (this.dummiedLocations.remove(name) && DEBUG)
+        {
+            FMLLog.fine("Registry Dummy Remove: %s", name);
+        }
 
         if (DEBUG)
         {
@@ -480,6 +517,10 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
 
     void markDummy(ResourceLocation rl, Integer id, I thing)
     {
+        if (DEBUG)
+        {
+            FMLLog.finer("Registry Dummy Add: %s %d -> %s", rl, id, thing);
+        }
         this.dummiedLocations.add(rl);
         this.addObjectRaw(id, rl, thing);
     }
@@ -558,7 +599,7 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
         availabilityMap.set(id);
         if (addCallback != null)
         {
-            addCallback.onAdd(thing, id);
+            addCallback.onAdd(thing, id, slaves);
         }
     }
 
@@ -573,15 +614,15 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
     }
 
     @SuppressWarnings("unchecked")
-    public Delegate<I> getExistingDelegate(I thing)
+    private Delegate<I> getExistingDelegate(I thing)
     {
-        try
+        if (isDelegated)
         {
-            return (Delegate<I>)delegateAccessor.get(thing);
-        } catch (IllegalAccessException e)
+            return (Delegate<I>)((IForgeRegistryEntry.Impl<I>)thing).delegate;
+        }
+        else
         {
-            FMLLog.log(Level.ERROR, e, "Illegal attempt to access delegate");
-            throw Throwables.propagate(e);
+            return null;
         }
     }
 
@@ -593,6 +634,12 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
             I sub = getPersistentSubstitutions().get(nameToReplace);
             getExistingDelegate(original).changeReference(sub);
             activeSubstitutions.put(nameToReplace, sub);
+            int id = getIDForObjectBypass(original);
+            // force the new object into the existing map
+            addObjectRaw(id, nameToReplace, sub);
+            // Track the original in the substitution originals collection
+            substitutionOriginals.put(nameToReplace, original);
+            if (substitutionCallback!=null) substitutionCallback.onSubstituteActivated(slaves, original, sub, nameToReplace);
             return original;
         }
         return null;
@@ -653,9 +700,9 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
     }
 
 
-    FMLControlledNamespacedRegistry<I> makeShallowCopy()
+    FMLControlledNamespacedRegistry<I> makeShallowCopy(BiMap<ResourceLocation, ? extends IForgeRegistry<?>> registries)
     {
-        return new FMLControlledNamespacedRegistry<I>(optionalDefaultKey, maxId, minId, superType, isDelegated);
+        return new FMLControlledNamespacedRegistry<I>(optionalDefaultKey, minId, maxId, superType, registries, addCallback, clearCallback, createCallback, substitutionCallback);
     }
 
     void resetSubstitutionDelegates()
@@ -672,7 +719,7 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
     }
 
     @SuppressWarnings("unchecked")
-    public <T> FMLControlledNamespacedRegistry<T> asType(Class<? extends T> type)
+    public <T extends IForgeRegistryEntry<T>> FMLControlledNamespacedRegistry<T> asType(Class<? extends T> type)
     {
         return (FMLControlledNamespacedRegistry<T>)this;
     }
@@ -714,6 +761,10 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
 
     public void loadDummied(Set<ResourceLocation> dummied)
     {
+        if (DEBUG && dummied.size() > 0)
+        {
+            FMLLog.fine("Registry Dummy Load: [%s]", Joiner.on(", ").join(dummied));
+        }
         this.dummiedLocations.addAll(dummied);
     }
 
@@ -737,8 +788,17 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
                 remappedIds.put(itemName, new Integer[] {currId, newId});
             }
             I obj = currentRegistry.getRaw(itemName);
-
+            I sub = obj;
+            // If we have an object in the originals set, we use that for initial adding - substitute activation will readd the substitute if neceessary later
+            if (currentRegistry.substitutionOriginals.containsKey(itemName))
+            {
+                obj = currentRegistry.substitutionOriginals.get(itemName);
+            }
             add(newId, itemName, obj);
+            if (currentRegistry.substitutionOriginals.containsKey(itemName) && substitutionCallback != null)
+            {
+                substitutionCallback.onSubstituteActivated(slaves, sub, obj, itemName);
+            }
         }
     }
 
@@ -754,7 +814,7 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
 
         for (I i : this.underlyingIntegerMap)
         {
-            addCallback.onAdd(i, this.underlyingIntegerMap.get(i));
+            addCallback.onAdd(i, this.underlyingIntegerMap.add(i), slaves);
         }
     }
 
@@ -762,13 +822,116 @@ public class FMLControlledNamespacedRegistry<I> extends RegistryNamespacedDefaul
      * Gets the name we use to identify the given object.
      */
     @Override
-    public ResourceLocation getNameForObject(I p_177774_1_)
+    public ResourceLocation getNameForObject(I value)
     {
-        ResourceLocation rl = super.getNameForObject(p_177774_1_);
+        ResourceLocation rl = super.getNameForObjectBypass(value);
         if (rl == null)
         {
-            rl = activeSubstitutions.inverse().get(p_177774_1_);
+            rl = activeSubstitutions.inverse().get(value);
         }
         return rl;
+    }
+
+    @Override
+    public Class<I> getRegistrySuperType()
+    {
+        return superType;
+    }
+
+
+    // IForgeRegistry: Modders should only interfaces with these methods
+
+    @Override
+    public void register(I value)
+    {
+        ResourceLocation key = value.getRegistryName();
+        if (key == null)
+        {
+            FMLLog.severe("Attempted to register a entry with a null name: %s", value);
+            throw new NullPointerException(String.format("Attempted to register a entry with a null name: %s", value));
+        }
+        add(-1, key, value);
+    }
+
+    @Override
+    public boolean containsValue(I value)
+    {
+        return getKey(value) != null;
+    }
+
+    @Override
+    public I getValue(ResourceLocation key)
+    {
+        return getObject(key);
+    }
+
+    @Override
+    public ResourceLocation getKey(I value)
+    {
+        /**
+         * Gets the name we use to identify the given object.
+         */
+        return getNameForObject(value);
+    }
+
+    @Override
+    public List<I> getValues()
+    {
+        return Lists.newArrayList(this.iterator());
+    }
+
+    @Override
+    public Set<Entry<ResourceLocation, I>> getEntries()
+    {
+        return Sets.newHashSet(new Iterator<Entry<ResourceLocation, I>>()
+        {
+            Iterator<I> itr = FMLControlledNamespacedRegistry.this.iterator();
+
+            @Override
+            public boolean hasNext()
+            {
+                return itr.hasNext();
+            }
+
+            @Override
+            public Entry<ResourceLocation, I> next()
+            {
+                final I value = itr.next();
+                final ResourceLocation key = FMLControlledNamespacedRegistry.this.getKey(value);
+                return new Entry<ResourceLocation, I>()
+                {
+                    @Override
+                    public ResourceLocation getKey()
+                    {
+                        return key;
+                    }
+
+                    @Override
+                    public I getValue()
+                    {
+                        return value;
+                    }
+
+                    @Override
+                    public I setValue(I value)
+                    {
+                        throw new UnsupportedOperationException("Setting the value in an iterator is not allowed");
+                    }
+                };
+            }
+
+            @Override
+            public void remove()
+            {
+                throw new UnsupportedOperationException("This is a READ ONLY view of this registry.");
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getSlaveMap(ResourceLocation slaveMapName, Class<T> type)
+    {
+        return (T)slaves.get(slaveMapName);
     }
 }

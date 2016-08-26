@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class NBTTagShort extends NBTBase.NBTPrimitive
+public class NBTTagShort extends NBTPrimitive
 {
     /** The short value for the tag. */
     private short data;
@@ -48,7 +48,7 @@ public class NBTTagShort extends NBTBase.NBTPrimitive
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagShort copy()
     {
         return new NBTTagShort(this.data);
     }

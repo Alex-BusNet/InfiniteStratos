@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.potion.Potion;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
@@ -68,13 +69,13 @@ public class UnitOverlay extends Gui
         final int POISON_TEXTURE_U = BAR_WIDTH + 2;  // black texels
         final int WITHER_TEXTURE_U = BAR_WIDTH + 3;  // brown texels
 
-        if (player.isPotionActive(WITHER_EFFECT_ID)) {
+        if (player.isPotionActive(Potion.getPotionById(WITHER_EFFECT_ID))) {
             drawTexturedModalRect(0, 0, WITHER_TEXTURE_U, 0, 1, BAR_HEIGHT - 2);
         }
-        else if (player.isPotionActive(POISON_EFFECT_ID)) {
+        else if (player.isPotionActive(Potion.getPotionById(POISON_EFFECT_ID))) {
             drawTexturedModalRect(0, 0, POISON_TEXTURE_U, 0, 1, BAR_HEIGHT - 2);
         }
-        else if (player.isPotionActive(REGEN_EFFECT_ID)) {
+        else if (player.isPotionActive(Potion.getPotionById(REGEN_EFFECT_ID))) {
             drawTexturedModalRect(0, 0, REGEN_TEXTURE_U, 0, 1, BAR_HEIGHT - 2);
         }
         else {

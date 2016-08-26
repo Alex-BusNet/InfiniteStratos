@@ -1,12 +1,11 @@
 package net.minecraft.nbt;
 
-import net.minecraft.util.MathHelper;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import net.minecraft.util.math.MathHelper;
 
-public class NBTTagDouble extends NBTBase.NBTPrimitive
+public class NBTTagDouble extends NBTPrimitive
 {
     /** The double value for the tag. */
     private double data;
@@ -50,7 +49,7 @@ public class NBTTagDouble extends NBTBase.NBTPrimitive
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagDouble copy()
     {
         return new NBTTagDouble(this.data);
     }

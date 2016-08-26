@@ -1,16 +1,26 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.client;
+
+import java.io.IOException;
+import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -18,12 +28,11 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-
-import java.util.List;
 
 public abstract class GuiScrollingList
 {
@@ -70,6 +79,7 @@ public abstract class GuiScrollingList
         this.screenHeight = screenHeight;
     }
 
+    @Deprecated // Unused, remove in 1.9.3?
     public void func_27258_a(boolean p_27258_1_)
     {
         this.highlightSelected = p_27258_1_;
@@ -119,6 +129,7 @@ public abstract class GuiScrollingList
      */
     protected void drawScreen(int mouseX, int mouseY) { func_27257_b(mouseX, mouseY); }
 
+    @Deprecated // Unused, Remove in 1.9.3?
     public int func_27256_c(int x, int y)
     {
         int left = this.left + 1;
@@ -128,7 +139,8 @@ public abstract class GuiScrollingList
         return x >= left && x <= right && entryIndex >= 0 && relativeY >= 0 && entryIndex < this.getSize() ? entryIndex : -1;
     }
 
-    public void registerScrollButtons(@SuppressWarnings("rawtypes") List buttons, int upActionID, int downActionID)
+    // FIXME: is this correct/still needed?
+    public void registerScrollButtons(List<GuiButton> buttons, int upActionID, int downActionID)
     {
         this.scrollUpActionId = upActionID;
         this.scrollDownActionId = downActionID;
@@ -170,6 +182,21 @@ public abstract class GuiScrollingList
                 this.initialMouseClickY = -2.0F;
                 this.applyScrollLimits();
             }
+        }
+    }
+
+
+    public void handleMouseInput(int mouseX, int mouseY) throws IOException
+    {
+        boolean isHovering = mouseX >= this.left && mouseX <= this.left + this.listWidth &&
+                             mouseY >= this.top && mouseY <= this.bottom;
+        if (!isHovering)
+            return;
+
+        int scroll = Mouse.getEventDWheel();
+        if (scroll != 0)
+        {
+            this.scrollDistance += (float)((-1 * scroll / 120.0F) * this.slotHeight / 2);
         }
     }
 
@@ -244,25 +271,13 @@ public abstract class GuiScrollingList
         }
         else
         {
-            while (isHovering && Mouse.next())
-            {
-                int scroll = Mouse.getEventDWheel();
-                if (scroll != 0)
-                {
-                    if      (scroll > 0) scroll = -1;
-                    else if (scroll < 0) scroll =  1;
-
-                    this.scrollDistance += (float)(scroll * this.slotHeight / 2);
-                }
-            }
-
             this.initialMouseClickY = -1.0F;
         }
 
         this.applyScrollLimits();
 
         Tessellator tess = Tessellator.getInstance();
-        WorldRenderer worldr = tess.getWorldRenderer();
+        VertexBuffer worldr = tess.getBuffer();
 
         ScaledResolution res = new ScaledResolution(client);
         double scaleW = client.displayWidth / res.getScaledWidth_double();
@@ -279,7 +294,7 @@ public abstract class GuiScrollingList
         {
             GlStateManager.disableLighting();
             GlStateManager.disableFog();
-            this.client.renderEngine.bindTexture(Gui.optionsBackground);
+            this.client.renderEngine.bindTexture(Gui.OPTIONS_BACKGROUND);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             float scale = 32.0F;
             worldr.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
@@ -328,10 +343,10 @@ public abstract class GuiScrollingList
 
         GlStateManager.disableDepth();
 
-        int extraHeight = this.getContentHeight() - viewHeight - border;
+        int extraHeight = (this.getContentHeight() + border) - viewHeight;
         if (extraHeight > 0)
         {
-            int height = viewHeight * viewHeight / this.getContentHeight();
+            int height = (viewHeight * viewHeight) / this.getContentHeight();
 
             if (height < 32) height = 32;
 
@@ -389,12 +404,12 @@ public abstract class GuiScrollingList
         GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
         GlStateManager.shadeModel(GL11.GL_SMOOTH);
         Tessellator tessellator = Tessellator.getInstance();
-        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
-        worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        worldrenderer.pos(right, top, 0.0D).color(r1, g1, b1, a1).endVertex();
-        worldrenderer.pos(left,  top, 0.0D).color(r1, g1, b1, a1).endVertex();
-        worldrenderer.pos(left,  bottom, 0.0D).color(r2, g2, b2, a2).endVertex();
-        worldrenderer.pos(right, bottom, 0.0D).color(r2, g2, b2, a2).endVertex();
+        VertexBuffer VertexBuffer = tessellator.getBuffer();
+        VertexBuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        VertexBuffer.pos(right, top, 0.0D).color(r1, g1, b1, a1).endVertex();
+        VertexBuffer.pos(left,  top, 0.0D).color(r1, g1, b1, a1).endVertex();
+        VertexBuffer.pos(left,  bottom, 0.0D).color(r2, g2, b2, a2).endVertex();
+        VertexBuffer.pos(right, bottom, 0.0D).color(r2, g2, b2, a2).endVertex();
         tessellator.draw();
         GlStateManager.shadeModel(GL11.GL_FLAT);
         GlStateManager.disableBlend();

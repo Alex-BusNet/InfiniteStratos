@@ -19,22 +19,22 @@ public class LayerEnderDragonEyes implements LayerRenderer<EntityDragon>
         this.dragonRenderer = dragonRendererIn;
     }
 
-    public void doRenderLayer(EntityDragon entitylivingbaseIn, float p_177141_2_, float p_177141_3_, float partialTicks, float p_177141_5_, float p_177141_6_, float p_177141_7_, float scale)
+    public void doRenderLayer(EntityDragon entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
         this.dragonRenderer.bindTexture(TEXTURE);
         GlStateManager.enableBlend();
         GlStateManager.disableAlpha();
-        GlStateManager.blendFunc(1, 1);
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
         GlStateManager.disableLighting();
         GlStateManager.depthFunc(514);
         int i = 61680;
-        int j = i % 65536;
-        int k = i / 65536;
-        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j / 1.0F, (float)k / 1.0F);
+        int j = 61680;
+        int k = 0;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 61680.0F, 0.0F);
         GlStateManager.enableLighting();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.dragonRenderer.getMainModel().render(entitylivingbaseIn, p_177141_2_, p_177141_3_, p_177141_5_, p_177141_6_, p_177141_7_, scale);
-        this.dragonRenderer.func_177105_a(entitylivingbaseIn, partialTicks);
+        this.dragonRenderer.getMainModel().render(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+        this.dragonRenderer.setLightmap(entitylivingbaseIn, partialTicks);
         GlStateManager.disableBlend();
         GlStateManager.enableAlpha();
         GlStateManager.depthFunc(515);

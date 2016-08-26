@@ -1,22 +1,21 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.network.play.client.C00PacketKeepAlive;
+import net.minecraft.network.play.client.CPacketKeepAlive;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.io.IOException;
 
 @SideOnly(Side.CLIENT)
 public class GuiDownloadTerrain extends GuiScreen
 {
-    private NetHandlerPlayClient netHandlerPlayClient;
+    private final NetHandlerPlayClient connection;
     private int progress;
 
     public GuiDownloadTerrain(NetHandlerPlayClient netHandler)
     {
-        this.netHandlerPlayClient = netHandler;
+        this.connection = netHandler;
     }
 
     /**
@@ -45,12 +44,12 @@ public class GuiDownloadTerrain extends GuiScreen
 
         if (this.progress % 20 == 0)
         {
-            this.netHandlerPlayClient.addToSendQueue(new C00PacketKeepAlive());
+            this.connection.sendPacket(new CPacketKeepAlive());
         }
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {

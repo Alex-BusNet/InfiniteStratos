@@ -1,14 +1,17 @@
 package net.minecraft.network.rcon;
 
 import com.google.common.collect.Maps;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.SERVER)
 public class RConThreadMain extends RConThreadBase
@@ -16,13 +19,13 @@ public class RConThreadMain extends RConThreadBase
     /** Port RCon is running on */
     private int rconPort;
     /** Port the server is running on */
-    private int serverPort;
+    private final int serverPort;
     /** Hostname RCon is running on */
     private String hostname;
     /** The RCon ServerSocket. */
     private ServerSocket serverSocket;
     /** The RCon password */
-    private String rconPassword;
+    private final String rconPassword;
     private Map<SocketAddress, RConThreadClient> clientThreads;
 
     public RConThreadMain(IServer p_i1538_1_)
@@ -39,7 +42,7 @@ public class RConThreadMain extends RConThreadBase
             this.logInfo("Setting default rcon port to " + this.rconPort);
             p_i1538_1_.setProperty("rcon.port", Integer.valueOf(this.rconPort));
 
-            if (0 == this.rconPassword.length())
+            if (this.rconPassword.isEmpty())
             {
                 p_i1538_1_.setProperty("rcon.password", "");
             }
@@ -47,7 +50,7 @@ public class RConThreadMain extends RConThreadBase
             p_i1538_1_.saveProperties();
         }
 
-        if (0 == this.hostname.length())
+        if (this.hostname.isEmpty())
         {
             this.hostname = "0.0.0.0";
         }
@@ -120,7 +123,7 @@ public class RConThreadMain extends RConThreadBase
      */
     public void startThread()
     {
-        if (0 == this.rconPassword.length())
+        if (this.rconPassword.isEmpty())
         {
             this.logWarning("No rcon password set in \'" + this.server.getSettingsFilename() + "\', rcon disabled!");
         }

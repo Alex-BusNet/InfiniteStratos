@@ -1,8 +1,29 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.asm.transformers;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import java.lang.reflect.Modifier;
+import java.util.List;
+
 import net.minecraft.launchwrapper.IClassTransformer;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -10,8 +31,8 @@ import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import java.lang.reflect.Modifier;
-import java.util.List;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 
 public class EventSubscriberTransformer implements IClassTransformer
 {
@@ -33,7 +54,7 @@ public class EventSubscriberTransformer implements IClassTransformer
             {
                 if (Modifier.isPrivate(methodNode.access))
                 {
-                    String msg = "Cannot apply @SubsribeEvent to private method %s/%s%s";
+                    String msg = "Cannot apply @SubscribeEvent to private method %s/%s%s";
                     throw new RuntimeException(String.format(msg, classNode.name, methodNode.name, methodNode.desc));
                 }
 

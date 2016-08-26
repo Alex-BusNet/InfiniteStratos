@@ -4,19 +4,22 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CancellationException;
+import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RegionRenderCacheBuilder;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CancellationException;
 
 @SideOnly(Side.CLIENT)
 public class ChunkRenderWorker implements Runnable
@@ -24,21 +27,23 @@ public class ChunkRenderWorker implements Runnable
     private static final Logger LOGGER = LogManager.getLogger();
     private final ChunkRenderDispatcher chunkRenderDispatcher;
     private final RegionRenderCacheBuilder regionRenderCacheBuilder;
+    private boolean shouldRun;
 
     public ChunkRenderWorker(ChunkRenderDispatcher p_i46201_1_)
     {
         this(p_i46201_1_, (RegionRenderCacheBuilder)null);
     }
 
-    public ChunkRenderWorker(ChunkRenderDispatcher chunkRenderDispatcherIn, RegionRenderCacheBuilder regionRenderCacheBuilderIn)
+    public ChunkRenderWorker(ChunkRenderDispatcher chunkRenderDispatcherIn, @Nullable RegionRenderCacheBuilder regionRenderCacheBuilderIn)
     {
+        this.shouldRun = true;
         this.chunkRenderDispatcher = chunkRenderDispatcherIn;
         this.regionRenderCacheBuilder = regionRenderCacheBuilderIn;
     }
 
     public void run()
     {
-        while (true)
+        while (this.shouldRun)
         {
             try
             {
@@ -46,7 +51,7 @@ public class ChunkRenderWorker implements Runnable
             }
             catch (InterruptedException var3)
             {
-                LOGGER.debug("Stopping due to interrupt");
+                LOGGER.debug("Stopping chunk worker due to interrupt");
                 return;
             }
             catch (Throwable throwable)
@@ -68,10 +73,27 @@ public class ChunkRenderWorker implements Runnable
             {
                 if (!generator.isFinished())
                 {
-                    LOGGER.warn("Chunk render task was " + generator.getStatus() + " when I expected it to be pending; ignoring task");
+                    LOGGER.warn("Chunk render task was {} when I expected it to be pending; ignoring task", new Object[] {generator.getStatus()});
                 }
 
                 return;
+            }
+
+            BlockPos blockpos = new BlockPos(Minecraft.getMinecraft().thePlayer);
+            BlockPos blockpos1 = generator.getRenderChunk().getPosition();
+            int i = 16;
+            int j = 8;
+            int k = 24;
+
+            if (blockpos1.add(8, 8, 8).distanceSq(blockpos) > 576.0D)
+            {
+                World world = generator.getRenderChunk().getWorld();
+                BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(blockpos1);
+
+                if (!this.isChunkExisting(blockpos$mutableblockpos.setPos(blockpos1).move(EnumFacing.WEST, 16), world) || !this.isChunkExisting(blockpos$mutableblockpos.setPos(blockpos1).move(EnumFacing.NORTH, 16), world) || !this.isChunkExisting(blockpos$mutableblockpos.setPos(blockpos1).move(EnumFacing.EAST, 16), world) || !this.isChunkExisting(blockpos$mutableblockpos.setPos(blockpos1).move(EnumFacing.SOUTH, 16), world))
+                {
+                    return;
+                }
             }
 
             generator.setStatus(ChunkCompileTaskGenerator.Status.COMPILING);
@@ -81,18 +103,18 @@ public class ChunkRenderWorker implements Runnable
             generator.getLock().unlock();
         }
 
-        Entity lvt_2_1_ = Minecraft.getMinecraft().getRenderViewEntity();
+        Entity lvt_2_2_ = Minecraft.getMinecraft().getRenderViewEntity();
 
-        if (lvt_2_1_ == null)
+        if (lvt_2_2_ == null)
         {
             generator.finish();
         }
         else
         {
             generator.setRegionRenderCacheBuilder(this.getRegionRenderCacheBuilder());
-            float f = (float)lvt_2_1_.posX;
-            float f1 = (float)lvt_2_1_.posY + lvt_2_1_.getEyeHeight();
-            float f2 = (float)lvt_2_1_.posZ;
+            float f = (float)lvt_2_2_.posX;
+            float f1 = (float)lvt_2_2_.posY + lvt_2_2_.getEyeHeight();
+            float f2 = (float)lvt_2_2_.posZ;
             ChunkCompileTaskGenerator.Type chunkcompiletaskgenerator$type = generator.getType();
 
             if (chunkcompiletaskgenerator$type == ChunkCompileTaskGenerator.Type.REBUILD_CHUNK)
@@ -112,7 +134,7 @@ public class ChunkRenderWorker implements Runnable
                 {
                     if (!generator.isFinished())
                     {
-                        LOGGER.warn("Chunk render task was " + generator.getStatus() + " when I expected it to be compiling; aborting task");
+                        LOGGER.warn("Chunk render task was {} when I expected it to be compiling; aborting task", new Object[] {generator.getStatus()});
                     }
 
                     this.freeRenderBuilder(generator);
@@ -126,25 +148,25 @@ public class ChunkRenderWorker implements Runnable
                 generator.getLock().unlock();
             }
 
-            final CompiledChunk lvt_7_1_ = generator.getCompiledChunk();
-            ArrayList lvt_8_1_ = Lists.newArrayList();
+            final CompiledChunk lvt_7_2_ = generator.getCompiledChunk();
+            ArrayList lvt_8_2_ = Lists.newArrayList();
 
             if (chunkcompiletaskgenerator$type == ChunkCompileTaskGenerator.Type.REBUILD_CHUNK)
             {
-                for (EnumWorldBlockLayer enumworldblocklayer : EnumWorldBlockLayer.values())
+                for (BlockRenderLayer blockrenderlayer : BlockRenderLayer.values())
                 {
-                    if (lvt_7_1_.isLayerStarted(enumworldblocklayer))
+                    if (lvt_7_2_.isLayerStarted(blockrenderlayer))
                     {
-                        lvt_8_1_.add(this.chunkRenderDispatcher.uploadChunk(enumworldblocklayer, generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(enumworldblocklayer), generator.getRenderChunk(), lvt_7_1_));
+                        lvt_8_2_.add(this.chunkRenderDispatcher.uploadChunk(blockrenderlayer, generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(blockrenderlayer), generator.getRenderChunk(), lvt_7_2_, generator.getDistanceSq()));
                     }
                 }
             }
             else if (chunkcompiletaskgenerator$type == ChunkCompileTaskGenerator.Type.RESORT_TRANSPARENCY)
             {
-                lvt_8_1_.add(this.chunkRenderDispatcher.uploadChunk(EnumWorldBlockLayer.TRANSLUCENT, generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(EnumWorldBlockLayer.TRANSLUCENT), generator.getRenderChunk(), lvt_7_1_));
+                lvt_8_2_.add(this.chunkRenderDispatcher.uploadChunk(BlockRenderLayer.TRANSLUCENT, generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(BlockRenderLayer.TRANSLUCENT), generator.getRenderChunk(), lvt_7_2_, generator.getDistanceSq()));
             }
 
-            final ListenableFuture<List<Object>> listenablefuture = Futures.allAsList(lvt_8_1_);
+            final ListenableFuture<List<Object>> listenablefuture = Futures.allAsList(lvt_8_2_);
             generator.addFinishRunnable(new Runnable()
             {
                 public void run()
@@ -154,7 +176,7 @@ public class ChunkRenderWorker implements Runnable
             });
             Futures.addCallback(listenablefuture, new FutureCallback<List<Object>>()
             {
-                public void onSuccess(List<Object> p_onSuccess_1_)
+                public void onSuccess(@Nullable List<Object> p_onSuccess_1_)
                 {
                     ChunkRenderWorker.this.freeRenderBuilder(generator);
                     generator.getLock().lock();
@@ -170,7 +192,7 @@ public class ChunkRenderWorker implements Runnable
 
                             if (!generator.isFinished())
                             {
-                                ChunkRenderWorker.LOGGER.warn("Chunk render task was " + generator.getStatus() + " when I expected it to be uploading; aborting task");
+                                ChunkRenderWorker.LOGGER.warn("Chunk render task was {} when I expected it to be uploading; aborting task", new Object[] {generator.getStatus()});
                             }
                         }
                         finally
@@ -180,7 +202,7 @@ public class ChunkRenderWorker implements Runnable
 
                         return;
                     }
-                    generator.getRenderChunk().setCompiledChunk(lvt_7_1_);
+                    generator.getRenderChunk().setCompiledChunk(lvt_7_2_);
                 }
                 public void onFailure(Throwable p_onFailure_1_)
                 {
@@ -195,6 +217,11 @@ public class ChunkRenderWorker implements Runnable
         }
     }
 
+    private boolean isChunkExisting(BlockPos p_188263_1_, World p_188263_2_)
+    {
+        return !p_188263_2_.getChunkFromChunkCoords(p_188263_1_.getX() >> 4, p_188263_1_.getZ() >> 4).isEmpty();
+    }
+
     private RegionRenderCacheBuilder getRegionRenderCacheBuilder() throws InterruptedException
     {
         return this.regionRenderCacheBuilder != null ? this.regionRenderCacheBuilder : this.chunkRenderDispatcher.allocateRenderBuilder();
@@ -206,5 +233,10 @@ public class ChunkRenderWorker implements Runnable
         {
             this.chunkRenderDispatcher.freeRenderBuilder(taskGenerator.getRegionRenderCacheBuilder());
         }
+    }
+
+    public void notifyToStop()
+    {
+        this.shouldRun = false;
     }
 }

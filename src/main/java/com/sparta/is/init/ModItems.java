@@ -3,13 +3,27 @@ package com.sparta.is.init;
 import com.sparta.is.item.*;
 import com.sparta.is.reference.Names;
 import com.sparta.is.reference.Reference;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @GameRegistry.ObjectHolder(Reference.MOD_ID)
 public class ModItems
 {
+    public static final List<ItemIS> ITEMS = new ArrayList<>();
+
+
     public static final ItemISEqualizer yukihiraNigata = new ItemYukihira();
+
     public static final ItemISEqualizer elucidator = new ItemElucidator();
 
     public static final ItemIS yukihiraBlade = new ItemYukihiraBlade();
@@ -38,6 +52,55 @@ public class ModItems
         GameRegistry.registerItem(elucidator, Names.Weapons.ELUCIDATOR);
         GameRegistry.registerItem(tabLabel, Names.Empty.TAB_LABEL);
     }
+
+    public static void registerRenders()
+    {
+        registerRender(yukihiraNigata);
+        registerRender(elucidator);
+    }
+
+    private static void registerRender(Item item)
+    {
+        Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(item, 0, new ModelResourceLocation(Reference.MOD_ID + ":" + item.getUnlocalizedName().substring(5), "inventory"));
+    }
+
+    private static void registerRender(Item item, int maxMeta)
+    {
+        for (int i = 0; i < maxMeta; i++)
+        {
+            Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(item, i, new ModelResourceLocation(Reference.MOD_ID + ":" + item .getUnlocalizedName().substring(5), "inventory"));
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static void initModelsAndVariants()
+    {
+        ITEMS.forEach(ItemIS::initModelsAndVariants);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static void registerItemColors()
+    {
+        for(ItemIS itemIS : ITEMS)
+        {
+            if(itemIS instanceof IItemColor )
+            {
+                FMLClientHandler.instance().getClient().getItemColors().registerItemColorHandler(new IItemColor()
+                {
+                    @Override
+                    public int getColorFromItemstack(ItemStack stack, int tintIndex)
+                    {
+                        return ((IItemColor) itemIS).getColorFromItemstack(stack, tintIndex);
+                    }
+                }, itemIS);
+            }
+        }
+    }
+
+
+
+
+
 
 
 }

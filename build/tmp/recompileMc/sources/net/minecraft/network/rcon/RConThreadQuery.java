@@ -1,17 +1,23 @@
 package net.minecraft.network.rcon;
 
 import com.google.common.collect.Maps;
-import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.PortUnreachableException;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Map.Entry;
+import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.SERVER)
 public class RConThreadQuery extends RConThreadBase
@@ -21,29 +27,29 @@ public class RConThreadQuery extends RConThreadBase
     /** The RCon query port */
     private int queryPort;
     /** Port the server is running on */
-    private int serverPort;
+    private final int serverPort;
     /** The maximum number of players allowed on the server */
-    private int maxPlayers;
+    private final int maxPlayers;
     /** The current server message of the day */
-    private String serverMotd;
+    private final String serverMotd;
     /** The name of the currently loaded world */
-    private String worldName;
+    private final String worldName;
     /** The remote socket querying the server */
     private DatagramSocket querySocket;
     /** A buffer for incoming DatagramPackets */
-    private byte[] buffer = new byte[1460];
+    private final byte[] buffer = new byte[1460];
     /** Storage for incoming DatagramPackets */
     private DatagramPacket incomingPacket;
-    private Map<SocketAddress, String> field_72644_p;
+    private final Map<SocketAddress, String> idents;
     /** The hostname of this query server */
     private String queryHostname;
     /** The hostname of the running server */
     private String serverHostname;
-    private Map<SocketAddress, RConThreadQuery.Auth> queryClients;
+    private final Map<SocketAddress, RConThreadQuery.Auth> queryClients;
     /** The time that this RConThreadQuery was constructed, from (new Date()).getTime() */
-    private long time;
+    private final long time;
     /** The RConQuery output stream */
-    private RConOutputStream output;
+    private final RConOutputStream output;
     /** The time of the last query response sent */
     private long lastQueryResponseTime;
 
@@ -59,7 +65,7 @@ public class RConThreadQuery extends RConThreadBase
         this.lastQueryResponseTime = 0L;
         this.queryHostname = "0.0.0.0";
 
-        if (0 != this.serverHostname.length() && !this.queryHostname.equals(this.serverHostname))
+        if (!this.serverHostname.isEmpty() && !this.queryHostname.equals(this.serverHostname))
         {
             this.queryHostname = this.serverHostname;
         }
@@ -87,7 +93,7 @@ public class RConThreadQuery extends RConThreadBase
             p_i1536_1_.saveProperties();
         }
 
-        this.field_72644_p = Maps.<SocketAddress, String>newHashMap();
+        this.idents = Maps.<SocketAddress, String>newHashMap();
         this.output = new RConOutputStream(1460);
         this.queryClients = Maps.<SocketAddress, RConThreadQuery.Auth>newHashMap();
         this.time = (new Date()).getTime();
@@ -349,7 +355,7 @@ public class RConThreadQuery extends RConThreadBase
     {
         if (this.running)
         {
-            this.logWarning("Unexpected exception, buggy JRE? (" + exception.toString() + ")");
+            this.logWarning("Unexpected exception, buggy JRE? (" + exception + ")");
 
             if (!this.initQuerySystem())
             {
@@ -391,15 +397,15 @@ public class RConThreadQuery extends RConThreadBase
     class Auth
     {
         /** The creation timestamp for this auth */
-        private long timestamp = (new Date()).getTime();
+        private final long timestamp = (new Date()).getTime();
         /** A random integer value to be used for client response authentication */
-        private int randomChallenge;
+        private final int randomChallenge;
         /** A client-provided request ID associated with this query. */
-        private byte[] requestId;
+        private final byte[] requestId;
         /** A unique string of bytes used to verify client auth */
-        private byte[] challengeValue;
+        private final byte[] challengeValue;
         /** The request ID stored as a String */
-        private String requestIdAsString;
+        private final String requestIdAsString;
 
         public Auth(DatagramPacket requestPacket)
         {

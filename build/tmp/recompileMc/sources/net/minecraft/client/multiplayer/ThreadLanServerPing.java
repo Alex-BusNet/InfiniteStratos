@@ -1,21 +1,20 @@
 package net.minecraft.client.multiplayer;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicInteger;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SideOnly(Side.CLIENT)
 public class ThreadLanServerPing extends Thread
 {
-    private static final AtomicInteger field_148658_a = new AtomicInteger(0);
-    private static final Logger logger = LogManager.getLogger();
+    private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
+    private static final Logger LOGGER = LogManager.getLogger();
     private final String motd;
     /** The socket we're using to send packets on. */
     private final DatagramSocket socket;
@@ -24,7 +23,7 @@ public class ThreadLanServerPing extends Thread
 
     public ThreadLanServerPing(String p_i1321_1_, String p_i1321_2_) throws IOException
     {
-        super("LanServerPinger #" + field_148658_a.incrementAndGet());
+        super("LanServerPinger #" + UNIQUE_THREAD_ID.incrementAndGet());
         this.motd = p_i1321_1_;
         this.address = p_i1321_2_;
         this.setDaemon(true);
@@ -46,7 +45,7 @@ public class ThreadLanServerPing extends Thread
             }
             catch (IOException ioexception)
             {
-                logger.warn("LanServerPinger: " + ioexception.getMessage());
+                LOGGER.warn("LanServerPinger: {}", new Object[] {ioexception.getMessage()});
                 break;
             }
 

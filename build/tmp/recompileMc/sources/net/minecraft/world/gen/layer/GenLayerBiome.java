@@ -1,15 +1,15 @@
 package net.minecraft.world.gen.layer;
 
+import net.minecraft.init.Biomes;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.ChunkProviderSettings;
 
 public class GenLayerBiome extends GenLayer
 {
     @SuppressWarnings("unchecked")
     private java.util.List<net.minecraftforge.common.BiomeManager.BiomeEntry>[] biomes = new java.util.ArrayList[net.minecraftforge.common.BiomeManager.BiomeType.values().length];
-
-    private final ChunkProviderSettings field_175973_g;
+    private final ChunkProviderSettings settings;
 
     public GenLayerBiome(long p_i45560_1_, GenLayer p_i45560_3_, WorldType p_i45560_4_, String p_i45560_5_)
     {
@@ -27,28 +27,28 @@ public class GenLayerBiome extends GenLayer
 
         int desertIdx = net.minecraftforge.common.BiomeManager.BiomeType.DESERT.ordinal();
 
-        biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(BiomeGenBase.desert, 30));
-        biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(BiomeGenBase.savanna, 20));
-        biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(BiomeGenBase.plains, 10));
+        biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(Biomes.DESERT, 30));
+        biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(Biomes.SAVANNA, 20));
+        biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(Biomes.PLAINS, 10));
 
         if (p_i45560_4_ == WorldType.DEFAULT_1_1)
         {
             biomes[desertIdx].clear();
-            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(BiomeGenBase.desert, 10));
-            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(BiomeGenBase.forest, 10));
-            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(BiomeGenBase.extremeHills, 10));
-            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(BiomeGenBase.swampland, 10));
-            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(BiomeGenBase.plains, 10));
-            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(BiomeGenBase.taiga, 10));
-            this.field_175973_g = null;
+            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(Biomes.DESERT, 10));
+            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(Biomes.FOREST, 10));
+            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(Biomes.EXTREME_HILLS, 10));
+            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(Biomes.SWAMPLAND, 10));
+            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(Biomes.PLAINS, 10));
+            biomes[desertIdx].add(new net.minecraftforge.common.BiomeManager.BiomeEntry(Biomes.TAIGA, 10));
+            this.settings = null;
         }
         else if (p_i45560_4_ == WorldType.CUSTOMIZED)
         {
-            this.field_175973_g = ChunkProviderSettings.Factory.jsonToFactory(p_i45560_5_).func_177864_b();
+            this.settings = ChunkProviderSettings.Factory.jsonToFactory(p_i45560_5_).build();
         }
         else
         {
-            this.field_175973_g = null;
+            this.settings = null;
         }
     }
 
@@ -70,15 +70,15 @@ public class GenLayerBiome extends GenLayer
                 int l = (k & 3840) >> 8;
                 k = k & -3841;
 
-                if (this.field_175973_g != null && this.field_175973_g.fixedBiome >= 0)
+                if (this.settings != null && this.settings.fixedBiome >= 0)
                 {
-                    aint1[j + i * areaWidth] = this.field_175973_g.fixedBiome;
+                    aint1[j + i * areaWidth] = this.settings.fixedBiome;
                 }
                 else if (isBiomeOceanic(k))
                 {
                     aint1[j + i * areaWidth] = k;
                 }
-                else if (k == BiomeGenBase.mushroomIsland.biomeID)
+                else if (k == Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND))
                 {
                     aint1[j + i * areaWidth] = k;
                 }
@@ -88,47 +88,47 @@ public class GenLayerBiome extends GenLayer
                     {
                         if (this.nextInt(3) == 0)
                         {
-                            aint1[j + i * areaWidth] = BiomeGenBase.mesaPlateau.biomeID;
+                            aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.MESA_CLEAR_ROCK);
                         }
                         else
                         {
-                            aint1[j + i * areaWidth] = BiomeGenBase.mesaPlateau_F.biomeID;
+                            aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.MESA_ROCK);
                         }
                     }
                     else
                     {
-                        aint1[j + i * areaWidth] = getWeightedBiomeEntry(net.minecraftforge.common.BiomeManager.BiomeType.DESERT).biome.biomeID;
+                        aint1[j + i * areaWidth] = Biome.getIdForBiome(getWeightedBiomeEntry(net.minecraftforge.common.BiomeManager.BiomeType.DESERT).biome);
                     }
                 }
                 else if (k == 2)
                 {
                     if (l > 0)
                     {
-                        aint1[j + i * areaWidth] = BiomeGenBase.jungle.biomeID;
+                        aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.JUNGLE);
                     }
                     else
                     {
-                        aint1[j + i * areaWidth] = getWeightedBiomeEntry(net.minecraftforge.common.BiomeManager.BiomeType.WARM).biome.biomeID;
+                        aint1[j + i * areaWidth] = Biome.getIdForBiome(getWeightedBiomeEntry(net.minecraftforge.common.BiomeManager.BiomeType.WARM).biome);
                     }
                 }
                 else if (k == 3)
                 {
                     if (l > 0)
                     {
-                        aint1[j + i * areaWidth] = BiomeGenBase.megaTaiga.biomeID;
+                        aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.REDWOOD_TAIGA);
                     }
                     else
                     {
-                        aint1[j + i * areaWidth] = getWeightedBiomeEntry(net.minecraftforge.common.BiomeManager.BiomeType.COOL).biome.biomeID;
+                        aint1[j + i * areaWidth] = Biome.getIdForBiome(getWeightedBiomeEntry(net.minecraftforge.common.BiomeManager.BiomeType.COOL).biome);
                     }
                 }
                 else if (k == 4)
                 {
-                    aint1[j + i * areaWidth] = getWeightedBiomeEntry(net.minecraftforge.common.BiomeManager.BiomeType.ICY).biome.biomeID;
+                    aint1[j + i * areaWidth] = Biome.getIdForBiome(getWeightedBiomeEntry(net.minecraftforge.common.BiomeManager.BiomeType.ICY).biome);
                 }
                 else
                 {
-                    aint1[j + i * areaWidth] = BiomeGenBase.mushroomIsland.biomeID;
+                    aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND);
                 }
             }
         }

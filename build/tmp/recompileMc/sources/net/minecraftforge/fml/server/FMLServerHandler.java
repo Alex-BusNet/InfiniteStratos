@@ -1,37 +1,53 @@
 /*
- * The FML Forge Mod Loader suite. Copyright (C) 2012 cpw
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2.1 of the License, or any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
  *
- * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51
- * Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 package net.minecraftforge.fml.server;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.command.ServerCommand;
+import java.io.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.dedicated.PendingCommand;
 import net.minecraft.util.IThreadListener;
+import net.minecraft.util.text.translation.LanguageMap;
 import net.minecraft.world.storage.SaveFormatOld;
-import net.minecraftforge.fml.common.*;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.IFMLSidedHandler;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.StartupQuery;
 import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.fml.common.functions.GenericIterableFactory;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import net.minecraftforge.fml.common.registry.LanguageRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.io.File;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import com.google.common.collect.ImmutableList;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Handles primary communication from hooked code into the system
@@ -63,22 +79,22 @@ public class FMLServerHandler implements IFMLSidedHandler
      * A reference to the server itself
      */
     private MinecraftServer server;
-
+    private List<String> injectedModContainers;
     private FMLServerHandler()
     {
-        FMLCommonHandler.instance().beginLoading(this);
+        injectedModContainers = FMLCommonHandler.instance().beginLoading(this);
     }
     /**
      * Called to start the whole game off from
      * {@link MinecraftServer#startServer}
      *
-     * @param minecraftServer
+     * @param minecraftServer server
      */
     @Override
     public void beginServerLoading(MinecraftServer minecraftServer)
     {
         server = minecraftServer;
-        Loader.instance().loadMods();
+        Loader.instance().loadMods(injectedModContainers);
         Loader.instance().preinitializeMods();
     }
 
@@ -172,7 +188,7 @@ public class FMLServerHandler implements IFMLSidedHandler
                 // rudimentary command processing, check for fml confirm/cancel and stop commands
                 synchronized (dedServer.pendingCommandList)
                 {
-                    for (Iterator<ServerCommand> it = GenericIterableFactory.newCastingIterable(dedServer.pendingCommandList, ServerCommand.class).iterator(); it.hasNext(); )
+                    for (Iterator<PendingCommand> it = GenericIterableFactory.newCastingIterable(dedServer.pendingCommandList, PendingCommand.class).iterator(); it.hasNext(); )
                     {
                         String cmd = it.next().command.trim().toLowerCase();
 
@@ -209,10 +225,50 @@ public class FMLServerHandler implements IFMLSidedHandler
     {
         return false;
     }
+
     @Override
     public void addModAsResource(ModContainer container)
     {
-        LanguageRegistry.instance().loadLanguagesFor(container, Side.SERVER);
+        String langFile = "assets/" + container.getModId().toLowerCase() + "/lang/en_US.lang";
+        File source = container.getSource();
+        InputStream stream = null;
+        ZipFile zip = null;
+        try
+        {
+            if (source.isDirectory() && (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment"))
+            {
+                stream = new FileInputStream(new File(source.toURI().resolve(langFile).getPath()));
+            }
+            else
+            {
+                zip = new ZipFile(source);
+                ZipEntry entry = zip.getEntry(langFile);
+                if(entry == null) throw new FileNotFoundException();
+                stream = zip.getInputStream(entry);
+            }
+            LanguageMap.inject(stream);
+        }
+        catch (IOException e)
+        {
+            // hush
+        }
+        catch(Exception e)
+        {
+            FMLLog.getLogger().error(e);
+        }
+        finally
+        {
+            IOUtils.closeQuietly(stream);
+            try
+            {
+                if (zip != null)
+                    zip.close();
+            }
+            catch (IOException e)
+            {
+                // shush
+            }
+        }
     }
 
     @Override
@@ -271,5 +327,11 @@ public class FMLServerHandler implements IFMLSidedHandler
     public String stripSpecialChars(String message)
     {
         return message;
+    }
+
+    @Override
+    public void reloadRenderers() {
+        // NOOP
+
     }
 }

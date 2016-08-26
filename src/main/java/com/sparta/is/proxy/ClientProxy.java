@@ -1,12 +1,10 @@
 package com.sparta.is.proxy;
 
-import com.sparta.is.client.handler.DrawBlockHighlightEventHandler;
 import com.sparta.is.client.handler.HUDTickHandler;
 import com.sparta.is.client.handler.ItemTooltipEventHandler;
 import com.sparta.is.client.handler.KeyInputEventHandler;
 import com.sparta.is.client.render.Units.Byakushiki;
 import com.sparta.is.client.settings.KeyBindings;
-import com.sparta.is.client.util.ClientSoundHelper;
 import com.sparta.is.settings.ChalkSettings;
 import com.sparta.is.settings.OneOffSettings;
 import com.sparta.is.settings.UnitSettings;
@@ -31,7 +29,6 @@ public class ClientProxy extends CommonProxy
         MinecraftForge.EVENT_BUS.register(new KeyInputEventHandler());
         MinecraftForge.EVENT_BUS.register(new HUDTickHandler());
         MinecraftForge.EVENT_BUS.register(new ItemTooltipEventHandler());
-        MinecraftForge.EVENT_BUS.register(new DrawBlockHighlightEventHandler());
     }
 
     @Override
@@ -77,7 +74,7 @@ public class ClientProxy extends CommonProxy
     @Override
     public void playSound(String soundName, float xCoord, float yCoord, float zCoord, float volume, float pitch)
     {
-        ClientSoundHelper.playSound(soundName, xCoord, yCoord, zCoord, volume, pitch);
+//        ClientSoundHelper.playSound(soundName, xCoord, yCoord, zCoord, volume, pitch);
     }
 
     @Override

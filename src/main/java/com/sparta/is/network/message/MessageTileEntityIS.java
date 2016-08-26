@@ -4,6 +4,7 @@ package com.sparta.is.network.message;
 import com.sparta.is.tileentity.TileEntityIS;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -14,6 +15,7 @@ import java.util.UUID;
 public class MessageTileEntityIS implements IMessage, IMessageHandler<MessageTileEntityIS, IMessage>
 {
     public int x, y, z;
+    public BlockPos blockPos;
     public byte orientation, state;
     public String customName;
     public UUID ownerUUID;
@@ -24,9 +26,10 @@ public class MessageTileEntityIS implements IMessage, IMessageHandler<MessageTil
 
     public MessageTileEntityIS(TileEntityIS tileEntityIS)
     {
-        this.x = tileEntityIS.xCoord;
-        this.y = tileEntityIS.yCoord;
-        this.z = tileEntityIS.zCoord;
+//        this.x = tileEntityIS.xCoord;
+//        this.y = tileEntityIS.yCoord;
+//        this.z = tileEntityIS.zCoord;
+        this.blockPos = tileEntityIS.getPos();
         this.orientation = (byte) tileEntityIS.getOrientation().ordinal();
         this.state = (byte) tileEntityIS.getState();
         this.customName = tileEntityIS.getCustomName();
@@ -39,6 +42,7 @@ public class MessageTileEntityIS implements IMessage, IMessageHandler<MessageTil
         this.x = buf.readInt();
         this.y = buf.readInt();
         this.z = buf.readInt();
+        this.blockPos = new BlockPos(x, y, z);
         this.orientation = buf.readByte();
         this.state = buf.readByte();
         int customNameLength = buf.readInt();
@@ -78,7 +82,7 @@ public class MessageTileEntityIS implements IMessage, IMessageHandler<MessageTil
     @Override
     public IMessage onMessage(MessageTileEntityIS message, MessageContext ctx)
     {
-        TileEntity tileEntity = FMLClientHandler.instance().getClient().theWorld.getTileEntity(message.x, message.y, message.z);
+        TileEntity tileEntity = FMLClientHandler.instance().getClient().theWorld.getTileEntity(new BlockPos(message.x, message.y, message.z));
 
         if (tileEntity instanceof TileEntityIS)
         {

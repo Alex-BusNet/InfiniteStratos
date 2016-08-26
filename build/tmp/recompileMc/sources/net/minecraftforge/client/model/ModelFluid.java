@@ -1,4 +1,56 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.client.model;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+
+import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector4f;
+
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.client.renderer.block.model.ItemOverrideList;
+import net.minecraft.client.renderer.block.model.ModelRotation;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
+import net.minecraftforge.common.model.IModelPart;
+import net.minecraftforge.common.model.IModelState;
+import net.minecraftforge.common.model.TRSRTransformation;
+import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.fluids.BlockFluidBase;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.common.FMLLog;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -11,38 +63,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.client.resources.model.IBakedModel;
-import net.minecraft.client.resources.model.ModelRotation;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.pipeline.LightUtil;
-import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
-import net.minecraftforge.common.property.IExtendedBlockState;
-import net.minecraftforge.fluids.BlockFluidBase;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fml.common.FMLLog;
-import org.apache.commons.lang3.tuple.Pair;
 
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Vector4f;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-@SuppressWarnings("deprecation")
-public class ModelFluid implements IModelCustomData<ModelFluid>
+public final class ModelFluid implements IModelCustomData
 {
-    public static final ModelFluid waterModel = new ModelFluid(FluidRegistry.WATER);
-    public static final ModelFluid lavaModel = new ModelFluid(FluidRegistry.LAVA);
+    public static final ModelFluid WATER = new ModelFluid(FluidRegistry.WATER);
+    public static final ModelFluid LAVA = new ModelFluid(FluidRegistry.LAVA);
     private final Fluid fluid;
 
     public ModelFluid(Fluid fluid)
@@ -60,7 +85,7 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
         return ImmutableSet.of(fluid.getStill(), fluid.getFlowing());
     }
 
-    public IFlexibleBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
+    public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
     {
         ImmutableMap<TransformType, TRSRTransformation> map = IPerspectiveAwareModel.MapWrapper.getTransforms(state);
         return new BakedFluid(state.apply(Optional.<IModelPart>absent()), map, format, fluid.getColor(), bakedTextureGetter.apply(fluid.getStill()), bakedTextureGetter.apply(fluid.getFlowing()), fluid.isGaseous(), Optional.<IExtendedBlockState>absent());
@@ -73,7 +98,7 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
 
     public static enum FluidLoader implements ICustomModelLoader
     {
-        instance;
+        INSTANCE;
 
         public void onResourceManagerReload(IResourceManager resourceManager) {}
 
@@ -87,11 +112,11 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
 
         public IModel loadModel(ResourceLocation modelLocation)
         {
-            return waterModel;
+            return WATER;
         }
     }
 
-    public static class BakedFluid implements IFlexibleBakedModel, ISmartBlockModel, IPerspectiveAwareModel
+    private static final class BakedFluid implements IPerspectiveAwareModel
     {
         private static final int x[] = { 0, 0, 1, 1 };
         private static final int z[] = { 0, 1, 1, 0 };
@@ -122,16 +147,6 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
         private final boolean gas;
         private final EnumMap<EnumFacing, List<BakedQuad>> faceQuads;
 
-        public BakedFluid(Optional<TRSRTransformation> transformation, VertexFormat format, int color, TextureAtlasSprite still, TextureAtlasSprite flowing, boolean gas)
-        {
-            this(transformation, format, color, still, flowing, gas, Optional.<IExtendedBlockState>absent());
-        }
-
-        public BakedFluid(Optional<TRSRTransformation> transformation, VertexFormat format, int color, TextureAtlasSprite still, TextureAtlasSprite flowing, boolean gas, Optional<IExtendedBlockState> stateOption)
-        {
-            this(transformation, ImmutableMap.<TransformType, TRSRTransformation>of(), format, color, still, flowing, gas, stateOption);
-        }
-
         public BakedFluid(Optional<TRSRTransformation> transformation, ImmutableMap<TransformType, TRSRTransformation> transforms, VertexFormat format, int color, TextureAtlasSprite still, TextureAtlasSprite flowing, boolean gas, Optional<IExtendedBlockState> stateOption)
         {
             this(transformation, transforms, format, color, still, flowing, gas, stateOption.isPresent(), getCorners(stateOption), getFlow(stateOption));
@@ -145,7 +160,8 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
                 IExtendedBlockState state = stateOption.get();
                 for(int i = 0; i < 4; i++)
                 {
-                    cornerRound[i] = Math.round(state.getValue(BlockFluidBase.LEVEL_CORNERS[i]) * 768);
+                    Float level = state.getValue(BlockFluidBase.LEVEL_CORNERS[i]);
+                    cornerRound[i] = Math.round((level == null ? 7f / 8 : level) * 768);
                 }
             }
             return cornerRound;
@@ -153,10 +169,11 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
 
         private static int getFlow(Optional<IExtendedBlockState> stateOption)
         {
-            float flow = -1000;
+            Float flow = -1000f;
             if(stateOption.isPresent())
             {
                 flow = stateOption.get().getValue(BlockFluidBase.FLOW_DIRECTION);
+                if(flow == null) flow = -1000f;
             }
             int flowRound = (int)Math.round(Math.toDegrees(flow));
             flowRound = MathHelper.clamp_int(flowRound, -1000, 1000);
@@ -211,25 +228,32 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
                 float s = MathHelper.sin(flow) * scale;
 
                 EnumFacing side = gas ? EnumFacing.DOWN : EnumFacing.UP;
-                UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(format);
-                builder.setQuadOrientation(side);
-                builder.setQuadColored();
-                for(int i = gas ? 3 : 0; i != (gas ? -1 : 4); i+= (gas ? -1 : 1))
+                UnpackedBakedQuad.Builder builder;
+                ImmutableList.Builder<BakedQuad> topFaceBuilder = ImmutableList.builder();
+                for(int k = 0; k < 2; k++)
                 {
-                    putVertex(
-                        builder, side,
-                        x[i], y[i], z[i],
-                        topSprite.getInterpolatedU(8 + c * (x[i] * 2 - 1) + s * (z[i] * 2 - 1)),
-                        topSprite.getInterpolatedV(8 + c * (x[(i + 1) % 4] * 2 - 1) + s * (z[(i + 1) % 4] * 2 - 1)));
+                    builder = new UnpackedBakedQuad.Builder(format);
+                    builder.setQuadOrientation(side);
+                    builder.setTexture(topSprite);
+                    for (int i = gas ? 3 : 0; i != (gas ? -1 : 4); i += (gas ? -1 : 1))
+                    {
+                        int l = (k * 3) + (1 - 2 * k) * i;
+                        putVertex(
+                            builder, side,
+                            x[l], y[l], z[l],
+                            topSprite.getInterpolatedU(8 + c * (x[l] * 2 - 1) + s * (z[l] * 2 - 1)),
+                            topSprite.getInterpolatedV(8 + c * (x[(l + 1) % 4] * 2 - 1) + s * (z[(l + 1) % 4] * 2 - 1)));
+                    }
+                    topFaceBuilder.add(builder.build());
                 }
-                faceQuads.put(side, ImmutableList.<BakedQuad>of(builder.build()));
+                faceQuads.put(side, topFaceBuilder.build());
 
                 // bottom
 
                 side = side.getOpposite();
                 builder = new UnpackedBakedQuad.Builder(format);
                 builder.setQuadOrientation(side);
-                builder.setQuadColored();
+                builder.setTexture(still);
                 for(int i = gas ? 3 : 0; i != (gas ? -1 : 4); i+= (gas ? -1 : 1))
                 {
                     putVertex(
@@ -251,7 +275,7 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
                     {
                         builder = new UnpackedBakedQuad.Builder(format);
                         builder.setQuadOrientation(side);
-                        builder.setQuadColored();
+                        builder.setTexture(flowing);
                         for(int j = 0; j < 4; j++)
                         {
                             int l = (k * 3) + (1 - 2 * k) * j;
@@ -273,7 +297,7 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
                 // 1 quad for inventory
                 UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(format);
                 builder.setQuadOrientation(EnumFacing.UP);
-                builder.setQuadColored();
+                builder.setTexture(still);
                 for(int i = 0; i < 4; i++)
                 {
                     putVertex(
@@ -303,11 +327,10 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
                     builder.put(e, data);
                     break;
                 case COLOR:
-                    float d = LightUtil.diffuseLight(side);
                     builder.put(e,
-                        d * ((color >> 16) & 0xFF) / 255f,
-                        d * ((color >> 8) & 0xFF) / 255f,
-                        d * (color & 0xFF) / 255f,
+                        ((color >> 16) & 0xFF) / 255f,
+                        ((color >> 8) & 0xFF) / 255f,
+                        (color & 0xFF) / 255f,
                         ((color >> 24) & 0xFF) / 255f);
                     break;
                 case UV: if(format.getElement(e).getIndex() == 0)
@@ -327,7 +350,7 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
 
         public boolean isAmbientOcclusion()
         {
-            return false;
+            return true;
         }
 
         public boolean isGui3d()
@@ -350,23 +373,9 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
             return ItemCameraTransforms.DEFAULT;
         }
 
-        public List<BakedQuad> getFaceQuads(EnumFacing side)
+        public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand)
         {
-            return faceQuads.get(side);
-        }
-
-        public List<BakedQuad> getGeneralQuads()
-        {
-            return ImmutableList.of();
-        }
-
-        public VertexFormat getFormat()
-        {
-            return format;
-        }
-
-        public IBakedModel handleBlockState(IBlockState state)
-        {
+            BakedFluid model = this;
             if(state instanceof IExtendedBlockState)
             {
                 IExtendedBlockState exState = (IExtendedBlockState)state;
@@ -380,20 +389,26 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
                 }
                 key <<= 1;
                 key |= 1;
-                return modelCache.getUnchecked(key);
+                model = modelCache.getUnchecked(key);
             }
-            return this;
+            if(side == null) return ImmutableList.of();
+            return model.faceQuads.get(side);
+        }
+
+        public ItemOverrideList getOverrides()
+        {
+            return ItemOverrideList.NONE;
         }
 
         @Override
-        public Pair<? extends IFlexibleBakedModel, Matrix4f> handlePerspective(TransformType type)
+        public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType type)
         {
             return IPerspectiveAwareModel.MapWrapper.handlePerspective(this, transforms, type);
         }
     }
 
     @Override
-    public IModel process(ImmutableMap<String, String> customData)
+    public ModelFluid process(ImmutableMap<String, String> customData)
     {
         if(!customData.containsKey("fluid")) return this;
 
@@ -403,7 +418,7 @@ public class ModelFluid implements IModelCustomData<ModelFluid>
         if(!FluidRegistry.isFluidRegistered(fluid))
         {
             FMLLog.severe("fluid '%s' not found", fluid);
-            return waterModel;
+            return WATER;
         }
         return new ModelFluid(FluidRegistry.getFluid(fluid));
     }

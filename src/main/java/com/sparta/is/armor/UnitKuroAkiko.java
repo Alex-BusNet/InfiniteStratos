@@ -19,12 +19,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.UsernameCache;
@@ -40,6 +42,7 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
     protected UUID ownerUUID = UUID.fromString("0ac415de-578c-4370-b179-d1c0e6fd0294");
     protected String ownerName;
     private static int state = 0;
+    private static final int TOTAL_EQUALIZERS = 4;
 
     public int maxEnergy = 40000;
     public int maxTransfer = 200;
@@ -48,7 +51,7 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
 
     public UnitKuroAkiko()
     {
-        super(Material.Armor.IS_ARMOR, 1, "Armor");
+        super(Material.Armor.IS_ARMOR, EntityEquipmentSlot.CHEST, "Armor");
         this.setUnlocalizedName(Names.Units.KURO_AKIKO);
         this.setShieldCapacity(40000);
         this.setRemainingShieldCapacity();
@@ -85,13 +88,13 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
     {
         switch ( armorType )
         {
-            case 0:
+            case HEAD:
                 return 0;
-            case 1:
+            case CHEST:
                 return 100;
-            case 2:
+            case LEGS:
                 return 0;
-            case 3:
+            case FEET:
                 return 0;
         }
         return 0;
@@ -99,13 +102,13 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
 
     protected int getEnergyPerDamage(ItemStack itemStack)
     {
-        int unbreakingLevel = MathHelper.clampI(EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, itemStack), 0, 4);
+        int unbreakingLevel = MathHelper.clamp(EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByID(34), itemStack), 0, 4);
         return energyPerDamage * (5 - unbreakingLevel) /5;
     }
 
 
     @Override
-    public String getArmorTexture(ItemStack itemStack, Entity entity, int slot, String type)
+    public String getArmorTexture(ItemStack itemStack, Entity entity, EntityEquipmentSlot slot, String type)
     {
         return Textures.Model.KURO_AKIKO_TEST.toString();
     }
@@ -145,22 +148,23 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
 
     }
 
-    @Override
-    public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer entityPlayer)
+    public ActionResult<ItemStack> onItemRightClick(ItemStack itemStack, World world, EntityPlayer entityPlayer)
     {
         if(!world.isRemote)
         {
-            if(! ItemHelper.hasOwnerUUID(itemStack))
+            if(!ItemHelper.hasOwnerUUID(itemStack))
             {
                 NBTTagCompound nbtTagCompound = EntityHelper.getCustomEntityData(entityPlayer);
                 UnitSettings unitSettings = new UnitSettings();
                 unitSettings.readFromNBT(nbtTagCompound);
                 unitSettings.setOwnerName(entityPlayer.getDisplayNameString());
                 unitSettings.setUnitName(itemStack.getUnlocalizedName());
+                unitSettings.setTotalEqualizers(TOTAL_EQUALIZERS);
 
                 ItemHelper.setOwner(itemStack, entityPlayer);
                 this.setOwnerName(entityPlayer.getDisplayNameString());
-                entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.OWNER_SET_TO_SELF, "the Elucidator"));
+
+                entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.OWNER_SET_TO_SELF, new Object[]{itemStack.getDisplayName()}));
 
                 unitSettings.writeToNBT(nbtTagCompound);
                 EntityHelper.saveCustomEntityData(entityPlayer, nbtTagCompound);
@@ -170,16 +174,18 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
             {
                 if(entityPlayer.getUniqueID() != getOwnerUUID())
                 {
-                    entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.INVALID_OWNER, "Sparta"));
+                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.INVALID_OWNER, ItemHelper.getOwnerName(itemStack)));
                 }
-                else if(entityPlayer.getUniqueID() != ItemHelper.getOwnerUUID(itemStack))
+                else if(entityPlayer.getUniqueID() == ItemHelper.getOwnerUUID(itemStack))
                 {
-                    entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ALREADY_OWNER, itemStack.getUnlocalizedName()));
+                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ALREADY_OWNER, itemStack.getUnlocalizedName()));
                 }
             }
+
+            return new ActionResult<>(EnumActionResult.SUCCESS, itemStack);
         }
 
-        return itemStack;
+        return new ActionResult<>(EnumActionResult.FAIL, itemStack);
     }
 
     public int getState()
@@ -248,7 +254,7 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
 
                 state = 0;
                 unitSettings.setDeployedState(0);
-                player.addChatMessage(new ChatComponentText("Unit in Standby"));
+                player.addChatMessage(new TextComponentTranslation("Unit in Standby"));
             }
             else if (key == Key.PARTIAL_DEPLOY  && state != 1 && state != 2)
             {
@@ -269,7 +275,7 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
 
                 state = 1;
                 unitSettings.setDeployedState(1);
-                player.addChatMessage(new ChatComponentText("Unit Partially Deployed"));
+                player.addChatMessage(new TextComponentTranslation("Unit Partially Deployed"));
             }
             else if (key == Key.FULL_DEPLOY && state != 2)
             {
@@ -293,7 +299,7 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
 
                 state = 2;
                 unitSettings.setDeployedState(2);
-                player.addChatMessage(new ChatComponentText("Unit Fully Deployed"));
+                player.addChatMessage(new TextComponentTranslation("Unit Fully Deployed"));
             }
 
             unitSettings.writeToNBT(playerCustomData);
@@ -353,17 +359,17 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
     @Override
     public int receiveEnergy(ItemStack container, int maxReceive, boolean simulate)
     {
-        if(container.stackTagCompound == null)
+        if(container.getTagCompound() == null)
         {
             EnergyHelper.setDefaultEnergyTag(container, 0);
         }
-        int stored = container.stackTagCompound.getInteger("Energy");
+        int stored = container.getTagCompound().getInteger("Energy");
         int receive = Math.min(maxReceive, Math.min(maxEnergy - stored, maxTransfer));
 
         if(!simulate)
         {
             stored += receive;
-            container.stackTagCompound.setInteger("Energy", stored);
+            container.getTagCompound().setInteger("Energy", stored);
         }
 
         return receive;
@@ -372,17 +378,17 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
     @Override
     public int extractEnergy(ItemStack container, int maxExtract, boolean simulate)
     {
-        if (container.stackTagCompound == null)
+        if (container.getTagCompound() == null)
         {
             EnergyHelper.setDefaultEnergyTag(container, 0);
         }
-        int stored = container.stackTagCompound.getInteger("Energy");
+        int stored = container.getTagCompound().getInteger("Energy");
         int extract = Math.min(maxExtract, stored);
 
         if (!simulate)
         {
             stored -= extract;
-            container.stackTagCompound.setInteger("Energy", stored);
+            container.getTagCompound().setInteger("Energy", stored);
         }
         return extract;
     }
@@ -390,12 +396,12 @@ public class UnitKuroAkiko extends ArmorIS implements IKeyBound, IOwnable, ISpec
     @Override
     public int getEnergyStored(ItemStack container)
     {
-        if(container.stackTagCompound == null)
+        if(container.getTagCompound() == null)
         {
             EnergyHelper.setDefaultEnergyTag(container, 0);
         }
 
-        return container.stackTagCompound.getInteger("Energy");
+        return container.getTagCompound().getInteger("Energy");
     }
 
     @Override

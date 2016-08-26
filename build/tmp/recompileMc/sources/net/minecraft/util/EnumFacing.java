@@ -3,10 +3,12 @@ package net.minecraft.util;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
-
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+import javax.annotation.Nullable;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3i;
 
 public enum EnumFacing implements IStringSerializable
 {
@@ -237,6 +239,7 @@ public enum EnumFacing implements IStringSerializable
     /**
      * Get the facing specified by the given name
      */
+    @Nullable
     public static EnumFacing byName(String name)
     {
         return name == null ? null : (EnumFacing)NAME_LOOKUP.get(name.toLowerCase());
@@ -269,6 +272,11 @@ public enum EnumFacing implements IStringSerializable
         return getHorizontal(MathHelper.floor_double(angle / 90.0D + 0.5D) & 3);
     }
 
+    public float getHorizontalAngle()
+    {
+        return (float)((this.horizontalIndex & 3) * 90);
+    }
+
     /**
      * Choose a random Facing using the given Random
      */
@@ -277,14 +285,14 @@ public enum EnumFacing implements IStringSerializable
         return values()[rand.nextInt(values().length)];
     }
 
-    public static EnumFacing getFacingFromVector(float p_176737_0_, float p_176737_1_, float p_176737_2_)
+    public static EnumFacing getFacingFromVector(float x, float y, float z)
     {
         EnumFacing enumfacing = NORTH;
         float f = Float.MIN_VALUE;
 
         for (EnumFacing enumfacing1 : values())
         {
-            float f1 = p_176737_0_ * (float)enumfacing1.directionVec.getX() + p_176737_1_ * (float)enumfacing1.directionVec.getY() + p_176737_2_ * (float)enumfacing1.directionVec.getZ();
+            float f1 = x * (float)enumfacing1.directionVec.getX() + y * (float)enumfacing1.directionVec.getY() + z * (float)enumfacing1.directionVec.getZ();
 
             if (f1 > f)
             {
@@ -306,17 +314,17 @@ public enum EnumFacing implements IStringSerializable
         return this.name;
     }
 
-    public static EnumFacing func_181076_a(EnumFacing.AxisDirection p_181076_0_, EnumFacing.Axis p_181076_1_)
+    public static EnumFacing getFacingFromAxis(EnumFacing.AxisDirection axisDirectionIn, EnumFacing.Axis axisIn)
     {
         for (EnumFacing enumfacing : values())
         {
-            if (enumfacing.getAxisDirection() == p_181076_0_ && enumfacing.getAxis() == p_181076_1_)
+            if (enumfacing.getAxisDirection() == axisDirectionIn && enumfacing.getAxis() == axisIn)
             {
                 return enumfacing;
             }
         }
 
-        throw new IllegalArgumentException("No such direction: " + p_181076_0_ + " " + p_181076_1_);
+        throw new IllegalArgumentException("No such direction: " + axisDirectionIn + " " + axisIn);
     }
 
     /**
@@ -360,6 +368,7 @@ public enum EnumFacing implements IStringSerializable
         /**
          * Get the axis specified by the given name
          */
+        @Nullable
         public static EnumFacing.Axis byName(String name)
         {
             return name == null ? null : (EnumFacing.Axis)NAME_LOOKUP.get(name.toLowerCase());
@@ -394,7 +403,7 @@ public enum EnumFacing implements IStringSerializable
             return this.name;
         }
 
-        public boolean apply(EnumFacing p_apply_1_)
+        public boolean apply(@Nullable EnumFacing p_apply_1_)
         {
             return p_apply_1_ != null && p_apply_1_.getAxis() == this;
         }
@@ -477,7 +486,7 @@ public enum EnumFacing implements IStringSerializable
             return aenumfacing[rand.nextInt(aenumfacing.length)];
         }
 
-        public boolean apply(EnumFacing p_apply_1_)
+        public boolean apply(@Nullable EnumFacing p_apply_1_)
         {
             return p_apply_1_ != null && p_apply_1_.getAxis().getPlane() == this;
         }

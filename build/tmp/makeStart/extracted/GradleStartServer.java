@@ -1,7 +1,7 @@
-import net.minecraftforge.gradle.GradleStartCommon;
-
 import java.util.List;
 import java.util.Map;
+
+import net.minecraftforge.gradle.GradleStartCommon;
 
 public class GradleStartServer extends GradleStartCommon
 {

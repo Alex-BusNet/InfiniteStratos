@@ -1,24 +1,23 @@
 package net.minecraft.client.gui;
 
 import com.google.common.collect.Lists;
-import net.minecraft.client.resources.*;
-import net.minecraft.util.Util;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.lwjgl.Sys;
-
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.ResourcePackListEntry;
+import net.minecraft.client.resources.ResourcePackListEntryDefault;
+import net.minecraft.client.resources.ResourcePackListEntryFound;
+import net.minecraft.client.resources.ResourcePackListEntryServer;
+import net.minecraft.client.resources.ResourcePackRepository;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiScreenResourcePacks extends GuiScreen
 {
-    private static final Logger logger = LogManager.getLogger();
     private final GuiScreen parentScreen;
     private List<ResourcePackListEntry> availableResourcePacks;
     private List<ResourcePackListEntry> selectedResourcePacks;
@@ -26,7 +25,7 @@ public class GuiScreenResourcePacks extends GuiScreen
     private GuiResourcePackAvailable availableResourcePacksList;
     /** List component that contains the selected resource packs */
     private GuiResourcePackSelected selectedResourcePacksList;
-    private boolean changed = false;
+    private boolean changed;
 
     public GuiScreenResourcePacks(GuiScreen parentScreenIn)
     {
@@ -54,6 +53,13 @@ public class GuiScreenResourcePacks extends GuiScreen
             for (ResourcePackRepository.Entry resourcepackrepository$entry : list)
             {
                 this.availableResourcePacks.add(new ResourcePackListEntryFound(this, resourcepackrepository$entry));
+            }
+
+            ResourcePackRepository.Entry resourcepackrepository$entry2 = resourcepackrepository.getResourcePackEntry();
+
+            if (resourcepackrepository$entry2 != null)
+            {
+                this.selectedResourcePacks.add(new ResourcePackListEntryServer(this, resourcepackrepository.getResourcePackInstance()));
             }
 
             for (ResourcePackRepository.Entry resourcepackrepository$entry1 : Lists.reverse(resourcepackrepository.getRepositoryEntries()))
@@ -112,55 +118,7 @@ public class GuiScreenResourcePacks extends GuiScreen
             if (button.id == 2)
             {
                 File file1 = this.mc.getResourcePackRepository().getDirResourcepacks();
-                String s = file1.getAbsolutePath();
-
-                if (Util.getOSType() == Util.EnumOS.OSX)
-                {
-                    try
-                    {
-                        logger.info(s);
-                        Runtime.getRuntime().exec(new String[] {"/usr/bin/open", s});
-                        return;
-                    }
-                    catch (IOException ioexception1)
-                    {
-                        logger.error((String)"Couldn\'t open file", (Throwable)ioexception1);
-                    }
-                }
-                else if (Util.getOSType() == Util.EnumOS.WINDOWS)
-                {
-                    String s1 = String.format("cmd.exe /C start \"Open file\" \"%s\"", new Object[] {s});
-
-                    try
-                    {
-                        Runtime.getRuntime().exec(s1);
-                        return;
-                    }
-                    catch (IOException ioexception)
-                    {
-                        logger.error((String)"Couldn\'t open file", (Throwable)ioexception);
-                    }
-                }
-
-                boolean flag = false;
-
-                try
-                {
-                    Class<?> oclass = Class.forName("java.awt.Desktop");
-                    Object object = oclass.getMethod("getDesktop", new Class[0]).invoke((Object)null, new Object[0]);
-                    oclass.getMethod("browse", new Class[] {URI.class}).invoke(object, new Object[] {file1.toURI()});
-                }
-                catch (Throwable throwable)
-                {
-                    logger.error("Couldn\'t open link", throwable);
-                    flag = true;
-                }
-
-                if (flag)
-                {
-                    logger.info("Opening via system class!");
-                    Sys.openURL("file://" + s);
-                }
+                OpenGlHelper.openFile(file1);
             }
             else if (button.id == 1)
             {
@@ -172,7 +130,7 @@ public class GuiScreenResourcePacks extends GuiScreen
                     {
                         if (resourcepacklistentry instanceof ResourcePackListEntryFound)
                         {
-                            list.add(((ResourcePackListEntryFound)resourcepacklistentry).func_148318_i());
+                            list.add(((ResourcePackListEntryFound)resourcepacklistentry).getResourcePackEntry());
                         }
                     }
 
@@ -185,7 +143,7 @@ public class GuiScreenResourcePacks extends GuiScreen
                     {
                         this.mc.gameSettings.resourcePacks.add(resourcepackrepository$entry.getResourcePackName());
 
-                        if (resourcepackrepository$entry.func_183027_f() != 1)
+                        if (resourcepackrepository$entry.getPackFormat() != 2)
                         {
                             this.mc.gameSettings.incompatibleResourcePacks.add(resourcepackrepository$entry.getResourcePackName());
                         }
@@ -211,7 +169,7 @@ public class GuiScreenResourcePacks extends GuiScreen
     }
 
     /**
-     * Called when a mouse button is released.  Args : mouseX, mouseY, releaseButton
+     * Called when a mouse button is released.
      */
     protected void mouseReleased(int mouseX, int mouseY, int state)
     {
@@ -219,7 +177,7 @@ public class GuiScreenResourcePacks extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {

@@ -1,19 +1,19 @@
 package net.minecraft.village;
 
 import com.google.common.collect.Lists;
+import java.util.Iterator;
+import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDoor;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldSavedData;
-
-import java.util.Iterator;
-import java.util.List;
 
 public class VillageCollection extends WorldSavedData
 {
@@ -157,11 +157,11 @@ public class VillageCollection extends WorldSavedData
         int j = 4;
         int k = 16;
 
-        for (int l = -i; l < i; ++l)
+        for (int l = -16; l < 16; ++l)
         {
-            for (int i1 = -j; i1 < j; ++i1)
+            for (int i1 = -4; i1 < 4; ++i1)
             {
-                for (int j1 = -k; j1 < k; ++j1)
+                for (int j1 = -16; j1 < 16; ++j1)
                 {
                     BlockPos blockpos = central.add(l, i1, j1);
 
@@ -175,7 +175,7 @@ public class VillageCollection extends WorldSavedData
                         }
                         else
                         {
-                            villagedoorinfo.func_179849_a(this.tickCounter);
+                            villagedoorinfo.setLastActivityTimestamp(this.tickCounter);
                         }
                     }
                 }
@@ -260,8 +260,9 @@ public class VillageCollection extends WorldSavedData
 
     private boolean isWoodDoor(BlockPos doorPos)
     {
-        Block block = this.worldObj.getBlockState(doorPos).getBlock();
-        return block instanceof BlockDoor ? block.getMaterial() == Material.wood : false;
+        IBlockState iblockstate = this.worldObj.getBlockState(doorPos);
+        Block block = iblockstate.getBlock();
+        return block instanceof BlockDoor ? iblockstate.getMaterial() == Material.WOOD : false;
     }
 
     /**
@@ -281,12 +282,9 @@ public class VillageCollection extends WorldSavedData
         }
     }
 
-    /**
-     * write data to NBTTagCompound from this MapDataBase, similar to Entities and TileEntities
-     */
-    public void writeToNBT(NBTTagCompound nbt)
+    public NBTTagCompound writeToNBT(NBTTagCompound p_189551_1_)
     {
-        nbt.setInteger("Tick", this.tickCounter);
+        p_189551_1_.setInteger("Tick", this.tickCounter);
         NBTTagList nbttaglist = new NBTTagList();
 
         for (Village village : this.villageList)
@@ -296,11 +294,12 @@ public class VillageCollection extends WorldSavedData
             nbttaglist.appendTag(nbttagcompound);
         }
 
-        nbt.setTag("Villages", nbttaglist);
+        p_189551_1_.setTag("Villages", nbttaglist);
+        return p_189551_1_;
     }
 
     public static String fileNameForProvider(WorldProvider provider)
     {
-        return "villages" + provider.getInternalNameSuffix();
+        return "villages" + provider.getDimensionType().getSuffix();
     }
 }

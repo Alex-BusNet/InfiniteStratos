@@ -1,7 +1,33 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.network.simpleimpl;
 
-import com.google.common.base.Throwables;
 import io.netty.channel.ChannelFutureListener;
+
+import java.lang.reflect.Method;
+import java.util.EnumMap;
+
+import com.google.common.base.Throwables;
+
+import org.apache.logging.log4j.Level;
+
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -9,16 +35,13 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
 import net.minecraftforge.fml.common.network.FMLOutboundHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
-import org.apache.logging.log4j.Level;
-
-import java.lang.reflect.Method;
-import java.util.EnumMap;
 
 /**
  * This class is a simplified netty wrapper for those not wishing to deal with the full power of netty.
@@ -29,7 +52,7 @@ import java.util.EnumMap;
  * Usage is simple:<ul>
  * <li>construct, and store, an instance of this class. It will automatically register and configure your underlying netty channel.
  *
- * <li>Then, call {@link #registerMessage(Class, Class, byte, Side)} for each message type you want to exchange
+ * <li>Then, call {@link #registerMessage(Class, Class, int, Side)} for each message type you want to exchange
  * providing an {@link IMessageHandler} implementation class as well as an {@link IMessage} implementation class. The side parameter
  * to that method indicates which side (server or client) the <em>message processing</em> will occur on. The discriminator byte
  * should be unique for this channelName - it is used to discriminate between different types of message that might
@@ -190,7 +213,7 @@ public class SimpleNetworkWrapper {
 
     /**
      * Construct a minecraft packet from the supplied message. Can be used where minecraft packets are required, such as
-     * {@link TileEntity#getDescriptionPacket}.
+     * {@link TileEntity#getDescriptionPacket()}.
      *
      * @param message The message to translate into packet form
      * @return A minecraft {@link Packet} suitable for use in minecraft APIs

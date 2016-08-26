@@ -1,7 +1,8 @@
 package com.sparta.is.client.render.model;
 
 import com.sparta.is.reference.Models;
-import net.minecraftforge.client.model.ICustomModelLoader;
+import com.sparta.is.utility.LogHelper;
+import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -9,15 +10,22 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class ModelISUnitStation
 {
-    private ICustomModelLoader modelISUnitStation;
+    private IModel modelISUnitStation;
 
     public ModelISUnitStation()
     {
-        modelISUnitStation = OBJLoader.instance.loadModel(Models.IS_UNIT_STATION);
+        try
+        {
+            modelISUnitStation = OBJLoader.INSTANCE.loadModel(Models.IS_UNIT_STATION);
+        }
+        catch ( Exception e )
+        {
+            LogHelper.error("Model IS Unit Station Load Error");
+        }
     }
 
-    public void render()
-    {
-        modelISUnitStation.renderAll();
-    }
+//    public void render()
+//    {
+//        modelISUnitStation.renderAll();
+//    }
 }

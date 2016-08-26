@@ -26,9 +26,9 @@ public class NBTTagIntArray extends NBTBase
     {
         output.writeInt(this.intArray.length);
 
-        for (int i = 0; i < this.intArray.length; ++i)
+        for (int i : this.intArray)
         {
-            output.writeInt(this.intArray[i]);
+            output.writeInt(i);
         }
     }
 
@@ -68,7 +68,7 @@ public class NBTTagIntArray extends NBTBase
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagIntArray copy()
     {
         int[] aint = new int[this.intArray.length];
         System.arraycopy(this.intArray, 0, aint, 0, this.intArray.length);

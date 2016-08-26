@@ -1,10 +1,11 @@
 package net.minecraft.inventory;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class InventoryCrafting implements IInventory
 {
@@ -36,14 +37,16 @@ public class InventoryCrafting implements IInventory
     /**
      * Returns the stack in the given slot.
      */
+    @Nullable
     public ItemStack getStackInSlot(int index)
     {
         return index >= this.getSizeInventory() ? null : this.stackList[index];
     }
 
     /**
-     * Returns the itemstack in the slot specified (Top left is 0, 0). Args: row, column
+     * Gets the ItemStack in the slot specified.
      */
+    @Nullable
     public ItemStack getStackInRowAndColumn(int row, int column)
     {
         return row >= 0 && row < this.inventoryWidth && column >= 0 && column <= this.inventoryHeight ? this.getStackInSlot(row + column * this.inventoryWidth) : null;
@@ -68,65 +71,40 @@ public class InventoryCrafting implements IInventory
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
-        return (IChatComponent)(this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName(), new Object[0]));
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
     }
 
     /**
      * Removes a stack from the given slot and returns it.
      */
+    @Nullable
     public ItemStack removeStackFromSlot(int index)
     {
-        if (this.stackList[index] != null)
-        {
-            ItemStack itemstack = this.stackList[index];
-            this.stackList[index] = null;
-            return itemstack;
-        }
-        else
-        {
-            return null;
-        }
+        return ItemStackHelper.getAndRemove(this.stackList, index);
     }
 
     /**
      * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
      */
+    @Nullable
     public ItemStack decrStackSize(int index, int count)
     {
-        if (this.stackList[index] != null)
-        {
-            if (this.stackList[index].stackSize <= count)
-            {
-                ItemStack itemstack1 = this.stackList[index];
-                this.stackList[index] = null;
-                this.eventHandler.onCraftMatrixChanged(this);
-                return itemstack1;
-            }
-            else
-            {
-                ItemStack itemstack = this.stackList[index].splitStack(count);
+        ItemStack itemstack = ItemStackHelper.getAndSplit(this.stackList, index, count);
 
-                if (this.stackList[index].stackSize == 0)
-                {
-                    this.stackList[index] = null;
-                }
-
-                this.eventHandler.onCraftMatrixChanged(this);
-                return itemstack;
-            }
-        }
-        else
+        if (itemstack != null)
         {
-            return null;
+            this.eventHandler.onCraftMatrixChanged(this);
         }
+
+        return itemstack;
     }
 
     /**
      * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
      */
-    public void setInventorySlotContents(int index, ItemStack stack)
+    public void setInventorySlotContents(int index, @Nullable ItemStack stack)
     {
         this.stackList[index] = stack;
         this.eventHandler.onCraftMatrixChanged(this);

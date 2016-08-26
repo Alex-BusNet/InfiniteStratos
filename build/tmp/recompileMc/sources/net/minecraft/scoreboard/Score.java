@@ -1,13 +1,10 @@
 package net.minecraft.scoreboard;
 
-import net.minecraft.entity.player.EntityPlayer;
-
 import java.util.Comparator;
-import java.util.List;
 
 public class Score
 {
-    public static final Comparator<Score> scoreComparator = new Comparator<Score>()
+    public static final Comparator<Score> SCORE_COMPARATOR = new Comparator<Score>()
     {
         public int compare(Score p_compare_1_, Score p_compare_2_)
         {
@@ -29,7 +26,7 @@ public class Score
         this.forceUpdate = true;
     }
 
-    public void increseScore(int amount)
+    public void increaseScore(int amount)
     {
         if (this.theScoreObjective.getCriteria().isReadOnly())
         {
@@ -53,7 +50,7 @@ public class Score
         }
     }
 
-    public void func_96648_a()
+    public void incrementScore()
     {
         if (this.theScoreObjective.getCriteria().isReadOnly())
         {
@@ -61,7 +58,7 @@ public class Score
         }
         else
         {
-            this.increseScore(1);
+            this.increaseScore(1);
         }
     }
 
@@ -78,7 +75,7 @@ public class Score
         if (i != points || this.forceUpdate)
         {
             this.forceUpdate = false;
-            this.getScoreScoreboard().func_96536_a(this);
+            this.getScoreScoreboard().onScoreUpdated(this);
         }
     }
 
@@ -108,10 +105,5 @@ public class Score
     public void setLocked(boolean locked)
     {
         this.locked = locked;
-    }
-
-    public void func_96651_a(List<EntityPlayer> p_96651_1_)
-    {
-        this.setScorePoints(this.theScoreObjective.getCriteria().func_96635_a(p_96651_1_));
     }
 }

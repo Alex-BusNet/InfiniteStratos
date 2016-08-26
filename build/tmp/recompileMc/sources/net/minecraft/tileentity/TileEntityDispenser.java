@@ -1,17 +1,21 @@
 package net.minecraft.tileentity;
 
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerDispenser;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.datafix.FixTypes;
+import net.minecraft.util.datafix.walkers.ItemStackDataLists;
 
-import java.util.Random;
-
-public class TileEntityDispenser extends TileEntityLockable implements IInventory
+public class TileEntityDispenser extends TileEntityLockableLoot implements IInventory
 {
     private static final Random RNG = new Random();
     private ItemStack[] stacks = new ItemStack[9];
@@ -28,63 +32,43 @@ public class TileEntityDispenser extends TileEntityLockable implements IInventor
     /**
      * Returns the stack in the given slot.
      */
+    @Nullable
     public ItemStack getStackInSlot(int index)
     {
+        this.fillWithLoot((EntityPlayer)null);
         return this.stacks[index];
     }
 
     /**
      * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
      */
+    @Nullable
     public ItemStack decrStackSize(int index, int count)
     {
-        if (this.stacks[index] != null)
-        {
-            if (this.stacks[index].stackSize <= count)
-            {
-                ItemStack itemstack1 = this.stacks[index];
-                this.stacks[index] = null;
-                this.markDirty();
-                return itemstack1;
-            }
-            else
-            {
-                ItemStack itemstack = this.stacks[index].splitStack(count);
+        this.fillWithLoot((EntityPlayer)null);
+        ItemStack itemstack = ItemStackHelper.getAndSplit(this.stacks, index, count);
 
-                if (this.stacks[index].stackSize == 0)
-                {
-                    this.stacks[index] = null;
-                }
-
-                this.markDirty();
-                return itemstack;
-            }
-        }
-        else
+        if (itemstack != null)
         {
-            return null;
+            this.markDirty();
         }
+
+        return itemstack;
     }
 
     /**
      * Removes a stack from the given slot and returns it.
      */
+    @Nullable
     public ItemStack removeStackFromSlot(int index)
     {
-        if (this.stacks[index] != null)
-        {
-            ItemStack itemstack = this.stacks[index];
-            this.stacks[index] = null;
-            return itemstack;
-        }
-        else
-        {
-            return null;
-        }
+        this.fillWithLoot((EntityPlayer)null);
+        return ItemStackHelper.getAndRemove(this.stacks, index);
     }
 
     public int getDispenseSlot()
     {
+        this.fillWithLoot((EntityPlayer)null);
         int i = -1;
         int j = 1;
 
@@ -102,8 +86,9 @@ public class TileEntityDispenser extends TileEntityLockable implements IInventor
     /**
      * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
      */
-    public void setInventorySlotContents(int index, ItemStack stack)
+    public void setInventorySlotContents(int index, @Nullable ItemStack stack)
     {
+        this.fillWithLoot((EntityPlayer)null);
         this.stacks[index] = stack;
 
         if (stack != null && stack.stackSize > this.getInventoryStackLimit())
@@ -153,20 +138,29 @@ public class TileEntityDispenser extends TileEntityLockable implements IInventor
         return this.customName != null;
     }
 
+    public static void func_189678_a(DataFixer p_189678_0_)
+    {
+        p_189678_0_.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackDataLists("Trap", new String[] {"Items"}));
+    }
+
     public void readFromNBT(NBTTagCompound compound)
     {
         super.readFromNBT(compound);
-        NBTTagList nbttaglist = compound.getTagList("Items", 10);
-        this.stacks = new ItemStack[this.getSizeInventory()];
 
-        for (int i = 0; i < nbttaglist.tagCount(); ++i)
+        if (!this.checkLootAndRead(compound))
         {
-            NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-            int j = nbttagcompound.getByte("Slot") & 255;
+            NBTTagList nbttaglist = compound.getTagList("Items", 10);
+            this.stacks = new ItemStack[this.getSizeInventory()];
 
-            if (j >= 0 && j < this.stacks.length)
+            for (int i = 0; i < nbttaglist.tagCount(); ++i)
             {
-                this.stacks[j] = ItemStack.loadItemStackFromNBT(nbttagcompound);
+                NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
+                int j = nbttagcompound.getByte("Slot") & 255;
+
+                if (j >= 0 && j < this.stacks.length)
+                {
+                    this.stacks[j] = ItemStack.loadItemStackFromNBT(nbttagcompound);
+                }
             }
         }
 
@@ -176,28 +170,34 @@ public class TileEntityDispenser extends TileEntityLockable implements IInventor
         }
     }
 
-    public void writeToNBT(NBTTagCompound compound)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
-        NBTTagList nbttaglist = new NBTTagList();
 
-        for (int i = 0; i < this.stacks.length; ++i)
+        if (!this.checkLootAndWrite(compound))
         {
-            if (this.stacks[i] != null)
-            {
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
-                nbttagcompound.setByte("Slot", (byte)i);
-                this.stacks[i].writeToNBT(nbttagcompound);
-                nbttaglist.appendTag(nbttagcompound);
-            }
-        }
+            NBTTagList nbttaglist = new NBTTagList();
 
-        compound.setTag("Items", nbttaglist);
+            for (int i = 0; i < this.stacks.length; ++i)
+            {
+                if (this.stacks[i] != null)
+                {
+                    NBTTagCompound nbttagcompound = new NBTTagCompound();
+                    nbttagcompound.setByte("Slot", (byte)i);
+                    this.stacks[i].writeToNBT(nbttagcompound);
+                    nbttaglist.appendTag(nbttagcompound);
+                }
+            }
+
+            compound.setTag("Items", nbttaglist);
+        }
 
         if (this.hasCustomName())
         {
             compound.setString("CustomName", this.customName);
         }
+
+        return compound;
     }
 
     /**
@@ -239,6 +239,7 @@ public class TileEntityDispenser extends TileEntityLockable implements IInventor
 
     public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
     {
+        this.fillWithLoot(playerIn);
         return new ContainerDispenser(playerInventory, this);
     }
 
@@ -258,6 +259,8 @@ public class TileEntityDispenser extends TileEntityLockable implements IInventor
 
     public void clear()
     {
+        this.fillWithLoot((EntityPlayer)null);
+
         for (int i = 0; i < this.stacks.length; ++i)
         {
             this.stacks[i] = null;

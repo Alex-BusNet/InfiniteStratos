@@ -2,11 +2,10 @@ package net.minecraft.client.entity;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -14,7 +13,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class EntityOtherPlayerMP extends AbstractClientPlayer
 {
-    private boolean isItemInUse;
     private int otherPlayerMPPosRotationIncrements;
     private double otherPlayerMPX;
     private double otherPlayerMPY;
@@ -28,7 +26,22 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
         this.stepHeight = 0.0F;
         this.noClip = true;
         this.renderOffsetY = 0.25F;
-        this.renderDistanceWeight = 10.0D;
+    }
+
+    /**
+     * Checks if the entity is in range to render.
+     */
+    public boolean isInRangeToRenderDist(double distance)
+    {
+        double d0 = this.getEntityBoundingBox().getAverageEdgeLength() * 10.0D;
+
+        if (Double.isNaN(d0))
+        {
+            d0 = 1.0D;
+        }
+
+        d0 = d0 * 64.0D * getRenderDistanceWeight();
+        return distance < d0 * d0;
     }
 
     /**
@@ -39,7 +52,10 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
         return true;
     }
 
-    public void setPositionAndRotation2(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean p_180426_10_)
+    /**
+     * Set the position and rotation values directly without any clamping.
+     */
+    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport)
     {
         this.otherPlayerMPX = x;
         this.otherPlayerMPY = y;
@@ -68,18 +84,6 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
 
         this.limbSwingAmount += (f - this.limbSwingAmount) * 0.4F;
         this.limbSwing += this.limbSwingAmount;
-
-        if (!this.isItemInUse && this.isEating() && this.inventory.mainInventory[this.inventory.currentItem] != null)
-        {
-            ItemStack itemstack = this.inventory.mainInventory[this.inventory.currentItem];
-            this.setItemInUse(this.inventory.mainInventory[this.inventory.currentItem], itemstack.getItem().getMaxItemUseDuration(itemstack));
-            this.isItemInUse = true;
-        }
-        else if (this.isItemInUse && !this.isEating())
-        {
-            this.clearItemInUse();
-            this.isItemInUse = false;
-        }
     }
 
     /**
@@ -134,27 +138,15 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
 
         this.cameraYaw += (f1 - this.cameraYaw) * 0.4F;
         this.cameraPitch += (f - this.cameraPitch) * 0.8F;
-    }
-
-    /**
-     * Sets the held item, or an armor slot. Slot 0 is held item. Slot 1-4 is armor. Params: Item, slot
-     */
-    public void setCurrentItemOrArmor(int slotIn, ItemStack stack)
-    {
-        if (slotIn == 0)
-        {
-            this.inventory.mainInventory[this.inventory.currentItem] = stack;
-        }
-        else
-        {
-            this.inventory.armorInventory[slotIn - 1] = stack;
-        }
+        this.worldObj.theProfiler.startSection("push");
+        this.collideWithNearbyEntities();
+        this.worldObj.theProfiler.endSection();
     }
 
     /**
      * Send a chat message to the CommandSender
      */
-    public void addChatMessage(IChatComponent component)
+    public void addChatMessage(ITextComponent component)
     {
         Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(component);
     }

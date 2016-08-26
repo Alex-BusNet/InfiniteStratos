@@ -1,11 +1,11 @@
 package net.minecraft.client.renderer.block.model;
 
+import javax.annotation.Nullable;
 import net.minecraft.client.renderer.EnumFaceDirection;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3i;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Matrix4f;
@@ -15,45 +15,81 @@ import org.lwjgl.util.vector.Vector4f;
 @SideOnly(Side.CLIENT)
 public class FaceBakery
 {
-    private static final float field_178418_a = 1.0F / (float)Math.cos(0.39269909262657166D) - 1.0F;
-    private static final float field_178417_b = 1.0F / (float)Math.cos((Math.PI / 4D)) - 1.0F;
-
-    public BakedQuad makeBakedQuad(Vector3f posFrom, Vector3f posTo, BlockPartFace face, TextureAtlasSprite sprite, EnumFacing facing, ModelRotation modelRotationIn, BlockPartRotation partRotation, boolean uvLocked, boolean shade)
+    private static final float SCALE_ROTATION_22_5 = 1.0F / (float)Math.cos(0.39269909262657166D) - 1.0F;
+    private static final float SCALE_ROTATION_GENERAL = 1.0F / (float)Math.cos((Math.PI / 4D)) - 1.0F;
+    private static final FaceBakery.Rotation[] UV_ROTATIONS = new FaceBakery.Rotation[ModelRotation.values().length * EnumFacing.values().length];
+    private static final FaceBakery.Rotation UV_ROTATION_0 = new FaceBakery.Rotation()
     {
-        return makeBakedQuad(posFrom, posTo, face, sprite, facing, (net.minecraftforge.client.model.ITransformation)modelRotationIn, partRotation, uvLocked, shade);
+        BlockFaceUV makeRotatedUV(float p_188007_1_, float p_188007_2_, float p_188007_3_, float p_188007_4_)
+        {
+            return new BlockFaceUV(new float[] {p_188007_1_, p_188007_2_, p_188007_3_, p_188007_4_}, 0);
+        }
+    };
+    private static final FaceBakery.Rotation UV_ROTATION_270 = new FaceBakery.Rotation()
+    {
+        BlockFaceUV makeRotatedUV(float p_188007_1_, float p_188007_2_, float p_188007_3_, float p_188007_4_)
+        {
+            return new BlockFaceUV(new float[] {p_188007_4_, 16.0F - p_188007_1_, p_188007_2_, 16.0F - p_188007_3_}, 270);
+        }
+    };
+    private static final FaceBakery.Rotation UV_ROTATION_INVERSE = new FaceBakery.Rotation()
+    {
+        BlockFaceUV makeRotatedUV(float p_188007_1_, float p_188007_2_, float p_188007_3_, float p_188007_4_)
+        {
+            return new BlockFaceUV(new float[] {16.0F - p_188007_1_, 16.0F - p_188007_2_, 16.0F - p_188007_3_, 16.0F - p_188007_4_}, 0);
+        }
+    };
+    private static final FaceBakery.Rotation UV_ROTATION_90 = new FaceBakery.Rotation()
+    {
+        BlockFaceUV makeRotatedUV(float p_188007_1_, float p_188007_2_, float p_188007_3_, float p_188007_4_)
+        {
+            return new BlockFaceUV(new float[] {16.0F - p_188007_2_, p_188007_3_, 16.0F - p_188007_4_, p_188007_1_}, 90);
+        }
+    };
+
+    public BakedQuad makeBakedQuad(Vector3f posFrom, Vector3f posTo, BlockPartFace face, TextureAtlasSprite sprite, EnumFacing facing, ModelRotation modelRotationIn, @Nullable BlockPartRotation partRotation, boolean uvLocked, boolean shade)
+    {
+        return makeBakedQuad(posFrom, posTo, face, sprite, facing, (net.minecraftforge.common.model.ITransformation)modelRotationIn, partRotation, uvLocked, shade);
     }
 
-    public BakedQuad makeBakedQuad(Vector3f posFrom, Vector3f posTo, BlockPartFace face, TextureAtlasSprite sprite, EnumFacing facing, net.minecraftforge.client.model.ITransformation modelRotationIn, BlockPartRotation partRotation, boolean uvLocked, boolean shade)
+    public BakedQuad makeBakedQuad(Vector3f posFrom, Vector3f posTo, BlockPartFace face, TextureAtlasSprite sprite, EnumFacing facing, net.minecraftforge.common.model.ITransformation modelRotationIn, BlockPartRotation partRotation, boolean uvLocked, boolean shade)
     {
-        int[] aint = this.makeQuadVertexData(face, sprite, facing, this.getPositionsDiv16(posFrom, posTo), modelRotationIn, partRotation, uvLocked, shade);
-        EnumFacing enumfacing = getFacingFromVertexData(aint);
+        BlockFaceUV blockfaceuv = face.blockFaceUV;
 
         if (uvLocked)
         {
-            this.func_178409_a(aint, enumfacing, face.blockFaceUV, sprite);
+            blockfaceuv = net.minecraftforge.client.ForgeHooksClient.applyUVLock(face.blockFaceUV, facing, modelRotationIn);
         }
+
+        int[] aint = this.makeQuadVertexData(blockfaceuv, sprite, facing, this.getPositionsDiv16(posFrom, posTo), modelRotationIn, partRotation, false);
+        EnumFacing enumfacing = getFacingFromVertexData(aint);
 
         if (partRotation == null)
         {
-            this.func_178408_a(aint, enumfacing);
+            this.applyFacing(aint, enumfacing);
         }
 
         net.minecraftforge.client.ForgeHooksClient.fillNormal(aint, enumfacing);
-        return new BakedQuad(aint, face.tintIndex, enumfacing);
+        return new BakedQuad(aint, face.tintIndex, enumfacing, sprite, shade, net.minecraft.client.renderer.vertex.DefaultVertexFormats.ITEM);
     }
 
-    private int[] makeQuadVertexData(BlockPartFace partFace, TextureAtlasSprite sprite, EnumFacing facing, float[] p_178405_4_, ModelRotation modelRotationIn, BlockPartRotation partRotation, boolean uvLocked, boolean shade)
+    private BlockFaceUV applyUVLock(BlockFaceUV p_188010_1_, EnumFacing p_188010_2_, ModelRotation p_188010_3_)
     {
-        return makeQuadVertexData(partFace, sprite, facing, p_178405_4_, modelRotationIn, partRotation, uvLocked, shade);
+        return UV_ROTATIONS[getIndex(p_188010_3_, p_188010_2_)].rotateUV(p_188010_1_);
     }
 
-    private int[] makeQuadVertexData(BlockPartFace partFace, TextureAtlasSprite sprite, EnumFacing facing, float[] p_178405_4_, net.minecraftforge.client.model.ITransformation modelRotationIn, BlockPartRotation partRotation, boolean uvLocked, boolean shade)
+    private int[] makeQuadVertexData(BlockFaceUV uvs, TextureAtlasSprite sprite, EnumFacing orientation, float[] p_188012_4_, ModelRotation rotationIn, @Nullable BlockPartRotation partRotation, boolean shade)
+    {
+        return makeQuadVertexData(uvs, sprite, orientation, p_188012_4_, (net.minecraftforge.common.model.ITransformation)rotationIn, partRotation, shade);
+    }
+
+    private int[] makeQuadVertexData(BlockFaceUV uvs, TextureAtlasSprite sprite, EnumFacing orientation, float[] p_188012_4_, net.minecraftforge.common.model.ITransformation rotationIn, BlockPartRotation partRotation, boolean shade)
     {
         int[] aint = new int[28];
 
         for (int i = 0; i < 4; ++i)
         {
-            this.fillVertexData(aint, i, facing, partFace, p_178405_4_, sprite, modelRotationIn, partRotation, uvLocked, shade);
+            this.fillVertexData(aint, i, orientation, uvs, p_188012_4_, sprite, rotationIn, partRotation, shade);
         }
 
         return aint;
@@ -97,20 +133,20 @@ public class FaceBakery
         return afloat;
     }
 
-    private void fillVertexData(int[] faceData, int vertexIndex, EnumFacing facing, BlockPartFace partFace, float[] p_178402_5_, TextureAtlasSprite sprite, ModelRotation modelRotationIn, BlockPartRotation partRotation, boolean uvLocked, boolean shade)
+    private void fillVertexData(int[] p_188015_1_, int p_188015_2_, EnumFacing p_188015_3_, BlockFaceUV p_188015_4_, float[] p_188015_5_, TextureAtlasSprite p_188015_6_, ModelRotation p_188015_7_, @Nullable BlockPartRotation p_188015_8_, boolean p_188015_9_)
     {
-        fillVertexData(faceData, vertexIndex, facing, partFace, p_178402_5_, sprite, modelRotationIn, partRotation, uvLocked, shade);
+        fillVertexData(p_188015_1_, p_188015_2_, p_188015_3_, p_188015_4_, p_188015_5_, p_188015_6_, (net.minecraftforge.common.model.ITransformation)p_188015_7_, p_188015_8_, p_188015_9_);
     }
 
-    private void fillVertexData(int[] faceData, int vertexIndex, EnumFacing facing, BlockPartFace partFace, float[] p_178402_5_, TextureAtlasSprite sprite, net.minecraftforge.client.model.ITransformation modelRotationIn, BlockPartRotation partRotation, boolean uvLocked, boolean shade)
+    private void fillVertexData(int[] p_188015_1_, int p_188015_2_, EnumFacing p_188015_3_, BlockFaceUV p_188015_4_, float[] p_188015_5_, TextureAtlasSprite p_188015_6_, net.minecraftforge.common.model.ITransformation p_188015_7_, BlockPartRotation p_188015_8_, boolean p_188015_9_)
     {
-        EnumFacing enumfacing = modelRotationIn.rotate(facing);
-        int i = shade ? this.getFaceShadeColor(enumfacing) : -1;
-        EnumFaceDirection.VertexInformation enumfacedirection$vertexinformation = EnumFaceDirection.getFacing(facing).func_179025_a(vertexIndex);
-        Vector3f vector3f = new Vector3f(p_178402_5_[enumfacedirection$vertexinformation.field_179184_a], p_178402_5_[enumfacedirection$vertexinformation.field_179182_b], p_178402_5_[enumfacedirection$vertexinformation.field_179183_c]);
-        this.func_178407_a(vector3f, partRotation);
-        int j = this.rotateVertex(vector3f, facing, vertexIndex, modelRotationIn, uvLocked);
-        this.storeVertexData(faceData, j, vertexIndex, vector3f, i, sprite, partFace.blockFaceUV);
+        EnumFacing enumfacing = p_188015_7_.rotate(p_188015_3_);
+        int i = p_188015_9_ ? this.getFaceShadeColor(enumfacing) : -1;
+        EnumFaceDirection.VertexInformation enumfacedirection$vertexinformation = EnumFaceDirection.getFacing(p_188015_3_).getVertexInformation(p_188015_2_);
+        Vector3f vector3f = new Vector3f(p_188015_5_[enumfacedirection$vertexinformation.xIndex], p_188015_5_[enumfacedirection$vertexinformation.yIndex], p_188015_5_[enumfacedirection$vertexinformation.zIndex]);
+        this.rotatePart(vector3f, p_188015_8_);
+        int j = this.rotateVertex(vector3f, p_188015_3_, p_188015_2_, p_188015_7_);
+        this.storeVertexData(p_188015_1_, j, p_188015_2_, vector3f, i, p_188015_6_, p_188015_4_);
     }
 
     private void storeVertexData(int[] faceData, int storeIndex, int vertexIndex, Vector3f position, int shadeColor, TextureAtlasSprite sprite, BlockFaceUV faceUV)
@@ -120,11 +156,11 @@ public class FaceBakery
         faceData[i + 1] = Float.floatToRawIntBits(position.y);
         faceData[i + 2] = Float.floatToRawIntBits(position.z);
         faceData[i + 3] = shadeColor;
-        faceData[i + 4] = Float.floatToRawIntBits(sprite.getInterpolatedU((double)faceUV.func_178348_a(vertexIndex)));
-        faceData[i + 4 + 1] = Float.floatToRawIntBits(sprite.getInterpolatedV((double)faceUV.func_178346_b(vertexIndex)));
+        faceData[i + 4] = Float.floatToRawIntBits(sprite.getInterpolatedU((double)faceUV.getVertexU(vertexIndex) * .999 + faceUV.getVertexU((vertexIndex + 2) % 4) * .001));
+        faceData[i + 4 + 1] = Float.floatToRawIntBits(sprite.getInterpolatedV((double)faceUV.getVertexV(vertexIndex) * .999 + faceUV.getVertexV((vertexIndex + 2) % 4) * .001));
     }
 
-    private void func_178407_a(Vector3f p_178407_1_, BlockPartRotation partRotation)
+    private void rotatePart(Vector3f p_178407_1_, @Nullable BlockPartRotation partRotation)
     {
         if (partRotation != null)
         {
@@ -150,11 +186,11 @@ public class FaceBakery
             {
                 if (Math.abs(partRotation.angle) == 22.5F)
                 {
-                    vector3f.scale(field_178418_a);
+                    vector3f.scale(SCALE_ROTATION_22_5);
                 }
                 else
                 {
-                    vector3f.scale(field_178417_b);
+                    vector3f.scale(SCALE_ROTATION_GENERAL);
                 }
 
                 Vector3f.add(vector3f, new Vector3f(1.0F, 1.0F, 1.0F), vector3f);
@@ -168,21 +204,21 @@ public class FaceBakery
         }
     }
 
-    public int rotateVertex(Vector3f position, EnumFacing facing, int vertexIndex, ModelRotation modelRotationIn, boolean uvLocked)
+    public int rotateVertex(Vector3f p_188011_1_, EnumFacing p_188011_2_, int p_188011_3_, ModelRotation p_188011_4_)
     {
-        return rotateVertex(position, facing, vertexIndex, modelRotationIn, uvLocked);
+        return rotateVertex(p_188011_1_, p_188011_2_, p_188011_3_, (net.minecraftforge.common.model.ITransformation)p_188011_4_);
     }
 
-    public int rotateVertex(Vector3f position, EnumFacing facing, int vertexIndex, net.minecraftforge.client.model.ITransformation modelRotationIn, boolean uvLocked)
+    public int rotateVertex(Vector3f p_188011_1_, EnumFacing p_188011_2_, int p_188011_3_, net.minecraftforge.common.model.ITransformation p_188011_4_)
     {
-        if (modelRotationIn == ModelRotation.X0_Y0)
+        if (p_188011_4_ == ModelRotation.X0_Y0)
         {
-            return vertexIndex;
+            return p_188011_3_;
         }
         else
         {
-            net.minecraftforge.client.ForgeHooksClient.transform(position, modelRotationIn.getMatrix());
-            return modelRotationIn.rotate(facing, vertexIndex);
+            net.minecraftforge.client.ForgeHooksClient.transform(p_188011_1_, p_188011_4_.getMatrix());
+            return p_188011_4_.rotate(p_188011_2_, p_188011_3_);
         }
     }
 
@@ -244,15 +280,7 @@ public class FaceBakery
         }
     }
 
-    public void func_178409_a(int[] p_178409_1_, EnumFacing facing, BlockFaceUV p_178409_3_, TextureAtlasSprite p_178409_4_)
-    {
-        for (int i = 0; i < 4; ++i)
-        {
-            this.func_178401_a(i, p_178409_1_, facing, p_178409_3_, p_178409_4_);
-        }
-    }
-
-    private void func_178408_a(int[] p_178408_1_, EnumFacing p_178408_2_)
+    private void applyFacing(int[] p_178408_1_, EnumFacing p_178408_2_)
     {
         int[] aint = new int[p_178408_1_.length];
         System.arraycopy(p_178408_1_, 0, aint, 0, p_178408_1_.length);
@@ -307,10 +335,10 @@ public class FaceBakery
         for (int i1 = 0; i1 < 4; ++i1)
         {
             int j1 = 7 * i1;
-            EnumFaceDirection.VertexInformation enumfacedirection$vertexinformation = enumfacedirection.func_179025_a(i1);
-            float f8 = afloat[enumfacedirection$vertexinformation.field_179184_a];
-            float f3 = afloat[enumfacedirection$vertexinformation.field_179182_b];
-            float f4 = afloat[enumfacedirection$vertexinformation.field_179183_c];
+            EnumFaceDirection.VertexInformation enumfacedirection$vertexinformation = enumfacedirection.getVertexInformation(i1);
+            float f8 = afloat[enumfacedirection$vertexinformation.xIndex];
+            float f3 = afloat[enumfacedirection$vertexinformation.yIndex];
+            float f4 = afloat[enumfacedirection$vertexinformation.zIndex];
             p_178408_1_[j1] = Float.floatToRawIntBits(f8);
             p_178408_1_[j1 + 1] = Float.floatToRawIntBits(f3);
             p_178408_1_[j1 + 2] = Float.floatToRawIntBits(f4);
@@ -331,60 +359,132 @@ public class FaceBakery
         }
     }
 
-    private void func_178401_a(int p_178401_1_, int[] p_178401_2_, EnumFacing facing, BlockFaceUV p_178401_4_, TextureAtlasSprite p_178401_5_)
+    private static void addUvRotation(ModelRotation p_188013_0_, EnumFacing p_188013_1_, FaceBakery.Rotation p_188013_2_)
     {
-        int i = 7 * p_178401_1_;
-        float f = Float.intBitsToFloat(p_178401_2_[i]);
-        float f1 = Float.intBitsToFloat(p_178401_2_[i + 1]);
-        float f2 = Float.intBitsToFloat(p_178401_2_[i + 2]);
-
-        if (f < -0.1F || f >= 1.1F)
-        {
-            f -= (float)MathHelper.floor_float(f);
-        }
-
-        if (f1 < -0.1F || f1 >= 1.1F)
-        {
-            f1 -= (float)MathHelper.floor_float(f1);
-        }
-
-        if (f2 < -0.1F || f2 >= 1.1F)
-        {
-            f2 -= (float)MathHelper.floor_float(f2);
-        }
-
-        float f3 = 0.0F;
-        float f4 = 0.0F;
-
-        switch (facing)
-        {
-            case DOWN:
-                f3 = f * 16.0F;
-                f4 = (1.0F - f2) * 16.0F;
-                break;
-            case UP:
-                f3 = f * 16.0F;
-                f4 = f2 * 16.0F;
-                break;
-            case NORTH:
-                f3 = (1.0F - f) * 16.0F;
-                f4 = (1.0F - f1) * 16.0F;
-                break;
-            case SOUTH:
-                f3 = f * 16.0F;
-                f4 = (1.0F - f1) * 16.0F;
-                break;
-            case WEST:
-                f3 = f2 * 16.0F;
-                f4 = (1.0F - f1) * 16.0F;
-                break;
-            case EAST:
-                f3 = (1.0F - f2) * 16.0F;
-                f4 = (1.0F - f1) * 16.0F;
-        }
-
-        int j = p_178401_4_.func_178345_c(p_178401_1_) * 7;
-        p_178401_2_[j + 4] = Float.floatToRawIntBits(p_178401_5_.getInterpolatedU((double)f3));
-        p_178401_2_[j + 4 + 1] = Float.floatToRawIntBits(p_178401_5_.getInterpolatedV((double)f4));
+        UV_ROTATIONS[getIndex(p_188013_0_, p_188013_1_)] = p_188013_2_;
     }
+
+    private static int getIndex(ModelRotation p_188014_0_, EnumFacing p_188014_1_)
+    {
+        return ModelRotation.values().length * p_188014_1_.ordinal() + p_188014_0_.ordinal();
+    }
+
+    static
+    {
+        addUvRotation(ModelRotation.X0_Y0, EnumFacing.DOWN, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y0, EnumFacing.EAST, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y0, EnumFacing.NORTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y0, EnumFacing.SOUTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y0, EnumFacing.UP, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y0, EnumFacing.WEST, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y90, EnumFacing.EAST, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y90, EnumFacing.NORTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y90, EnumFacing.SOUTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y90, EnumFacing.WEST, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y180, EnumFacing.EAST, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y180, EnumFacing.NORTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y180, EnumFacing.SOUTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y180, EnumFacing.WEST, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y270, EnumFacing.EAST, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y270, EnumFacing.NORTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y270, EnumFacing.SOUTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y270, EnumFacing.WEST, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X90_Y0, EnumFacing.DOWN, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X90_Y0, EnumFacing.SOUTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X90_Y90, EnumFacing.DOWN, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X90_Y180, EnumFacing.DOWN, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X90_Y180, EnumFacing.NORTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X90_Y270, EnumFacing.DOWN, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X180_Y0, EnumFacing.DOWN, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X180_Y0, EnumFacing.UP, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X270_Y0, EnumFacing.SOUTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X270_Y0, EnumFacing.UP, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X270_Y90, EnumFacing.UP, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X270_Y180, EnumFacing.NORTH, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X270_Y180, EnumFacing.UP, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X270_Y270, EnumFacing.UP, UV_ROTATION_0);
+        addUvRotation(ModelRotation.X0_Y270, EnumFacing.UP, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X0_Y90, EnumFacing.DOWN, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X90_Y0, EnumFacing.WEST, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X90_Y90, EnumFacing.WEST, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X90_Y180, EnumFacing.WEST, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X90_Y270, EnumFacing.NORTH, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X90_Y270, EnumFacing.SOUTH, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X90_Y270, EnumFacing.WEST, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X180_Y90, EnumFacing.UP, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X180_Y270, EnumFacing.DOWN, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X270_Y0, EnumFacing.EAST, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X270_Y90, EnumFacing.EAST, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X270_Y90, EnumFacing.NORTH, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X270_Y90, EnumFacing.SOUTH, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X270_Y180, EnumFacing.EAST, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X270_Y270, EnumFacing.EAST, UV_ROTATION_270);
+        addUvRotation(ModelRotation.X0_Y180, EnumFacing.DOWN, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X0_Y180, EnumFacing.UP, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X90_Y0, EnumFacing.NORTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X90_Y0, EnumFacing.UP, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X90_Y90, EnumFacing.UP, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X90_Y180, EnumFacing.SOUTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X90_Y180, EnumFacing.UP, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X90_Y270, EnumFacing.UP, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y0, EnumFacing.EAST, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y0, EnumFacing.NORTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y0, EnumFacing.SOUTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y0, EnumFacing.WEST, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y90, EnumFacing.EAST, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y90, EnumFacing.NORTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y90, EnumFacing.SOUTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y90, EnumFacing.WEST, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y180, EnumFacing.DOWN, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y180, EnumFacing.EAST, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y180, EnumFacing.NORTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y180, EnumFacing.SOUTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y180, EnumFacing.UP, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y180, EnumFacing.WEST, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y270, EnumFacing.EAST, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y270, EnumFacing.NORTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y270, EnumFacing.SOUTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X180_Y270, EnumFacing.WEST, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X270_Y0, EnumFacing.DOWN, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X270_Y0, EnumFacing.NORTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X270_Y90, EnumFacing.DOWN, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X270_Y180, EnumFacing.DOWN, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X270_Y180, EnumFacing.SOUTH, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X270_Y270, EnumFacing.DOWN, UV_ROTATION_INVERSE);
+        addUvRotation(ModelRotation.X0_Y90, EnumFacing.UP, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X0_Y270, EnumFacing.DOWN, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X90_Y0, EnumFacing.EAST, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X90_Y90, EnumFacing.EAST, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X90_Y90, EnumFacing.NORTH, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X90_Y90, EnumFacing.SOUTH, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X90_Y180, EnumFacing.EAST, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X90_Y270, EnumFacing.EAST, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X270_Y0, EnumFacing.WEST, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X180_Y90, EnumFacing.DOWN, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X180_Y270, EnumFacing.UP, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X270_Y90, EnumFacing.WEST, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X270_Y180, EnumFacing.WEST, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X270_Y270, EnumFacing.NORTH, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X270_Y270, EnumFacing.SOUTH, UV_ROTATION_90);
+        addUvRotation(ModelRotation.X270_Y270, EnumFacing.WEST, UV_ROTATION_90);
+    }
+
+    @SideOnly(Side.CLIENT)
+    abstract static class Rotation
+        {
+            private Rotation()
+            {
+            }
+
+            public BlockFaceUV rotateUV(BlockFaceUV p_188006_1_)
+            {
+                float f = p_188006_1_.getVertexU(p_188006_1_.getVertexRotatedRev(0));
+                float f1 = p_188006_1_.getVertexV(p_188006_1_.getVertexRotatedRev(0));
+                float f2 = p_188006_1_.getVertexU(p_188006_1_.getVertexRotatedRev(2));
+                float f3 = p_188006_1_.getVertexV(p_188006_1_.getVertexRotatedRev(2));
+                return this.makeRotatedUV(f, f1, f2, f3);
+            }
+
+            abstract BlockFaceUV makeRotatedUV(float p_188007_1_, float p_188007_2_, float p_188007_3_, float p_188007_4_);
+        }
 }

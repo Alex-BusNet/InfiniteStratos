@@ -2,11 +2,13 @@ package com.sparta.is.armor;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.sparta.is.InfiniteStratos;
 import com.sparta.is.creativetab.CreativeTabIS;
 import com.sparta.is.reference.Textures;
 import com.sparta.is.utility.IModifyable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 
@@ -24,12 +26,13 @@ public class ArmorIS extends ItemArmor implements IModifyable
     private static int totalShieldCapacity;
     private static int remainingShieldCapacity;
 
-    public ArmorIS(ArmorMaterial armorMaterial, int slot, String type)
+    public ArmorIS(ArmorMaterial armorMaterial, EntityEquipmentSlot slot, String type)
     {
         super(armorMaterial, 0 , slot);
         this.setCreativeTab(CreativeTabIS.IS_TAB);
         this.setMaxStackSize(1);
         this.modifyType = type;
+        this.setUnlocalizedName(InfiniteStratos.MOD_ID + ".ArmorIS");
     }
 
     @Override
@@ -63,7 +66,7 @@ public class ArmorIS extends ItemArmor implements IModifyable
     }
 
     @Override
-    public String getArmorTexture(ItemStack itemStack, Entity entity, int slot, String type)
+    public String getArmorTexture(ItemStack itemStack, Entity entity, EntityEquipmentSlot slot, String type)
     {
         if(textures[1] !=  null)
         {
@@ -71,13 +74,6 @@ public class ArmorIS extends ItemArmor implements IModifyable
         }
         return textures[0];
     }
-
-    @Override
-    public boolean isValidArmor(ItemStack itemStack, int armorType, Entity entity)
-    {
-        return armorType == 1;
-    }
-
 
     public int getShieldCapacity()
     {
@@ -132,7 +128,5 @@ public class ArmorIS extends ItemArmor implements IModifyable
     {
         return new String[] {"armor"};
     }
-
-
 
 }

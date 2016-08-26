@@ -1,31 +1,44 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2014 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors (this class):
- *     bspkrs - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 package net.minecraftforge.fml.client.config;
+
+import static net.minecraftforge.fml.client.config.GuiUtils.RESET_CHAR;
+import static net.minecraftforge.fml.client.config.GuiUtils.UNDO_CHAR;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiListExtended;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
+
 import org.lwjgl.input.Keyboard;
-
-import java.util.*;
-
-import static net.minecraftforge.fml.client.config.GuiUtils.RESET_CHAR;
-import static net.minecraftforge.fml.client.config.GuiUtils.UNDO_CHAR;
 
 /**
  * This class implements the scrolling list functionality of the config GUI screens. It also provides all the default control handlers
@@ -109,7 +122,7 @@ public class GuiConfigEntries extends GuiListExtended
                 if (configElement.getConfigEntryClass() != null)
                     try
                     {
-                        this.listEntries.add((IConfigEntry) configElement.getConfigEntryClass()
+                        this.listEntries.add(configElement.getConfigEntryClass()
                                 .getConstructor(GuiConfig.class, GuiConfigEntries.class, IConfigElement.class)
                                 .newInstance(this.owningScreen, this, configElement));
                     }
@@ -917,7 +930,8 @@ public class GuiConfigEntries extends GuiListExtended
          * Returns true if the mouse has been pressed on this control.
          */
         /**
-         * Returns true if the mouse has been pressed on this control.
+         * Called when the mouse is clicked within this entry. Returning true means that something within this entry was
+         * clicked and the list should not be dragged.
          */
         @Override
         public boolean mousePressed(int index, int x, int y, int mouseEvent, int relativeX, int relativeY)
@@ -1347,7 +1361,8 @@ public class GuiConfigEntries extends GuiListExtended
         }
 
         /**
-         * Returns true if the mouse has been pressed on this control.
+         * Called when the mouse is clicked within this entry. Returning true means that something within this entry was
+         * clicked and the list should not be dragged.
          */
         @Override
         public boolean mousePressed(int index, int x, int y, int mouseEvent, int relativeX, int relativeY)
@@ -1503,6 +1518,7 @@ public class GuiConfigEntries extends GuiListExtended
             this.defaultHoverChecker = new HoverChecker(this.btnDefault, 800);
             this.undoToolTip = Arrays.asList(new String[] { I18n.format("fml.configgui.tooltip.undoChanges") });
             this.defaultToolTip = Arrays.asList(new String[] { I18n.format("fml.configgui.tooltip.resetToDefault") });
+            this.toolTip = new ArrayList<String>();
 
             this.drawLabel = true;
 
@@ -1511,26 +1527,22 @@ public class GuiConfigEntries extends GuiListExtended
             comment = I18n.format(configElement.getLanguageKey() + ".tooltip").replace("\\n", "\n");
 
             if (!comment.equals(configElement.getLanguageKey() + ".tooltip"))
-                toolTip = new ArrayList<String>(this.mc.fontRendererObj.listFormattedStringToWidth(
-                        EnumChatFormatting.GREEN + name + "\n" + EnumChatFormatting.YELLOW + comment, 300));
+                Collections.addAll(toolTip, (TextFormatting.GREEN + name + "\n" + TextFormatting.YELLOW + comment).split("\n"));
             else if (configElement.getComment() != null && !configElement.getComment().trim().isEmpty())
-                toolTip = new ArrayList<String>(this.mc.fontRendererObj.listFormattedStringToWidth(
-                        EnumChatFormatting.GREEN + name + "\n" + EnumChatFormatting.YELLOW + configElement.getComment(), 300));
+                Collections.addAll(toolTip, (TextFormatting.GREEN + name + "\n" + TextFormatting.YELLOW + configElement.getComment()).split("\n"));
             else
-                toolTip = new ArrayList<String>(this.mc.fontRendererObj.listFormattedStringToWidth(
-                        EnumChatFormatting.GREEN + name + "\n" + EnumChatFormatting.RED + "No tooltip defined.", 300));
+                Collections.addAll(toolTip, (TextFormatting.GREEN + name + "\n" + TextFormatting.RED + "No tooltip defined.").split("\n"));
 
             if ((configElement.getType() == ConfigGuiType.INTEGER
                     && (Integer.valueOf(configElement.getMinValue().toString()) != Integer.MIN_VALUE || Integer.valueOf(configElement.getMaxValue().toString()) != Integer.MAX_VALUE))
                     || (configElement.getType() == ConfigGuiType.DOUBLE
                     && (Double.valueOf(configElement.getMinValue().toString()) != -Double.MAX_VALUE || Double.valueOf(configElement.getMaxValue().toString()) != Double.MAX_VALUE)))
-                toolTip.addAll(this.mc.fontRendererObj.listFormattedStringToWidth(
-                        EnumChatFormatting.AQUA + I18n.format("fml.configgui.tooltip.defaultNumeric", configElement.getMinValue(), configElement.getMaxValue(), configElement.getDefault()), 300));
+                Collections.addAll(toolTip, (TextFormatting.AQUA + I18n.format("fml.configgui.tooltip.defaultNumeric", configElement.getMinValue(), configElement.getMaxValue(), configElement.getDefault())).split("\n"));
             else if (configElement.getType() != ConfigGuiType.CONFIG_CATEGORY)
-                toolTip.addAll(this.mc.fontRendererObj.listFormattedStringToWidth(EnumChatFormatting.AQUA + I18n.format("fml.configgui.tooltip.default", configElement.getDefault()),300));
+                Collections.addAll(toolTip, (TextFormatting.AQUA + I18n.format("fml.configgui.tooltip.default", configElement.getDefault())).split("\n"));
 
             if (configElement.requiresMcRestart() || owningScreen.allRequireMcRestart)
-                toolTip.add(EnumChatFormatting.RED + "[" + I18n.format("fml.configgui.gameRestartTitle") + "]");
+                toolTip.add(TextFormatting.RED + "[" + I18n.format("fml.configgui.gameRestartTitle") + "]");
         }
 
         @Override
@@ -1540,9 +1552,9 @@ public class GuiConfigEntries extends GuiListExtended
 
             if (drawLabel)
             {
-                String label = (!isValidValue ? EnumChatFormatting.RED.toString() :
-                        (isChanged ? EnumChatFormatting.WHITE.toString() : EnumChatFormatting.GRAY.toString()))
-                        + (isChanged ? EnumChatFormatting.ITALIC.toString() : "") + this.name;
+                String label = (!isValidValue ? TextFormatting.RED.toString() :
+                        (isChanged ? TextFormatting.WHITE.toString() : TextFormatting.GRAY.toString()))
+                        + (isChanged ? TextFormatting.ITALIC.toString() : "") + this.name;
                 this.mc.fontRendererObj.drawString(
                         label,
                         this.owningScreen.entryList.labelX,
@@ -1584,7 +1596,8 @@ public class GuiConfigEntries extends GuiListExtended
         }
 
         /**
-         * Returns true if the mouse has been pressed on this control.
+         * Called when the mouse is clicked within this entry. Returning true means that something within this entry was
+         * clicked and the list should not be dragged.
          */
         @Override
         public boolean mousePressed(int index, int x, int y, int mouseEvent, int relativeX, int relativeY)
@@ -1715,18 +1728,18 @@ public class GuiConfigEntries extends GuiListExtended
         public boolean enabled();
 
         /**
-         * Handles user keystrokes for any GuiTextField objects in this entry. Call {@code GuiTextField.keyTyped()} for any GuiTextField
+         * Handles user keystrokes for any GuiTextField objects in this entry. Call {@link GuiTextField#textboxKeyTyped(char, int)} for any GuiTextField
          * objects that should receive the input provided.
          */
         public void keyTyped(char eventChar, int eventKey);
 
         /**
-         * Call {@code GuiTextField.updateCursorCounter()} for any GuiTextField objects in this entry.
+         * Call {@link GuiTextField#updateCursorCounter()} for any GuiTextField objects in this entry.
          */
         public void updateCursorCounter();
 
         /**
-         * Call {@code GuiTextField.mouseClicked()} for and GuiTextField objects in this entry.
+         * Call {@link GuiTextField#mouseClicked(int, int, int)} for and GuiTextField objects in this entry.
          */
         public void mouseClicked(int x, int y, int mouseEvent);
 

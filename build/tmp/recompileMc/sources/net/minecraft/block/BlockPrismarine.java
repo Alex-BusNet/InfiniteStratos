@@ -1,20 +1,19 @@
 package net.minecraft.block;
 
+import java.util.List;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 public class BlockPrismarine extends Block
 {
@@ -25,9 +24,9 @@ public class BlockPrismarine extends Block
 
     public BlockPrismarine()
     {
-        super(Material.rock);
+        super(Material.ROCK);
         this.setDefaultState(this.blockState.getBaseState().withProperty(VARIANT, BlockPrismarine.EnumType.ROUGH));
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -35,7 +34,7 @@ public class BlockPrismarine extends Block
      */
     public String getLocalizedName()
     {
-        return StatCollector.translateToLocal(this.getUnlocalizedName() + "." + BlockPrismarine.EnumType.ROUGH.getUnlocalizedName() + ".name");
+        return I18n.translateToLocal(this.getUnlocalizedName() + "." + BlockPrismarine.EnumType.ROUGH.getUnlocalizedName() + ".name");
     }
 
     /**
@@ -43,7 +42,7 @@ public class BlockPrismarine extends Block
      */
     public MapColor getMapColor(IBlockState state)
     {
-        return state.getValue(VARIANT) == BlockPrismarine.EnumType.ROUGH ? MapColor.cyanColor : MapColor.diamondColor;
+        return state.getValue(VARIANT) == BlockPrismarine.EnumType.ROUGH ? MapColor.CYAN : MapColor.DIAMOND;
     }
 
     /**
@@ -63,9 +62,9 @@ public class BlockPrismarine extends Block
         return ((BlockPrismarine.EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {VARIANT});
+        return new BlockStateContainer(this, new IProperty[] {VARIANT});
     }
 
     /**

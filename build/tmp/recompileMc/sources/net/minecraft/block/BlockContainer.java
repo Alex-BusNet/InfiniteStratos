@@ -4,8 +4,9 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class BlockContainer extends Block implements ITileEntityProvider
@@ -15,28 +16,28 @@ public abstract class BlockContainer extends Block implements ITileEntityProvide
         this(materialIn, materialIn.getMaterialMapColor());
     }
 
-    protected BlockContainer(Material p_i46402_1_, MapColor p_i46402_2_)
+    protected BlockContainer(Material materialIn, MapColor color)
     {
-        super(p_i46402_1_, p_i46402_2_);
+        super(materialIn, color);
         this.isBlockContainer = true;
     }
 
-    protected boolean func_181086_a(World p_181086_1_, BlockPos p_181086_2_, EnumFacing p_181086_3_)
+    protected boolean isInvalidNeighbor(World worldIn, BlockPos pos, EnumFacing facing)
     {
-        return p_181086_1_.getBlockState(p_181086_2_.offset(p_181086_3_)).getBlock().getMaterial() == Material.cactus;
+        return worldIn.getBlockState(pos.offset(facing)).getMaterial() == Material.CACTUS;
     }
 
-    protected boolean func_181087_e(World p_181087_1_, BlockPos p_181087_2_)
+    protected boolean hasInvalidNeighbor(World worldIn, BlockPos pos)
     {
-        return this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.NORTH) || this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.SOUTH) || this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.WEST) || this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.EAST);
+        return this.isInvalidNeighbor(worldIn, pos, EnumFacing.NORTH) || this.isInvalidNeighbor(worldIn, pos, EnumFacing.SOUTH) || this.isInvalidNeighbor(worldIn, pos, EnumFacing.WEST) || this.isInvalidNeighbor(worldIn, pos, EnumFacing.EAST);
     }
 
     /**
      * The type of render function called. 3 for standard block models, 2 for TESR's, 1 for liquids, -1 is no render
      */
-    public int getRenderType()
+    public EnumBlockRenderType getRenderType(IBlockState state)
     {
-        return -1;
+        return EnumBlockRenderType.INVISIBLE;
     }
 
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
@@ -46,12 +47,18 @@ public abstract class BlockContainer extends Block implements ITileEntityProvide
     }
 
     /**
-     * Called on both Client and Server when World#addBlockEvent is called
+     * Called on both Client and Server when World#addBlockEvent is called. On the Server, this may perform additional
+     * changes to the world, like pistons replacing the block with an extended base. On the client, the update may
+     * involve replacing tile entities, playing sounds, or performing other visual actions to reflect the server side
+     * changes.
+     *  
+     * @param state The block state retrieved from the block position prior to this method being invoked
+     * @param pos The position of the block event. Can be used to retrieve tile entities.
      */
-    public boolean onBlockEventReceived(World worldIn, BlockPos pos, IBlockState state, int eventID, int eventParam)
+    public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param)
     {
-        super.onBlockEventReceived(worldIn, pos, state, eventID, eventParam);
+        super.eventReceived(state, worldIn, pos, id, param);
         TileEntity tileentity = worldIn.getTileEntity(pos);
-        return tileentity == null ? false : tileentity.receiveClientEvent(eventID, eventParam);
+        return tileentity == null ? false : tileentity.receiveClientEvent(id, param);
     }
 }

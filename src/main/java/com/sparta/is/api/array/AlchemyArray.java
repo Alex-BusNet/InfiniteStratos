@@ -4,13 +4,13 @@ package com.sparta.is.api.array;
  * BORROWED FROM Equivalent Exchange 3 FOR SAKE OF EARLY TILE ENTITY DEVELOPMENT
  */
 
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
@@ -58,7 +58,7 @@ public class AlchemyArray implements Comparable<AlchemyArray>
 
     public String getDisplayName()
     {
-        return StatCollector.translateToLocal(unlocalizedName);
+        return I18n.format(unlocalizedName);
     }
 
     public int getChalkCostPerBlock()

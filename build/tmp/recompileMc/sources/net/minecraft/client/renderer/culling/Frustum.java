@@ -1,13 +1,13 @@
 package net.minecraft.client.renderer.culling;
 
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class Frustum implements ICamera
 {
-    private ClippingHelper clippingHelper;
+    private final ClippingHelper clippingHelper;
     private double xPosition;
     private double yPosition;
     private double zPosition;

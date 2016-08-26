@@ -2,12 +2,13 @@ package net.minecraft.client.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class ModelBase
 {
@@ -15,14 +16,14 @@ public abstract class ModelBase
     public boolean isRiding;
     public boolean isChild = true;
     public List<ModelRenderer> boxList = Lists.<ModelRenderer>newArrayList();
-    private Map<String, TextureOffset> modelTextureMap = Maps.<String, TextureOffset>newHashMap();
+    private final Map<String, TextureOffset> modelTextureMap = Maps.<String, TextureOffset>newHashMap();
     public int textureWidth = 64;
     public int textureHeight = 32;
 
     /**
      * Sets the models various rotation angles then renders the model.
      */
-    public void render(Entity entityIn, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float scale)
+    public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
     }
 
@@ -31,7 +32,7 @@ public abstract class ModelBase
      * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how
      * "far" arms and legs can swing at most.
      */
-    public void setRotationAngles(float p_78087_1_, float p_78087_2_, float p_78087_3_, float p_78087_4_, float p_78087_5_, float p_78087_6_, Entity entityIn)
+    public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn)
     {
     }
 

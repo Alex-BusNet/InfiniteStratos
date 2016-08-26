@@ -4,28 +4,41 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 public class UserList<K, V extends UserListEntry<K>>
 {
-    protected static final Logger logger = LogManager.getLogger();
+    protected static final Logger LOGGER = LogManager.getLogger();
     protected final Gson gson;
     private final File saveFile;
     private final Map<String, V> values = Maps.<String, V>newHashMap();
     private boolean lanServer = true;
-    private static final ParameterizedType saveFileFormat = new ParameterizedType()
+    private static final ParameterizedType USER_LIST_ENTRY_TYPE = new ParameterizedType()
     {
         public Type[] getActualTypeArguments()
         {
@@ -72,7 +85,7 @@ public class UserList<K, V extends UserListEntry<K>>
         }
         catch (IOException ioexception)
         {
-            logger.warn((String)"Could not save the list after adding a user.", (Throwable)ioexception);
+            LOGGER.warn((String)"Could not save the list after adding a user.", (Throwable)ioexception);
         }
     }
 
@@ -92,7 +105,7 @@ public class UserList<K, V extends UserListEntry<K>>
         }
         catch (IOException ioexception)
         {
-            logger.warn((String)"Could not save the list after removing a user.", (Throwable)ioexception);
+            LOGGER.warn((String)"Could not save the list after removing a user.", (Throwable)ioexception);
         }
     }
 
@@ -183,7 +196,7 @@ public class UserList<K, V extends UserListEntry<K>>
         try
         {
             bufferedreader = Files.newReader(this.saveFile, Charsets.UTF_8);
-            collection = (Collection)this.gson.fromJson((Reader)bufferedreader, saveFileFormat);
+            collection = (Collection)this.gson.fromJson((Reader)bufferedreader, USER_LIST_ENTRY_TYPE);
         }
         finally
         {
@@ -222,8 +235,7 @@ public class UserList<K, V extends UserListEntry<K>>
             if (p_deserialize_1_.isJsonObject())
             {
                 JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
-                UserListEntry<K> userlistentry = UserList.this.createEntry(jsonobject);
-                return userlistentry;
+                return UserList.this.createEntry(jsonobject);
             }
             else
             {

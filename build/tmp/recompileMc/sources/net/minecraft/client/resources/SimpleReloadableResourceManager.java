@@ -6,30 +6,30 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.minecraft.client.resources.data.IMetadataSerializer;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.annotation.Nullable;
+import net.minecraft.client.resources.data.MetadataSerializer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 @SideOnly(Side.CLIENT)
 public class SimpleReloadableResourceManager implements IReloadableResourceManager
 {
-    private static final Logger logger = LogManager.getLogger();
-    private static final Joiner joinerResourcePacks = Joiner.on(", ");
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Joiner JOINER_RESOURCE_PACKS = Joiner.on(", ");
     private final Map<String, FallbackResourceManager> domainResourceManagers = Maps.<String, FallbackResourceManager>newHashMap();
     private final List<IResourceManagerReloadListener> reloadListeners = Lists.<IResourceManagerReloadListener>newArrayList();
     private final Set<String> setResourceDomains = Sets.<String>newLinkedHashSet();
-    private final IMetadataSerializer rmMetadataSerializer;
+    private final MetadataSerializer rmMetadataSerializer;
 
-    public SimpleReloadableResourceManager(IMetadataSerializer rmMetadataSerializerIn)
+    public SimpleReloadableResourceManager(MetadataSerializer rmMetadataSerializerIn)
     {
         this.rmMetadataSerializer = rmMetadataSerializerIn;
     }
@@ -90,19 +90,20 @@ public class SimpleReloadableResourceManager implements IReloadableResourceManag
         this.setResourceDomains.clear();
     }
 
-    public void reloadResources(List<IResourcePack> p_110541_1_)
+    public void reloadResources(List<IResourcePack> resourcesPacksList)
     {
+        net.minecraftforge.fml.common.ProgressManager.ProgressBar resReload = net.minecraftforge.fml.common.ProgressManager.push("Loading Resources", resourcesPacksList.size()+1, true);
         this.clearResources();
-        net.minecraftforge.fml.common.ProgressManager.ProgressBar resReload = net.minecraftforge.fml.common.ProgressManager.push("Loading Resources", p_110541_1_.size()+1, true);
-        logger.info("Reloading ResourceManager: " + joinerResourcePacks.join(Iterables.transform(p_110541_1_, new Function<IResourcePack, String>()
+        LOGGER.info("Reloading ResourceManager: {}", new Object[] {JOINER_RESOURCE_PACKS.join(Iterables.transform(resourcesPacksList, new Function<IResourcePack, String>()
         {
-            public String apply(IResourcePack p_apply_1_)
+            public String apply(@Nullable IResourcePack p_apply_1_)
             {
-                return p_apply_1_.getPackName();
+                return p_apply_1_ == null ? "<NULL>" : p_apply_1_.getPackName();
             }
-        })));
+        }))
+                                                                          });
 
-        for (IResourcePack iresourcepack : p_110541_1_)
+        for (IResourcePack iresourcepack : resourcesPacksList)
         {
             resReload.step(iresourcepack.getPackName());
             this.reloadResourcePack(iresourcepack);

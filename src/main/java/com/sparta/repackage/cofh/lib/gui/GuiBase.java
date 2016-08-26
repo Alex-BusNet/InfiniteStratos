@@ -1,27 +1,23 @@
 package com.sparta.repackage.cofh.lib.gui;
 
-import com.sparta.repackage.cofh.lib.gui.slot.SlotFalseCopy;
-import com.sparta.repackage.cofh.lib.render.RenderHelper;
-import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
-import com.sparta.repackage.cofh.lib.audio.SoundBase;
 import com.sparta.repackage.cofh.lib.gui.element.ElementBase;
 import com.sparta.repackage.cofh.lib.gui.element.TabBase;
-
+import com.sparta.repackage.cofh.lib.gui.slot.SlotFalseCopy;
+import com.sparta.repackage.cofh.lib.util.helpers.StringHelper;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
-import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.client.FMLClientHandler;
-
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -57,10 +53,10 @@ public abstract class GuiBase extends GuiContainer {
 	protected List<String> tooltip = new LinkedList<String>();
 	protected boolean tooltips = true;
 
-	public static void playSound(String name, float volume, float pitch) {
-
-		guiSoundManager.playSound(new SoundBase(name, volume, pitch));
-	}
+//	public static void playSound(String name, float volume, float pitch) {
+//
+//		guiSoundManager.playSound(name, volume, pitch));
+//	}
 
 	public GuiBase(Container container) {
 
@@ -105,7 +101,7 @@ public abstract class GuiBase extends GuiContainer {
 			fontRendererObj.drawString(StringHelper.localize(name), getCenteredOffset(StringHelper.localize(name)), 6, 0x404040);
 		}
 		if (drawInventory) {
-			fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, ySize - 96 + 3, 0x404040);
+			fontRendererObj.drawString(I18n.format("container.inventory"), 8, ySize - 96 + 3, 0x404040);
 		}
 		drawElements(0, true);
 		drawTabs(0, true);
@@ -240,28 +236,28 @@ public abstract class GuiBase extends GuiContainer {
 		}
 	}
 
-	@Override
-	protected void mouseMovedOrUp(int mX, int mY, int mouseButton) {
-
-		mX -= guiLeft;
-		mY -= guiTop;
-
-		if (mouseButton >= 0 && mouseButton <= 2) { // 0:left, 1:right, 2:
-													// middle
-			for (int i = elements.size(); i-- > 0;) {
-				ElementBase c = elements.get(i);
-				if (!c.isVisible() || !c.isEnabled()) { // no bounds checking on
-														// mouseUp events
-					continue;
-				}
-				c.onMouseReleased(mX, mY);
-			}
-		}
-		mX += guiLeft;
-		mY += guiTop;
-
-		super.mouseMovedOrUp(mX, mY, mouseButton);
-	}
+//	@Override
+//	protected void mouseMovedOrUp(int mX, int mY, int mouseButton) {
+//
+//		mX -= guiLeft;
+//		mY -= guiTop;
+//
+//		if (mouseButton >= 0 && mouseButton <= 2) { // 0:left, 1:right, 2:
+//													// middle
+//			for (int i = elements.size(); i-- > 0;) {
+//				ElementBase c = elements.get(i);
+//				if (!c.isVisible() || !c.isEnabled()) { // no bounds checking on
+//														// mouseUp events
+//					continue;
+//				}
+//				c.onMouseReleased(mX, mY);
+//			}
+//		}
+//		mX += guiLeft;
+//		mY += guiTop;
+//
+//		super.mouseMovedOrUp(mX, mY, mouseButton);
+//	}
 
 	@Override
 	protected void mouseClickMove(int mX, int mY, int lastClick, long timeSinceClick) {
@@ -269,10 +265,10 @@ public abstract class GuiBase extends GuiContainer {
 		Slot slot = getSlotAtPosition(mX, mY);
 		ItemStack itemstack = this.mc.thePlayer.inventory.getItemStack();
 
-		if (this.field_147007_t && slot != null && itemstack != null && slot instanceof SlotFalseCopy) {
+		if (this.dragSplittingSlots.isEmpty() && slot != null && itemstack != null && slot instanceof SlotFalseCopy) {
 			if (lastIndex != slot.slotNumber) {
 				lastIndex = slot.slotNumber;
-				this.handleMouseClick(slot, slot.slotNumber, 0, 0);
+				this.handleMouseClick(slot, slot.slotNumber, 0, ClickType.CLONE);
 			}
 		} else {
 			lastIndex = -1;
@@ -294,7 +290,7 @@ public abstract class GuiBase extends GuiContainer {
 
 	public boolean isMouseOverSlot(Slot theSlot, int xCoord, int yCoord) {
 
-		return this.func_146978_c(theSlot.xDisplayPosition, theSlot.yDisplayPosition, 16, 16, xCoord, yCoord);
+		return this.isPointInRegion(theSlot.xDisplayPosition, theSlot.yDisplayPosition, 16, 16, xCoord, yCoord);
 	}
 
 	/**
@@ -494,15 +490,15 @@ public abstract class GuiBase extends GuiContainer {
 	/**
 	 * Essentially a placeholder method for tabs to use should they need to draw a button.
 	 */
-	public void drawButton(TextureAtlasSprite icon, int x, int y, int spriteSheet, int mode) {
+//	public void drawButton(TextureAtlasSprite icon, int x, int y, int spriteSheet, int mode) {
+//
+//		drawIcon(icon, x, y, spriteSheet);
+//	}
 
-		drawIcon(icon, x, y, spriteSheet);
-	}
-
-	public void drawButton(String iconName, int x, int y, int spriteSheet, int mode) {
-
-		drawButton(getIcon(iconName), x, y, spriteSheet, mode);
-	}
+//	public void drawButton(String iconName, int x, int y, int spriteSheet, int mode) {
+//
+//		drawButton(getIcon(iconName), x, y, spriteSheet, mode);
+//	}
 
 	public void drawItemStack(ItemStack stack, int x, int y, boolean drawOverlay, String overlayTxt) {
 
@@ -524,7 +520,7 @@ public abstract class GuiBase extends GuiContainer {
 		itemRender.renderItemAndEffectIntoGUI(stack, x, y);
 
 		if (drawOverlay) {
-			itemRender.renderItemOverlayIntoGUI(font, stack, x, y - (this.draggedStack == null ? 0 : 8), overlayTxt);
+			itemRender.renderItemOverlayIntoGUI(font, stack, x, y - (this.dragSplittingSlots == null ? 0 : 8), overlayTxt);
 		}
 
 		this.zLevel = 0.0F;
@@ -536,16 +532,16 @@ public abstract class GuiBase extends GuiContainer {
 	/**
 	 * Simple method used to draw a fluid of arbitrary size.
 	 */
-	public void drawFluid(int x, int y, FluidStack fluid, int width, int height) {
-
-		if (fluid == null || fluid.getFluid() == null) {
-			return;
-		}
-		RenderHelper.setBlockTextureSheet();
-		RenderHelper.setColor3ub(fluid.getFluid().getColor(fluid));
-
-		drawTiledTexture(x, y, fluid.getFluid().getIcon(fluid), width, height);
-	}
+//	public void drawFluid(int x, int y, FluidStack fluid, int width, int height) {
+//
+//		if (fluid == null || fluid.getFluid() == null) {
+//			return;
+//		}
+//		RenderHelper.setBlockTextureSheet();
+//		RenderHelper.setColor3ub(fluid.getFluid().getColor(fluid));
+//
+//		drawTiledTexture(x, y, , width, height);
+//	}
 
 	public void drawTiledTexture(int x, int y, TextureAtlasSprite icon, int width, int height) {
 
@@ -565,31 +561,31 @@ public abstract class GuiBase extends GuiContainer {
 		GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0F);
 	}
 
-	public void drawIcon(TextureAtlasSprite icon, int x, int y, int spriteSheet) {
+//	public void drawIcon(TextureAtlasSprite icon, int x, int y, int spriteSheet) {
+//
+//		if (spriteSheet == 0) {
+//			RenderHelper.setBlockTextureSheet();
+//		} else {
+//			RenderHelper.setItemTextureSheet();
+//		}
+//		GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0F);
+//		drawTexturedModalRect(x, y, icon, 16, 16);
+//	}
+//
+//	public void drawColorIcon(TextureAtlasSprite icon, int x, int y, int spriteSheet) {
+//
+//		if (spriteSheet == 0) {
+//			RenderHelper.setBlockTextureSheet();
+//		} else {
+//			RenderHelper.setItemTextureSheet();
+//		}
+//		drawTexturedModalRect(x, y, icon, 16, 16);
+//	}
 
-		if (spriteSheet == 0) {
-			RenderHelper.setBlockTextureSheet();
-		} else {
-			RenderHelper.setItemTextureSheet();
-		}
-		GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0F);
-		drawTexturedModalRect(x, y, icon, 16, 16);
-	}
-
-	public void drawColorIcon(TextureAtlasSprite icon, int x, int y, int spriteSheet) {
-
-		if (spriteSheet == 0) {
-			RenderHelper.setBlockTextureSheet();
-		} else {
-			RenderHelper.setItemTextureSheet();
-		}
-		drawTexturedModalRect(x, y, icon, 16, 16);
-	}
-
-	public void drawIcon(String iconName, int x, int y, int spriteSheet) {
-
-		drawIcon(getIcon(iconName), x, y, spriteSheet);
-	}
+//	public void drawIcon(String iconName, int x, int y, int spriteSheet) {
+//
+//		drawIcon(getIcon(iconName), x, y, spriteSheet);
+//	}
 
 	public void drawSizedModalRect(int x1, int y1, int x2, int y2, int color) {
 
@@ -617,7 +613,7 @@ public abstract class GuiBase extends GuiContainer {
 		GL11.glColor4f(r, g, b, a);
 
 		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+		VertexBuffer worldrenderer = tessellator.getBuffer();
 		worldrenderer.begin(7, DefaultVertexFormats.POSITION);
 		worldrenderer.pos(x1, y2, this.zLevel).endVertex();
 		worldrenderer.pos(x2, y2, this.zLevel).endVertex();
@@ -653,7 +649,7 @@ public abstract class GuiBase extends GuiContainer {
 		GL11.glColor4f(r, g, b, a);
 
 		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+		VertexBuffer worldrenderer = tessellator.getBuffer();
 		worldrenderer.begin(7, DefaultVertexFormats.POSITION);
 		worldrenderer.pos(x1, y2, this.zLevel).endVertex();
 		worldrenderer.pos(x2, y2, this.zLevel).endVertex();
@@ -670,7 +666,7 @@ public abstract class GuiBase extends GuiContainer {
 		float texV = 1 / texH;
 
 		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+		VertexBuffer worldrenderer = tessellator.getBuffer();
 		worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
 		worldrenderer.pos(x + 0, y + height, this.zLevel).tex((u + 0) * texU, (v + height) * texV).endVertex();
 		worldrenderer.pos(x + width, y + height, this.zLevel).tex((u + width) * texU, (v + height) * texV).endVertex();
@@ -690,7 +686,7 @@ public abstract class GuiBase extends GuiContainer {
 		double maxV = icon.getMaxV();
 
 		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+		VertexBuffer worldrenderer = tessellator.getBuffer();
 		worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
 		worldrenderer.pos(x + 0, y + height, this.zLevel).tex(minU, minV + (maxV - minV) * height / 16F);
 		worldrenderer.pos(x + width, y + height, this.zLevel).tex(minU + (maxU - minU) * width / 16F, minV + (maxV - minV) * height / 16F);

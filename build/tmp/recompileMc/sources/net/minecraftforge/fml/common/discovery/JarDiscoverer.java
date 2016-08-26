@@ -1,27 +1,41 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.common.discovery;
 
-import com.google.common.collect.Lists;
-import net.minecraftforge.fml.common.*;
-import net.minecraftforge.fml.common.discovery.asm.ASMModParser;
-import org.apache.logging.log4j.Level;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.jar.JarFile;
+
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.LoaderException;
+import net.minecraftforge.fml.common.MetadataCollection;
+import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.ModContainerFactory;
+import net.minecraftforge.fml.common.discovery.asm.ASMModParser;
+
+import org.apache.logging.log4j.Level;
+
 import java.util.regex.Matcher;
 import java.util.zip.ZipEntry;
+
+import com.google.common.collect.Lists;
 
 public class JarDiscoverer implements ITypeDiscoverer
 {
@@ -76,6 +90,7 @@ public class JarDiscoverer implements ITypeDiscoverer
                         table.addContainer(container);
                         foundMods.add(container);
                         container.bindMetadata(mc);
+                        container.setClassVersion(modParser.getClassVersion());
                     }
                 }
             }

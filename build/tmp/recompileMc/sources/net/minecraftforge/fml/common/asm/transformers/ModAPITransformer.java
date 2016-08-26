@@ -1,20 +1,47 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.asm.transformers;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Sets;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModAPIManager;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 import net.minecraftforge.fml.relauncher.FMLRelaunchLog;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.signature.SignatureReader;
+import org.objectweb.asm.signature.SignatureWriter;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import java.util.*;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Sets;
 
 public class ModAPITransformer implements IClassTransformer {
 
@@ -57,7 +84,7 @@ public class ModAPITransformer implements IClassTransformer {
             }
             else
             {
-                stripMethod(classNode, (String)optional.getObjectName());
+                stripMethod(classNode, optional.getObjectName());
             }
 
         }
@@ -91,8 +118,16 @@ public class ModAPITransformer implements IClassTransformer {
 
     private void stripInterface(ClassNode classNode, String interfaceName, boolean stripRefs)
     {
-        String ifaceName = interfaceName.replace('.', '/');
+        final String ifaceName = interfaceName.replace('.', '/');
         boolean found = classNode.interfaces.remove(ifaceName);
+        if (found && classNode.signature != null)
+        {
+            SignatureReader sr = new SignatureReader(classNode.signature);
+            final RemovingSignatureWriter signatureWriter = new RemovingSignatureWriter(ifaceName);
+            sr.accept(signatureWriter);
+            classNode.signature = signatureWriter.toString();
+            if (logDebugInfo) FMLRelaunchLog.finer("Optional removal - interface %s removed from type signature");
+        }
         if (found && logDebugInfo) FMLRelaunchLog.finer("Optional removal - interface %s removed", interfaceName);
         if (!found && logDebugInfo) FMLRelaunchLog.finer("Optional removal - interface %s NOT removed - not found", interfaceName);
 
@@ -151,4 +186,25 @@ public class ModAPITransformer implements IClassTransformer {
         }
     }
 
+    private static class RemovingSignatureWriter extends SignatureWriter
+    {
+        private final String ifaceName;
+
+        RemovingSignatureWriter(String ifaceName)
+        {
+            this.ifaceName = ifaceName;
+        }
+
+        @Override
+        public void visitClassType(String name)
+        {
+            if (name.equals(ifaceName)) {
+                super.visitClassType("java/lang/Object");
+            }
+            else
+            {
+                super.visitClassType(name);
+            }
+        }
+    }
 }

@@ -1,10 +1,30 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.common.capabilities;
 
+import java.util.concurrent.Callable;
+
 import com.google.common.base.Throwables;
+
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.util.EnumFacing;
-
-import java.util.concurrent.Callable;
 
 /**
  * This is the core holder object Capabilities.
@@ -54,7 +74,7 @@ public class Capability<T>
          * @param capability The Capability being stored.
          * @param instance An instance of that capabilities interface.
          * @param side The side of the object the instance is associated with.
-         * @param A NBT holding the data. Must not be null, as doesn't make sense to call this function with nothing to read...
+         * @param nbt A NBT holding the data. Must not be null, as doesn't make sense to call this function with nothing to read...
          */
         void readNBT(Capability<T> capability, T instance, EnumFacing side, NBTBase nbt);
     }
@@ -64,10 +84,29 @@ public class Capability<T>
      * the fully qualified class name for the target interface.
      */
     public String getName() { return name; }
+
     /**
      * @return An instance of the default storage handler. You can safely use this store your default implementation in NBT.
      */
     public IStorage<T> getStorage() { return storage; }
+    
+    /**
+     * Quick access to the IStorage's readNBT. 
+     * See {@link IStorage#readNBT(Capability, Object, EnumFacing, NBTBase)}  for documentation.
+     */
+    public void readNBT(T instance, EnumFacing side, NBTBase nbt)
+    {
+    	storage.readNBT(this, instance, side, nbt); 
+    }
+    
+    /**
+     * Quick access to the IStorage's writeNBT. 
+     * See {@link IStorage#writeNBT(Capability, Object, EnumFacing)} for documentation.
+     */
+    public NBTBase writeNBT(T instance, EnumFacing side)
+    {
+    	return storage.writeNBT(this, instance, side);
+    }
 
     /**
      * A NEW instance of the default implementation.
@@ -89,6 +128,17 @@ public class Capability<T>
             Throwables.propagate(e);
         }
         return null;
+    }
+
+    /**
+     * Use this inside ICapabilityProvider.getCapability to avoid unchecked cast warnings.
+     * Example: return SOME_CAPABILITY.cast(instance);
+     * Use with caution;
+     */
+    @SuppressWarnings("unchecked")
+    public <R> R cast(T instance)
+    {
+        return (R)instance;
     }
 
     // INTERNAL

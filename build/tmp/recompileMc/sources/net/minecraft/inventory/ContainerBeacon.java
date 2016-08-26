@@ -1,20 +1,23 @@
 package net.minecraft.inventory;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ContainerBeacon extends Container
 {
-    private IInventory tileBeacon;
+    private final IInventory tileBeacon;
     /** This beacon's slot where you put in Emerald, Diamond, Gold or Iron Ingot. */
     private final ContainerBeacon.BeaconSlot beaconSlot;
 
     public ContainerBeacon(IInventory playerInventory, IInventory tileBeaconIn)
     {
         this.tileBeacon = tileBeaconIn;
-        this.addSlotToContainer(this.beaconSlot = new ContainerBeacon.BeaconSlot(tileBeaconIn, 0, 136, 110));
+        this.beaconSlot = new ContainerBeacon.BeaconSlot(tileBeaconIn, 0, 136, 110);
+        this.addSlotToContainer(this.beaconSlot);
         int i = 36;
         int j = 137;
 
@@ -22,19 +25,19 @@ public class ContainerBeacon extends Container
         {
             for (int l = 0; l < 9; ++l)
             {
-                this.addSlotToContainer(new Slot(playerInventory, l + k * 9 + 9, i + l * 18, j + k * 18));
+                this.addSlotToContainer(new Slot(playerInventory, l + k * 9 + 9, 36 + l * 18, 137 + k * 18));
             }
         }
 
         for (int i1 = 0; i1 < 9; ++i1)
         {
-            this.addSlotToContainer(new Slot(playerInventory, i1, i + i1 * 18, 58 + j));
+            this.addSlotToContainer(new Slot(playerInventory, i1, 36 + i1 * 18, 195));
         }
     }
 
-    public void onCraftGuiOpened(ICrafting listener)
+    public void addListener(IContainerListener listener)
     {
-        super.onCraftGuiOpened(listener);
+        super.addListener(listener);
         listener.sendAllWindowProperties(this, this.tileBeacon);
     }
 
@@ -44,7 +47,7 @@ public class ContainerBeacon extends Container
         this.tileBeacon.setField(id, data);
     }
 
-    public IInventory func_180611_e()
+    public IInventory getTileEntity()
     {
         return this.tileBeacon;
     }
@@ -62,7 +65,7 @@ public class ContainerBeacon extends Container
 
             if (itemstack != null)
             {
-                playerIn.dropPlayerItemWithRandomChoice(itemstack, false);
+                playerIn.dropItem(itemstack, false);
             }
         }
     }
@@ -75,6 +78,7 @@ public class ContainerBeacon extends Container
     /**
      * Take a stack from the specified inventory slot.
      */
+    @Nullable
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
         ItemStack itemstack = null;
@@ -142,15 +146,15 @@ public class ContainerBeacon extends Container
 
     class BeaconSlot extends Slot
     {
-        public BeaconSlot(IInventory p_i1801_2_, int p_i1801_3_, int p_i1801_4_, int p_i1801_5_)
+        public BeaconSlot(IInventory inventoryIn, int index, int xIn, int yIn)
         {
-            super(p_i1801_2_, p_i1801_3_, p_i1801_4_, p_i1801_5_);
+            super(inventoryIn, index, xIn, yIn);
         }
 
         /**
          * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
          */
-        public boolean isItemValid(ItemStack stack)
+        public boolean isItemValid(@Nullable ItemStack stack)
         {
             return stack == null ? false : stack.getItem().isBeaconPayment(stack);
         }

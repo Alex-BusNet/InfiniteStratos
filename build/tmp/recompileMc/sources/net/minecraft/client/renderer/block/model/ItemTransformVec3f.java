@@ -1,22 +1,26 @@
 package net.minecraft.client.renderer.block.model;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import java.lang.reflect.Type;
 import net.minecraft.util.JsonUtils;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
-
-import java.lang.reflect.Type;
 
 /*
  * @deprecated use {@link net.minecraftforge.client.model.IModelState} and {@link net.minecraftforge.client.model.TRSRTransformation}
  */
 @SideOnly(Side.CLIENT)
 @Deprecated
-public class ItemTransformVec3f implements net.minecraftforge.client.model.IModelState
+public class ItemTransformVec3f implements net.minecraftforge.common.model.IModelState
 {
-    public com.google.common.base.Optional<net.minecraftforge.client.model.TRSRTransformation> apply(com.google.common.base.Optional<? extends net.minecraftforge.client.model.IModelPart> part) { return net.minecraftforge.client.ForgeHooksClient.applyTransform(this, part); }
+    public com.google.common.base.Optional<net.minecraftforge.common.model.TRSRTransformation> apply(com.google.common.base.Optional<? extends net.minecraftforge.common.model.IModelPart> part) { return net.minecraftforge.client.ForgeHooksClient.applyTransform(this, part); }
     public static final ItemTransformVec3f DEFAULT = new ItemTransformVec3f(new Vector3f(), new Vector3f(), new Vector3f(1.0F, 1.0F, 1.0F));
     public final Vector3f rotation;
     public final Vector3f translation;
@@ -42,7 +46,7 @@ public class ItemTransformVec3f implements net.minecraftforge.client.model.IMode
         else
         {
             ItemTransformVec3f itemtransformvec3f = (ItemTransformVec3f)p_equals_1_;
-            return !this.rotation.equals(itemtransformvec3f.rotation) ? false : (!this.scale.equals(itemtransformvec3f.scale) ? false : this.translation.equals(itemtransformvec3f.translation));
+            return this.rotation.equals(itemtransformvec3f.rotation) && this.scale.equals(itemtransformvec3f.scale) && this.translation.equals(itemtransformvec3f.translation);
         }
     }
 
@@ -67,9 +71,9 @@ public class ItemTransformVec3f implements net.minecraftforge.client.model.IMode
                 Vector3f vector3f = this.parseVector3f(jsonobject, "rotation", ROTATION_DEFAULT);
                 Vector3f vector3f1 = this.parseVector3f(jsonobject, "translation", TRANSLATION_DEFAULT);
                 vector3f1.scale(0.0625F);
-                vector3f1.x = MathHelper.clamp_float(vector3f1.x, -1.5F, 1.5F);
-                vector3f1.y = MathHelper.clamp_float(vector3f1.y, -1.5F, 1.5F);
-                vector3f1.z = MathHelper.clamp_float(vector3f1.z, -1.5F, 1.5F);
+                vector3f1.x = MathHelper.clamp_float(vector3f1.x, -5.0F, 5.0F);
+                vector3f1.y = MathHelper.clamp_float(vector3f1.y, -5.0F, 5.0F);
+                vector3f1.z = MathHelper.clamp_float(vector3f1.z, -5.0F, 5.0F);
                 Vector3f vector3f2 = this.parseVector3f(jsonobject, "scale", SCALE_DEFAULT);
                 vector3f2.x = MathHelper.clamp_float(vector3f2.x, -4.0F, 4.0F);
                 vector3f2.y = MathHelper.clamp_float(vector3f2.y, -4.0F, 4.0F);

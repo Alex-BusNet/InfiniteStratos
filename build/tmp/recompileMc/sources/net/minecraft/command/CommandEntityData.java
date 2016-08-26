@@ -1,10 +1,12 @@
 package net.minecraft.command;
 
+import java.util.UUID;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 
 public class CommandEntityData extends CommandBase
 {
@@ -26,8 +28,6 @@ public class CommandEntityData extends CommandBase
 
     /**
      * Gets the usage string for the command.
-     *  
-     * @param sender The command sender that executed the command
      */
     public String getCommandUsage(ICommandSender sender)
     {
@@ -35,12 +35,9 @@ public class CommandEntityData extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
-     *  
-     * @param sender The command sender that executed the command
-     * @param args The arguments that were passed
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 2)
         {
@@ -48,7 +45,7 @@ public class CommandEntityData extends CommandBase
         }
         else
         {
-            Entity entity = func_175768_b(sender, args[0]);
+            Entity entity = getEntity(server, sender, args[0]);
 
             if (entity instanceof EntityPlayer)
             {
@@ -56,9 +53,8 @@ public class CommandEntityData extends CommandBase
             }
             else
             {
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
-                entity.writeToNBT(nbttagcompound);
-                NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbttagcompound.copy();
+                NBTTagCompound nbttagcompound = entityToNBT(entity);
+                NBTTagCompound nbttagcompound1 = nbttagcompound.copy();
                 NBTTagCompound nbttagcompound2;
 
                 try
@@ -70,9 +66,9 @@ public class CommandEntityData extends CommandBase
                     throw new CommandException("commands.entitydata.tagError", new Object[] {nbtexception.getMessage()});
                 }
 
-                nbttagcompound2.removeTag("UUIDMost");
-                nbttagcompound2.removeTag("UUIDLeast");
+                UUID uuid = entity.getUniqueID();
                 nbttagcompound.merge(nbttagcompound2);
+                entity.setUniqueId(uuid);
 
                 if (nbttagcompound.equals(nbttagcompound1))
                 {
@@ -81,7 +77,7 @@ public class CommandEntityData extends CommandBase
                 else
                 {
                     entity.readFromNBT(nbttagcompound);
-                    notifyOperators(sender, this, "commands.entitydata.success", new Object[] {nbttagcompound.toString()});
+                    notifyCommandListener(sender, this, "commands.entitydata.success", new Object[] {nbttagcompound.toString()});
                 }
             }
         }
@@ -89,8 +85,6 @@ public class CommandEntityData extends CommandBase
 
     /**
      * Return whether the specified command parameter index is a username parameter.
-     *  
-     * @param args The arguments that were passed
      */
     public boolean isUsernameIndex(String[] args, int index)
     {

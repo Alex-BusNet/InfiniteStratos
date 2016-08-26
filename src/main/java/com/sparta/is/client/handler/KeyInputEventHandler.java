@@ -6,6 +6,7 @@ import com.sparta.is.network.message.MessageKeyPressed;
 import com.sparta.is.reference.Key;
 import com.sparta.is.utility.IKeyBound;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -18,27 +19,27 @@ public class KeyInputEventHandler
 {
     private static Key getPressedKeyBinding()
     {
-        if (KeyBindings.standbyKey.getIsKeyPressed())
+        if (KeyBindings.standbyKey.isPressed())
         {
             return Key.STANDBY;
         }
-        else if (KeyBindings.partialDeployKey.getIsKeyPressed())
+        else if (KeyBindings.partialDeployKey.isPressed())
         {
             return Key.PARTIAL_DEPLOY;
         }
-        else if (KeyBindings.fullDeployKey.getIsKeyPressed())
+        else if (KeyBindings.fullDeployKey.isPressed())
         {
             return Key.FULL_DEPLOY;
         }
-        else if (KeyBindings.equalizerAccessModifier.getIsKeyPressed())
+        else if (KeyBindings.equalizerAccessModifier.isPressed())
         {
             return Key.EQUALIZER_ACCESS_MODIFIER;
         }
-        else if(KeyBindings.oneOffAbility.getIsKeyPressed())
+        else if(KeyBindings.oneOffAbility.isPressed())
         {
             return Key.ONE_OFF_ABILITY;
         }
-        else if (KeyBindings.oneOffAbilityOff.getIsKeyPressed())
+        else if (KeyBindings.oneOffAbilityOff.isPressed())
         {
             return Key.ONE_OFF_ABILITY_OFF;
         }
@@ -63,9 +64,9 @@ public class KeyInputEventHandler
                 {
                     EntityPlayer entityPlayer = FMLClientHandler.instance().getClientPlayerEntity();
 
-                    if(entityPlayer.getCurrentEquippedItem() != null)
+                    if(entityPlayer.getHeldItemMainhand() != null)
                     {
-                        ItemStack currentEquippedItem = entityPlayer.getCurrentEquippedItem();
+                        ItemStack currentEquippedItem = entityPlayer.getHeldItemMainhand();
 
                         if(currentEquippedItem.getItem() instanceof IKeyBound)
                         {
@@ -88,9 +89,9 @@ public class KeyInputEventHandler
             {
                 EntityPlayer entityPlayer = FMLClientHandler.instance().getClientPlayerEntity();
 
-                if(entityPlayer.getCurrentArmor(2) != null)
+                if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST)!= null)
                 {
-                    ItemStack currentEquippedArmor = entityPlayer.getCurrentArmor(2);
+                    ItemStack currentEquippedArmor = entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
 
                     if(currentEquippedArmor.getItem() instanceof IKeyBound)
                     {

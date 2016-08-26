@@ -1,11 +1,10 @@
 package net.minecraft.realms;
 
-import net.minecraft.util.MathHelper;
+import java.util.Random;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.Random;
 
 @SideOnly(Side.CLIENT)
 public class RealmsMth
@@ -92,7 +91,7 @@ public class RealmsMth
 
     public static int absFloor(double p_absFloor_0_)
     {
-        return MathHelper.func_154353_e(p_absFloor_0_);
+        return MathHelper.absFloor(p_absFloor_0_);
     }
 
     public static int smallestEncompassingPowerOfTwo(int p_smallestEncompassingPowerOfTwo_0_)
@@ -132,12 +131,12 @@ public class RealmsMth
 
     public static double wrapDegrees(double p_wrapDegrees_0_)
     {
-        return MathHelper.wrapAngleTo180_double(p_wrapDegrees_0_);
+        return MathHelper.wrapDegrees(p_wrapDegrees_0_);
     }
 
     public static float wrapDegrees(float p_wrapDegrees_0_)
     {
-        return MathHelper.wrapAngleTo180_float(p_wrapDegrees_0_);
+        return MathHelper.wrapDegrees(p_wrapDegrees_0_);
     }
 
     public static float clamp(float p_clamp_0_, float p_clamp_1_, float p_clamp_2_)

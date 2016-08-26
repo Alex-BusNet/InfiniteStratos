@@ -6,20 +6,20 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class Tessellator
 {
-    private WorldRenderer worldRenderer;
-    private WorldVertexBufferUploader vboUploader = new WorldVertexBufferUploader();
+    private final VertexBuffer worldRenderer;
+    private final WorldVertexBufferUploader vboUploader = new WorldVertexBufferUploader();
     /** The static instance of the Tessellator. */
-    private static final Tessellator instance = new Tessellator(2097152);
+    private static final Tessellator INSTANCE = new Tessellator(2097152);
 
     public static Tessellator getInstance()
     {
         /** The static instance of the Tessellator. */
-        return instance;
+        return INSTANCE;
     }
 
     public Tessellator(int bufferSize)
     {
-        this.worldRenderer = new WorldRenderer(bufferSize);
+        this.worldRenderer = new VertexBuffer(bufferSize);
     }
 
     /**
@@ -31,7 +31,7 @@ public class Tessellator
         this.vboUploader.draw(this.worldRenderer);
     }
 
-    public WorldRenderer getWorldRenderer()
+    public VertexBuffer getBuffer()
     {
         return this.worldRenderer;
     }

@@ -1,5 +1,7 @@
 package net.minecraft.inventory;
 
+import javax.annotation.Nullable;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemArmor;
@@ -10,6 +12,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ContainerPlayer extends Container
 {
+    private static final EntityEquipmentSlot[] VALID_EQUIPMENT_SLOTS = new EntityEquipmentSlot[] {EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.FEET};
     /** The crafting matrix inventory. */
     public InventoryCrafting craftMatrix = new InventoryCrafting(this, 2, 2);
     public IInventory craftResult = new InventoryCraftResult();
@@ -21,20 +24,20 @@ public class ContainerPlayer extends Container
     {
         this.isLocalWorld = localWorld;
         this.thePlayer = player;
-        this.addSlotToContainer(new SlotCrafting(playerInventory.player, this.craftMatrix, this.craftResult, 0, 144, 36));
+        this.addSlotToContainer(new SlotCrafting(playerInventory.player, this.craftMatrix, this.craftResult, 0, 154, 28));
 
         for (int i = 0; i < 2; ++i)
         {
             for (int j = 0; j < 2; ++j)
             {
-                this.addSlotToContainer(new Slot(this.craftMatrix, j + i * 2, 88 + j * 18, 26 + i * 18));
+                this.addSlotToContainer(new Slot(this.craftMatrix, j + i * 2, 98 + j * 18, 18 + i * 18));
             }
         }
 
         for (int k = 0; k < 4; ++k)
         {
-            final int k_f = k;
-            this.addSlotToContainer(new Slot(playerInventory, playerInventory.getSizeInventory() - 1 - k, 8, 8 + k * 18)
+            final EntityEquipmentSlot entityequipmentslot = VALID_EQUIPMENT_SLOTS[k];
+            this.addSlotToContainer(new Slot(playerInventory, 36 + (3 - k), 8, 8 + k * 18)
             {
                 /**
                  * Returns the maximum stack size for a given slot (usually the same as getInventoryStackLimit(), but 1
@@ -47,15 +50,22 @@ public class ContainerPlayer extends Container
                 /**
                  * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
                  */
-                public boolean isItemValid(ItemStack stack)
+                public boolean isItemValid(@Nullable ItemStack stack)
                 {
-                    if (stack == null) return false;
-                    return stack.getItem().isValidArmor(stack, k_f, thePlayer);
+                    if (stack == null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return stack.getItem().isValidArmor(stack, entityequipmentslot, thePlayer);
+                    }
                 }
+                @Nullable
                 @SideOnly(Side.CLIENT)
                 public String getSlotTexture()
                 {
-                    return ItemArmor.EMPTY_SLOT_NAMES[k_f];
+                    return ItemArmor.EMPTY_SLOT_NAMES[entityequipmentslot.getIndex()];
                 }
             });
         }
@@ -73,6 +83,22 @@ public class ContainerPlayer extends Container
             this.addSlotToContainer(new Slot(playerInventory, i1, 8 + i1 * 18, 142));
         }
 
+        this.addSlotToContainer(new Slot(playerInventory, 40, 77, 62)
+        {
+            /**
+             * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
+             */
+            public boolean isItemValid(@Nullable ItemStack stack)
+            {
+                return super.isItemValid(stack);
+            }
+            @Nullable
+            @SideOnly(Side.CLIENT)
+            public String getSlotTexture()
+            {
+                return "minecraft:items/empty_armor_slot_shield";
+            }
+        });
         this.onCraftMatrixChanged(this.craftMatrix);
     }
 
@@ -97,7 +123,7 @@ public class ContainerPlayer extends Container
 
             if (itemstack != null)
             {
-                playerIn.dropPlayerItemWithRandomChoice(itemstack, false);
+                playerIn.dropItem(itemstack, false);
             }
         }
 
@@ -112,6 +138,7 @@ public class ContainerPlayer extends Container
     /**
      * Take a stack from the specified inventory slot.
      */
+    @Nullable
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
         ItemStack itemstack = null;
@@ -121,6 +148,7 @@ public class ContainerPlayer extends Container
         {
             ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
+            EntityEquipmentSlot entityequipmentslot = EntityLiving.getSlotForItemStack(itemstack);
 
             if (index == 0)
             {
@@ -145,11 +173,18 @@ public class ContainerPlayer extends Container
                     return null;
                 }
             }
-            else if (itemstack.getItem() instanceof ItemArmor && !((Slot)this.inventorySlots.get(5 + ((ItemArmor)itemstack.getItem()).armorType)).getHasStack())
+            else if (entityequipmentslot.getSlotType() == EntityEquipmentSlot.Type.ARMOR && !((Slot)this.inventorySlots.get(8 - entityequipmentslot.getIndex())).getHasStack())
             {
-                int i = 5 + ((ItemArmor)itemstack.getItem()).armorType;
+                int i = 8 - entityequipmentslot.getIndex();
 
                 if (!this.mergeItemStack(itemstack1, i, i + 1, false))
+                {
+                    return null;
+                }
+            }
+            else if (entityequipmentslot == EntityEquipmentSlot.OFFHAND && !((Slot)this.inventorySlots.get(45)).getHasStack())
+            {
+                if (!this.mergeItemStack(itemstack1, 45, 46, false))
                 {
                     return null;
                 }
@@ -197,8 +232,8 @@ public class ContainerPlayer extends Container
      * Called to determine if the current slot is valid for the stack merging (double-click) code. The stack passed in
      * is null for the initial slot that was double-clicked.
      */
-    public boolean canMergeSlot(ItemStack stack, Slot p_94530_2_)
+    public boolean canMergeSlot(ItemStack stack, Slot slotIn)
     {
-        return p_94530_2_.inventory != this.craftResult && super.canMergeSlot(stack, p_94530_2_);
+        return slotIn.inventory != this.craftResult && super.canMergeSlot(stack, slotIn);
     }
 }

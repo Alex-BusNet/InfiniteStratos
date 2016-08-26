@@ -4,6 +4,7 @@ import com.sparta.is.reference.Key;
 import com.sparta.is.utility.IKeyBound;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -61,27 +62,27 @@ public class MessageKeyPressed implements IMessage, IMessageHandler<MessageKeyPr
     {
         EntityPlayer entityPlayer = ctx.getServerHandler().playerEntity;
 
-        if (entityPlayer != null && entityPlayer.getCurrentArmor(2) != null && entityPlayer.getCurrentArmor(2).getItem() instanceof IKeyBound)
+        if (entityPlayer != null && entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != null && entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof IKeyBound)
         {
             if (message.keyPressed == Key.STANDBY.ordinal())
             {
-                ((IKeyBound) entityPlayer.getCurrentArmor(2).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentArmor(2), Key.STANDBY, false);
+                ((IKeyBound) entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST), Key.STANDBY, false);
             }
             else if (message.keyPressed == Key.PARTIAL_DEPLOY.ordinal())
             {
-                ((IKeyBound) entityPlayer.getCurrentArmor(2).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentArmor(2), Key.PARTIAL_DEPLOY, false);
+                ((IKeyBound) entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST), Key.PARTIAL_DEPLOY, false);
             }
             else if (message.keyPressed == Key.FULL_DEPLOY.ordinal())
             {
-                ((IKeyBound) entityPlayer.getCurrentArmor(2).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentArmor(2), Key.FULL_DEPLOY, false);
+                ((IKeyBound) entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST), Key.FULL_DEPLOY, false);
             }
             else if(message.keyPressed == Key.ONE_OFF_ABILITY.ordinal())
             {
-                ((IKeyBound) entityPlayer.getCurrentEquippedItem().getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentEquippedItem(), Key.ONE_OFF_ABILITY, false);
+                ((IKeyBound) entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST), Key.ONE_OFF_ABILITY, false);
             }
             else if(message.keyPressed == Key.ONE_OFF_ABILITY_OFF.ordinal())
             {
-                ((IKeyBound) entityPlayer.getCurrentEquippedItem().getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getCurrentEquippedItem(), Key.ONE_OFF_ABILITY_OFF, false);
+                ((IKeyBound) entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST), Key.ONE_OFF_ABILITY_OFF, false);
             }
         }
 

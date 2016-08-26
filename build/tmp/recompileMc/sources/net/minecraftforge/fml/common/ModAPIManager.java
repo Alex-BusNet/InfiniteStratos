@@ -1,23 +1,43 @@
-package net.minecraftforge.fml.common;
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import net.minecraftforge.fml.common.asm.transformers.ModAPITransformer;
-import net.minecraftforge.fml.common.discovery.ASMDataTable;
-import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
-import net.minecraftforge.fml.common.discovery.ModCandidate;
-import net.minecraftforge.fml.common.discovery.ModDiscoverer;
-import net.minecraftforge.fml.common.functions.ModIdFunction;
-import net.minecraftforge.fml.common.versioning.ArtifactVersion;
-import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
-import net.minecraftforge.fml.common.versioning.VersionParser;
+package net.minecraftforge.fml.common;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import net.minecraftforge.fml.common.asm.transformers.ModAPITransformer;
+import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.common.discovery.ModCandidate;
+import net.minecraftforge.fml.common.discovery.ModDiscoverer;
+import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
+import net.minecraftforge.fml.common.functions.ModIdFunction;
+import net.minecraftforge.fml.common.versioning.ArtifactVersion;
+import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
+import net.minecraftforge.fml.common.versioning.VersionParser;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class ModAPIManager {
     public static final ModAPIManager INSTANCE = new ModAPIManager();

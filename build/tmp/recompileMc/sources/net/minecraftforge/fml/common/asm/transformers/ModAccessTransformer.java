@@ -1,10 +1,23 @@
-package net.minecraftforge.fml.common.asm.transformers;
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Maps;
-import com.google.common.io.ByteSource;
-import com.google.common.io.CharSource;
-import net.minecraftforge.fml.relauncher.FMLRelaunchLog;
+package net.minecraftforge.fml.common.asm.transformers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +26,13 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+
+import net.minecraftforge.fml.relauncher.FMLRelaunchLog;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.Maps;
+import com.google.common.io.ByteSource;
+import com.google.common.io.CharSource;
 
 public class ModAccessTransformer extends AccessTransformer {
     private static Map<String, String> embedded = Maps.newHashMap(); //Needs to be primitive so that both classloaders get the same class.

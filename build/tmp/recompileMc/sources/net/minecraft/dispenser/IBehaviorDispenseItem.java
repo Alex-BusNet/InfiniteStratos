@@ -4,7 +4,7 @@ import net.minecraft.item.ItemStack;
 
 public interface IBehaviorDispenseItem
 {
-    IBehaviorDispenseItem itemDispenseBehaviorProvider = new IBehaviorDispenseItem()
+    IBehaviorDispenseItem DEFAULT_BEHAVIOR = new IBehaviorDispenseItem()
     {
         /**
          * Dispenses the specified ItemStack from a dispenser.

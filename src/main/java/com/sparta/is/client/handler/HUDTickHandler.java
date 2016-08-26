@@ -1,6 +1,5 @@
 package com.sparta.is.client.handler;
 
-import com.sparta.is.client.util.RenderUtils;
 import com.sparta.is.utility.IOverlayItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
@@ -45,7 +44,7 @@ public class HUDTickHandler
         float overlayScale = 2f;
         float overlayOpacity = 1f;
         GL11.glPushMatrix();
-        ScaledResolution sr = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+        ScaledResolution sr = new ScaledResolution(minecraft);
         GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glLoadIdentity();
@@ -65,7 +64,7 @@ public class HUDTickHandler
         hudOverlayX = (int) (sr.getScaledWidth() - 16 * overlayScale);
         hudOverlayY = (int) (sr.getScaledHeight() - 16 * overlayScale);
 
-        RenderUtils.renderItemIntoGUI(minecraft.fontRendererObj, itemStack, hudOverlayX, hudOverlayY, overlayOpacity, overlayScale, -90);
+       minecraft.getRenderItem().renderItemIntoGUI(itemStack, hudOverlayX, hudOverlayY);
 
         GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glPopMatrix();

@@ -1,22 +1,22 @@
 package net.minecraft.inventory;
 
 import com.google.common.collect.Lists;
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 public class InventoryBasic implements IInventory
 {
     private String inventoryTitle;
-    private int slotsCount;
-    private ItemStack[] inventoryContents;
-    private List<IInvBasic> field_70480_d;
+    private final int slotsCount;
+    private final ItemStack[] inventoryContents;
+    private List<IInventoryChangedListener> changeListeners;
     private boolean hasCustomName;
 
     public InventoryBasic(String title, boolean customName, int slotCount)
@@ -28,29 +28,36 @@ public class InventoryBasic implements IInventory
     }
 
     @SideOnly(Side.CLIENT)
-    public InventoryBasic(IChatComponent title, int slotCount)
+    public InventoryBasic(ITextComponent title, int slotCount)
     {
         this(title.getUnformattedText(), true, slotCount);
     }
 
-    public void func_110134_a(IInvBasic p_110134_1_)
+    /**
+     * Add a listener that will be notified when any item in this inventory is modified.
+     */
+    public void addInventoryChangeListener(IInventoryChangedListener listener)
     {
-        if (this.field_70480_d == null)
+        if (this.changeListeners == null)
         {
-            this.field_70480_d = Lists.<IInvBasic>newArrayList();
+            this.changeListeners = Lists.<IInventoryChangedListener>newArrayList();
         }
 
-        this.field_70480_d.add(p_110134_1_);
+        this.changeListeners.add(listener);
     }
 
-    public void func_110132_b(IInvBasic p_110132_1_)
+    /**
+     * removes the specified IInvBasic from receiving further change notices
+     */
+    public void removeInventoryChangeListener(IInventoryChangedListener listener)
     {
-        this.field_70480_d.remove(p_110132_1_);
+        this.changeListeners.remove(listener);
     }
 
     /**
      * Returns the stack in the given slot.
      */
+    @Nullable
     public ItemStack getStackInSlot(int index)
     {
         return index >= 0 && index < this.inventoryContents.length ? this.inventoryContents[index] : null;
@@ -59,37 +66,21 @@ public class InventoryBasic implements IInventory
     /**
      * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
      */
+    @Nullable
     public ItemStack decrStackSize(int index, int count)
     {
-        if (this.inventoryContents[index] != null)
-        {
-            if (this.inventoryContents[index].stackSize <= count)
-            {
-                ItemStack itemstack1 = this.inventoryContents[index];
-                this.inventoryContents[index] = null;
-                this.markDirty();
-                return itemstack1;
-            }
-            else
-            {
-                ItemStack itemstack = this.inventoryContents[index].splitStack(count);
+        ItemStack itemstack = ItemStackHelper.getAndSplit(this.inventoryContents, index, count);
 
-                if (this.inventoryContents[index].stackSize == 0)
-                {
-                    this.inventoryContents[index] = null;
-                }
-
-                this.markDirty();
-                return itemstack;
-            }
-        }
-        else
+        if (itemstack != null)
         {
-            return null;
+            this.markDirty();
         }
+
+        return itemstack;
     }
 
-    public ItemStack func_174894_a(ItemStack stack)
+    @Nullable
+    public ItemStack addItem(ItemStack stack)
     {
         ItemStack itemstack = stack.copy();
 
@@ -134,6 +125,7 @@ public class InventoryBasic implements IInventory
     /**
      * Removes a stack from the given slot and returns it.
      */
+    @Nullable
     public ItemStack removeStackFromSlot(int index)
     {
         if (this.inventoryContents[index] != null)
@@ -151,7 +143,7 @@ public class InventoryBasic implements IInventory
     /**
      * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
      */
-    public void setInventorySlotContents(int index, ItemStack stack)
+    public void setInventorySlotContents(int index, @Nullable ItemStack stack)
     {
         this.inventoryContents[index] = stack;
 
@@ -199,9 +191,9 @@ public class InventoryBasic implements IInventory
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
-        return (IChatComponent)(this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName(), new Object[0]));
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
     }
 
     /**
@@ -218,11 +210,11 @@ public class InventoryBasic implements IInventory
      */
     public void markDirty()
     {
-        if (this.field_70480_d != null)
+        if (this.changeListeners != null)
         {
-            for (int i = 0; i < this.field_70480_d.size(); ++i)
+            for (int i = 0; i < this.changeListeners.size(); ++i)
             {
-                ((IInvBasic)this.field_70480_d.get(i)).onInventoryChanged(this);
+                ((IInventoryChangedListener)this.changeListeners.get(i)).onInventoryChanged(this);
             }
         }
     }

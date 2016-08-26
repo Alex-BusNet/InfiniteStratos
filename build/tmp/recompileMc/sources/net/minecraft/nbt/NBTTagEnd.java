@@ -34,7 +34,7 @@ public class NBTTagEnd extends NBTBase
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagEnd copy()
     {
         return new NBTTagEnd();
     }

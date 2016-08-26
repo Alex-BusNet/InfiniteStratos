@@ -1,5 +1,6 @@
 package net.minecraft.village;
 
+import javax.annotation.Nullable;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -25,12 +26,12 @@ public class MerchantRecipe
         this.readFromTags(tagCompound);
     }
 
-    public MerchantRecipe(ItemStack buy1, ItemStack buy2, ItemStack sell)
+    public MerchantRecipe(ItemStack buy1, @Nullable ItemStack buy2, ItemStack sell)
     {
         this(buy1, buy2, sell, 0, 7);
     }
 
-    public MerchantRecipe(ItemStack buy1, ItemStack buy2, ItemStack sell, int toolUsesIn, int maxTradeUsesIn)
+    public MerchantRecipe(ItemStack buy1, @Nullable ItemStack buy2, ItemStack sell, int toolUsesIn, int maxTradeUsesIn)
     {
         this.itemToBuy = buy1;
         this.secondItemToBuy = buy2;

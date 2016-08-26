@@ -3,9 +3,6 @@ package net.minecraft.client.resources;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -16,11 +13,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class FileResourcePack extends AbstractResourcePack implements Closeable
 {
-    public static final Splitter entryNameSplitter = Splitter.on('/').omitEmptyStrings().limit(3);
+    public static final Splitter ENTRY_NAME_SPLITTER = Splitter.on('/').omitEmptyStrings().limit(3);
     private ZipFile resourcePackZipFile;
 
     public FileResourcePack(File resourcePackFileIn)
@@ -88,19 +87,19 @@ public class FileResourcePack extends AbstractResourcePack implements Closeable
 
             if (s.startsWith("assets/"))
             {
-                List<String> list = Lists.newArrayList(entryNameSplitter.split(s));
+                List<String> list = Lists.newArrayList(ENTRY_NAME_SPLITTER.split(s));
 
                 if (list.size() > 1)
                 {
                     String s1 = (String)list.get(1);
 
-                    if (!s1.equals(s1.toLowerCase()))
+                    if (s1.equals(s1.toLowerCase()))
                     {
-                        this.logNameNotLowercase(s1);
+                        set.add(s1);
                     }
                     else
                     {
-                        set.add(s1);
+                        this.logNameNotLowercase(s1);
                     }
                 }
             }

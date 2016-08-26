@@ -1,54 +1,83 @@
 package net.minecraft.entity.item;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityEndermite;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityEndGateway;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityEnderPearl extends EntityThrowable
 {
-    private EntityLivingBase field_181555_c;
+    private EntityLivingBase thrower;
 
-    public EntityEnderPearl(World p_i46455_1_)
+    public EntityEnderPearl(World worldIn)
     {
-        super(p_i46455_1_);
+        super(worldIn);
     }
 
-    public EntityEnderPearl(World worldIn, EntityLivingBase p_i1783_2_)
+    public EntityEnderPearl(World worldIn, EntityLivingBase throwerIn)
     {
-        super(worldIn, p_i1783_2_);
-        this.field_181555_c = p_i1783_2_;
+        super(worldIn, throwerIn);
+        this.thrower = throwerIn;
     }
 
     @SideOnly(Side.CLIENT)
-    public EntityEnderPearl(World worldIn, double p_i1784_2_, double p_i1784_4_, double p_i1784_6_)
+    public EntityEnderPearl(World worldIn, double x, double y, double z)
     {
-        super(worldIn, p_i1784_2_, p_i1784_4_, p_i1784_6_);
+        super(worldIn, x, y, z);
+    }
+
+    public static void func_189663_a(DataFixer p_189663_0_)
+    {
+        EntityThrowable.func_189661_a(p_189663_0_, "ThrownEnderpearl");
     }
 
     /**
      * Called when this EntityThrowable hits a block or entity.
      */
-    protected void onImpact(MovingObjectPosition p_70184_1_)
+    protected void onImpact(RayTraceResult result)
     {
         EntityLivingBase entitylivingbase = this.getThrower();
 
-        if (p_70184_1_.entityHit != null)
+        if (result.entityHit != null)
         {
-            if (p_70184_1_.entityHit == this.field_181555_c)
+            if (result.entityHit == this.thrower)
             {
                 return;
             }
 
-            p_70184_1_.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, entitylivingbase), 0.0F);
+            result.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, entitylivingbase), 0.0F);
+        }
+
+        if (result.typeOfHit == RayTraceResult.Type.BLOCK)
+        {
+            BlockPos blockpos = result.getBlockPos();
+            TileEntity tileentity = this.worldObj.getTileEntity(blockpos);
+
+            if (tileentity instanceof TileEntityEndGateway)
+            {
+                TileEntityEndGateway tileentityendgateway = (TileEntityEndGateway)tileentity;
+
+                if (entitylivingbase != null)
+                {
+                    tileentityendgateway.teleportEntity(entitylivingbase);
+                    this.setDead();
+                    return;
+                }
+
+                tileentityendgateway.teleportEntity(this);
+                return;
+            }
         }
 
         for (int i = 0; i < 32; ++i)
@@ -62,7 +91,7 @@ public class EntityEnderPearl extends EntityThrowable
             {
                 EntityPlayerMP entityplayermp = (EntityPlayerMP)entitylivingbase;
 
-                if (entityplayermp.playerNetServerHandler.getNetworkManager().isChannelOpen() && entityplayermp.worldObj == this.worldObj && !entityplayermp.isPlayerSleeping())
+                if (entityplayermp.connection.getNetworkManager().isChannelOpen() && entityplayermp.worldObj == this.worldObj && !entityplayermp.isPlayerSleeping())
                 {
                     net.minecraftforge.event.entity.living.EnderTeleportEvent event = new net.minecraftforge.event.entity.living.EnderTeleportEvent(entityplayermp, this.posX, this.posY, this.posZ, 5.0F);
                     if (!net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event))
@@ -77,12 +106,12 @@ public class EntityEnderPearl extends EntityThrowable
 
                     if (entitylivingbase.isRiding())
                     {
-                        entitylivingbase.mountEntity((Entity)null);
+                        entitylivingbase.dismountRidingEntity();
                     }
 
-                    entitylivingbase.setPositionAndUpdate(event.targetX, event.targetY, event.targetZ);
+                    entitylivingbase.setPositionAndUpdate(event.getTargetX(), event.getTargetY(), event.getTargetZ());
                     entitylivingbase.fallDistance = 0.0F;
-                    entitylivingbase.attackEntityFrom(DamageSource.fall, event.attackDamage);
+                    entitylivingbase.attackEntityFrom(DamageSource.fall, event.getAttackDamage());
                     }
                 }
             }

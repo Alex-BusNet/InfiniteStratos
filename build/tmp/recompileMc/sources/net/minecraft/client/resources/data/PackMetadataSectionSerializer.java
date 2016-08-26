@@ -1,12 +1,16 @@
 package net.minecraft.client.resources.data;
 
-import com.google.gson.*;
-import net.minecraft.util.IChatComponent;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import java.lang.reflect.Type;
 import net.minecraft.util.JsonUtils;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.lang.reflect.Type;
 
 @SideOnly(Side.CLIENT)
 public class PackMetadataSectionSerializer extends BaseMetadataSectionSerializer<PackMetadataSection> implements JsonSerializer<PackMetadataSection>
@@ -14,16 +18,16 @@ public class PackMetadataSectionSerializer extends BaseMetadataSectionSerializer
     public PackMetadataSection deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException
     {
         JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
-        IChatComponent ichatcomponent = (IChatComponent)p_deserialize_3_.deserialize(jsonobject.get("description"), IChatComponent.class);
+        ITextComponent itextcomponent = (ITextComponent)p_deserialize_3_.deserialize(jsonobject.get("description"), ITextComponent.class);
 
-        if (ichatcomponent == null)
+        if (itextcomponent == null)
         {
             throw new JsonParseException("Invalid/missing description!");
         }
         else
         {
             int i = JsonUtils.getInt(jsonobject, "pack_format");
-            return new PackMetadataSection(ichatcomponent, i);
+            return new PackMetadataSection(itextcomponent, i);
         }
     }
 

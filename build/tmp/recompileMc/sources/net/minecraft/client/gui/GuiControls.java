@@ -1,5 +1,6 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
@@ -7,19 +8,17 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.IOException;
-
 @SideOnly(Side.CLIENT)
 public class GuiControls extends GuiScreen
 {
-    private static final GameSettings.Options[] optionsArr = new GameSettings.Options[] {GameSettings.Options.INVERT_MOUSE, GameSettings.Options.SENSITIVITY, GameSettings.Options.TOUCHSCREEN};
+    private static final GameSettings.Options[] OPTIONS_ARR = new GameSettings.Options[] {GameSettings.Options.INVERT_MOUSE, GameSettings.Options.SENSITIVITY, GameSettings.Options.TOUCHSCREEN, GameSettings.Options.AUTO_JUMP};
     /** A reference to the screen object that created this. Used for navigating between screens. */
-    private GuiScreen parentScreen;
+    private final GuiScreen parentScreen;
     protected String screenTitle = "Controls";
     /** Reference to the GameSettings object. */
-    private GameSettings options;
+    private final GameSettings options;
     /** The ID of the button that has been pressed. */
-    public KeyBinding buttonId = null;
+    public KeyBinding buttonId;
     public long time;
     private GuiKeyBindingList keyBindingList;
     private GuiButton buttonReset;
@@ -38,11 +37,11 @@ public class GuiControls extends GuiScreen
     {
         this.keyBindingList = new GuiKeyBindingList(this, this.mc);
         this.buttonList.add(new GuiButton(200, this.width / 2 - 155, this.height - 29, 150, 20, I18n.format("gui.done", new Object[0])));
-        this.buttonList.add(this.buttonReset = new GuiButton(201, this.width / 2 - 155 + 160, this.height - 29, 150, 20, I18n.format("controls.resetAll", new Object[0])));
+        this.buttonReset = this.func_189646_b(new GuiButton(201, this.width / 2 - 155 + 160, this.height - 29, 150, 20, I18n.format("controls.resetAll", new Object[0])));
         this.screenTitle = I18n.format("controls.title", new Object[0]);
         int i = 0;
 
-        for (GameSettings.Options gamesettings$options : optionsArr)
+        for (GameSettings.Options gamesettings$options : OPTIONS_ARR)
         {
             if (gamesettings$options.getEnumFloat())
             {
@@ -79,7 +78,7 @@ public class GuiControls extends GuiScreen
         {
             for (KeyBinding keybinding : this.mc.gameSettings.keyBindings)
             {
-                keybinding.setKeyCode(keybinding.getKeyCodeDefault());
+                keybinding.setToDefault();
             }
 
             KeyBinding.resetKeyBindingArrayAndHash();
@@ -98,6 +97,7 @@ public class GuiControls extends GuiScreen
     {
         if (this.buttonId != null)
         {
+            this.buttonId.setKeyModifierAndCode(net.minecraftforge.client.settings.KeyModifier.getActiveModifier(), -100 + mouseButton);
             this.options.setOptionKeyBinding(this.buttonId, -100 + mouseButton);
             this.buttonId = null;
             KeyBinding.resetKeyBindingArrayAndHash();
@@ -109,7 +109,7 @@ public class GuiControls extends GuiScreen
     }
 
     /**
-     * Called when a mouse button is released.  Args : mouseX, mouseY, releaseButton
+     * Called when a mouse button is released.
      */
     protected void mouseReleased(int mouseX, int mouseY, int state)
     {
@@ -129,17 +129,21 @@ public class GuiControls extends GuiScreen
         {
             if (keyCode == 1)
             {
+                this.buttonId.setKeyModifierAndCode(net.minecraftforge.client.settings.KeyModifier.NONE, 0);
                 this.options.setOptionKeyBinding(this.buttonId, 0);
             }
             else if (keyCode != 0)
             {
+                this.buttonId.setKeyModifierAndCode(net.minecraftforge.client.settings.KeyModifier.getActiveModifier(), keyCode);
                 this.options.setOptionKeyBinding(this.buttonId, keyCode);
             }
             else if (typedChar > 0)
             {
+                this.buttonId.setKeyModifierAndCode(net.minecraftforge.client.settings.KeyModifier.getActiveModifier(), typedChar + 256);
                 this.options.setOptionKeyBinding(this.buttonId, typedChar + 256);
             }
 
+            if (!net.minecraftforge.client.settings.KeyModifier.isKeyCodeModifier(keyCode))
             this.buttonId = null;
             this.time = Minecraft.getSystemTime();
             KeyBinding.resetKeyBindingArrayAndHash();
@@ -151,25 +155,25 @@ public class GuiControls extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
         this.keyBindingList.drawScreen(mouseX, mouseY, partialTicks);
         this.drawCenteredString(this.fontRendererObj, this.screenTitle, this.width / 2, 8, 16777215);
-        boolean flag = true;
+        boolean flag = false;
 
         for (KeyBinding keybinding : this.options.keyBindings)
         {
-            if (keybinding.getKeyCode() != keybinding.getKeyCodeDefault())
+            if (!keybinding.isSetToDefaultValue())
             {
-                flag = false;
+                flag = true;
                 break;
             }
         }
 
-        this.buttonReset.enabled = !flag;
+        this.buttonReset.enabled = flag;
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 }

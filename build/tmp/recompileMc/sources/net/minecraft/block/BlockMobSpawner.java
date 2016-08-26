@@ -1,23 +1,25 @@
 package net.minecraft.block;
 
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.Random;
 
 public class BlockMobSpawner extends BlockContainer
 {
     protected BlockMobSpawner()
     {
-        super(Material.rock);
+        super(Material.ROCK);
     }
 
     /**
@@ -31,6 +33,7 @@ public class BlockMobSpawner extends BlockContainer
     /**
      * Get the Item that this Block should drop when harvested.
      */
+    @Nullable
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return null;
@@ -53,7 +56,7 @@ public class BlockMobSpawner extends BlockContainer
     }
 
     @Override
-    public int getExpDrop(net.minecraft.world.IBlockAccess world, BlockPos pos, int fortune)
+    public int getExpDrop(IBlockState state, net.minecraft.world.IBlockAccess world, BlockPos pos, int fortune)
     {
         return 15 + RANDOM.nextInt(15) + RANDOM.nextInt(15);
     }
@@ -61,7 +64,7 @@ public class BlockMobSpawner extends BlockContainer
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
@@ -69,20 +72,20 @@ public class BlockMobSpawner extends BlockContainer
     /**
      * The type of render function called. 3 for standard block models, 2 for TESR's, 1 for liquids, -1 is no render
      */
-    public int getRenderType()
+    public EnumBlockRenderType getRenderType(IBlockState state)
     {
-        return 3;
+        return EnumBlockRenderType.MODEL;
     }
 
-    @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
-    {
-        return EnumWorldBlockLayer.CUTOUT;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public Item getItem(World worldIn, BlockPos pos)
+    @Nullable
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
         return null;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public BlockRenderLayer getBlockLayer()
+    {
+        return BlockRenderLayer.CUTOUT;
     }
 }

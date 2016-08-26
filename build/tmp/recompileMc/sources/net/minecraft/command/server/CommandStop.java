@@ -17,8 +17,6 @@ public class CommandStop extends CommandBase
 
     /**
      * Gets the usage string for the command.
-     *  
-     * @param sender The command sender that executed the command
      */
     public String getCommandUsage(ICommandSender sender)
     {
@@ -26,18 +24,15 @@ public class CommandStop extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
-     *  
-     * @param sender The command sender that executed the command
-     * @param args The arguments that were passed
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
-        if (MinecraftServer.getServer().worldServers != null)
+        if (server.worldServers != null)
         {
-            notifyOperators(sender, this, "commands.stop.start", new Object[0]);
+            notifyCommandListener(sender, this, "commands.stop.start", new Object[0]);
         }
 
-        MinecraftServer.getServer().initiateShutdown();
+        server.initiateShutdown();
     }
 }

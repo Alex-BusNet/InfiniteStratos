@@ -23,7 +23,7 @@ public interface IProgressUpdate
     void displayLoadingString(String message);
 
     /**
-     * Updates the progress bar on the loading screen to the specified amount. Args: loadProgress
+     * Updates the progress bar on the loading screen to the specified amount.
      */
     void setLoadingProgress(int progress);
 

@@ -1,14 +1,34 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.network;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Throwables;
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import org.apache.commons.lang3.Validate;
 
-import java.io.IOException;
+import com.google.common.base.Charsets;
+import com.google.common.base.Throwables;
+
+import io.netty.buffer.ByteBuf;
 
 /**
  * Utilities for interacting with {@link ByteBuf}.
@@ -239,7 +259,7 @@ public class ByteBufUtils {
         // Add the tab for alignment
         returnString.append('\t');
 
-        // Add final chararacters at right, after padding
+        // Add final characters at right, after padding
 
         // If it was at the end of a line, print out the full line
         if (i > 0 && (i % 16) == 0)

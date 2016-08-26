@@ -1,16 +1,16 @@
 package net.minecraft.command.server;
 
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
-
-import java.util.List;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class CommandEmote extends CommandBase
 {
@@ -32,8 +32,6 @@ public class CommandEmote extends CommandBase
 
     /**
      * Gets the usage string for the command.
-     *  
-     * @param sender The command sender that executed the command
      */
     public String getCommandUsage(ICommandSender sender)
     {
@@ -41,12 +39,9 @@ public class CommandEmote extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
-     *  
-     * @param sender The command sender that executed the command
-     * @param args The arguments that were passed
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length <= 0)
         {
@@ -54,17 +49,17 @@ public class CommandEmote extends CommandBase
         }
         else
         {
-            IChatComponent ichatcomponent = getChatComponentFromNthArg(sender, args, 0, !(sender instanceof EntityPlayer));
-            MinecraftServer.getServer().getConfigurationManager().sendChatMsg(new ChatComponentTranslation("chat.type.emote", new Object[] {sender.getDisplayName(), ichatcomponent}));
+            ITextComponent itextcomponent = getChatComponentFromNthArg(sender, args, 0, !(sender instanceof EntityPlayer));
+            server.getPlayerList().sendChatMsg(new TextComponentTranslation("chat.type.emote", new Object[] {sender.getDisplayName(), itextcomponent}));
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
         /**
          * Returns a List of strings (chosen from the given strings) which the last word in the given string array is a
          * beginning-match for. (Tab completion).
          */
-        return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
+        return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
     }
 }

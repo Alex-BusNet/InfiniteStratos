@@ -6,7 +6,7 @@ public class ItemYukihiraHilt extends ItemIS
 {
     public ItemYukihiraHilt()
     {
-        super();
+        super(Names.Parts.YUKIHIRA_HILT);
         this.setUnlocalizedName(Names.Parts.YUKIHIRA_HILT);
         this.maxStackSize=1;
     }

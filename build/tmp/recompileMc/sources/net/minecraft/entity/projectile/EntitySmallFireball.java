@@ -3,9 +3,10 @@ package net.minecraft.entity.projectile;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 public class EntitySmallFireball extends EntityFireball
@@ -28,24 +29,28 @@ public class EntitySmallFireball extends EntityFireball
         this.setSize(0.3125F, 0.3125F);
     }
 
+    public static void func_189745_a(DataFixer p_189745_0_)
+    {
+        EntityFireball.func_189743_a(p_189745_0_, "SmallFireball");
+    }
+
     /**
      * Called when this EntityFireball hits a block or entity.
      */
-    protected void onImpact(MovingObjectPosition movingObject)
+    protected void onImpact(RayTraceResult result)
     {
         if (!this.worldObj.isRemote)
         {
-            if (movingObject.entityHit != null)
+            if (result.entityHit != null)
             {
-                boolean flag = movingObject.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 5.0F);
-
-                if (flag)
+                if (!result.entityHit.isImmuneToFire())
                 {
-                    this.applyEnchantments(this.shootingEntity, movingObject.entityHit);
+                    boolean flag = result.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 5.0F);
 
-                    if (!movingObject.entityHit.isImmuneToFire())
+                    if (flag)
                     {
-                        movingObject.entityHit.setFire(5);
+                        this.applyEnchantments(this.shootingEntity, result.entityHit);
+                        result.entityHit.setFire(5);
                     }
                 }
             }
@@ -60,11 +65,11 @@ public class EntitySmallFireball extends EntityFireball
 
                 if (flag1)
                 {
-                    BlockPos blockpos = movingObject.getBlockPos().offset(movingObject.sideHit);
+                    BlockPos blockpos = result.getBlockPos().offset(result.sideHit);
 
                     if (this.worldObj.isAirBlock(blockpos))
                     {
-                        this.worldObj.setBlockState(blockpos, Blocks.fire.getDefaultState());
+                        this.worldObj.setBlockState(blockpos, Blocks.FIRE.getDefaultState());
                     }
                 }
             }

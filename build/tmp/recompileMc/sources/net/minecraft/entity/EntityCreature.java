@@ -1,14 +1,14 @@
 package net.minecraft.entity;
 
+import java.util.UUID;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.pathfinding.PathNavigateGround;
-import net.minecraft.util.BlockPos;
+import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.UUID;
 
 public abstract class EntityCreature extends EntityLiving
 {
@@ -17,8 +17,9 @@ public abstract class EntityCreature extends EntityLiving
     private BlockPos homePosition = BlockPos.ORIGIN;
     /** If -1 there is no maximum distance */
     private float maximumHomeDistance = -1.0F;
-    private EntityAIBase aiBase = new EntityAIMoveTowardsRestriction(this, 1.0D);
+    private final EntityAIBase aiBase = new EntityAIMoveTowardsRestriction(this, 1.0D);
     private boolean isMovementAITaskSet;
+    private float restoreWaterCost = PathNodeType.WATER.getPriority();
 
     public EntityCreature(World worldIn)
     {
@@ -117,13 +118,14 @@ public abstract class EntityCreature extends EntityLiving
 
                 if (this.getNavigator() instanceof PathNavigateGround)
                 {
-                    ((PathNavigateGround)this.getNavigator()).setAvoidsWater(false);
+                    this.restoreWaterCost = this.getPathPriority(PathNodeType.WATER);
+                    this.setPathPriority(PathNodeType.WATER, 0.0F);
                 }
 
                 this.isMovementAITaskSet = true;
             }
 
-            this.func_142017_o(f);
+            this.onLeashDistance(f);
 
             if (f > 4.0F)
             {
@@ -152,14 +154,14 @@ public abstract class EntityCreature extends EntityLiving
 
             if (this.getNavigator() instanceof PathNavigateGround)
             {
-                ((PathNavigateGround)this.getNavigator()).setAvoidsWater(true);
+                this.setPathPriority(PathNodeType.WATER, this.restoreWaterCost);
             }
 
             this.detachHome();
         }
     }
 
-    protected void func_142017_o(float p_142017_1_)
+    protected void onLeashDistance(float p_142017_1_)
     {
     }
 }

@@ -1,11 +1,10 @@
 package net.minecraft.client.renderer.chunk;
 
+import java.util.BitSet;
+import java.util.Set;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.BitSet;
-import java.util.Set;
 
 @SideOnly(Side.CLIENT)
 public class SetVisibility
@@ -18,11 +17,11 @@ public class SetVisibility
         this.bitSet = new BitSet(COUNT_FACES * COUNT_FACES);
     }
 
-    public void setManyVisible(Set<EnumFacing> p_178620_1_)
+    public void setManyVisible(Set<EnumFacing> facing)
     {
-        for (EnumFacing enumfacing : p_178620_1_)
+        for (EnumFacing enumfacing : facing)
         {
-            for (EnumFacing enumfacing1 : p_178620_1_)
+            for (EnumFacing enumfacing1 : facing)
             {
                 this.setVisible(enumfacing, enumfacing1, true);
             }

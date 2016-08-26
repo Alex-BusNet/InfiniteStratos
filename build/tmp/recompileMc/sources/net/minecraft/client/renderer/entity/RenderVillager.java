@@ -11,12 +11,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderVillager extends RenderLiving<EntityVillager>
 {
-    private static final ResourceLocation villagerTextures = new ResourceLocation("textures/entity/villager/villager.png");
-    private static final ResourceLocation farmerVillagerTextures = new ResourceLocation("textures/entity/villager/farmer.png");
-    private static final ResourceLocation librarianVillagerTextures = new ResourceLocation("textures/entity/villager/librarian.png");
-    private static final ResourceLocation priestVillagerTextures = new ResourceLocation("textures/entity/villager/priest.png");
-    private static final ResourceLocation smithVillagerTextures = new ResourceLocation("textures/entity/villager/smith.png");
-    private static final ResourceLocation butcherVillagerTextures = new ResourceLocation("textures/entity/villager/butcher.png");
+    private static final ResourceLocation VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/villager.png");
+    private static final ResourceLocation FARMER_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/farmer.png");
+    private static final ResourceLocation LIBRARIAN_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/librarian.png");
+    private static final ResourceLocation PRIEST_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/priest.png");
+    private static final ResourceLocation SMITH_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/smith.png");
+    private static final ResourceLocation BUTCHER_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/butcher.png");
 
     public RenderVillager(RenderManager renderManagerIn)
     {
@@ -34,26 +34,11 @@ public class RenderVillager extends RenderLiving<EntityVillager>
      */
     protected ResourceLocation getEntityTexture(EntityVillager entity)
     {
-        switch (entity.getProfession())
-        {
-            case 0:
-                return farmerVillagerTextures;
-            case 1:
-                return librarianVillagerTextures;
-            case 2:
-                return priestVillagerTextures;
-            case 3:
-                return smithVillagerTextures;
-            case 4:
-                return butcherVillagerTextures;
-            default:
-                return net.minecraftforge.fml.common.registry.VillagerRegistry.getVillagerSkin(entity.getProfession(), villagerTextures);
-        }
+        return entity.getProfessionForge().getSkin();
     }
 
     /**
-     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:
-     * entityLiving, partialTickTime
+     * Allows the render to do state modifications necessary before the model is rendered.
      */
     protected void preRenderCallback(EntityVillager entitylivingbaseIn, float partialTickTime)
     {

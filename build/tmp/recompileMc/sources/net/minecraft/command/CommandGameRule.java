@@ -1,13 +1,14 @@
 package net.minecraft.command;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S19PacketEntityStatus;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.world.GameRules;
-
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.SPacketEntityStatus;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.GameRules;
 
 public class CommandGameRule extends CommandBase
 {
@@ -29,8 +30,6 @@ public class CommandGameRule extends CommandBase
 
     /**
      * Gets the usage string for the command.
-     *  
-     * @param sender The command sender that executed the command
      */
     public String getCommandUsage(ICommandSender sender)
     {
@@ -38,21 +37,18 @@ public class CommandGameRule extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
-     *  
-     * @param sender The command sender that executed the command
-     * @param args The arguments that were passed
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
-        GameRules gamerules = this.getGameRules();
+        GameRules gamerules = this.getOverWorldGameRules(server);
         String s = args.length > 0 ? args[0] : "";
         String s1 = args.length > 1 ? buildString(args, 1) : "";
 
         switch (args.length)
         {
             case 0:
-                sender.addChatMessage(new ChatComponentText(joinNiceString(gamerules.getRules())));
+                sender.addChatMessage(new TextComponentString(joinNiceString(gamerules.getRules())));
                 break;
             case 1:
 
@@ -62,7 +58,7 @@ public class CommandGameRule extends CommandBase
                 }
 
                 String s2 = gamerules.getString(s);
-                sender.addChatMessage((new ChatComponentText(s)).appendText(" = ").appendText(s2));
+                sender.addChatMessage((new TextComponentString(s)).appendText(" = ").appendText(s2));
                 sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, gamerules.getInt(s));
                 break;
             default:
@@ -73,25 +69,25 @@ public class CommandGameRule extends CommandBase
                 }
 
                 gamerules.setOrCreateGameRule(s, s1);
-                func_175773_a(gamerules, s);
-                notifyOperators(sender, this, "commands.gamerule.success", new Object[0]);
+                notifyGameRuleChange(gamerules, s, server);
+                notifyCommandListener(sender, this, "commands.gamerule.success", new Object[] {s, s1});
         }
     }
 
-    public static void func_175773_a(GameRules p_175773_0_, String p_175773_1_)
+    public static void notifyGameRuleChange(GameRules rules, String p_184898_1_, MinecraftServer server)
     {
-        if ("reducedDebugInfo".equals(p_175773_1_))
+        if ("reducedDebugInfo".equals(p_184898_1_))
         {
-            byte b0 = (byte)(p_175773_0_.getBoolean(p_175773_1_) ? 22 : 23);
+            byte b0 = (byte)(rules.getBoolean(p_184898_1_) ? 22 : 23);
 
-            for (EntityPlayerMP entityplayermp : MinecraftServer.getServer().getConfigurationManager().getPlayerList())
+            for (EntityPlayerMP entityplayermp : server.getPlayerList().getPlayerList())
             {
-                entityplayermp.playerNetServerHandler.sendPacket(new S19PacketEntityStatus(entityplayermp, b0));
+                entityplayermp.connection.sendPacket(new SPacketEntityStatus(entityplayermp, b0));
             }
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
         if (args.length == 1)
         {
@@ -99,13 +95,13 @@ public class CommandGameRule extends CommandBase
              * Returns a List of strings (chosen from the given strings) which the last word in the given string array
              * is a beginning-match for. (Tab completion).
              */
-            return getListOfStringsMatchingLastWord(args, this.getGameRules().getRules());
+            return getListOfStringsMatchingLastWord(args, this.getOverWorldGameRules(server).getRules());
         }
         else
         {
             if (args.length == 2)
             {
-                GameRules gamerules = this.getGameRules();
+                GameRules gamerules = this.getOverWorldGameRules(server);
 
                 if (gamerules.areSameType(args[0], GameRules.ValueType.BOOLEAN_VALUE))
                 {
@@ -117,15 +113,15 @@ public class CommandGameRule extends CommandBase
                 }
             }
 
-            return null;
+            return Collections.<String>emptyList();
         }
     }
 
     /**
-     * Return the game rule set this command should be able to manipulate.
+     * Get the game rules for the overworld
      */
-    private GameRules getGameRules()
+    private GameRules getOverWorldGameRules(MinecraftServer server)
     {
-        return MinecraftServer.getServer().worldServerForDimension(0).getGameRules();
+        return server.worldServerForDimension(0).getGameRules();
     }
 }

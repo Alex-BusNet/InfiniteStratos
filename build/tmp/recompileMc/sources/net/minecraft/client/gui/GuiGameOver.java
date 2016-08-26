@@ -1,20 +1,26 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
+import javax.annotation.Nullable;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.io.IOException;
 
 @SideOnly(Side.CLIENT)
 public class GuiGameOver extends GuiScreen implements GuiYesNoCallback
 {
     /** The integer value containing the number of ticks that have passed since the player's death */
     private int enableButtonsTimer;
-    private boolean field_146346_f = false;
+    private final ITextComponent causeOfDeath;
+
+    public GuiGameOver(@Nullable ITextComponent p_i46598_1_)
+    {
+        this.causeOfDeath = p_i46598_1_;
+    }
 
     /**
      * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
@@ -23,17 +29,12 @@ public class GuiGameOver extends GuiScreen implements GuiYesNoCallback
     public void initGui()
     {
         this.buttonList.clear();
+        this.enableButtonsTimer = 0;
 
         if (this.mc.theWorld.getWorldInfo().isHardcoreModeEnabled())
         {
-            if (this.mc.isIntegratedServerRunning())
-            {
-                this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height / 4 + 96, I18n.format("deathScreen.deleteWorld", new Object[0])));
-            }
-            else
-            {
-                this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height / 4 + 96, I18n.format("deathScreen.leaveServer", new Object[0])));
-            }
+            this.buttonList.add(new GuiButton(0, this.width / 2 - 100, this.height / 4 + 72, I18n.format("deathScreen.spectate", new Object[0])));
+            this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height / 4 + 96, I18n.format("deathScreen." + (this.mc.isIntegratedServerRunning() ? "deleteWorld" : "leaveServer"), new Object[0])));
         }
         else
         {
@@ -90,7 +91,11 @@ public class GuiGameOver extends GuiScreen implements GuiYesNoCallback
     {
         if (result)
         {
-            this.mc.theWorld.sendQuittingDisconnectingPacket();
+            if (this.mc.theWorld != null)
+            {
+                this.mc.theWorld.sendQuittingDisconnectingPacket();
+            }
+
             this.mc.loadWorld((WorldClient)null);
             this.mc.displayGuiScreen(new GuiMainMenu());
         }
@@ -102,25 +107,70 @@ public class GuiGameOver extends GuiScreen implements GuiYesNoCallback
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
+        boolean flag = this.mc.theWorld.getWorldInfo().isHardcoreModeEnabled();
         this.drawGradientRect(0, 0, this.width, this.height, 1615855616, -1602211792);
         GlStateManager.pushMatrix();
         GlStateManager.scale(2.0F, 2.0F, 2.0F);
-        boolean flag = this.mc.theWorld.getWorldInfo().isHardcoreModeEnabled();
-        String s = flag ? I18n.format("deathScreen.title.hardcore", new Object[0]) : I18n.format("deathScreen.title", new Object[0]);
-        this.drawCenteredString(this.fontRendererObj, s, this.width / 2 / 2, 30, 16777215);
+        this.drawCenteredString(this.fontRendererObj, I18n.format(flag ? "deathScreen.title.hardcore" : "deathScreen.title", new Object[0]), this.width / 2 / 2, 30, 16777215);
         GlStateManager.popMatrix();
 
-        if (flag)
+        if (this.causeOfDeath != null)
         {
-            this.drawCenteredString(this.fontRendererObj, I18n.format("deathScreen.hardcoreInfo", new Object[0]), this.width / 2, 144, 16777215);
+            this.drawCenteredString(this.fontRendererObj, this.causeOfDeath.getFormattedText(), this.width / 2, 85, 16777215);
         }
 
-        this.drawCenteredString(this.fontRendererObj, I18n.format("deathScreen.score", new Object[0]) + ": " + EnumChatFormatting.YELLOW + this.mc.thePlayer.getScore(), this.width / 2, 100, 16777215);
+        this.drawCenteredString(this.fontRendererObj, I18n.format("deathScreen.score", new Object[0]) + ": " + TextFormatting.YELLOW + this.mc.thePlayer.getScore(), this.width / 2, 100, 16777215);
+
+        if (this.causeOfDeath != null && mouseY > 85 && mouseY < 85 + this.fontRendererObj.FONT_HEIGHT)
+        {
+            ITextComponent itextcomponent = this.getClickedComponentAt(mouseX);
+
+            if (itextcomponent != null && itextcomponent.getStyle().getHoverEvent() != null)
+            {
+                this.handleComponentHover(itextcomponent, mouseX, mouseY);
+            }
+        }
+
         super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    @Nullable
+    public ITextComponent getClickedComponentAt(int p_184870_1_)
+    {
+        if (this.causeOfDeath == null)
+        {
+            return null;
+        }
+        else
+        {
+            int i = this.mc.fontRendererObj.getStringWidth(this.causeOfDeath.getFormattedText());
+            int j = this.width / 2 - i / 2;
+            int k = this.width / 2 + i / 2;
+            int l = j;
+
+            if (p_184870_1_ >= j && p_184870_1_ <= k)
+            {
+                for (ITextComponent itextcomponent : this.causeOfDeath)
+                {
+                    l += this.mc.fontRendererObj.getStringWidth(GuiUtilRenderComponents.removeTextColorsIfConfigured(itextcomponent.getUnformattedComponentText(), false));
+
+                    if (l > p_184870_1_)
+                    {
+                        return itextcomponent;
+                    }
+                }
+
+                return null;
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 
     /**

@@ -12,7 +12,7 @@ public class PlayerHelper
     {
         if ( FMLCommonHandler.instance().getMinecraftServerInstance() != null)
         {
-            return FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().getOppedPlayerNames().toString().contains(entityPlayer.getDisplayNameString().toString());
+            return FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getOppedPlayerNames().toString().contains(entityPlayer.getDisplayNameString().toString());
         }
 
         return false;
@@ -31,7 +31,7 @@ public class PlayerHelper
         else if (entityPlayer instanceof EntityPlayerMP)
         {
             EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entityPlayer;
-            if (entityPlayerMP.playerNetServerHandler == null)
+            if (entityPlayerMP.connection.netManager == null)
             {
                 return true;
             }
@@ -45,7 +45,7 @@ public class PlayerHelper
                 return true;
             }
 
-            return !FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().playerEntityList.contains(entityPlayer);
+            return !FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getAllUsernames().toString().contains(entityPlayer.toString());
         }
 
         return false;

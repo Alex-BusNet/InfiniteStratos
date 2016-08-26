@@ -1,42 +1,44 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.common.registry;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.Validate;
+
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.monster.ZombieType;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.entity.passive.EntityVillager.*;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.entity.passive.EntityVillager.ITradeList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.structure.StructureComponent;
 import net.minecraft.world.gen.structure.StructureVillagePieces;
 import net.minecraft.world.gen.structure.StructureVillagePieces.PieceWeight;
 import net.minecraft.world.gen.structure.StructureVillagePieces.Village;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.commons.lang3.Validate;
-
-import java.util.*;
 /**
  * Registry for villager trading control
- *
- * @author cpw
  */
 public class VillagerRegistry
 {
@@ -44,9 +46,6 @@ public class VillagerRegistry
     private static final VillagerRegistry INSTANCE = new VillagerRegistry();
 
     private Map<Class<?>, IVillageCreationHandler> villageCreationHandlers = Maps.newHashMap();
-    private List<Integer> newVillagerIds = Lists.newArrayList();
-    @SideOnly(Side.CLIENT)
-    private Map<Integer, ResourceLocation> newVillagers;
 
     private VillagerRegistry()
     {
@@ -98,39 +97,6 @@ public class VillagerRegistry
     }
 
     /**
-     * Register your villager id
-     *
-     * @param id
-     */
-    @Deprecated // Doesn't work at all.
-    public void registerVillagerId(int id)
-    {
-        if (newVillagerIds.contains(id))
-        {
-            FMLLog.severe("Attempt to register duplicate villager id %d", id);
-            throw new RuntimeException();
-        }
-        newVillagerIds.add(id);
-    }
-
-    /**
-     * Register a new skin for a villager type
-     *
-     * @param villagerId
-     * @param villagerSkin
-     */
-    @SideOnly(Side.CLIENT)
-    @Deprecated // Doesn't work at all.
-    public void registerVillagerSkin(int villagerId, ResourceLocation villagerSkin)
-    {
-        if (newVillagers == null)
-        {
-            newVillagers = Maps.newHashMap();
-        }
-        newVillagers.put(villagerId, villagerSkin);
-    }
-
-    /**
      * Register a new village creation handler
      *
      * @param handler
@@ -138,34 +104,6 @@ public class VillagerRegistry
     public void registerVillageCreationHandler(IVillageCreationHandler handler)
     {
         villageCreationHandlers.put(handler.getComponentClass(), handler);
-    }
-
-    /**
-     * Callback to setup new villager types
-     *
-     * @param villagerType
-     * @param defaultSkin
-     */
-    @SideOnly(Side.CLIENT)
-    @Deprecated // Doesn't work at all.
-    public static ResourceLocation getVillagerSkin(int villagerType, ResourceLocation defaultSkin)
-    {
-        if (instance().newVillagers != null && instance().newVillagers.containsKey(villagerType))
-        {
-            return instance().newVillagers.get(villagerType);
-        }
-        return defaultSkin;
-    }
-
-    /**
-     * Returns a list of all added villager types
-     *
-     * @return newVillagerIds
-     */
-    @Deprecated // Doesn't work at all.
-    public static Collection<Integer> getRegisteredVillagers()
-    {
-        return Collections.unmodifiableCollection(instance().newVillagerIds);
     }
 
     public static void addExtraVillageComponents(List<PieceWeight> list, Random random, int i)
@@ -194,7 +132,8 @@ public class VillagerRegistry
     }
 
     private boolean hasInit = false;
-    private FMLControlledNamespacedRegistry<VillagerProfession> professions = PersistentRegistryManager.createRegistry(PROFESSIONS, VillagerProfession.class, null, 1024, 0, true, null);
+    private FMLControlledNamespacedRegistry<VillagerProfession> professions = PersistentRegistryManager.createRegistry(PROFESSIONS, VillagerProfession.class, null, 0, 1024, true, null, null, null, null);
+    public IForgeRegistry<VillagerProfession> getRegistry() { return this.professions; }
 
 
     private void init()
@@ -204,7 +143,9 @@ public class VillagerRegistry
             return;
         }
 
-        VillagerProfession prof = new VillagerProfession("minecraft:farmer", "minecraft:textures/entity/villager/farmer.png");
+        VillagerProfession prof = new VillagerProfession("minecraft:farmer",
+                "minecraft:textures/entity/villager/farmer.png",
+                "minecraft:textures/entity/zombie_villager/zombie_farmer.png");
         {
             register(prof, 0);
             (new VillagerCareer(prof, "farmer")).init(VanillaTrades.trades[0][0]);
@@ -212,24 +153,32 @@ public class VillagerRegistry
             (new VillagerCareer(prof, "shepherd")).init(VanillaTrades.trades[0][2]);
             (new VillagerCareer(prof, "fletcher")).init(VanillaTrades.trades[0][3]);
         }
-        prof = new VillagerProfession("minecraft:librarian", "minecraft:textures/entity/villager/librarian.png");
+        prof = new VillagerProfession("minecraft:librarian",
+                "minecraft:textures/entity/villager/librarian.png",
+                "minecraft:textures/entity/zombie_villager/zombie_librarian.png");
         {
             register(prof, 1);
             (new VillagerCareer(prof, "librarian")).init(VanillaTrades.trades[1][0]);
         }
-        prof = new VillagerProfession("minecraft:priest", "minecraft:textures/entity/villager/priest.png");
+        prof = new VillagerProfession("minecraft:priest",
+                "minecraft:textures/entity/villager/priest.png",
+                "minecraft:textures/entity/zombie_villager/zombie_priest.png");
         {
             register(prof, 2);
             (new VillagerCareer(prof, "cleric")).init(VanillaTrades.trades[2][0]);
         }
-        prof = new VillagerProfession("minecraft:smith", "minecraft:textures/entity/villager/smith.png");
+        prof = new VillagerProfession("minecraft:smith",
+                "minecraft:textures/entity/villager/smith.png",
+                "minecraft:textures/entity/zombie_villager/zombie_smith.png");
         {
             register(prof, 3);
             (new VillagerCareer(prof, "armor")).init(VanillaTrades.trades[3][0]);
             (new VillagerCareer(prof, "weapon")).init(VanillaTrades.trades[3][1]);
             (new VillagerCareer(prof, "tool")).init(VanillaTrades.trades[3][2]);
         }
-        prof = new VillagerProfession("minecraft:butcher", "minecraft:textures/entity/villager/butcher.png");
+        prof = new VillagerProfession("minecraft:butcher",
+                "minecraft:textures/entity/villager/butcher.png",
+                "minecraft:textures/entity/zombie_villager/zombie_butcher.png");
         {
             register(prof, 4);
             (new VillagerCareer(prof, "butcher")).init(VanillaTrades.trades[4][0]);
@@ -237,18 +186,24 @@ public class VillagerRegistry
         }
     }
 
-    public static class VillagerProfession
+    public static class VillagerProfession extends IForgeRegistryEntry.Impl<VillagerProfession>
     {
         private ResourceLocation name;
         private ResourceLocation texture;
+        private ResourceLocation zombie;
         private List<VillagerCareer> careers = Lists.newArrayList();
-        public final RegistryDelegate<VillagerProfession> delegate = PersistentRegistryManager.makeDelegate(this, VillagerProfession.class);
 
+        @Deprecated //Use Zombie texture
         public VillagerProfession(String name, String texture)
+        {
+            this (name, texture, "minecraft:textures/entity/zombie_villager/zombie_villager.png");
+        }
+        public VillagerProfession(String name, String texture, String zombie)
         {
             this.name = new ResourceLocation(name);
             this.texture = new ResourceLocation(texture);
-            ((RegistryDelegate.Delegate<VillagerProfession>)delegate).setResourceName(this.name);
+            this.zombie = new ResourceLocation(zombie);
+            this.setRegistryName(this.name);
         }
 
         private void register(VillagerCareer career)
@@ -258,6 +213,23 @@ public class VillagerRegistry
             career.id = careers.size();
             careers.add(career);
         }
+
+        public ResourceLocation getSkin() { return this.texture; }
+        public ResourceLocation getZombieSkin() { return this.zombie; }
+        public VillagerCareer getCareer(int id)
+        {
+            for (VillagerCareer car : this.careers)
+            {
+                if (car.id == id)
+                    return car;
+            }
+            return this.careers.get(0);
+        }
+
+        public int getRandomCareer(Random rand)
+        {
+            return this.careers.get(rand.nextInt(this.careers.size())).id;
+        }
     }
 
     public static class VillagerCareer
@@ -265,6 +237,7 @@ public class VillagerRegistry
         private VillagerProfession profession;
         private String name;
         private int id;
+        private List<List<ITradeList>> trades = Lists.newArrayList();
 
         public VillagerCareer(VillagerProfession parent, String name)
         {
@@ -273,8 +246,45 @@ public class VillagerRegistry
             parent.register(this);
         }
 
-        private VillagerCareer init(EntityVillager.ITradeList[][] traids)
+        public String getName()
         {
+            return this.name;
+        }
+
+
+        public VillagerCareer addTrade(int level, ITradeList... trades)
+        {
+            if (level <= 0)
+                throw new IllegalArgumentException("Levels start at 1");
+
+            List<ITradeList> levelTrades = level <= this.trades.size() ? this.trades.get(level - 1) : null;
+            if (levelTrades == null)
+            {
+                while (this.trades.size() < level)
+                {
+                    levelTrades = Lists.newArrayList();
+                    this.trades.add(levelTrades);
+                }
+            }
+            if (levelTrades == null) //Not sure how this could happen, but screw it
+            {
+                levelTrades = Lists.newArrayList();
+                this.trades.set(level - 1, levelTrades);
+            }
+            for (ITradeList t : trades)
+                levelTrades.add(t);
+            return this;
+        }
+
+
+        public List<ITradeList> getTrades(int level)
+        {
+            return level >= 0 && level < this.trades.size() ? Collections.unmodifiableList(this.trades.get(level)) : null;
+        }
+        private VillagerCareer init(EntityVillager.ITradeList[][] trades)
+        {
+            for (int x = 0; x < trades.length; x++)
+                this.trades.add(Lists.newArrayList(trades[x]));
             return this;
         }
 
@@ -302,11 +312,94 @@ public class VillagerRegistry
      */
     public static void setRandomProfession(EntityVillager entity, Random rand)
     {
-        Set<ResourceLocation> entries = INSTANCE.professions.getKeys();
-        int prof = rand.nextInt(entries.size());
-        //TODO: Grab id range from internal registry
-        entity.setProfession(rand.nextInt(5));
+        List<VillagerProfession> entries = INSTANCE.professions.getValues();
+        entity.setProfession(entries.get(rand.nextInt(entries.size())));
     }
+    public static void setRandomProfession(EntityZombie entity, Random rand)
+    {
+        List<VillagerProfession> entries = INSTANCE.professions.getValues();
+        entity.setVillagerType(entries.get(rand.nextInt(entries.size())));
+    }
+
+
+
+
+
+
+
+    //Below this is INTERNAL USE ONLY DO NOT USE MODDERS
+    public static void onSetProfession(EntityVillager entity, VillagerProfession prof)
+    {
+        int network = INSTANCE.professions.getId(prof);
+        if (network == -1 || prof != INSTANCE.professions.getObjectById(network))
+        {
+            throw new RuntimeException("Attempted to set villager profession to unregistered profession: " + network + " " + prof);
+        }
+
+        if (network != entity.getProfession())
+            entity.setProfession(network);
+    }
+    public static void onSetProfession(EntityVillager entity, int network)
+    {
+        VillagerProfession prof = INSTANCE.professions.getObjectById(network);
+        if (prof == null || INSTANCE.professions.getId(prof) != network)
+        {
+            throw new RuntimeException("Attempted to set villager profession to unregistered profession: " + network + " " + prof);
+        }
+
+        if (prof != entity.getProfessionForge())
+            entity.setProfession(prof);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static void onSetProfession(EntityZombie entity, VillagerProfession prof)
+    {
+        if (prof == null)
+        {
+            if (entity.func_189777_di() != ZombieType.NORMAL && entity.func_189777_di() != ZombieType.HUSK)
+                entity.func_189778_a(ZombieType.NORMAL);
+            return;
+        }
+
+        int network = INSTANCE.professions.getId(prof);
+        if (network == -1 || prof != INSTANCE.professions.getObjectById(network))
+        {
+            throw new RuntimeException("Attempted to set villager profession to unregistered profession: " + network + " " + prof);
+        }
+
+        if (network >= 0 && network < 5) // Vanilla
+        {
+            if (entity.func_189777_di() == null || entity.func_189777_di().func_190150_a() != network + 1)
+            {
+                entity.func_189778_a(ZombieType.func_190144_b(network));
+            }
+        }
+        else if (entity.func_189777_di() != null)
+            entity.func_189778_a(ZombieType.NORMAL);
+    }
+    public static void onSetProfession(EntityZombie entity, ZombieType type, int network)
+    {
+        if (type == ZombieType.NORMAL || type == ZombieType.HUSK)
+        {
+            if (entity.getVillagerTypeForge() != null)
+                entity.setVillagerType(null);
+            return;
+        }
+        int realID = network - 1;
+        if (type == null) //Forge type?
+            realID = network * -1; // Forge encoded as -ID
+        VillagerProfession prof = INSTANCE.professions.getObjectById(realID);
+        if (prof == null && network != 0 || INSTANCE.professions.getId(prof) != realID)
+        {
+            throw new RuntimeException("Attempted to set villager profession to unregistered profession: " + realID + " " + prof);
+        }
+
+        if (prof != entity.getVillagerTypeForge())
+            entity.setVillagerType(prof);
+    }
+
+    @Deprecated public static VillagerProfession getById(int network){ return INSTANCE.professions.getObjectById(network); }
+    @Deprecated public static int getId(VillagerProfession prof){ return INSTANCE.professions.getId(prof); }
 
     //TODO: Figure out a good generic system for this. Put on hold for Patches.
 
@@ -315,197 +408,6 @@ public class VillagerRegistry
         //This field is moved from EntityVillager over to here.
         //Moved to inner class to stop static initializer issues.
         //It is nasty I know but it's vanilla.
-        private static final ITradeList[][][][] trades =
-                {
-                        {
-                                {
-                                        {
-                                                new EmeraldForItems(Items.wheat, new PriceInfo(18, 22)),
-                                                new EmeraldForItems(Items.potato, new PriceInfo(15, 19)),
-                                                new EmeraldForItems(Items.carrot, new PriceInfo(15, 19)),
-                                                new ListItemForEmeralds(Items.bread, new PriceInfo(-4, -2))
-                                        },
-                                        {
-                                                new EmeraldForItems(Item.getItemFromBlock(Blocks.pumpkin), new PriceInfo(8, 13)),
-                                                new ListItemForEmeralds(Items.pumpkin_pie, new PriceInfo(-3, -2))
-                                        },
-                                        {
-                                                new EmeraldForItems(Item.getItemFromBlock(Blocks.melon_block), new PriceInfo(7, 12)),
-                                                new ListItemForEmeralds(Items.apple, new PriceInfo(-5, -7))
-                                        },
-                                        {
-                                                new ListItemForEmeralds(Items.cookie, new PriceInfo(-6, -10)),
-                                                new ListItemForEmeralds(Items.cake, new PriceInfo(1, 1))
-                                        }
-                                },
-                                {
-                                        {
-                                                new EmeraldForItems(Items.string, new PriceInfo(15, 20)),
-                                                new EmeraldForItems(Items.coal, new PriceInfo(16, 24)),
-                                                new ItemAndEmeraldToItem(Items.fish, new PriceInfo(6, 6), Items.cooked_fish, new PriceInfo(6, 6))
-                                        },
-                                        {
-                                                new ListEnchantedItemForEmeralds(Items.fishing_rod, new PriceInfo(7, 8))
-                                        }
-                                },
-                                {
-                                        {
-                                                new EmeraldForItems(Item.getItemFromBlock(Blocks.wool), new PriceInfo(16, 22)),
-                                                new ListItemForEmeralds(Items.shears, new PriceInfo(3, 4))
-                                        },
-                                        {
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 0), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 1), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 2), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 3), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 4), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 5), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 6), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 7), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 8), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 9), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 10), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 11), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 12), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 13), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 14), new PriceInfo(1, 2)),
-                                                new ListItemForEmeralds(new ItemStack(Blocks.wool, 1, 15), new PriceInfo(1, 2))
-                                        }
-                                },
-                                {
-                                        {
-                                                new EmeraldForItems(Items.string, new PriceInfo(15, 20)),
-                                                new ListItemForEmeralds(Items.arrow, new PriceInfo(-12, -8))
-                                        },
-                                        {
-                                                new ListItemForEmeralds(Items.bow, new PriceInfo(2, 3)),
-                                                new ItemAndEmeraldToItem(Item.getItemFromBlock(Blocks.gravel), new PriceInfo(10, 10), Items.flint, new PriceInfo(6, 10))
-                                        }
-                                }
-                        },
-                        {
-                                {
-                                        {
-                                                new EmeraldForItems(Items.paper, new PriceInfo(24, 36)),
-                                                new ListEnchantedBookForEmeralds()
-                                        },
-                                        {
-                                                new EmeraldForItems(Items.book, new PriceInfo(8, 10)),
-                                                new ListItemForEmeralds(Items.compass, new PriceInfo(10, 12)),
-                                                new ListItemForEmeralds(Item.getItemFromBlock(Blocks.bookshelf), new PriceInfo(3, 4))
-                                        },
-                                        {
-                                                new EmeraldForItems(Items.written_book, new PriceInfo(2, 2)),
-                                                new ListItemForEmeralds(Items.clock, new PriceInfo(10, 12)),
-                                                new ListItemForEmeralds(Item.getItemFromBlock(Blocks.glass), new PriceInfo(-5, -3))
-                                        },
-                                        {
-                                                new ListEnchantedBookForEmeralds()
-                                        },
-                                        {
-                                                new ListEnchantedBookForEmeralds()
-                                        },
-                                        {
-                                                new ListItemForEmeralds(Items.name_tag, new PriceInfo(20, 22))
-                                        }
-                                }
-                        },
-                        {
-                                {
-                                        {
-                                                new EmeraldForItems(Items.rotten_flesh, new PriceInfo(36, 40)),
-                                                new EmeraldForItems(Items.gold_ingot, new PriceInfo(8, 10))
-                                        },
-                                        {
-                                                new ListItemForEmeralds(Items.redstone, new PriceInfo(-4, -1)),
-                                                new ListItemForEmeralds(new ItemStack(Items.dye, 1, EnumDyeColor.BLUE.getDyeDamage()),
-                                                        new PriceInfo(-2, -1))
-                                        },
-                                        {
-                                                new ListItemForEmeralds(Items.ender_eye, new PriceInfo(7, 11)),
-                                                new ListItemForEmeralds(Item.getItemFromBlock(Blocks.glowstone), new PriceInfo(-3, -1))
-                                        },
-                                        {
-                                                new ListItemForEmeralds(Items.experience_bottle, new PriceInfo(3, 11))
-                                        }
-                                }
-                        },
-                        {
-                                {
-                                        {
-                                                new EmeraldForItems(Items.coal, new PriceInfo(16, 24)),
-                                                new ListItemForEmeralds(Items.iron_helmet, new PriceInfo(4, 6))
-                                        },
-                                        {
-                                                new EmeraldForItems(Items.iron_ingot, new PriceInfo(7, 9)),
-                                                new ListItemForEmeralds(Items.iron_chestplate, new PriceInfo(10, 14))
-                                        },
-                                        {
-                                                new EmeraldForItems(Items.diamond, new PriceInfo(3, 4)),
-                                                new ListEnchantedItemForEmeralds(Items.diamond_chestplate, new PriceInfo(16, 19))
-                                        },
-                                        {
-                                                new ListItemForEmeralds(Items.chainmail_boots, new PriceInfo(5, 7)),
-                                                new ListItemForEmeralds(Items.chainmail_leggings, new PriceInfo(9, 11)),
-                                                new ListItemForEmeralds(Items.chainmail_helmet, new PriceInfo(5, 7)),
-                                                new ListItemForEmeralds(Items.chainmail_chestplate, new PriceInfo(11, 15))
-                                        }
-                                },
-                                {
-                                        {
-                                                new EmeraldForItems(Items.coal, new PriceInfo(16, 24)),
-                                                new ListItemForEmeralds(Items.iron_axe, new PriceInfo(6, 8))
-                                        },
-                                        {
-                                                new EmeraldForItems(Items.iron_ingot, new PriceInfo(7, 9)),
-                                                new ListEnchantedItemForEmeralds(Items.iron_sword, new PriceInfo(9, 10))
-                                        },
-                                        {
-                                                new EmeraldForItems(Items.diamond, new PriceInfo(3, 4)),
-                                                new ListEnchantedItemForEmeralds(Items.diamond_sword, new PriceInfo(12, 15)),
-                                                new ListEnchantedItemForEmeralds(Items.diamond_axe, new PriceInfo(9, 12))
-                                        }
-                                },
-                                {
-                                        {
-                                                new EmeraldForItems(Items.coal, new PriceInfo(16, 24)),
-                                                new ListEnchantedItemForEmeralds(Items.iron_shovel, new PriceInfo(5, 7))
-                                        },
-                                        {
-                                                new EmeraldForItems(Items.iron_ingot, new PriceInfo(7, 9)),
-                                                new ListEnchantedItemForEmeralds(Items.iron_pickaxe, new PriceInfo(9, 11))
-                                        },
-                                        {
-                                                new EmeraldForItems(Items.diamond, new PriceInfo(3, 4)),
-                                                new ListEnchantedItemForEmeralds(Items.diamond_pickaxe, new PriceInfo(12, 15))
-                                        }
-                                }
-                        },
-                        {
-                                {
-                                        {
-                                                new EmeraldForItems(Items.porkchop, new PriceInfo(14, 18)),
-                                                new EmeraldForItems(Items.chicken, new PriceInfo(14, 18))
-                                        },
-                                        {
-                                                new EmeraldForItems(Items.coal, new PriceInfo(16, 24)),
-                                                new ListItemForEmeralds(Items.cooked_porkchop, new PriceInfo(-7, -5)),
-                                                new ListItemForEmeralds(Items.cooked_chicken, new PriceInfo(-8, -6))
-                                        }
-                                },
-                                {
-                                        {
-                                                new EmeraldForItems(Items.leather, new PriceInfo(9, 12)),
-                                                new ListItemForEmeralds(Items.leather_leggings, new PriceInfo(2, 4))
-                                        },
-                                        {
-                                                new ListEnchantedItemForEmeralds(Items.leather_chestplate, new PriceInfo(7, 12))
-                                        },
-                                        {
-                                                new ListItemForEmeralds(Items.saddle, new PriceInfo(8, 10))
-                                        }
-                                }
-                        }
-                };
+        private static final ITradeList[][][][] trades = EntityVillager.GET_TRADES_DONT_USE();
     }
 }

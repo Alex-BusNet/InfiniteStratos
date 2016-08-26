@@ -1,5 +1,7 @@
 package net.minecraft.client.renderer;
 
+import com.google.common.collect.Ordering;
+import java.util.Collection;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.Container;
@@ -7,8 +9,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.Collection;
 
 @SideOnly(Side.CLIENT)
 public abstract class InventoryEffectRenderer extends GuiContainer
@@ -35,23 +35,24 @@ public abstract class InventoryEffectRenderer extends GuiContainer
     {
         boolean hasVisibleEffect = false;
         for(PotionEffect potioneffect : this.mc.thePlayer.getActivePotionEffects()) {
-            Potion potion = Potion.potionTypes[potioneffect.getPotionID()];
+            Potion potion = potioneffect.getPotion();
             if(potion.shouldRender(potioneffect)) { hasVisibleEffect = true; break; }
         }
-        if (!this.mc.thePlayer.getActivePotionEffects().isEmpty() && hasVisibleEffect)
-        {
-            this.guiLeft = 160 + (this.width - this.xSize - 200) / 2;
-            this.hasActivePotionEffects = true;
-        }
-        else
+        if (this.mc.thePlayer.getActivePotionEffects().isEmpty() || !hasVisibleEffect)
         {
             this.guiLeft = (this.width - this.xSize) / 2;
             this.hasActivePotionEffects = false;
         }
+        else
+        {
+            if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiScreenEvent.PotionShiftEvent(this))) this.guiLeft = (this.width - this.xSize) / 2; else
+            this.guiLeft = 160 + (this.width - this.xSize - 200) / 2;
+            this.hasActivePotionEffects = true;
+        }
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
@@ -84,12 +85,12 @@ public abstract class InventoryEffectRenderer extends GuiContainer
                 l = 132 / (collection.size() - 1);
             }
 
-            for (PotionEffect potioneffect : this.mc.thePlayer.getActivePotionEffects())
+            for (PotionEffect potioneffect : Ordering.natural().sortedCopy(collection))
             {
-                Potion potion = Potion.potionTypes[potioneffect.getPotionID()];
+                Potion potion = potioneffect.getPotion();
                 if(!potion.shouldRender(potioneffect)) continue;
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-                this.mc.getTextureManager().bindTexture(inventoryBackground);
+                this.mc.getTextureManager().bindTexture(INVENTORY_BACKGROUND);
                 this.drawTexturedModalRect(i, j, 0, 166, 140, 32);
 
                 if (potion.hasStatusIcon())
@@ -99,7 +100,7 @@ public abstract class InventoryEffectRenderer extends GuiContainer
                 }
 
                 potion.renderInventoryEffect(i, j, potioneffect, mc);
-                if (!potion.shouldRenderInvText(potioneffect)) continue;
+                if (!potion.shouldRenderInvText(potioneffect)) { j += l; continue; }
                 String s1 = I18n.format(potion.getName(), new Object[0]);
 
                 if (potioneffect.getAmplifier() == 1)
@@ -116,7 +117,7 @@ public abstract class InventoryEffectRenderer extends GuiContainer
                 }
 
                 this.fontRendererObj.drawStringWithShadow(s1, (float)(i + 10 + 18), (float)(j + 6), 16777215);
-                String s = Potion.getDurationString(potioneffect);
+                String s = Potion.getPotionDurationString(potioneffect, 1.0F);
                 this.fontRendererObj.drawStringWithShadow(s, (float)(i + 10 + 18), (float)(j + 6 + 10), 8355711);
                 j += l;
             }

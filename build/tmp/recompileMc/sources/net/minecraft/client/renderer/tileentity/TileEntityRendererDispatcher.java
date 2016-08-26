@@ -1,26 +1,40 @@
 package net.minecraft.client.renderer.tileentity;
 
 import com.google.common.collect.Maps;
+import java.util.Map;
+import javax.annotation.Nullable;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.*;
-import net.minecraft.util.BlockPos;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityBanner;
+import net.minecraft.tileentity.TileEntityBeacon;
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntityEnchantmentTable;
+import net.minecraft.tileentity.TileEntityEndGateway;
+import net.minecraft.tileentity.TileEntityEndPortal;
+import net.minecraft.tileentity.TileEntityEnderChest;
+import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.tileentity.TileEntityPiston;
+import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.tileentity.TileEntitySkull;
+import net.minecraft.tileentity.TileEntityStructure;
 import net.minecraft.util.ReportedException;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Map;
-
 @SideOnly(Side.CLIENT)
 public class TileEntityRendererDispatcher
 {
-    public Map < Class <? extends TileEntity > , TileEntitySpecialRenderer <? extends TileEntity >> mapSpecialRenderers = Maps. < Class <? extends TileEntity > , TileEntitySpecialRenderer <? extends TileEntity >> newHashMap();
+    public final Map < Class <? extends TileEntity > , TileEntitySpecialRenderer <? extends TileEntity >> mapSpecialRenderers = Maps. < Class <? extends TileEntity > , TileEntitySpecialRenderer <? extends TileEntity >> newHashMap();
     public static TileEntityRendererDispatcher instance = new TileEntityRendererDispatcher();
     private FontRenderer fontRenderer;
     /** The player's current X position (same as playerX) */
@@ -34,6 +48,7 @@ public class TileEntityRendererDispatcher
     public Entity entity;
     public float entityYaw;
     public float entityPitch;
+    public RayTraceResult field_190057_j;
     public double entityX;
     public double entityY;
     public double entityZ;
@@ -47,9 +62,11 @@ public class TileEntityRendererDispatcher
         this.mapSpecialRenderers.put(TileEntityEnderChest.class, new TileEntityEnderChestRenderer());
         this.mapSpecialRenderers.put(TileEntityEnchantmentTable.class, new TileEntityEnchantmentTableRenderer());
         this.mapSpecialRenderers.put(TileEntityEndPortal.class, new TileEntityEndPortalRenderer());
+        this.mapSpecialRenderers.put(TileEntityEndGateway.class, new TileEntityEndGatewayRenderer());
         this.mapSpecialRenderers.put(TileEntityBeacon.class, new TileEntityBeaconRenderer());
         this.mapSpecialRenderers.put(TileEntitySkull.class, new TileEntitySkullRenderer());
         this.mapSpecialRenderers.put(TileEntityBanner.class, new TileEntityBannerRenderer());
+        this.mapSpecialRenderers.put(TileEntityStructure.class, new TileEntityStructureRenderer());
 
         for (TileEntitySpecialRenderer<?> tileentityspecialrenderer : this.mapSpecialRenderers.values())
         {
@@ -70,38 +87,41 @@ public class TileEntityRendererDispatcher
         return (TileEntitySpecialRenderer<T>)tileentityspecialrenderer;
     }
 
-    public <T extends TileEntity> TileEntitySpecialRenderer<T> getSpecialRenderer(TileEntity tileEntityIn)
+    @Nullable
+    public <T extends TileEntity> TileEntitySpecialRenderer<T> getSpecialRenderer(@Nullable TileEntity tileEntityIn)
     {
         return (TileEntitySpecialRenderer<T>)(tileEntityIn == null ? null : this.getSpecialRendererByClass(tileEntityIn.getClass()));
     }
 
-    public void cacheActiveRenderInfo(World worldIn, TextureManager textureManagerIn, FontRenderer fontrendererIn, Entity entityIn, float partialTicks)
+    public void func_190056_a(World p_190056_1_, TextureManager p_190056_2_, FontRenderer p_190056_3_, Entity p_190056_4_, RayTraceResult p_190056_5_, float p_190056_6_)
     {
-        if (this.worldObj != worldIn)
+        if (this.worldObj != p_190056_1_)
         {
-            this.setWorld(worldIn);
+            this.setWorld(p_190056_1_);
         }
 
-        this.renderEngine = textureManagerIn;
-        this.entity = entityIn;
-        this.fontRenderer = fontrendererIn;
-        this.entityYaw = entityIn.prevRotationYaw + (entityIn.rotationYaw - entityIn.prevRotationYaw) * partialTicks;
-        this.entityPitch = entityIn.prevRotationPitch + (entityIn.rotationPitch - entityIn.prevRotationPitch) * partialTicks;
-        this.entityX = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double)partialTicks;
-        this.entityY = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double)partialTicks;
-        this.entityZ = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double)partialTicks;
+        this.renderEngine = p_190056_2_;
+        this.entity = p_190056_4_;
+        this.fontRenderer = p_190056_3_;
+        this.field_190057_j = p_190056_5_;
+        this.entityYaw = p_190056_4_.prevRotationYaw + (p_190056_4_.rotationYaw - p_190056_4_.prevRotationYaw) * p_190056_6_;
+        this.entityPitch = p_190056_4_.prevRotationPitch + (p_190056_4_.rotationPitch - p_190056_4_.prevRotationPitch) * p_190056_6_;
+        this.entityX = p_190056_4_.lastTickPosX + (p_190056_4_.posX - p_190056_4_.lastTickPosX) * (double)p_190056_6_;
+        this.entityY = p_190056_4_.lastTickPosY + (p_190056_4_.posY - p_190056_4_.lastTickPosY) * (double)p_190056_6_;
+        this.entityZ = p_190056_4_.lastTickPosZ + (p_190056_4_.posZ - p_190056_4_.lastTickPosZ) * (double)p_190056_6_;
     }
 
     public void renderTileEntity(TileEntity tileentityIn, float partialTicks, int destroyStage)
     {
         if (tileentityIn.getDistanceSq(this.entityX, this.entityY, this.entityZ) < tileentityIn.getMaxRenderDistanceSquared())
         {
-            if(!tileentityIn.hasFastRenderer())
+            RenderHelper.enableStandardItemLighting();
+            if(!drawingBatch || !tileentityIn.hasFastRenderer())
             {
             int i = this.worldObj.getCombinedLight(tileentityIn.getPos(), 0);
             int j = i % 65536;
             int k = i / 65536;
-            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j / 1.0F, (float)k / 1.0F);
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
             BlockPos blockpos = tileentityIn.getPos();
@@ -125,9 +145,9 @@ public class TileEntityRendererDispatcher
         {
             try
             {
-                if(tileEntityIn.hasFastRenderer())
+                if(drawingBatch && tileEntityIn.hasFastRenderer())
                 {
-                    tileentityspecialrenderer.renderTileEntityFast(tileEntityIn, x, y, z, partialTicks, destroyStage, batchBuffer.getWorldRenderer());
+                    tileentityspecialrenderer.renderTileEntityFast(tileEntityIn, x, y, z, partialTicks, destroyStage, batchBuffer.getBuffer());
                 }
                 else
                 tileentityspecialrenderer.renderTileEntityAt(tileEntityIn, x, y, z, partialTicks, destroyStage);
@@ -142,9 +162,14 @@ public class TileEntityRendererDispatcher
         }
     }
 
-    public void setWorld(World worldIn)
+    public void setWorld(@Nullable World worldIn)
     {
         this.worldObj = worldIn;
+
+        if (worldIn == null)
+        {
+            this.entity = null;
+        }
     }
 
     public FontRenderer getFontRenderer()
@@ -157,6 +182,7 @@ public class TileEntityRendererDispatcher
      * Buffer used for batched TESRs
      */
     private net.minecraft.client.renderer.Tessellator batchBuffer = new net.minecraft.client.renderer.Tessellator(0x200000);
+    private boolean drawingBatch = false;
 
     /**
      * Prepare for a batched TESR rendering.
@@ -164,7 +190,8 @@ public class TileEntityRendererDispatcher
      */
     public void preDrawBatch()
     {
-        batchBuffer.getWorldRenderer().begin(org.lwjgl.opengl.GL11.GL_QUADS, net.minecraft.client.renderer.vertex.DefaultVertexFormats.BLOCK);
+        batchBuffer.getBuffer().begin(org.lwjgl.opengl.GL11.GL_QUADS, net.minecraft.client.renderer.vertex.DefaultVertexFormats.BLOCK);
+        drawingBatch = true;
     }
 
     /**
@@ -173,7 +200,7 @@ public class TileEntityRendererDispatcher
      */
     public void drawBatch(int pass)
     {
-        renderEngine.bindTexture(net.minecraft.client.renderer.texture.TextureMap.locationBlocksTexture);
+        renderEngine.bindTexture(net.minecraft.client.renderer.texture.TextureMap.LOCATION_BLOCKS_TEXTURE);
         net.minecraft.client.renderer.RenderHelper.disableStandardItemLighting();
         GlStateManager.blendFunc(org.lwjgl.opengl.GL11.GL_SRC_ALPHA, org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA);
         GlStateManager.enableBlend();
@@ -190,10 +217,11 @@ public class TileEntityRendererDispatcher
 
         if(pass > 0)
         {
-            batchBuffer.getWorldRenderer().sortVertexData((float)staticPlayerX, (float)staticPlayerY, (float)staticPlayerZ);
+            batchBuffer.getBuffer().sortVertexData((float)staticPlayerX, (float)staticPlayerY, (float)staticPlayerZ);
         }
         batchBuffer.draw();
 
         net.minecraft.client.renderer.RenderHelper.enableStandardItemLighting();
+        drawingBatch = false;
     }
 }

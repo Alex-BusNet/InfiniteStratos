@@ -1,11 +1,11 @@
 package net.minecraft.world.storage;
 
+import java.io.File;
+import java.util.List;
 import net.minecraft.client.AnvilConverterException;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 public interface ISaveFormat
 {
@@ -21,8 +21,14 @@ public interface ISaveFormat
     ISaveHandler getSaveLoader(String saveName, boolean storePlayerdata);
 
     @SideOnly(Side.CLIENT)
-    List<SaveFormatComparator> getSaveList() throws AnvilConverterException;
+    List<WorldSummary> getSaveList() throws AnvilConverterException;
 
+    /**
+     * gets if the map is old chunk saving (true) or McRegion (false)
+     */
+    boolean isOldMapFormat(String saveName);
+
+    @SideOnly(Side.CLIENT)
     void flushCache();
 
     /**
@@ -32,13 +38,13 @@ public interface ISaveFormat
     WorldInfo getWorldInfo(String saveName);
 
     @SideOnly(Side.CLIENT)
-    boolean func_154335_d(String p_154335_1_);
+    boolean isNewLevelIdAcceptable(String saveName);
 
     /**
-     * @args: Takes one argument - the name of the directory of the world to delete. @desc: Delete the world by deleting
-     * the associated directory recursively.
+     * Deletes a world directory.
      */
-    boolean deleteWorldDirectory(String p_75802_1_);
+    @SideOnly(Side.CLIENT)
+    boolean deleteWorldDirectory(String saveName);
 
     /**
      * Renames the world by storing the new name in level.dat. It does *not* rename the directory containing the world
@@ -48,21 +54,18 @@ public interface ISaveFormat
     void renameWorld(String dirName, String newName);
 
     @SideOnly(Side.CLIENT)
-    boolean func_154334_a(String saveName);
-
-    /**
-     * gets if the map is old chunk saving (true) or McRegion (false)
-     */
-    boolean isOldMapFormat(String saveName);
+    boolean isConvertible(String saveName);
 
     /**
      * converts the map to mcRegion
      */
     boolean convertMapFormat(String filename, IProgressUpdate progressCallback);
 
+    File getFile(String p_186352_1_, String p_186352_2_);
+
     /**
      * Return whether the given world can be loaded.
      */
     @SideOnly(Side.CLIENT)
-    boolean canLoadWorld(String p_90033_1_);
+    boolean canLoadWorld(String saveName);
 }

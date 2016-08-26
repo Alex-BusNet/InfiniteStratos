@@ -4,7 +4,8 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
-import net.minecraft.block.Block;
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.material.MapColor;
@@ -13,16 +14,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 public class ItemMap extends ItemMapBase
 {
@@ -58,7 +58,7 @@ public class ItemMap extends ItemMapBase
             mapdata = new MapData(s);
             mapdata.scale = 3;
             mapdata.calculateMapCenter((double)worldIn.getWorldInfo().getSpawnX(), (double)worldIn.getWorldInfo().getSpawnZ(), mapdata.scale);
-            mapdata.dimension = worldIn.provider.getDimensionId();
+            mapdata.dimension = worldIn.provider.getDimension();
             mapdata.markDirty();
             worldIn.setItemData(s, mapdata);
         }
@@ -68,7 +68,7 @@ public class ItemMap extends ItemMapBase
 
     public void updateMapData(World worldIn, Entity viewer, MapData data)
     {
-        if (worldIn.provider.getDimensionId() == data.dimension && viewer instanceof EntityPlayer)
+        if (worldIn.provider.getDimension() == data.dimension && viewer instanceof EntityPlayer)
         {
             int i = 1 << data.scale;
             int j = data.xCenter;
@@ -83,12 +83,12 @@ public class ItemMap extends ItemMapBase
             }
 
             MapData.MapInfo mapdata$mapinfo = data.getMapInfo((EntityPlayer)viewer);
-            ++mapdata$mapinfo.field_82569_d;
+            ++mapdata$mapinfo.step;
             boolean flag = false;
 
             for (int k1 = l - j1 + 1; k1 < l + j1; ++k1)
             {
-                if ((k1 & 15) == (mapdata$mapinfo.field_82569_d & 15) || flag)
+                if ((k1 & 15) == (mapdata$mapinfo.step & 15) || flag)
                 {
                     flag = false;
                     double d0 = 0.0D;
@@ -119,11 +119,11 @@ public class ItemMap extends ItemMapBase
 
                                     if ((l3 >> 20 & 1) == 0)
                                     {
-                                        multiset.add(Blocks.dirt.getMapColor(Blocks.dirt.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT)), 10);
+                                        multiset.add(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT).getMapColor(), 10);
                                     }
                                     else
                                     {
-                                        multiset.add(Blocks.stone.getMapColor(Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.STONE)), 100);
+                                        multiset.add(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.STONE).getMapColor(), 100);
                                     }
 
                                     d1 = 100.0D;
@@ -137,35 +137,35 @@ public class ItemMap extends ItemMapBase
                                         for (int j4 = 0; j4 < i; ++j4)
                                         {
                                             int k4 = chunk.getHeightValue(i4 + i3, j4 + j3) + 1;
-                                            IBlockState iblockstate = Blocks.air.getDefaultState();
+                                            IBlockState iblockstate = Blocks.AIR.getDefaultState();
 
                                             if (k4 > 1)
                                             {
-                                                label541:
+                                                label542:
                                                 {
                                                     while (true)
                                                     {
                                                         --k4;
-                                                        iblockstate = chunk.getBlockState(blockpos$mutableblockpos.set(i4 + i3, k4, j4 + j3));
+                                                        iblockstate = chunk.getBlockState(blockpos$mutableblockpos.setPos(i4 + i3, k4, j4 + j3));
 
-                                                        if (iblockstate.getBlock().getMapColor(iblockstate) != MapColor.airColor || k4 <= 0)
+                                                        if (iblockstate.getMapColor() != MapColor.AIR || k4 <= 0)
                                                         {
                                                             break;
                                                         }
                                                     }
 
-                                                    if (k4 > 0 && iblockstate.getBlock().getMaterial().isLiquid())
+                                                    if (k4 > 0 && iblockstate.getMaterial().isLiquid())
                                                     {
                                                         int l4 = k4 - 1;
 
                                                         while (true)
                                                         {
-                                                            Block block = chunk.getBlock(i4 + i3, l4--, j4 + j3);
+                                                            IBlockState iblockstate1 = chunk.getBlockState(i4 + i3, l4--, j4 + j3);
                                                             ++k3;
 
-                                                            if (l4 <= 0 || !block.getMaterial().isLiquid())
+                                                            if (l4 <= 0 || !iblockstate1.getMaterial().isLiquid())
                                                             {
-                                                                break label541;
+                                                                break label542;
                                                             }
                                                         }
                                                     }
@@ -173,7 +173,7 @@ public class ItemMap extends ItemMapBase
                                             }
 
                                             d1 += (double)k4 / (double)(i * i);
-                                            multiset.add(iblockstate.getBlock().getMapColor(iblockstate));
+                                            multiset.add(iblockstate.getMapColor());
                                         }
                                     }
                                 }
@@ -192,9 +192,9 @@ public class ItemMap extends ItemMapBase
                                     i5 = 0;
                                 }
 
-                                MapColor mapcolor = (MapColor)Iterables.getFirst(Multisets.<MapColor>copyHighestCountFirst(multiset), MapColor.airColor);
+                                MapColor mapcolor = (MapColor)Iterables.getFirst(Multisets.<MapColor>copyHighestCountFirst(multiset), MapColor.AIR);
 
-                                if (mapcolor == MapColor.waterColor)
+                                if (mapcolor == MapColor.WATER)
                                 {
                                     d2 = (double)k3 * 0.1D + (double)(k1 + l1 & 1) * 0.2D;
                                     i5 = 1;
@@ -248,14 +248,15 @@ public class ItemMap extends ItemMapBase
                 mapdata.updateVisiblePlayers(entityplayer, stack);
             }
 
-            if (isSelected)
+            if (isSelected || entityIn instanceof EntityPlayer && ((EntityPlayer)entityIn).getHeldItemOffhand() == stack)
             {
                 this.updateMapData(worldIn, entityIn, mapdata);
             }
         }
     }
 
-    public Packet createMapDataPacket(ItemStack stack, World worldIn, EntityPlayer player)
+    @Nullable
+    public Packet<?> createMapDataPacket(ItemStack stack, World worldIn, EntityPlayer player)
     {
         return this.getMapData(stack, worldIn).getMapPacket(stack, worldIn, player);
     }
@@ -265,23 +266,48 @@ public class ItemMap extends ItemMapBase
      */
     public void onCreated(ItemStack stack, World worldIn, EntityPlayer playerIn)
     {
-        if (stack.hasTagCompound() && stack.getTagCompound().getBoolean("map_is_scaling"))
+        NBTTagCompound nbttagcompound = stack.getTagCompound();
+
+        if (nbttagcompound != null)
         {
-            MapData mapdata = Items.filled_map.getMapData(stack, worldIn);
-            stack.setItemDamage(worldIn.getUniqueDataId("map"));
-            MapData mapdata1 = new MapData("map_" + stack.getMetadata());
-            mapdata1.scale = (byte)(mapdata.scale + 1);
-
-            if (mapdata1.scale > 4)
+            if (nbttagcompound.hasKey("map_scale_direction", 99))
             {
-                mapdata1.scale = 4;
+                scaleMap(stack, worldIn, nbttagcompound.getInteger("map_scale_direction"));
+                nbttagcompound.removeTag("map_scale_direction");
             }
-
-            mapdata1.calculateMapCenter((double)mapdata.xCenter, (double)mapdata.zCenter, mapdata1.scale);
-            mapdata1.dimension = mapdata.dimension;
-            mapdata1.markDirty();
-            worldIn.setItemData("map_" + stack.getMetadata(), mapdata1);
+            else if (nbttagcompound.getBoolean("map_tracking_position"))
+            {
+                enableMapTracking(stack, worldIn);
+                nbttagcompound.removeTag("map_tracking_position");
+            }
         }
+    }
+
+    protected static void scaleMap(ItemStack p_185063_0_, World p_185063_1_, int p_185063_2_)
+    {
+        MapData mapdata = Items.FILLED_MAP.getMapData(p_185063_0_, p_185063_1_);
+        p_185063_0_.setItemDamage(p_185063_1_.getUniqueDataId("map"));
+        MapData mapdata1 = new MapData("map_" + p_185063_0_.getMetadata());
+        mapdata1.scale = (byte)MathHelper.clamp_int(mapdata.scale + p_185063_2_, 0, 4);
+        mapdata1.trackingPosition = mapdata.trackingPosition;
+        mapdata1.calculateMapCenter((double)mapdata.xCenter, (double)mapdata.zCenter, mapdata1.scale);
+        mapdata1.dimension = mapdata.dimension;
+        mapdata1.markDirty();
+        p_185063_1_.setItemData("map_" + p_185063_0_.getMetadata(), mapdata1);
+    }
+
+    protected static void enableMapTracking(ItemStack p_185064_0_, World p_185064_1_)
+    {
+        MapData mapdata = Items.FILLED_MAP.getMapData(p_185064_0_, p_185064_1_);
+        p_185064_0_.setItemDamage(p_185064_1_.getUniqueDataId("map"));
+        MapData mapdata1 = new MapData("map_" + p_185064_0_.getMetadata());
+        mapdata1.trackingPosition = true;
+        mapdata1.xCenter = mapdata.xCenter;
+        mapdata1.zCenter = mapdata.zCenter;
+        mapdata1.scale = mapdata.scale;
+        mapdata1.dimension = mapdata.dimension;
+        mapdata1.markDirty();
+        p_185064_1_.setItemData("map_" + p_185064_0_.getMetadata(), mapdata1);
     }
 
     /**

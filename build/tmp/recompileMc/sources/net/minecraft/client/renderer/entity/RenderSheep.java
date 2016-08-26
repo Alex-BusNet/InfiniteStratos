@@ -10,7 +10,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderSheep extends RenderLiving<EntitySheep>
 {
-    private static final ResourceLocation shearedSheepTextures = new ResourceLocation("textures/entity/sheep/sheep.png");
+    private static final ResourceLocation SHEARED_SHEEP_TEXTURES = new ResourceLocation("textures/entity/sheep/sheep.png");
 
     public RenderSheep(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn)
     {
@@ -23,6 +23,6 @@ public class RenderSheep extends RenderLiving<EntitySheep>
      */
     protected ResourceLocation getEntityTexture(EntitySheep entity)
     {
-        return shearedSheepTextures;
+        return SHEARED_SHEEP_TEXTURES;
     }
 }

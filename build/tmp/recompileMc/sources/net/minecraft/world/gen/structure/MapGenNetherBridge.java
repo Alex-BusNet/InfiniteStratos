@@ -1,26 +1,25 @@
 package net.minecraft.world.gen.structure;
 
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Random;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.entity.monster.EntityPigZombie;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
-
-import java.util.List;
-import java.util.Random;
+import net.minecraft.world.biome.Biome;
 
 public class MapGenNetherBridge extends MapGenStructure
 {
-    private List<BiomeGenBase.SpawnListEntry> spawnList = Lists.<BiomeGenBase.SpawnListEntry>newArrayList();
+    private final List<Biome.SpawnListEntry> spawnList = Lists.<Biome.SpawnListEntry>newArrayList();
 
     public MapGenNetherBridge()
     {
-        this.spawnList.add(new BiomeGenBase.SpawnListEntry(EntityBlaze.class, 10, 2, 3));
-        this.spawnList.add(new BiomeGenBase.SpawnListEntry(EntityPigZombie.class, 5, 4, 4));
-        this.spawnList.add(new BiomeGenBase.SpawnListEntry(EntitySkeleton.class, 10, 4, 4));
-        this.spawnList.add(new BiomeGenBase.SpawnListEntry(EntityMagmaCube.class, 3, 4, 4));
+        this.spawnList.add(new Biome.SpawnListEntry(EntityBlaze.class, 10, 2, 3));
+        this.spawnList.add(new Biome.SpawnListEntry(EntityPigZombie.class, 5, 4, 4));
+        this.spawnList.add(new Biome.SpawnListEntry(EntitySkeleton.class, 10, 4, 4));
+        this.spawnList.add(new Biome.SpawnListEntry(EntityMagmaCube.class, 3, 4, 4));
     }
 
     public String getStructureName()
@@ -28,7 +27,7 @@ public class MapGenNetherBridge extends MapGenStructure
         return "Fortress";
     }
 
-    public List<BiomeGenBase.SpawnListEntry> getSpawnList()
+    public List<Biome.SpawnListEntry> getSpawnList()
     {
         return this.spawnList;
     }
@@ -53,23 +52,23 @@ public class MapGenNetherBridge extends MapGenStructure
             {
             }
 
-            public Start(World worldIn, Random p_i2040_2_, int p_i2040_3_, int p_i2040_4_)
+            public Start(World worldIn, Random random, int chunkX, int chunkZ)
             {
-                super(p_i2040_3_, p_i2040_4_);
-                StructureNetherBridgePieces.Start structurenetherbridgepieces$start = new StructureNetherBridgePieces.Start(p_i2040_2_, (p_i2040_3_ << 4) + 2, (p_i2040_4_ << 4) + 2);
+                super(chunkX, chunkZ);
+                StructureNetherBridgePieces.Start structurenetherbridgepieces$start = new StructureNetherBridgePieces.Start(random, (chunkX << 4) + 2, (chunkZ << 4) + 2);
                 this.components.add(structurenetherbridgepieces$start);
-                structurenetherbridgepieces$start.buildComponent(structurenetherbridgepieces$start, this.components, p_i2040_2_);
-                List<StructureComponent> list = structurenetherbridgepieces$start.field_74967_d;
+                structurenetherbridgepieces$start.buildComponent(structurenetherbridgepieces$start, this.components, random);
+                List<StructureComponent> list = structurenetherbridgepieces$start.pendingChildren;
 
                 while (!list.isEmpty())
                 {
-                    int i = p_i2040_2_.nextInt(list.size());
+                    int i = random.nextInt(list.size());
                     StructureComponent structurecomponent = (StructureComponent)list.remove(i);
-                    structurecomponent.buildComponent(structurenetherbridgepieces$start, this.components, p_i2040_2_);
+                    structurecomponent.buildComponent(structurenetherbridgepieces$start, this.components, random);
                 }
 
                 this.updateBoundingBox();
-                this.setRandomHeight(worldIn, p_i2040_2_, 48, 70);
+                this.setRandomHeight(worldIn, random, 48, 70);
             }
         }
 }

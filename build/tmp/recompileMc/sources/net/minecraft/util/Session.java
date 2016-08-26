@@ -3,12 +3,11 @@ package net.minecraft.util;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.util.UUIDTypeAdapter;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nullable;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class Session
@@ -26,13 +25,14 @@ public class Session
         {
             usernameIn = "MissingName";
             playerIDIn = tokenIn = "NotValid";
-            FMLLog.getLogger().log(org.apache.logging.log4j.Level.WARN, "=========================================================");
-            FMLLog.getLogger().log(org.apache.logging.log4j.Level.WARN, "WARNING!! the username was not set for this session, typically");
-            FMLLog.getLogger().log(org.apache.logging.log4j.Level.WARN, "this means you installed Forge incorrectly. We have set your");
-            FMLLog.getLogger().log(org.apache.logging.log4j.Level.WARN, "name to \"MissingName\" and your session to nothing. Please");
-            FMLLog.getLogger().log(org.apache.logging.log4j.Level.WARN, "check your installation and post a console log from the launcher");
-            FMLLog.getLogger().log(org.apache.logging.log4j.Level.WARN, "when asking for help!");
-            FMLLog.getLogger().log(org.apache.logging.log4j.Level.WARN, "=========================================================");
+            org.apache.logging.log4j.Logger logger = net.minecraftforge.fml.common.FMLLog.getLogger();
+            logger.log(org.apache.logging.log4j.Level.WARN, "=========================================================");
+            logger.log(org.apache.logging.log4j.Level.WARN, "WARNING!! the username was not set for this session, typically");
+            logger.log(org.apache.logging.log4j.Level.WARN, "this means you installed Forge incorrectly. We have set your");
+            logger.log(org.apache.logging.log4j.Level.WARN, "name to \"MissingName\" and your session to nothing. Please");
+            logger.log(org.apache.logging.log4j.Level.WARN, "check your installation and post a console log from the launcher");
+            logger.log(org.apache.logging.log4j.Level.WARN, "when asking for help!");
+            logger.log(org.apache.logging.log4j.Level.WARN, "=========================================================");
         }
 
         this.username = usernameIn;
@@ -76,14 +76,6 @@ public class Session
         }
     }
 
-    /**
-     * Returns either 'legacy' or 'mojang' whether the account is migrated or not
-     */
-    public Session.Type getSessionType()
-    {
-        return this.sessionType;
-    }
-
     /* ======================================== FORGE START ===================================== */
     //For internal use only. Modders should never need to use this.
     public void setProperties(com.mojang.authlib.properties.PropertyMap properties)
@@ -111,6 +103,7 @@ public class Session
             this.sessionType = sessionTypeIn;
         }
 
+        @Nullable
         public static Session.Type setSessionType(String sessionTypeIn)
         {
             return (Session.Type)SESSION_TYPES.get(sessionTypeIn.toLowerCase());

@@ -9,8 +9,8 @@ public class BlockHardenedClay extends Block
 {
     public BlockHardenedClay()
     {
-        super(Material.rock);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        super(Material.ROCK);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -18,6 +18,6 @@ public class BlockHardenedClay extends Block
      */
     public MapColor getMapColor(IBlockState state)
     {
-        return MapColor.adobeColor;
+        return MapColor.ADOBE;
     }
 }

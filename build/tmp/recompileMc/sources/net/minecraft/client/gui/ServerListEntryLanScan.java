@@ -38,9 +38,10 @@ public class ServerListEntryLanScan implements GuiListExtended.IGuiListEntry
     }
 
     /**
-     * Returns true if the mouse has been pressed on this control.
+     * Called when the mouse is clicked within this entry. Returning true means that something within this entry was
+     * clicked and the list should not be dragged.
      */
-    public boolean mousePressed(int slotIndex, int p_148278_2_, int p_148278_3_, int p_148278_4_, int p_148278_5_, int p_148278_6_)
+    public boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY)
     {
         return false;
     }

@@ -1,5 +1,7 @@
 package net.minecraft.block;
 
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -8,31 +10,31 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-
-import java.util.Random;
 
 public class BlockOre extends Block
 {
     public BlockOre()
     {
-        this(Material.rock.getMaterialMapColor());
+        this(Material.ROCK.getMaterialMapColor());
     }
 
-    public BlockOre(MapColor p_i46390_1_)
+    public BlockOre(MapColor color)
     {
-        super(Material.rock, p_i46390_1_);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        super(Material.ROCK, color);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
      * Get the Item that this Block should drop when harvested.
      */
+    @Nullable
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return this == Blocks.coal_ore ? Items.coal : (this == Blocks.diamond_ore ? Items.diamond : (this == Blocks.lapis_ore ? Items.dye : (this == Blocks.emerald_ore ? Items.emerald : (this == Blocks.quartz_ore ? Items.quartz : Item.getItemFromBlock(this)))));
+        return this == Blocks.COAL_ORE ? Items.COAL : (this == Blocks.DIAMOND_ORE ? Items.DIAMOND : (this == Blocks.LAPIS_ORE ? Items.DYE : (this == Blocks.EMERALD_ORE ? Items.EMERALD : (this == Blocks.QUARTZ_ORE ? Items.QUARTZ : Item.getItemFromBlock(this)))));
     }
 
     /**
@@ -40,7 +42,7 @@ public class BlockOre extends Block
      */
     public int quantityDropped(Random random)
     {
-        return this == Blocks.lapis_ore ? 4 + random.nextInt(5) : 1;
+        return this == Blocks.LAPIS_ORE ? 4 + random.nextInt(5) : 1;
     }
 
     /**
@@ -73,31 +75,30 @@ public class BlockOre extends Block
         super.dropBlockAsItemWithChance(worldIn, pos, state, chance, fortune);
     }
     @Override
-    public int getExpDrop(net.minecraft.world.IBlockAccess world, BlockPos pos, int fortune)
+    public int getExpDrop(IBlockState state, net.minecraft.world.IBlockAccess world, BlockPos pos, int fortune)
     {
-        IBlockState state = world.getBlockState(pos);
         Random rand = world instanceof World ? ((World)world).rand : new Random();
         if (this.getItemDropped(state, rand, fortune) != Item.getItemFromBlock(this))
         {
             int i = 0;
 
-            if (this == Blocks.coal_ore)
+            if (this == Blocks.COAL_ORE)
             {
                 i = MathHelper.getRandomIntegerInRange(rand, 0, 2);
             }
-            else if (this == Blocks.diamond_ore)
+            else if (this == Blocks.DIAMOND_ORE)
             {
                 i = MathHelper.getRandomIntegerInRange(rand, 3, 7);
             }
-            else if (this == Blocks.emerald_ore)
+            else if (this == Blocks.EMERALD_ORE)
             {
                 i = MathHelper.getRandomIntegerInRange(rand, 3, 7);
             }
-            else if (this == Blocks.lapis_ore)
+            else if (this == Blocks.LAPIS_ORE)
             {
                 i = MathHelper.getRandomIntegerInRange(rand, 2, 5);
             }
-            else if (this == Blocks.quartz_ore)
+            else if (this == Blocks.QUARTZ_ORE)
             {
                 i = MathHelper.getRandomIntegerInRange(rand, 2, 5);
             }
@@ -107,9 +108,9 @@ public class BlockOre extends Block
         return 0;
     }
 
-    public int getDamageValue(World worldIn, BlockPos pos)
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
-        return 0;
+        return new ItemStack(this);
     }
 
     /**
@@ -118,6 +119,6 @@ public class BlockOre extends Block
      */
     public int damageDropped(IBlockState state)
     {
-        return this == Blocks.lapis_ore ? EnumDyeColor.BLUE.getDyeDamage() : 0;
+        return this == Blocks.LAPIS_ORE ? EnumDyeColor.BLUE.getDyeDamage() : 0;
     }
 }

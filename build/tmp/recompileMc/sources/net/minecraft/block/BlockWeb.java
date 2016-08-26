@@ -1,26 +1,30 @@
 package net.minecraft.block;
 
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.Random;
 
 public class BlockWeb extends Block
 {
     public BlockWeb()
     {
-        super(Material.web);
-        this.setCreativeTab(CreativeTabs.tabDecorations);
+        super(Material.WEB);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
     }
 
     /**
@@ -34,17 +38,18 @@ public class BlockWeb extends Block
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos)
     {
-        return null;
+        return NULL_AABB;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -52,9 +57,10 @@ public class BlockWeb extends Block
     /**
      * Get the Item that this Block should drop when harvested.
      */
+    @Nullable
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.string;
+        return Items.STRING;
     }
 
     protected boolean canSilkHarvest()
@@ -63,8 +69,21 @@ public class BlockWeb extends Block
     }
 
     @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.CUTOUT;
+        return BlockRenderLayer.CUTOUT;
+    }
+
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack)
+    {
+        if (!worldIn.isRemote && stack != null && stack.getItem() == Items.SHEARS)
+        {
+            player.addStat(StatList.getBlockStats(this));
+            spawnAsEntity(worldIn, pos, new ItemStack(Item.getItemFromBlock(this), 1));
+        }
+        else
+        {
+            super.harvestBlock(worldIn, player, pos, state, te, stack);
+        }
     }
 }

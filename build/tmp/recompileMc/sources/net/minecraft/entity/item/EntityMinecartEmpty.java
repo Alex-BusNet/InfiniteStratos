@@ -1,7 +1,10 @@
 package net.minecraft.entity.item;
 
-import net.minecraft.entity.Entity;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 
 public class EntityMinecartEmpty extends EntityMinecart
@@ -11,30 +14,33 @@ public class EntityMinecartEmpty extends EntityMinecart
         super(worldIn);
     }
 
-    public EntityMinecartEmpty(World worldIn, double p_i1723_2_, double p_i1723_4_, double p_i1723_6_)
+    public EntityMinecartEmpty(World worldIn, double x, double y, double z)
     {
-        super(worldIn, p_i1723_2_, p_i1723_4_, p_i1723_6_);
+        super(worldIn, x, y, z);
     }
 
-    /**
-     * First layer of player interaction
-     */
-    public boolean interactFirst(EntityPlayer playerIn)
+    public static void func_189673_a(DataFixer p_189673_0_)
     {
-        if(net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.minecart.MinecartInteractEvent(this, playerIn))) return true;
-        if (this.riddenByEntity != null && this.riddenByEntity instanceof EntityPlayer && this.riddenByEntity != playerIn)
-        {
-            return true;
-        }
-        else if (this.riddenByEntity != null && this.riddenByEntity != playerIn)
+        EntityMinecart.func_189669_a(p_189673_0_, "MinecartRideable");
+    }
+
+    public boolean processInitialInteract(EntityPlayer player, @Nullable ItemStack stack, EnumHand hand)
+    {
+        if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.minecart.MinecartInteractEvent(this, player, stack, hand))) return true;
+
+        if (player.isSneaking())
         {
             return false;
+        }
+        else if (this.isBeingRidden())
+        {
+            return true;
         }
         else
         {
             if (!this.worldObj.isRemote)
             {
-                playerIn.mountEntity(this);
+                player.startRiding(this);
             }
 
             return true;
@@ -42,15 +48,15 @@ public class EntityMinecartEmpty extends EntityMinecart
     }
 
     /**
-     * Called every tick the minecart is on an activator rail. Args: x, y, z, is the rail receiving power
+     * Called every tick the minecart is on an activator rail.
      */
     public void onActivatorRailPass(int x, int y, int z, boolean receivingPower)
     {
         if (receivingPower)
         {
-            if (this.riddenByEntity != null)
+            if (this.isBeingRidden())
             {
-                this.riddenByEntity.mountEntity((Entity)null);
+                this.removePassengers();
             }
 
             if (this.getRollingAmplitude() == 0)
@@ -63,8 +69,8 @@ public class EntityMinecartEmpty extends EntityMinecart
         }
     }
 
-    public EntityMinecart.EnumMinecartType getMinecartType()
+    public EntityMinecart.Type getType()
     {
-        return EntityMinecart.EnumMinecartType.RIDEABLE;
+        return EntityMinecart.Type.RIDEABLE;
     }
 }

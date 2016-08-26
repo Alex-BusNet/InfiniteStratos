@@ -18,8 +18,8 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
-        classpath "gradle.plugin.com.matthewprenger:CurseGradle:1.0.5" // Required for the curseforge task
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath "gradle.plugin.com.matthewprenger:CurseGradle:1.0.7" // Required for the curseforge task
     }
 }
 
@@ -41,8 +41,8 @@ apply plugin: 'maven'
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'com.matthewprenger.cursegradle' // Required for the curseforge task
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 version = "${minecraft_version}-${mod_version}.${System.getenv("BUILD_NUMBER") ?: 0}"
 group = mod_group
@@ -55,7 +55,7 @@ minecraft {
     useDepAts = true //Required for JEI
 
     // Set mod version in code prior to compilation
-    replaceIn "reference/Reference.java"
+    replaceIn "InfiniteStratos.java"
     replace "@MOD_VERSION@", "${mod_version}.${System.getenv("BUILD_NUMBER") ?: 0}"
 
     // Set the jar signature in code prior to compilation, if it exists as a build property

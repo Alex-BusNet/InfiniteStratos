@@ -1,5 +1,6 @@
 package net.minecraft.inventory;
 
+import javax.annotation.Nullable;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
@@ -14,7 +15,7 @@ public class SlotFurnaceFuel extends Slot
     /**
      * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
      */
-    public boolean isItemValid(ItemStack stack)
+    public boolean isItemValid(@Nullable ItemStack stack)
     {
         return TileEntityFurnace.isItemFuel(stack) || isBucket(stack);
     }
@@ -26,6 +27,6 @@ public class SlotFurnaceFuel extends Slot
 
     public static boolean isBucket(ItemStack stack)
     {
-        return stack != null && stack.getItem() != null && stack.getItem() == Items.bucket;
+        return stack != null && stack.getItem() != null && stack.getItem() == Items.BUCKET;
     }
 }

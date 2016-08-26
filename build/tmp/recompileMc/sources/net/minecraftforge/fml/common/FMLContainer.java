@@ -1,19 +1,33 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.common;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
+import java.io.File;
+import java.security.cert.Certificate;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -28,21 +42,21 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.PersistentRegistryManager;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
 import net.minecraftforge.fml.relauncher.Side;
+
 import org.apache.logging.log4j.Level;
 
-import java.io.File;
-import java.security.cert.Certificate;
-import java.util.*;
-import java.util.Map.Entry;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 /**
  * @author cpw
  *
  */
-public class FMLContainer extends DummyModContainer implements WorldAccessContainer
+public final class FMLContainer extends DummyModContainer implements WorldAccessContainer
 {
     public FMLContainer()
     {
@@ -78,8 +92,9 @@ public class FMLContainer extends DummyModContainer implements WorldAccessContai
     @Subscribe
     public void modPreinitialization(FMLPreInitializationEvent evt)
     {
-        // Initialize the villager registry
-        VillagerRegistry.instance();
+        // Initialize all Forge/Vanilla registries {invoke the static init)
+        if (ForgeRegistries.ITEMS == null)
+            throw new RuntimeException("Something horrible went wrong in init, ForgeRegistres didn't create...");
     }
 
     @NetworkCheckHandler
@@ -298,13 +313,15 @@ public class FMLContainer extends DummyModContainer implements WorldAccessContai
                 {
                     entry.blocked.add(i);
                 }
-                // save doesn't have dummied list
-                if (!regs.getCompoundTag(key).hasKey("dummied")) return;
-                list = regs.getCompoundTag(key).getTagList("dummied",10);
-                for (int x = 0; x < list.tagCount(); x++)
+
+                if (regs.getCompoundTag(key).hasKey("dummied")) // Added in 1.8.9 dev, some worlds may not have it.
                 {
-                    NBTTagCompound e = list.getCompoundTagAt(x);
-                    entry.dummied.add(new ResourceLocation(e.getString("K")));
+                    list = regs.getCompoundTag(key).getTagList("dummied",10);
+                    for (int x = 0; x < list.tagCount(); x++)
+                    {
+                        NBTTagCompound e = list.getCompoundTagAt(x);
+                        entry.dummied.add(new ResourceLocation(e.getString("K")));
+                    }
                 }
             }
             failedElements = PersistentRegistryManager.injectSnapshot(snapshot, true, true);

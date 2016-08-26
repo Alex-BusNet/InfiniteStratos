@@ -1,12 +1,11 @@
 package net.minecraft.client.gui;
 
 import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.List;
 import net.minecraft.client.resources.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.io.IOException;
-import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class GuiYesNo extends GuiScreen
@@ -14,8 +13,8 @@ public class GuiYesNo extends GuiScreen
     /** A reference to the screen object that created this. Used for navigating between screens. */
     protected GuiYesNoCallback parentScreen;
     protected String messageLine1;
-    private String messageLine2;
-    private final List<String> field_175298_s = Lists.<String>newArrayList();
+    private final String messageLine2;
+    private final List<String> listLines = Lists.<String>newArrayList();
     /** The text shown for the first button in GuiYesNo */
     protected String confirmButtonText;
     /** The text shown for the second button in GuiYesNo */
@@ -51,8 +50,8 @@ public class GuiYesNo extends GuiScreen
     {
         this.buttonList.add(new GuiOptionButton(0, this.width / 2 - 155, this.height / 6 + 96, this.confirmButtonText));
         this.buttonList.add(new GuiOptionButton(1, this.width / 2 - 155 + 160, this.height / 6 + 96, this.cancelButtonText));
-        this.field_175298_s.clear();
-        this.field_175298_s.addAll(this.fontRendererObj.listFormattedStringToWidth(this.messageLine2, this.width - 50));
+        this.listLines.clear();
+        this.listLines.addAll(this.fontRendererObj.listFormattedStringToWidth(this.messageLine2, this.width - 50));
     }
 
     /**
@@ -64,7 +63,7 @@ public class GuiYesNo extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
@@ -72,7 +71,7 @@ public class GuiYesNo extends GuiScreen
         this.drawCenteredString(this.fontRendererObj, this.messageLine1, this.width / 2, 70, 16777215);
         int i = 90;
 
-        for (String s : this.field_175298_s)
+        for (String s : this.listLines)
         {
             this.drawCenteredString(this.fontRendererObj, s, this.width / 2, i, 16777215);
             i += this.fontRendererObj.FONT_HEIGHT;

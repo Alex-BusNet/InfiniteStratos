@@ -1,34 +1,58 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.common;
-
-import com.google.common.collect.*;
-import com.google.common.collect.ImmutableMap.Builder;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-import net.minecraftforge.fml.common.LoaderState.ModState;
-import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
-import net.minecraftforge.fml.common.event.*;
-import net.minecraftforge.fml.common.functions.ArtifactVersionNameFunction;
-import net.minecraftforge.fml.common.versioning.ArtifactVersion;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.ThreadContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+
+import net.minecraftforge.fml.common.LoaderState.ModState;
+import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
+import net.minecraftforge.fml.common.event.FMLEvent;
+import net.minecraftforge.fml.common.event.FMLLoadEvent;
+import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLStateEvent;
+import net.minecraftforge.fml.common.functions.ArtifactVersionNameFunction;
+import net.minecraftforge.fml.common.versioning.ArtifactVersion;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.ThreadContext;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import com.google.common.eventbus.SubscriberExceptionHandler;
+import com.google.common.eventbus.SubscriberExceptionContext;
 
 public class LoadController
 {
@@ -46,7 +70,14 @@ public class LoadController
     public LoadController(Loader loader)
     {
         this.loader = loader;
-        this.masterChannel = new EventBus("FMLMainChannel");
+        this.masterChannel = new EventBus(new SubscriberExceptionHandler()
+        {
+            @Override
+            public void handleException(Throwable exception, SubscriberExceptionContext context)
+            {
+                FMLLog.log("FMLMainChannel", Level.ERROR, exception, "Could not dispatch event: %s to %s", context.getEvent(), context.getSubscriberMethod());
+            }
+        });
         this.masterChannel.register(this);
 
         state = LoaderState.NOINIT;
@@ -73,10 +104,18 @@ public class LoadController
     {
         Builder<String, EventBus> eventBus = ImmutableMap.builder();
 
-        for (ModContainer mod : loader.getModList())
+        for (final ModContainer mod : loader.getModList())
         {
             //Create mod logger, and make the EventBus logger a child of it.
-            EventBus bus = new EventBus(mod.getModId());
+            EventBus bus = new EventBus(new SubscriberExceptionHandler()
+            {
+                @Override
+                public void handleException(final Throwable exception, final SubscriberExceptionContext context)
+                {
+                    LoadController.this.errorOccurred(mod, exception);
+                }
+            });
+
             boolean isActive = mod.registerBus(bus, this);
             if (isActive)
             {
@@ -134,8 +173,8 @@ public class LoadController
             else
             {
                 FMLLog.severe("The ForgeModLoader state engine has become corrupted. Probably, a state was missed by and invalid modification to a base class" +
-                		"ForgeModLoader depends on. This is a critical error and not recoverable. Investigate any modifications to base classes outside of" +
-                		"ForgeModLoader, especially Optifine, to see if there are fixes available.");
+                        "ForgeModLoader depends on. This is a critical error and not recoverable. Investigate any modifications to base classes outside of" +
+                        "ForgeModLoader, especially Optifine, to see if there are fixes available.");
                 throw new RuntimeException("The ForgeModLoader state engine is invalid");
             }
             if (toThrow != null && toThrow instanceof RuntimeException)
@@ -160,6 +199,10 @@ public class LoadController
         return activeContainer != null ? activeContainer : findActiveContainerFromStack();
     }
 
+    void forceActiveContainer(ModContainer container)
+    {
+        activeContainer = container;
+    }
     @Subscribe
     public void propogateStateMessage(FMLEvent stateEvent)
     {
@@ -212,7 +255,7 @@ public class LoadController
 
     public ImmutableBiMap<ModContainer, Object> buildModObjectList()
     {
-        ImmutableBiMap.Builder<ModContainer, Object> builder = ImmutableBiMap.<ModContainer, Object>builder();
+        ImmutableBiMap.Builder<ModContainer, Object> builder = ImmutableBiMap.builder();
         for (ModContainer mc : activeModList)
         {
             if (!mc.isImmutable() && mc.getMod()!=null)
@@ -240,7 +283,7 @@ public class LoadController
     {
         if (exception instanceof InvocationTargetException)
         {
-            errors.put(modContainer.getModId(), ((InvocationTargetException)exception).getCause());
+            errors.put(modContainer.getModId(), exception.getCause());
         }
         else
         {
@@ -302,9 +345,9 @@ public class LoadController
         return this.state == state;
     }
 
-	boolean hasReachedState(LoaderState state) {
-		return this.state.ordinal()>=state.ordinal() && this.state!=LoaderState.ERRORED;
-	}
+    boolean hasReachedState(LoaderState state) {
+        return this.state.ordinal()>=state.ordinal() && this.state!=LoaderState.ERRORED;
+    }
 
     void forceState(LoaderState newState)
     {

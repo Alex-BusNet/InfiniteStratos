@@ -1,5 +1,7 @@
 package net.minecraft.entity.ai;
 
+import java.util.List;
+import java.util.Random;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -10,12 +12,9 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
-import java.util.List;
-import java.util.Random;
-
 public class EntityAIMate extends EntityAIBase
 {
-    private EntityAnimal theAnimal;
+    private final EntityAnimal theAnimal;
     World theWorld;
     private EntityAnimal targetMate;
     /** Delay preventing a baby from spawning immediately when two mate-able animals find each other. */
@@ -85,8 +84,7 @@ public class EntityAIMate extends EntityAIBase
      */
     private EntityAnimal getNearbyMate()
     {
-        float f = 8.0F;
-        List<EntityAnimal> list = this.theWorld.<EntityAnimal>getEntitiesWithinAABB(this.theAnimal.getClass(), this.theAnimal.getEntityBoundingBox().expand((double)f, (double)f, (double)f));
+        List<EntityAnimal> list = this.theWorld.<EntityAnimal>getEntitiesWithinAABB(this.theAnimal.getClass(), this.theAnimal.getEntityBoundingBox().expandXyz(8.0D));
         double d0 = Double.MAX_VALUE;
         EntityAnimal entityanimal = null;
 
@@ -120,11 +118,11 @@ public class EntityAIMate extends EntityAIBase
 
             if (entityplayer != null)
             {
-                entityplayer.triggerAchievement(StatList.animalsBredStat);
+                entityplayer.addStat(StatList.ANIMALS_BRED);
 
                 if (this.theAnimal instanceof EntityCow)
                 {
-                    entityplayer.triggerAchievement(AchievementList.breedCow);
+                    entityplayer.addStat(AchievementList.BREED_COW);
                 }
             }
 

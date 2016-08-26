@@ -1,5 +1,6 @@
 package net.minecraft.world.storage;
 
+import javax.annotation.Nullable;
 import net.minecraft.world.WorldSavedData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -13,10 +14,11 @@ public class SaveDataMemoryStorage extends MapStorage
     }
 
     /**
-     * Loads an existing MapDataBase corresponding to the given String id from disk, instantiating the given Class, or
-     * returns null if none such file exists. args: Class to instantiate, String dataid
+     * Loads an existing MapDataBase corresponding to the given id from disk, instantiating the given Class, or returns
+     * null if none such file exists.
      */
-    public WorldSavedData loadData(Class <? extends WorldSavedData > clazz, String dataIdentifier)
+    @Nullable
+    public WorldSavedData getOrLoadData(Class <? extends WorldSavedData > clazz, String dataIdentifier)
     {
         return (WorldSavedData)this.loadedDataMap.get(dataIdentifier);
     }

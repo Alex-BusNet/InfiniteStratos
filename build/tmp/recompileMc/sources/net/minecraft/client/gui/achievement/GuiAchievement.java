@@ -5,7 +5,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.stats.Achievement;
 import net.minecraft.util.ResourceLocation;
@@ -15,15 +15,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class GuiAchievement extends Gui
 {
-    private static final ResourceLocation achievementBg = new ResourceLocation("textures/gui/achievement/achievement_background.png");
-    private Minecraft mc;
+    private static final ResourceLocation ACHIEVEMENT_BG = new ResourceLocation("textures/gui/achievement/achievement_background.png");
+    private final Minecraft mc;
     private int width;
     private int height;
     private String achievementTitle;
     private String achievementDescription;
     private Achievement theAchievement;
     private long notificationTime;
-    private RenderItem renderItem;
+    private final RenderItem renderItem;
     private boolean permanentNotification;
 
     public GuiAchievement(Minecraft mc)
@@ -77,17 +77,17 @@ public class GuiAchievement extends Gui
         {
             double d0 = (double)(Minecraft.getSystemTime() - this.notificationTime) / 3000.0D;
 
-            if (!this.permanentNotification)
+            if (this.permanentNotification)
             {
-                if (d0 < 0.0D || d0 > 1.0D)
+                if (d0 > 0.5D)
                 {
-                    this.notificationTime = 0L;
-                    return;
+                    d0 = 0.5D;
                 }
             }
-            else if (d0 > 0.5D)
+            else if (d0 < 0.0D || d0 > 1.0D)
             {
-                d0 = 0.5D;
+                this.notificationTime = 0L;
+                return;
             }
 
             this.updateAchievementWindowScale();
@@ -114,7 +114,7 @@ public class GuiAchievement extends Gui
             int j = 0 - (int)(d1 * 36.0D);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager.enableTexture2D();
-            this.mc.getTextureManager().bindTexture(achievementBg);
+            this.mc.getTextureManager().bindTexture(ACHIEVEMENT_BG);
             GlStateManager.disableLighting();
             this.drawTexturedModalRect(i, j, 96, 202, 160, 32);
 

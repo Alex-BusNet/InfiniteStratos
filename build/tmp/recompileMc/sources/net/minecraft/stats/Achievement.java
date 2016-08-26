@@ -3,7 +3,11 @@ package net.minecraft.stats;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.*;
+import net.minecraft.util.IJsonSerializable;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -31,21 +35,21 @@ public class Achievement extends StatBase
      */
     private boolean isSpecial;
 
-    public Achievement(String p_i46327_1_, String p_i46327_2_, int column, int row, Item p_i46327_5_, Achievement parent)
+    public Achievement(String statIdIn, String unlocalizedName, int column, int row, Item itemIn, Achievement parent)
     {
-        this(p_i46327_1_, p_i46327_2_, column, row, new ItemStack(p_i46327_5_), parent);
+        this(statIdIn, unlocalizedName, column, row, new ItemStack(itemIn), parent);
     }
 
-    public Achievement(String p_i45301_1_, String p_i45301_2_, int column, int row, Block p_i45301_5_, Achievement parent)
+    public Achievement(String statIdIn, String unlocalizedName, int column, int row, Block blockIn, Achievement parent)
     {
-        this(p_i45301_1_, p_i45301_2_, column, row, new ItemStack(p_i45301_5_), parent);
+        this(statIdIn, unlocalizedName, column, row, new ItemStack(blockIn), parent);
     }
 
-    public Achievement(String p_i45302_1_, String p_i45302_2_, int column, int row, ItemStack p_i45302_5_, Achievement parent)
+    public Achievement(String statIdIn, String unlocalizedName, int column, int row, ItemStack stack, Achievement parent)
     {
-        super(p_i45302_1_, new ChatComponentTranslation("achievement." + p_i45302_2_, new Object[0]));
-        this.theItemStack = p_i45302_5_;
-        this.achievementDescription = "achievement." + p_i45302_2_ + ".desc";
+        super(statIdIn, new TextComponentTranslation("achievement." + unlocalizedName, new Object[0]));
+        this.theItemStack = stack;
+        this.achievementDescription = "achievement." + unlocalizedName + ".desc";
         this.displayColumn = column;
         this.displayRow = row;
 
@@ -98,7 +102,7 @@ public class Achievement extends StatBase
     public Achievement registerStat()
     {
         super.registerStat();
-        AchievementList.achievementList.add(this);
+        AchievementList.ACHIEVEMENTS.add(this);
         return this;
     }
 
@@ -110,16 +114,16 @@ public class Achievement extends StatBase
         return true;
     }
 
-    public IChatComponent getStatName()
+    public ITextComponent getStatName()
     {
-        IChatComponent ichatcomponent = super.getStatName();
-        ichatcomponent.getChatStyle().setColor(this.getSpecial() ? EnumChatFormatting.DARK_PURPLE : EnumChatFormatting.GREEN);
-        return ichatcomponent;
+        ITextComponent itextcomponent = super.getStatName();
+        itextcomponent.getStyle().setColor(this.getSpecial() ? TextFormatting.DARK_PURPLE : TextFormatting.GREEN);
+        return itextcomponent;
     }
 
-    public Achievement func_150953_b(Class <? extends IJsonSerializable > p_150953_1_)
+    public Achievement setSerializableClazz(Class <? extends IJsonSerializable > clazz)
     {
-        return (Achievement)super.func_150953_b(p_150953_1_);
+        return (Achievement)super.setSerializableClazz(clazz);
     }
 
     /**
@@ -128,16 +132,16 @@ public class Achievement extends StatBase
     @SideOnly(Side.CLIENT)
     public String getDescription()
     {
-        return this.statStringFormatter != null ? this.statStringFormatter.formatString(StatCollector.translateToLocal(this.achievementDescription)) : StatCollector.translateToLocal(this.achievementDescription);
+        return this.statStringFormatter != null ? this.statStringFormatter.formatString(I18n.translateToLocal(this.achievementDescription)) : I18n.translateToLocal(this.achievementDescription);
     }
 
     /**
      * Defines a string formatter for the achievement.
      */
     @SideOnly(Side.CLIENT)
-    public Achievement setStatStringFormatter(IStatStringFormat p_75988_1_)
+    public Achievement setStatStringFormatter(IStatStringFormat statStringFormatterIn)
     {
-        this.statStringFormatter = p_75988_1_;
+        this.statStringFormatter = statStringFormatterIn;
         return this;
     }
 

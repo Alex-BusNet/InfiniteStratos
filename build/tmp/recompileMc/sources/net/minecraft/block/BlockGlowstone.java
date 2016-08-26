@@ -1,21 +1,21 @@
 package net.minecraft.block;
 
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.util.MathHelper;
-
-import java.util.Random;
+import net.minecraft.util.math.MathHelper;
 
 public class BlockGlowstone extends Block
 {
     public BlockGlowstone(Material materialIn)
     {
         super(materialIn);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -37,9 +37,10 @@ public class BlockGlowstone extends Block
     /**
      * Get the Item that this Block should drop when harvested.
      */
+    @Nullable
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.glowstone_dust;
+        return Items.GLOWSTONE_DUST;
     }
 
     /**
@@ -47,6 +48,6 @@ public class BlockGlowstone extends Block
      */
     public MapColor getMapColor(IBlockState state)
     {
-        return MapColor.sandColor;
+        return MapColor.SAND;
     }
 }

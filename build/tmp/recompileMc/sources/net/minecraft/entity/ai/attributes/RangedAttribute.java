@@ -1,6 +1,7 @@
 package net.minecraft.entity.ai.attributes;
 
-import net.minecraft.util.MathHelper;
+import javax.annotation.Nullable;
+import net.minecraft.util.math.MathHelper;
 
 public class RangedAttribute extends BaseAttribute
 {
@@ -8,7 +9,7 @@ public class RangedAttribute extends BaseAttribute
     private final double maximumValue;
     private String description;
 
-    public RangedAttribute(IAttribute p_i45891_1_, String unlocalizedNameIn, double defaultValue, double minimumValueIn, double maximumValueIn)
+    public RangedAttribute(@Nullable IAttribute p_i45891_1_, String unlocalizedNameIn, double defaultValue, double minimumValueIn, double maximumValueIn)
     {
         super(p_i45891_1_, unlocalizedNameIn, defaultValue);
         this.minimumValue = minimumValueIn;

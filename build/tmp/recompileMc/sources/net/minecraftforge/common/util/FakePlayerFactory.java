@@ -1,14 +1,34 @@
-package net.minecraftforge.common.util;
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-import com.google.common.collect.Maps;
-import com.mojang.authlib.GameProfile;
-import net.minecraft.world.WorldServer;
+package net.minecraftforge.common.util;
 
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+
+import com.google.common.collect.Maps;
+import com.mojang.authlib.GameProfile;
+
+import net.minecraft.world.WorldServer;
 
 //To be expanded for generic Mod fake players?
 public class FakePlayerFactory

@@ -1,12 +1,40 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.client.model;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collection;
+import java.util.List;
+
+import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector4f;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.block.model.ModelBlock;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -14,29 +42,36 @@ import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraftforge.common.model.IModelPart;
+import net.minecraftforge.common.model.IModelState;
+import net.minecraftforge.common.model.TRSRTransformation;
 
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Vector4f;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collection;
-import java.util.List;
-public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
+public final class ItemLayerModel implements IRetexturableModel
 {
-
-    public static final ItemLayerModel instance = new ItemLayerModel(ImmutableList.<ResourceLocation>of());
+    public static final ItemLayerModel INSTANCE = new ItemLayerModel(ImmutableList.<ResourceLocation>of());
 
     private final ImmutableList<ResourceLocation> textures;
+    private final ItemOverrideList overrides;
 
     public ItemLayerModel(ImmutableList<ResourceLocation> textures)
     {
+        this(textures, ItemOverrideList.NONE);
+    }
+
+    public ItemLayerModel(ImmutableList<ResourceLocation> textures, ItemOverrideList overrides)
+    {
         this.textures = textures;
+        this.overrides = overrides;
     }
 
     public ItemLayerModel(ModelBlock model)
     {
-        this(getTextures(model));
+        this(getTextures(model), model.createOverrides());
     }
 
     private static ImmutableList<ResourceLocation> getTextures(ModelBlock model)
@@ -64,7 +99,7 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
         return TRSRTransformation.identity();
     }
 
-    public IModel retexture(ImmutableMap<String, String> textures)
+    public ItemLayerModel retexture(ImmutableMap<String, String> textures)
     {
         ImmutableList.Builder<ResourceLocation> builder = ImmutableList.builder();
         for(int i = 0; i < textures.size() + this.textures.size(); i++)
@@ -78,10 +113,10 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
                 builder.add(this.textures.get(i));
             }
         }
-        return new ItemLayerModel(builder.build());
+        return new ItemLayerModel(builder.build(), overrides);
     }
 
-    public IFlexibleBakedModel bake(IModelState state, final VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
+    public IBakedModel bake(IModelState state, final VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
     {
         ImmutableList.Builder<BakedQuad> builder = ImmutableList.builder();
         Optional<TRSRTransformation> transform = state.apply(Optional.<IModelPart>absent());
@@ -92,48 +127,24 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
         }
         TextureAtlasSprite particle = bakedTextureGetter.apply(textures.isEmpty() ? new ResourceLocation("missingno") : textures.get(0));
         ImmutableMap<TransformType, TRSRTransformation> map = IPerspectiveAwareModel.MapWrapper.getTransforms(state);
-        return new BakedItemModel(builder.build(), particle, format, map, null);
+        return new BakedItemModel(builder.build(), particle, map, overrides, null);
     }
 
-    @Deprecated // remove 1.9
-    public static class BakedModel implements IFlexibleBakedModel
+    private static final class BakedItemModel implements IPerspectiveAwareModel
     {
         private final ImmutableList<BakedQuad> quads;
         private final TextureAtlasSprite particle;
-        private final VertexFormat format;
-
-        public BakedModel(ImmutableList<BakedQuad> quads, TextureAtlasSprite particle, VertexFormat format)
-        {
-            this.quads = quads;
-            this.particle = particle;
-            this.format = format;
-        }
-
-        public boolean isAmbientOcclusion() { return true; }
-        public boolean isGui3d() { return false; }
-        public boolean isBuiltInRenderer() { return false; }
-        public TextureAtlasSprite getParticleTexture() { return particle; }
-        public ItemCameraTransforms getItemCameraTransforms() { return ItemCameraTransforms.DEFAULT; }
-        public List<BakedQuad> getFaceQuads(EnumFacing side) { return ImmutableList.of(); }
-        public List<BakedQuad> getGeneralQuads() { return quads; }
-        public VertexFormat getFormat() { return format; }
-    }
-
-    private static class BakedItemModel implements IFlexibleBakedModel, IPerspectiveAwareModel
-    {
-        private final ImmutableList<BakedQuad> quads;
-        private final TextureAtlasSprite particle;
-        private final VertexFormat format;
         private final ImmutableMap<TransformType, TRSRTransformation> transforms;
-        private final IFlexibleBakedModel otherModel;
+        private final IBakedModel otherModel;
         private final boolean isCulled;
+        private final ItemOverrideList overrides;
 
-        public BakedItemModel(ImmutableList<BakedQuad> quads, TextureAtlasSprite particle, VertexFormat format, ImmutableMap<TransformType, TRSRTransformation> transforms, IFlexibleBakedModel otherModel)
+        public BakedItemModel(ImmutableList<BakedQuad> quads, TextureAtlasSprite particle, ImmutableMap<TransformType, TRSRTransformation> transforms, ItemOverrideList overrides, IBakedModel otherModel)
         {
             this.quads = quads;
             this.particle = particle;
-            this.format = format;
             this.transforms = transforms;
+            this.overrides = overrides;
             if(otherModel != null)
             {
                 this.otherModel = otherModel;
@@ -149,7 +160,7 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
                         builder.add(quad);
                     }
                 }
-                this.otherModel = new BakedItemModel(builder.build(), particle, format, transforms, this);
+                this.otherModel = new BakedItemModel(builder.build(), particle, transforms, overrides, this);
                 isCulled = false;
             }
         }
@@ -159,13 +170,16 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
         public boolean isBuiltInRenderer() { return false; }
         public TextureAtlasSprite getParticleTexture() { return particle; }
         public ItemCameraTransforms getItemCameraTransforms() { return ItemCameraTransforms.DEFAULT; }
-        public List<BakedQuad> getFaceQuads(EnumFacing side) { return ImmutableList.of(); }
-        public List<BakedQuad> getGeneralQuads() { return quads; }
-        public VertexFormat getFormat() { return format; }
-
-        public Pair<? extends IFlexibleBakedModel, Matrix4f> handlePerspective(TransformType type)
+        public ItemOverrideList getOverrides() { return overrides; }
+        public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand)
         {
-            Pair<? extends IFlexibleBakedModel, Matrix4f> pair = IPerspectiveAwareModel.MapWrapper.handlePerspective(this, transforms, type);
+            if(side == null) return quads;
+            return ImmutableList.of();
+        }
+
+        public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType type)
+        {
+            Pair<? extends IBakedModel, Matrix4f> pair = IPerspectiveAwareModel.MapWrapper.handlePerspective(this, transforms, type);
             if(type == TransformType.GUI && !isCulled && pair.getRight() == null)
             {
                 return Pair.of(otherModel, null);
@@ -178,7 +192,7 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
         }
     }
 
-    public ImmutableList<BakedQuad> getQuadsForSprite(int tint, TextureAtlasSprite sprite, VertexFormat format, Optional<TRSRTransformation> transform)
+    public static ImmutableList<BakedQuad> getQuadsForSprite(int tint, TextureAtlasSprite sprite, VertexFormat format, Optional<TRSRTransformation> transform)
     {
         ImmutableList.Builder<BakedQuad> builder = ImmutableList.builder();
 
@@ -232,14 +246,14 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
             }
         }
         // front
-        builder.add(buildQuad(format, transform, EnumFacing.NORTH, tint,
+        builder.add(buildQuad(format, transform, EnumFacing.NORTH, sprite, tint,
             0, 0, 7.5f / 16f, sprite.getMinU(), sprite.getMaxV(),
             0, 1, 7.5f / 16f, sprite.getMinU(), sprite.getMinV(),
             1, 1, 7.5f / 16f, sprite.getMaxU(), sprite.getMinV(),
             1, 0, 7.5f / 16f, sprite.getMaxU(), sprite.getMaxV()
         ));
         // back
-        builder.add(buildQuad(format, transform, EnumFacing.SOUTH, tint,
+        builder.add(buildQuad(format, transform, EnumFacing.SOUTH, sprite, tint,
             0, 0, 8.5f / 16f, sprite.getMinU(), sprite.getMaxV(),
             1, 0, 8.5f / 16f, sprite.getMaxU(), sprite.getMaxV(),
             1, 1, 8.5f / 16f, sprite.getMaxU(), sprite.getMinV(),
@@ -248,7 +262,7 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
         return builder.build();
     }
 
-    protected boolean isTransparent(int[] pixels, int uMax, int vMax, int u, int v)
+    private static boolean isTransparent(int[] pixels, int uMax, int vMax, int u, int v)
     {
         return (pixels[u + (vMax - 1 - v) * uMax] >> 24 & 0xFF) == 0;
     }
@@ -337,7 +351,7 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
             throw new IllegalArgumentException("can't handle z-oriented side");
         }
         return buildQuad(
-            format, transform, side.getOpposite(), tint, // getOpposite is related either to the swapping of V direction, or something else
+            format, transform, side.getOpposite(), sprite, tint, // getOpposite is related either to the swapping of V direction, or something else
             x0, y0, z1, sprite.getInterpolatedU(u0), sprite.getInterpolatedV(v0),
             x1, y1, z1, sprite.getInterpolatedU(u1), sprite.getInterpolatedV(v1),
             x1, y1, z2, sprite.getInterpolatedU(u1), sprite.getInterpolatedV(v1),
@@ -346,7 +360,7 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
     }
 
     private static final BakedQuad buildQuad(
-        VertexFormat format, Optional<TRSRTransformation> transform, EnumFacing side, int tint,
+        VertexFormat format, Optional<TRSRTransformation> transform, EnumFacing side, TextureAtlasSprite sprite, int tint,
         float x0, float y0, float z0, float u0, float v0,
         float x1, float y1, float z1, float u1, float v1,
         float x2, float y2, float z2, float u2, float v2,
@@ -355,6 +369,7 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
         UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(format);
         builder.setQuadTint(tint);
         builder.setQuadOrientation(side);
+        builder.setTexture(sprite);
         putVertex(builder, format, transform, side, x0, y0, z0, u0, v0);
         putVertex(builder, format, transform, side, x1, y1, z1, u1, v1);
         putVertex(builder, format, transform, side, x2, y2, z2, u2, v2);
@@ -404,7 +419,7 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
 
     public static enum Loader implements ICustomModelLoader
     {
-        instance;
+        INSTANCE;
 
         public void onResourceManagerReload(IResourceManager resourceManager) {}
 
@@ -418,7 +433,7 @@ public class ItemLayerModel implements IRetexturableModel<ItemLayerModel>
 
         public IModel loadModel(ResourceLocation modelLocation)
         {
-            return ItemLayerModel.instance;
+            return ItemLayerModel.INSTANCE;
         }
     }
 }

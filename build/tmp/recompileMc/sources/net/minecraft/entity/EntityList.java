@@ -2,37 +2,94 @@ package net.minecraft.entity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.entity.ai.EntityMinecartMobSpawner;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.annotation.Nullable;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.item.*;
-import net.minecraft.entity.monster.*;
-import net.minecraft.entity.passive.*;
+import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.item.EntityBoat;
+import net.minecraft.entity.item.EntityEnderCrystal;
+import net.minecraft.entity.item.EntityEnderEye;
+import net.minecraft.entity.item.EntityEnderPearl;
+import net.minecraft.entity.item.EntityExpBottle;
+import net.minecraft.entity.item.EntityFallingBlock;
+import net.minecraft.entity.item.EntityFireworkRocket;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.item.EntityMinecartChest;
+import net.minecraft.entity.item.EntityMinecartCommandBlock;
+import net.minecraft.entity.item.EntityMinecartEmpty;
+import net.minecraft.entity.item.EntityMinecartFurnace;
+import net.minecraft.entity.item.EntityMinecartHopper;
+import net.minecraft.entity.item.EntityMinecartMobSpawner;
+import net.minecraft.entity.item.EntityMinecartTNT;
+import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.monster.EntityBlaze;
+import net.minecraft.entity.monster.EntityCaveSpider;
+import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.EntityEnderman;
+import net.minecraft.entity.monster.EntityEndermite;
+import net.minecraft.entity.monster.EntityGhast;
+import net.minecraft.entity.monster.EntityGiantZombie;
+import net.minecraft.entity.monster.EntityGuardian;
+import net.minecraft.entity.monster.EntityIronGolem;
+import net.minecraft.entity.monster.EntityMagmaCube;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.EntityPigZombie;
+import net.minecraft.entity.monster.EntityPolarBear;
+import net.minecraft.entity.monster.EntityShulker;
+import net.minecraft.entity.monster.EntitySilverfish;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntitySlime;
+import net.minecraft.entity.monster.EntitySnowman;
+import net.minecraft.entity.monster.EntitySpider;
+import net.minecraft.entity.monster.EntityWitch;
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.passive.EntityBat;
+import net.minecraft.entity.passive.EntityChicken;
+import net.minecraft.entity.passive.EntityCow;
+import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.EntityMooshroom;
+import net.minecraft.entity.passive.EntityOcelot;
+import net.minecraft.entity.passive.EntityPig;
+import net.minecraft.entity.passive.EntityRabbit;
+import net.minecraft.entity.passive.EntitySheep;
+import net.minecraft.entity.passive.EntitySquid;
+import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.*;
+import net.minecraft.entity.projectile.EntityDragonFireball;
+import net.minecraft.entity.projectile.EntityEgg;
+import net.minecraft.entity.projectile.EntityLargeFireball;
+import net.minecraft.entity.projectile.EntityPotion;
+import net.minecraft.entity.projectile.EntityShulkerBullet;
+import net.minecraft.entity.projectile.EntitySmallFireball;
+import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.entity.projectile.EntitySpectralArrow;
+import net.minecraft.entity.projectile.EntityTippedArrow;
+import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class EntityList
 {
-    private static final Logger logger = LogManager.getLogger();
-    public static final Map < String, Class <? extends Entity >> stringToClassMapping = Maps. < String, Class <? extends Entity >> newHashMap();
-    public static final Map < Class <? extends Entity > , String > classToStringMapping = Maps. < Class <? extends Entity > , String > newHashMap();
-    public static final Map < Integer, Class <? extends Entity >> idToClassMapping = Maps. < Integer, Class <? extends Entity >> newHashMap();
-    private static final Map < Class <? extends Entity > , Integer > classToIDMapping = Maps. < Class <? extends Entity > , Integer > newHashMap();
-    private static final Map<String, Integer> stringToIDMapping = Maps.<String, Integer>newHashMap();
-    public static final Map<Integer, EntityList.EntityEggInfo> entityEggs = Maps.<Integer, EntityList.EntityEggInfo>newLinkedHashMap();
+    private static final Logger LOGGER = LogManager.getLogger();
+    public static final Map < String, Class <? extends Entity >> NAME_TO_CLASS = Maps. < String, Class <? extends Entity >> newHashMap();
+    public static final Map < Class <? extends Entity > , String > CLASS_TO_NAME = Maps. < Class <? extends Entity > , String > newHashMap();
+    public static final Map < Integer, Class <? extends Entity >> ID_TO_CLASS = Maps. < Integer, Class <? extends Entity >> newHashMap();
+    private static final Map < Class <? extends Entity > , Integer > CLASS_TO_ID = Maps. < Class <? extends Entity > , Integer > newHashMap();
+    private static final Map<String, Integer> NAME_TO_ID = Maps.<String, Integer>newHashMap();
+    public static final Map<String, EntityList.EntityEggInfo> ENTITY_EGGS = Maps.<String, EntityList.EntityEggInfo>newLinkedHashMap();
 
     /**
      * adds a mapping between Entity classes and both a string representation and an ID
@@ -40,11 +97,11 @@ public class EntityList
     public static void addMapping(Class <? extends Entity > entityClass, String entityName, int id)
     {
         if (id < 0 || id > 255) throw new IllegalArgumentException("Attempted to register a entity with invalid ID: " + id + " Name: " + entityName + " Class: " + entityClass);
-        if (stringToClassMapping.containsKey(entityName))
+        if (NAME_TO_CLASS.containsKey(entityName))
         {
             throw new IllegalArgumentException("ID is already registered: " + entityName);
         }
-        else if (idToClassMapping.containsKey(Integer.valueOf(id)))
+        else if (ID_TO_CLASS.containsKey(Integer.valueOf(id)))
         {
             throw new IllegalArgumentException("ID is already registered: " + id);
         }
@@ -58,11 +115,11 @@ public class EntityList
         }
         else
         {
-            stringToClassMapping.put(entityName, entityClass);
-            classToStringMapping.put(entityClass, entityName);
-            idToClassMapping.put(Integer.valueOf(id), entityClass);
-            classToIDMapping.put(entityClass, Integer.valueOf(id));
-            stringToIDMapping.put(entityName, Integer.valueOf(id));
+            NAME_TO_CLASS.put(entityName, entityClass);
+            CLASS_TO_NAME.put(entityClass, entityName);
+            ID_TO_CLASS.put(Integer.valueOf(id), entityClass);
+            CLASS_TO_ID.put(entityClass, Integer.valueOf(id));
+            NAME_TO_ID.put(entityName, Integer.valueOf(id));
         }
     }
 
@@ -72,19 +129,20 @@ public class EntityList
     public static void addMapping(Class <? extends Entity > entityClass, String entityName, int entityID, int baseColor, int spotColor)
     {
         addMapping(entityClass, entityName, entityID);
-        entityEggs.put(Integer.valueOf(entityID), new EntityList.EntityEggInfo(entityID, baseColor, spotColor));
+        ENTITY_EGGS.put(entityName, new EntityList.EntityEggInfo(entityName, baseColor, spotColor));
     }
 
     /**
      * Create a new instance of an entity in the world by using the entity name.
      */
+    @Nullable
     public static Entity createEntityByName(String entityName, World worldIn)
     {
         Entity entity = null;
 
         try
         {
-            Class <? extends Entity > oclass = (Class)stringToClassMapping.get(entityName);
+            Class <? extends Entity > oclass = (Class)NAME_TO_CLASS.get(entityName);
 
             if (oclass != null)
             {
@@ -102,20 +160,15 @@ public class EntityList
     /**
      * create a new instance of an entity from NBT store
      */
+    @Nullable
     public static Entity createEntityFromNBT(NBTTagCompound nbt, World worldIn)
     {
         Entity entity = null;
 
-        if ("Minecart".equals(nbt.getString("id")))
-        {
-            nbt.setString("id", EntityMinecart.EnumMinecartType.byNetworkID(nbt.getInteger("Type")).getName());
-            nbt.removeTag("Type");
-        }
-
         Class <? extends Entity > oclass = null;
         try
         {
-            oclass = stringToClassMapping.get(nbt.getString("id"));
+            oclass = NAME_TO_CLASS.get(nbt.getString("id"));
 
             if (oclass != null)
             {
@@ -143,7 +196,7 @@ public class EntityList
         }
         else
         {
-            logger.warn("Skipping Entity with id " + nbt.getString("id"));
+            LOGGER.warn("Skipping Entity with id {}", new Object[] {nbt.getString("id")});
         }
 
         return entity;
@@ -152,6 +205,7 @@ public class EntityList
     /**
      * Create a new instance of an entity in the world by using an entity ID.
      */
+    @Nullable
     public static Entity createEntityByID(int entityID, World worldIn)
     {
         Entity entity = null;
@@ -172,10 +226,17 @@ public class EntityList
 
         if (entity == null)
         {
-            logger.warn("Skipping Entity with id " + entityID);
+            LOGGER.warn("Skipping Entity with id {}", new Object[] {Integer.valueOf(entityID)});
         }
 
         return entity;
+    }
+
+    @Nullable
+    public static Entity createEntityByIDFromName(String name, World worldIn)
+    {
+        Entity e = createEntityByName(name, worldIn); // Forge: Support entities without global ID
+        return e == null ? createEntityByName("Pig", worldIn) : e;
     }
 
     /**
@@ -183,13 +244,14 @@ public class EntityList
      */
     public static int getEntityID(Entity entityIn)
     {
-        Integer integer = (Integer)classToIDMapping.get(entityIn.getClass());
+        Integer integer = (Integer)CLASS_TO_ID.get(entityIn.getClass());
         return integer == null ? 0 : integer.intValue();
     }
 
+    @Nullable
     public static Class <? extends Entity > getClassFromID(int entityID)
     {
-        return (Class)idToClassMapping.get(Integer.valueOf(entityID));
+        return (Class)ID_TO_CLASS.get(Integer.valueOf(entityID));
     }
 
     /**
@@ -197,39 +259,35 @@ public class EntityList
      */
     public static String getEntityString(Entity entityIn)
     {
-        return (String)classToStringMapping.get(entityIn.getClass());
+        return getEntityStringFromClass(entityIn.getClass());
     }
 
-    /**
-     * Finds the class using IDtoClassMapping and classToStringMapping
-     */
-    public static String getStringFromID(int entityID)
+    public static String getEntityStringFromClass(Class <? extends Entity > entityClass)
     {
-        return (String)classToStringMapping.get(getClassFromID(entityID));
+        return (String)CLASS_TO_NAME.get(entityClass);
     }
 
     /**
      * Returns the ID assigned to it's string representation
      */
-    @SideOnly(Side.CLIENT)
     public static int getIDFromString(String entityName)
     {
-        Integer integer = (Integer)stringToIDMapping.get(entityName);
+        Integer integer = (Integer)NAME_TO_ID.get(entityName);
         return integer == null ? 90 : integer.intValue();
     }
 
-    public static void func_151514_a()
+    public static void init()
     {
     }
 
     public static List<String> getEntityNameList()
     {
-        Set<String> set = stringToClassMapping.keySet();
+        Set<String> set = NAME_TO_CLASS.keySet();
         List<String> list = Lists.<String>newArrayList();
 
         for (String s : set)
         {
-            Class <? extends Entity > oclass = (Class)stringToClassMapping.get(s);
+            Class <? extends Entity > oclass = (Class)NAME_TO_CLASS.get(s);
 
             if ((oclass.getModifiers() & 1024) != 1024)
             {
@@ -245,13 +303,21 @@ public class EntityList
     {
         String s = getEntityString(entityIn);
 
-        if (s == null && entityIn instanceof EntityPlayer)
+        if (s == null)
         {
-            s = "Player";
-        }
-        else if (s == null && entityIn instanceof EntityLightningBolt)
-        {
-            s = "LightningBolt";
+            if (entityIn instanceof EntityPlayer)
+            {
+                s = "Player";
+            }
+            else
+            {
+                if (!(entityIn instanceof EntityLightningBolt))
+                {
+                    return false;
+                }
+
+                s = "LightningBolt";
+            }
         }
 
         return entityName.equals(s);
@@ -266,10 +332,11 @@ public class EntityList
     {
         addMapping(EntityItem.class, "Item", 1);
         addMapping(EntityXPOrb.class, "XPOrb", 2);
+        addMapping(EntityAreaEffectCloud.class, "AreaEffectCloud", 3);
         addMapping(EntityEgg.class, "ThrownEgg", 7);
         addMapping(EntityLeashKnot.class, "LeashKnot", 8);
         addMapping(EntityPainting.class, "Painting", 9);
-        addMapping(EntityArrow.class, "Arrow", 10);
+        addMapping(EntityTippedArrow.class, "Arrow", 10);
         addMapping(EntitySnowball.class, "Snowball", 11);
         addMapping(EntityLargeFireball.class, "Fireball", 12);
         addMapping(EntitySmallFireball.class, "SmallFireball", 13);
@@ -282,15 +349,18 @@ public class EntityList
         addMapping(EntityTNTPrimed.class, "PrimedTnt", 20);
         addMapping(EntityFallingBlock.class, "FallingSand", 21);
         addMapping(EntityFireworkRocket.class, "FireworksRocketEntity", 22);
+        addMapping(EntitySpectralArrow.class, "SpectralArrow", 24);
+        addMapping(EntityShulkerBullet.class, "ShulkerBullet", 25);
+        addMapping(EntityDragonFireball.class, "DragonFireball", 26);
         addMapping(EntityArmorStand.class, "ArmorStand", 30);
         addMapping(EntityBoat.class, "Boat", 41);
-        addMapping(EntityMinecartEmpty.class, EntityMinecart.EnumMinecartType.RIDEABLE.getName(), 42);
-        addMapping(EntityMinecartChest.class, EntityMinecart.EnumMinecartType.CHEST.getName(), 43);
-        addMapping(EntityMinecartFurnace.class, EntityMinecart.EnumMinecartType.FURNACE.getName(), 44);
-        addMapping(EntityMinecartTNT.class, EntityMinecart.EnumMinecartType.TNT.getName(), 45);
-        addMapping(EntityMinecartHopper.class, EntityMinecart.EnumMinecartType.HOPPER.getName(), 46);
-        addMapping(EntityMinecartMobSpawner.class, EntityMinecart.EnumMinecartType.SPAWNER.getName(), 47);
-        addMapping(EntityMinecartCommandBlock.class, EntityMinecart.EnumMinecartType.COMMAND_BLOCK.getName(), 40);
+        addMapping(EntityMinecartEmpty.class, EntityMinecart.Type.RIDEABLE.getName(), 42);
+        addMapping(EntityMinecartChest.class, EntityMinecart.Type.CHEST.getName(), 43);
+        addMapping(EntityMinecartFurnace.class, EntityMinecart.Type.FURNACE.getName(), 44);
+        addMapping(EntityMinecartTNT.class, EntityMinecart.Type.TNT.getName(), 45);
+        addMapping(EntityMinecartHopper.class, EntityMinecart.Type.HOPPER.getName(), 46);
+        addMapping(EntityMinecartMobSpawner.class, EntityMinecart.Type.SPAWNER.getName(), 47);
+        addMapping(EntityMinecartCommandBlock.class, EntityMinecart.Type.COMMAND_BLOCK.getName(), 40);
         addMapping(EntityLiving.class, "Mob", 48);
         addMapping(EntityMob.class, "Monster", 49);
         addMapping(EntityCreeper.class, "Creeper", 50, 894731, 0);
@@ -312,6 +382,7 @@ public class EntityList
         addMapping(EntityWitch.class, "Witch", 66, 3407872, 5349438);
         addMapping(EntityEndermite.class, "Endermite", 67, 1447446, 7237230);
         addMapping(EntityGuardian.class, "Guardian", 68, 5931634, 15826224);
+        addMapping(EntityShulker.class, "Shulker", 69, 9725844, 5060690);
         addMapping(EntityPig.class, "Pig", 90, 15771042, 14377823);
         addMapping(EntitySheep.class, "Sheep", 91, 15198183, 16758197);
         addMapping(EntityCow.class, "Cow", 92, 4470310, 10592673);
@@ -324,6 +395,7 @@ public class EntityList
         addMapping(EntityIronGolem.class, "VillagerGolem", 99);
         addMapping(EntityHorse.class, "EntityHorse", 100, 12623485, 15656192);
         addMapping(EntityRabbit.class, "Rabbit", 101, 10051392, 7555121);
+        addMapping(EntityPolarBear.class, "PolarBear", 102, 15921906, 9803152);
         addMapping(EntityVillager.class, "Villager", 120, 5651507, 12422002);
         addMapping(EntityEnderCrystal.class, "EnderCrystal", 200);
     }
@@ -331,34 +403,21 @@ public class EntityList
     public static class EntityEggInfo
         {
             /** The entityID of the spawned mob */
-            @Deprecated // This is not always a valid number in the global ID list.
-            public final int spawnedID;
-            public final String name;
+            public final String spawnedID;
             /** Base color of the egg */
             public final int primaryColor;
             /** Color of the egg spots */
             public final int secondaryColor;
-            public final StatBase field_151512_d;
-            public final StatBase field_151513_e;
+            public final StatBase killEntityStat;
+            public final StatBase entityKilledByStat;
 
-            public EntityEggInfo(int id, int baseColor, int spotColor)
+            public EntityEggInfo(String spawnedIDIn, int primColor, int secondColor)
             {
-                this.spawnedID = id;
-                this.primaryColor = baseColor;
-                this.secondaryColor = spotColor;
-                this.field_151512_d = StatList.getStatKillEntity(this);
-                this.field_151513_e = StatList.getStatEntityKilledBy(this);
-                this.name = EntityList.getStringFromID(id);
-            }
-
-            public EntityEggInfo(String name, int primaryColor, int secondaryColor)
-            {
-                this.spawnedID = -1;
-                this.name = name;
-                this.primaryColor = primaryColor;
-                this.secondaryColor = secondaryColor;
-                this.field_151512_d = (new StatBase("stat.killEntity."     + name, new net.minecraft.util.ChatComponentTranslation("stat.entityKill",     new net.minecraft.util.ChatComponentTranslation("entity." + name + ".name")))).registerStat();
-                this.field_151513_e = (new StatBase("stat.entityKilledBy." + name, new net.minecraft.util.ChatComponentTranslation("stat.entityKilledBy", new net.minecraft.util.ChatComponentTranslation("entity." + name + ".name")))).registerStat();
+                this.spawnedID = spawnedIDIn;
+                this.primaryColor = primColor;
+                this.secondaryColor = secondColor;
+                this.killEntityStat = StatList.getStatKillEntity(this);
+                this.entityKilledByStat = StatList.getStatEntityKilledBy(this);
             }
         }
 }

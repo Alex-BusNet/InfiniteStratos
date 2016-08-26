@@ -1,5 +1,6 @@
 package net.minecraft.block;
 
+import javax.annotation.Nullable;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.inventory.IInventory;
@@ -8,15 +9,15 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.tileentity.TileEntityDropper;
 import net.minecraft.tileentity.TileEntityHopper;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class BlockDropper extends BlockDispenser
 {
     private final IBehaviorDispenseItem dropBehavior = new BehaviorDefaultDispenseItem();
 
-    protected IBehaviorDispenseItem getBehavior(ItemStack stack)
+    protected IBehaviorDispenseItem getBehavior(@Nullable ItemStack stack)
     {
         return this.dropBehavior;
     }
@@ -40,7 +41,7 @@ public class BlockDropper extends BlockDispenser
 
             if (i < 0)
             {
-                worldIn.playAuxSFX(1001, pos, 0);
+                worldIn.playEvent(1001, pos, 0);
             }
             else
             {

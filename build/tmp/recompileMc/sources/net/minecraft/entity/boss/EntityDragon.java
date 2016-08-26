@@ -1,26 +1,55 @@
 package net.minecraft.entity.boss;
 
-import com.google.common.collect.Lists;
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockTorch;
-import net.minecraft.entity.*;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IEntityMultiPart;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.boss.dragon.phase.IPhase;
+import net.minecraft.entity.boss.dragon.phase.PhaseList;
+import net.minecraft.entity.boss.dragon.phase.PhaseManager;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.*;
-import net.minecraft.world.Explosion;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.pathfinding.Path;
+import net.minecraft.pathfinding.PathHeap;
+import net.minecraft.pathfinding.PathPoint;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.end.DragonFightManager;
+import net.minecraft.world.gen.feature.WorldGenEndPodium;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.Iterator;
-import java.util.List;
-
-public class EntityDragon extends EntityLiving implements IBossDisplayData, IEntityMultiPart, IMob
+public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
 {
-    public double targetX;
-    public double targetY;
-    public double targetZ;
+    private static final Logger LOGGER = LogManager.getLogger();
+    public static final DataParameter<Integer> PHASE = EntityDataManager.<Integer>createKey(EntityDragon.class, DataSerializers.VARINT);
     /** Ring buffer array for the last 64 Y-positions and yaw rotations. Used to calculate offsets for the animations. */
     public double[][] ringBuffer = new double[64][3];
     /** Index into the ring buffer. Incremented once per tick and restarts at 0 once it reaches the end of the buffer. */
@@ -28,48 +57,75 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
     /** An array containing all body parts of this dragon */
     public EntityDragonPart[] dragonPartArray;
     /** The head bounding box of a dragon */
-    public EntityDragonPart dragonPartHead;
+    public EntityDragonPart dragonPartHead = new EntityDragonPart(this, "head", 6.0F, 6.0F);
+    public EntityDragonPart dragonPartNeck = new EntityDragonPart(this, "neck", 6.0F, 6.0F);
     /** The body bounding box of a dragon */
-    public EntityDragonPart dragonPartBody;
-    public EntityDragonPart dragonPartTail1;
-    public EntityDragonPart dragonPartTail2;
-    public EntityDragonPart dragonPartTail3;
-    public EntityDragonPart dragonPartWing1;
-    public EntityDragonPart dragonPartWing2;
+    public EntityDragonPart dragonPartBody = new EntityDragonPart(this, "body", 8.0F, 8.0F);
+    public EntityDragonPart dragonPartTail1 = new EntityDragonPart(this, "tail", 4.0F, 4.0F);
+    public EntityDragonPart dragonPartTail2 = new EntityDragonPart(this, "tail", 4.0F, 4.0F);
+    public EntityDragonPart dragonPartTail3 = new EntityDragonPart(this, "tail", 4.0F, 4.0F);
+    public EntityDragonPart dragonPartWing1 = new EntityDragonPart(this, "wing", 4.0F, 4.0F);
+    public EntityDragonPart dragonPartWing2 = new EntityDragonPart(this, "wing", 4.0F, 4.0F);
     /** Animation time at previous tick. */
     public float prevAnimTime;
     /** Animation time, used to control the speed of the animation cycles (wings flapping, jaw opening, etc.) */
     public float animTime;
-    /** Force selecting a new flight target at next tick if set to true. */
-    public boolean forceNewTarget;
     /** Activated if the dragon is flying though obsidian, white stone or bedrock. Slows movement and animation speed. */
     public boolean slowed;
-    private Entity target;
     public int deathTicks;
     /** The current endercrystal that is healing this dragon */
     public EntityEnderCrystal healingEnderCrystal;
+    private final DragonFightManager fightManager;
+    private final PhaseManager phaseManager;
+    private int growlTime = 200;
+    private int sittingDamageReceived;
+    /**
+     * A series of points describing three circles. The first is low to the ground and described by the first 12 points;
+     * the next 8 points describe a spiral upwards to the next, tighter circle of just 4 points. Generated by
+     * initPathPoints.
+     */
+    private final PathPoint[] pathPoints = new PathPoint[24];
+    /**
+     * An array of bitmaps indicating, for each member of pathPoints, which other members should be considered
+     * "neighboring" for the purpose of path-finding. The set bits indicate the indexes into pathPoints that should be
+     * considered to be candidates for the next step in a path through the circles. Generated by initPathPoints.
+     */
+    private final int[] neighbors = new int[24];
+    private final PathHeap pathFindQueue = new PathHeap();
 
     public EntityDragon(World worldIn)
     {
         super(worldIn);
-        this.dragonPartArray = new EntityDragonPart[] {this.dragonPartHead = new EntityDragonPart(this, "head", 6.0F, 6.0F), this.dragonPartBody = new EntityDragonPart(this, "body", 8.0F, 8.0F), this.dragonPartTail1 = new EntityDragonPart(this, "tail", 4.0F, 4.0F), this.dragonPartTail2 = new EntityDragonPart(this, "tail", 4.0F, 4.0F), this.dragonPartTail3 = new EntityDragonPart(this, "tail", 4.0F, 4.0F), this.dragonPartWing1 = new EntityDragonPart(this, "wing", 4.0F, 4.0F), this.dragonPartWing2 = new EntityDragonPart(this, "wing", 4.0F, 4.0F)};
+        this.dragonPartArray = new EntityDragonPart[] {this.dragonPartHead, this.dragonPartNeck, this.dragonPartBody, this.dragonPartTail1, this.dragonPartTail2, this.dragonPartTail3, this.dragonPartWing1, this.dragonPartWing2};
         this.setHealth(this.getMaxHealth());
         this.setSize(16.0F, 8.0F);
         this.noClip = true;
         this.isImmuneToFire = true;
-        this.targetY = 100.0D;
+        this.growlTime = 100;
         this.ignoreFrustumCheck = true;
+
+        if (!worldIn.isRemote && worldIn.provider instanceof WorldProviderEnd)
+        {
+            this.fightManager = ((WorldProviderEnd)worldIn.provider).getDragonFightManager();
+        }
+        else
+        {
+            this.fightManager = null;
+        }
+
+        this.phaseManager = new PhaseManager(this);
     }
 
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(200.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(200.0D);
     }
 
     protected void entityInit()
     {
         super.entityInit();
+        this.getDataManager().register(PHASE, Integer.valueOf(PhaseList.HOVER.getId()));
     }
 
     /**
@@ -84,11 +140,11 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
         }
 
         p_70974_2_ = 1.0F - p_70974_2_;
-        int i = this.ringBufferIndex - p_70974_1_ * 1 & 63;
-        int j = this.ringBufferIndex - p_70974_1_ * 1 - 1 & 63;
+        int i = this.ringBufferIndex - p_70974_1_ & 63;
+        int j = this.ringBufferIndex - p_70974_1_ - 1 & 63;
         double[] adouble = new double[3];
         double d0 = this.ringBuffer[i][0];
-        double d1 = MathHelper.wrapAngleTo180_double(this.ringBuffer[j][0] - d0);
+        double d1 = MathHelper.wrapDegrees(this.ringBuffer[j][0] - d0);
         adouble[0] = d0 + d1 * (double)p_70974_2_;
         d0 = this.ringBuffer[i][1];
         d1 = this.ringBuffer[j][1] - d0;
@@ -105,12 +161,23 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
     {
         if (this.worldObj.isRemote)
         {
-            float f = MathHelper.cos(this.animTime * (float)Math.PI * 2.0F);
-            float f1 = MathHelper.cos(this.prevAnimTime * (float)Math.PI * 2.0F);
+            this.setHealth(this.getHealth());
 
-            if (f1 <= -0.3F && f >= -0.3F && !this.isSilent())
+            if (!this.isSilent())
             {
-                this.worldObj.playSound(this.posX, this.posY, this.posZ, "mob.enderdragon.wings", 5.0F, 0.8F + this.rand.nextFloat() * 0.3F, false);
+                float f = MathHelper.cos(this.animTime * ((float)Math.PI * 2F));
+                float f1 = MathHelper.cos(this.prevAnimTime * ((float)Math.PI * 2F));
+
+                if (f1 <= -0.3F && f >= -0.3F)
+                {
+                    this.worldObj.playSound(this.posX, this.posY, this.posZ, SoundEvents.ENTITY_ENDERDRAGON_FLAP, this.getSoundCategory(), 5.0F, 0.8F + this.rand.nextFloat() * 0.3F, false);
+                }
+
+                if (!this.phaseManager.getCurrentPhase().getIsStationary() && --this.growlTime < 0)
+                {
+                    this.worldObj.playSound(this.posX, this.posY, this.posZ, SoundEvents.ENTITY_ENDERDRAGON_GROWL, this.getSoundCategory(), 2.5F, 0.8F + this.rand.nextFloat() * 0.3F, false);
+                    this.growlTime = 200 + this.rand.nextInt(200);
+                }
             }
         }
 
@@ -118,27 +185,31 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
 
         if (this.getHealth() <= 0.0F)
         {
-            float f11 = (this.rand.nextFloat() - 0.5F) * 8.0F;
-            float f13 = (this.rand.nextFloat() - 0.5F) * 4.0F;
-            float f14 = (this.rand.nextFloat() - 0.5F) * 8.0F;
-            this.worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.posX + (double)f11, this.posY + 2.0D + (double)f13, this.posZ + (double)f14, 0.0D, 0.0D, 0.0D, new int[0]);
+            float f13 = (this.rand.nextFloat() - 0.5F) * 8.0F;
+            float f15 = (this.rand.nextFloat() - 0.5F) * 4.0F;
+            float f17 = (this.rand.nextFloat() - 0.5F) * 8.0F;
+            this.worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.posX + (double)f13, this.posY + 2.0D + (double)f15, this.posZ + (double)f17, 0.0D, 0.0D, 0.0D, new int[0]);
         }
         else
         {
             this.updateDragonEnderCrystal();
-            float f10 = 0.2F / (MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ) * 10.0F + 1.0F);
-            f10 = f10 * (float)Math.pow(2.0D, this.motionY);
+            float f12 = 0.2F / (MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ) * 10.0F + 1.0F);
+            f12 = f12 * (float)Math.pow(2.0D, this.motionY);
 
-            if (this.slowed)
+            if (this.phaseManager.getCurrentPhase().getIsStationary())
             {
-                this.animTime += f10 * 0.5F;
+                this.animTime += 0.1F;
+            }
+            else if (this.slowed)
+            {
+                this.animTime += f12 * 0.5F;
             }
             else
             {
-                this.animTime += f10;
+                this.animTime += f12;
             }
 
-            this.rotationYaw = MathHelper.wrapAngleTo180_float(this.rotationYaw);
+            this.rotationYaw = MathHelper.wrapDegrees(this.rotationYaw);
 
             if (this.isAIDisabled())
             {
@@ -167,148 +238,117 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
                 {
                     if (this.newPosRotationIncrements > 0)
                     {
-                        double d10 = this.posX + (this.newPosX - this.posX) / (double)this.newPosRotationIncrements;
-                        double d0 = this.posY + (this.newPosY - this.posY) / (double)this.newPosRotationIncrements;
-                        double d1 = this.posZ + (this.newPosZ - this.posZ) / (double)this.newPosRotationIncrements;
-                        double d2 = MathHelper.wrapAngleTo180_double(this.newRotationYaw - (double)this.rotationYaw);
+                        double d5 = this.posX + (this.interpTargetX - this.posX) / (double)this.newPosRotationIncrements;
+                        double d0 = this.posY + (this.interpTargetY - this.posY) / (double)this.newPosRotationIncrements;
+                        double d1 = this.posZ + (this.interpTargetZ - this.posZ) / (double)this.newPosRotationIncrements;
+                        double d2 = MathHelper.wrapDegrees(this.interpTargetYaw - (double)this.rotationYaw);
                         this.rotationYaw = (float)((double)this.rotationYaw + d2 / (double)this.newPosRotationIncrements);
-                        this.rotationPitch = (float)((double)this.rotationPitch + (this.newRotationPitch - (double)this.rotationPitch) / (double)this.newPosRotationIncrements);
+                        this.rotationPitch = (float)((double)this.rotationPitch + (this.interpTargetPitch - (double)this.rotationPitch) / (double)this.newPosRotationIncrements);
                         --this.newPosRotationIncrements;
-                        this.setPosition(d10, d0, d1);
+                        this.setPosition(d5, d0, d1);
                         this.setRotation(this.rotationYaw, this.rotationPitch);
                     }
+
+                    this.phaseManager.getCurrentPhase().doClientRenderEffects();
                 }
                 else
                 {
-                    double d11 = this.targetX - this.posX;
-                    double d12 = this.targetY - this.posY;
-                    double d13 = this.targetZ - this.posZ;
-                    double d14 = d11 * d11 + d12 * d12 + d13 * d13;
+                    IPhase iphase = this.phaseManager.getCurrentPhase();
+                    iphase.doLocalUpdate();
 
-                    if (this.target != null)
+                    if (this.phaseManager.getCurrentPhase() != iphase)
                     {
-                        this.targetX = this.target.posX;
-                        this.targetZ = this.target.posZ;
-                        double d3 = this.targetX - this.posX;
-                        double d5 = this.targetZ - this.posZ;
-                        double d7 = Math.sqrt(d3 * d3 + d5 * d5);
-                        double d8 = 0.4000000059604645D + d7 / 80.0D - 1.0D;
+                        iphase = this.phaseManager.getCurrentPhase();
+                        iphase.doLocalUpdate();
+                    }
 
-                        if (d8 > 10.0D)
+                    Vec3d vec3d = iphase.getTargetLocation();
+
+                    if (vec3d != null)
+                    {
+                        double d6 = vec3d.xCoord - this.posX;
+                        double d7 = vec3d.yCoord - this.posY;
+                        double d8 = vec3d.zCoord - this.posZ;
+                        double d3 = d6 * d6 + d7 * d7 + d8 * d8;
+                        float f6 = iphase.getMaxRiseOrFall();
+                        d7 = MathHelper.clamp_double(d7 / (double)MathHelper.sqrt_double(d6 * d6 + d8 * d8), (double)(-f6), (double)f6);
+                        this.motionY += d7 * 0.10000000149011612D;
+                        this.rotationYaw = MathHelper.wrapDegrees(this.rotationYaw);
+                        double d4 = MathHelper.clamp_double(MathHelper.wrapDegrees(180.0D - MathHelper.atan2(d6, d8) * (180D / Math.PI) - (double)this.rotationYaw), -50.0D, 50.0D);
+                        Vec3d vec3d1 = (new Vec3d(vec3d.xCoord - this.posX, vec3d.yCoord - this.posY, vec3d.zCoord - this.posZ)).normalize();
+                        Vec3d vec3d2 = (new Vec3d((double)MathHelper.sin(this.rotationYaw * 0.017453292F), this.motionY, (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)))).normalize();
+                        float f8 = Math.max(((float)vec3d2.dotProduct(vec3d1) + 0.5F) / 1.5F, 0.0F);
+                        this.randomYawVelocity *= 0.8F;
+                        this.randomYawVelocity = (float)((double)this.randomYawVelocity + d4 * (double)iphase.getYawFactor());
+                        this.rotationYaw += this.randomYawVelocity * 0.1F;
+                        float f9 = (float)(2.0D / (d3 + 1.0D));
+                        float f10 = 0.06F;
+                        this.moveRelative(0.0F, -1.0F, 0.06F * (f8 * f9 + (1.0F - f9)));
+
+                        if (this.slowed)
                         {
-                            d8 = 10.0D;
+                            this.moveEntity(this.motionX * 0.800000011920929D, this.motionY * 0.800000011920929D, this.motionZ * 0.800000011920929D);
+                        }
+                        else
+                        {
+                            this.moveEntity(this.motionX, this.motionY, this.motionZ);
                         }
 
-                        this.targetY = this.target.getEntityBoundingBox().minY + d8;
+                        Vec3d vec3d3 = (new Vec3d(this.motionX, this.motionY, this.motionZ)).normalize();
+                        float f11 = ((float)vec3d3.dotProduct(vec3d2) + 1.0F) / 2.0F;
+                        f11 = 0.8F + 0.15F * f11;
+                        this.motionX *= (double)f11;
+                        this.motionZ *= (double)f11;
+                        this.motionY *= 0.9100000262260437D;
                     }
-                    else
-                    {
-                        this.targetX += this.rand.nextGaussian() * 2.0D;
-                        this.targetZ += this.rand.nextGaussian() * 2.0D;
-                    }
-
-                    if (this.forceNewTarget || d14 < 100.0D || d14 > 22500.0D || this.isCollidedHorizontally || this.isCollidedVertically)
-                    {
-                        this.setNewTarget();
-                    }
-
-                    d12 = d12 / (double)MathHelper.sqrt_double(d11 * d11 + d13 * d13);
-                    float f17 = 0.6F;
-                    d12 = MathHelper.clamp_double(d12, (double)(-f17), (double)f17);
-                    this.motionY += d12 * 0.10000000149011612D;
-                    this.rotationYaw = MathHelper.wrapAngleTo180_float(this.rotationYaw);
-                    double d4 = 180.0D - MathHelper.atan2(d11, d13) * 180.0D / Math.PI;
-                    double d6 = MathHelper.wrapAngleTo180_double(d4 - (double)this.rotationYaw);
-
-                    if (d6 > 50.0D)
-                    {
-                        d6 = 50.0D;
-                    }
-
-                    if (d6 < -50.0D)
-                    {
-                        d6 = -50.0D;
-                    }
-
-                    Vec3 vec3 = (new Vec3(this.targetX - this.posX, this.targetY - this.posY, this.targetZ - this.posZ)).normalize();
-                    double d15 = (double)(-MathHelper.cos(this.rotationYaw * (float)Math.PI / 180.0F));
-                    Vec3 vec31 = (new Vec3((double)MathHelper.sin(this.rotationYaw * (float)Math.PI / 180.0F), this.motionY, d15)).normalize();
-                    float f5 = ((float)vec31.dotProduct(vec3) + 0.5F) / 1.5F;
-
-                    if (f5 < 0.0F)
-                    {
-                        f5 = 0.0F;
-                    }
-
-                    this.randomYawVelocity *= 0.8F;
-                    float f6 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ) * 1.0F + 1.0F;
-                    double d9 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ) * 1.0D + 1.0D;
-
-                    if (d9 > 40.0D)
-                    {
-                        d9 = 40.0D;
-                    }
-
-                    this.randomYawVelocity = (float)((double)this.randomYawVelocity + d6 * (0.699999988079071D / d9 / (double)f6));
-                    this.rotationYaw += this.randomYawVelocity * 0.1F;
-                    float f7 = (float)(2.0D / (d9 + 1.0D));
-                    float f8 = 0.06F;
-                    this.moveFlying(0.0F, -1.0F, f8 * (f5 * f7 + (1.0F - f7)));
-
-                    if (this.slowed)
-                    {
-                        this.moveEntity(this.motionX * 0.800000011920929D, this.motionY * 0.800000011920929D, this.motionZ * 0.800000011920929D);
-                    }
-                    else
-                    {
-                        this.moveEntity(this.motionX, this.motionY, this.motionZ);
-                    }
-
-                    Vec3 vec32 = (new Vec3(this.motionX, this.motionY, this.motionZ)).normalize();
-                    float f9 = ((float)vec32.dotProduct(vec31) + 1.0F) / 2.0F;
-                    f9 = 0.8F + 0.15F * f9;
-                    this.motionX *= (double)f9;
-                    this.motionZ *= (double)f9;
-                    this.motionY *= 0.9100000262260437D;
                 }
 
                 this.renderYawOffset = this.rotationYaw;
-                this.dragonPartHead.width = this.dragonPartHead.height = 3.0F;
-                this.dragonPartTail1.width = this.dragonPartTail1.height = 2.0F;
-                this.dragonPartTail2.width = this.dragonPartTail2.height = 2.0F;
-                this.dragonPartTail3.width = this.dragonPartTail3.height = 2.0F;
+                this.dragonPartHead.width = 1.0F;
+                this.dragonPartHead.height = 1.0F;
+                this.dragonPartNeck.width = 3.0F;
+                this.dragonPartNeck.height = 3.0F;
+                this.dragonPartTail1.width = 2.0F;
+                this.dragonPartTail1.height = 2.0F;
+                this.dragonPartTail2.width = 2.0F;
+                this.dragonPartTail2.height = 2.0F;
+                this.dragonPartTail3.width = 2.0F;
+                this.dragonPartTail3.height = 2.0F;
                 this.dragonPartBody.height = 3.0F;
                 this.dragonPartBody.width = 5.0F;
                 this.dragonPartWing1.height = 2.0F;
                 this.dragonPartWing1.width = 4.0F;
                 this.dragonPartWing2.height = 3.0F;
                 this.dragonPartWing2.width = 4.0F;
-                float f12 = (float)(this.getMovementOffsets(5, 1.0F)[1] - this.getMovementOffsets(10, 1.0F)[1]) * 10.0F / 180.0F * (float)Math.PI;
-                float f2 = MathHelper.cos(f12);
-                float f15 = -MathHelper.sin(f12);
-                float f3 = this.rotationYaw * (float)Math.PI / 180.0F;
-                float f16 = MathHelper.sin(f3);
-                float f4 = MathHelper.cos(f3);
+                float f14 = (float)(this.getMovementOffsets(5, 1.0F)[1] - this.getMovementOffsets(10, 1.0F)[1]) * 10.0F * 0.017453292F;
+                float f16 = MathHelper.cos(f14);
+                float f18 = MathHelper.sin(f14);
+                float f2 = this.rotationYaw * 0.017453292F;
+                float f19 = MathHelper.sin(f2);
+                float f3 = MathHelper.cos(f2);
                 this.dragonPartBody.onUpdate();
-                this.dragonPartBody.setLocationAndAngles(this.posX + (double)(f16 * 0.5F), this.posY, this.posZ - (double)(f4 * 0.5F), 0.0F, 0.0F);
+                this.dragonPartBody.setLocationAndAngles(this.posX + (double)(f19 * 0.5F), this.posY, this.posZ - (double)(f3 * 0.5F), 0.0F, 0.0F);
                 this.dragonPartWing1.onUpdate();
-                this.dragonPartWing1.setLocationAndAngles(this.posX + (double)(f4 * 4.5F), this.posY + 2.0D, this.posZ + (double)(f16 * 4.5F), 0.0F, 0.0F);
+                this.dragonPartWing1.setLocationAndAngles(this.posX + (double)(f3 * 4.5F), this.posY + 2.0D, this.posZ + (double)(f19 * 4.5F), 0.0F, 0.0F);
                 this.dragonPartWing2.onUpdate();
-                this.dragonPartWing2.setLocationAndAngles(this.posX - (double)(f4 * 4.5F), this.posY + 2.0D, this.posZ - (double)(f16 * 4.5F), 0.0F, 0.0F);
+                this.dragonPartWing2.setLocationAndAngles(this.posX - (double)(f3 * 4.5F), this.posY + 2.0D, this.posZ - (double)(f19 * 4.5F), 0.0F, 0.0F);
 
                 if (!this.worldObj.isRemote && this.hurtTime == 0)
                 {
                     this.collideWithEntities(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.dragonPartWing1.getEntityBoundingBox().expand(4.0D, 2.0D, 4.0D).offset(0.0D, -2.0D, 0.0D)));
                     this.collideWithEntities(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.dragonPartWing2.getEntityBoundingBox().expand(4.0D, 2.0D, 4.0D).offset(0.0D, -2.0D, 0.0D)));
-                    this.attackEntitiesInList(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.dragonPartHead.getEntityBoundingBox().expand(1.0D, 1.0D, 1.0D)));
+                    this.attackEntitiesInList(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.dragonPartHead.getEntityBoundingBox().expandXyz(1.0D)));
+                    this.attackEntitiesInList(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.dragonPartNeck.getEntityBoundingBox().expandXyz(1.0D)));
                 }
 
-                double[] adouble1 = this.getMovementOffsets(5, 1.0F);
-                double[] adouble = this.getMovementOffsets(0, 1.0F);
-                float f18 = MathHelper.sin(this.rotationYaw * (float)Math.PI / 180.0F - this.randomYawVelocity * 0.01F);
-                float f19 = MathHelper.cos(this.rotationYaw * (float)Math.PI / 180.0F - this.randomYawVelocity * 0.01F);
+                double[] adouble = this.getMovementOffsets(5, 1.0F);
+                float f4 = MathHelper.sin(this.rotationYaw * 0.017453292F - this.randomYawVelocity * 0.01F);
+                float f20 = MathHelper.cos(this.rotationYaw * 0.017453292F - this.randomYawVelocity * 0.01F);
                 this.dragonPartHead.onUpdate();
-                this.dragonPartHead.setLocationAndAngles(this.posX + (double)(f18 * 5.5F * f2), this.posY + (adouble[1] - adouble1[1]) * 1.0D + (double)(f15 * 5.5F), this.posZ - (double)(f19 * 5.5F * f2), 0.0F, 0.0F);
+                this.dragonPartNeck.onUpdate();
+                float f5 = this.getHeadYOffset(1.0F);
+                this.dragonPartHead.setLocationAndAngles(this.posX + (double)(f4 * 6.5F * f16), this.posY + (double)f5 + (double)(f18 * 6.5F), this.posZ - (double)(f20 * 6.5F * f16), 0.0F, 0.0F);
+                this.dragonPartNeck.setLocationAndAngles(this.posX + (double)(f4 * 5.5F * f16), this.posY + (double)f5 + (double)(f18 * 5.5F), this.posZ - (double)(f20 * 5.5F * f16), 0.0F, 0.0F);
 
                 for (int j = 0; j < 3; ++j)
                 {
@@ -329,22 +369,45 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
                         entitydragonpart = this.dragonPartTail3;
                     }
 
-                    double[] adouble2 = this.getMovementOffsets(12 + j * 2, 1.0F);
-                    float f20 = this.rotationYaw * (float)Math.PI / 180.0F + this.simplifyAngle(adouble2[0] - adouble1[0]) * (float)Math.PI / 180.0F * 1.0F;
-                    float f21 = MathHelper.sin(f20);
-                    float f22 = MathHelper.cos(f20);
+                    double[] adouble1 = this.getMovementOffsets(12 + j * 2, 1.0F);
+                    float f21 = this.rotationYaw * 0.017453292F + this.simplifyAngle(adouble1[0] - adouble[0]) * 0.017453292F;
+                    float f22 = MathHelper.sin(f21);
+                    float f7 = MathHelper.cos(f21);
                     float f23 = 1.5F;
                     float f24 = (float)(j + 1) * 2.0F;
                     entitydragonpart.onUpdate();
-                    entitydragonpart.setLocationAndAngles(this.posX - (double)((f16 * f23 + f21 * f24) * f2), this.posY + (adouble2[1] - adouble1[1]) * 1.0D - (double)((f24 + f23) * f15) + 1.5D, this.posZ + (double)((f4 * f23 + f22 * f24) * f2), 0.0F, 0.0F);
+                    entitydragonpart.setLocationAndAngles(this.posX - (double)((f19 * 1.5F + f22 * f24) * f16), this.posY + (adouble1[1] - adouble[1]) - (double)((f24 + 1.5F) * f18) + 1.5D, this.posZ + (double)((f3 * 1.5F + f7 * f24) * f16), 0.0F, 0.0F);
                 }
 
                 if (!this.worldObj.isRemote)
                 {
-                    this.slowed = this.destroyBlocksInAABB(this.dragonPartHead.getEntityBoundingBox()) | this.destroyBlocksInAABB(this.dragonPartBody.getEntityBoundingBox());
+                    this.slowed = this.destroyBlocksInAABB(this.dragonPartHead.getEntityBoundingBox()) | this.destroyBlocksInAABB(this.dragonPartNeck.getEntityBoundingBox()) | this.destroyBlocksInAABB(this.dragonPartBody.getEntityBoundingBox());
+
+                    if (this.fightManager != null)
+                    {
+                        this.fightManager.dragonUpdate(this);
+                    }
                 }
             }
         }
+    }
+
+    private float getHeadYOffset(float p_184662_1_)
+    {
+        double d0;
+
+        if (this.phaseManager.getCurrentPhase().getIsStationary())
+        {
+            d0 = -1.0D;
+        }
+        else
+        {
+            double[] adouble = this.getMovementOffsets(5, 1.0F);
+            double[] adouble1 = this.getMovementOffsets(0, 1.0F);
+            d0 = adouble[1] - adouble1[0];
+        }
+
+        return (float)d0;
     }
 
     /**
@@ -356,11 +419,6 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
         {
             if (this.healingEnderCrystal.isDead)
             {
-                if (!this.worldObj.isRemote)
-                {
-                    this.attackEntityFromPart(this.dragonPartHead, DamageSource.setExplosionSource((Explosion)null), 10.0F);
-                }
-
                 this.healingEnderCrystal = null;
             }
             else if (this.ticksExisted % 10 == 0 && this.getHealth() < this.getMaxHealth())
@@ -371,8 +429,7 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
 
         if (this.rand.nextInt(10) == 0)
         {
-            float f = 32.0F;
-            List<EntityEnderCrystal> list = this.worldObj.<EntityEnderCrystal>getEntitiesWithinAABB(EntityEnderCrystal.class, this.getEntityBoundingBox().expand((double)f, (double)f, (double)f));
+            List<EntityEnderCrystal> list = this.worldObj.<EntityEnderCrystal>getEntitiesWithinAABB(EntityEnderCrystal.class, this.getEntityBoundingBox().expandXyz(32.0D));
             EntityEnderCrystal entityendercrystal = null;
             double d0 = Double.MAX_VALUE;
 
@@ -407,6 +464,12 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
                 double d3 = entity.posZ - d1;
                 double d4 = d2 * d2 + d3 * d3;
                 entity.addVelocity(d2 / d4 * 4.0D, 0.20000000298023224D, d3 / d4 * 4.0D);
+
+                if (!this.phaseManager.getCurrentPhase().getIsStationary() && ((EntityLivingBase)entity).getRevengeTimer() < entity.ticksExisted - 2)
+                {
+                    entity.attackEntityFrom(DamageSource.causeMobDamage(this), 5.0F);
+                    this.applyEnchantments(this, entity);
+                }
             }
         }
     }
@@ -429,56 +492,11 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
     }
 
     /**
-     * Sets a new target for the flight AI. It can be a random coordinate or a nearby player.
-     */
-    private void setNewTarget()
-    {
-        this.forceNewTarget = false;
-        List<EntityPlayer> list = Lists.newArrayList(this.worldObj.playerEntities);
-        Iterator<EntityPlayer> iterator = list.iterator();
-
-        while (iterator.hasNext())
-        {
-            if (((EntityPlayer)iterator.next()).isSpectator())
-            {
-                iterator.remove();
-            }
-        }
-
-        if (this.rand.nextInt(2) == 0 && !list.isEmpty())
-        {
-            this.target = (Entity)list.get(this.rand.nextInt(list.size()));
-        }
-        else
-        {
-            while (true)
-            {
-                this.targetX = 0.0D;
-                this.targetY = (double)(70.0F + this.rand.nextFloat() * 50.0F);
-                this.targetZ = 0.0D;
-                this.targetX += (double)(this.rand.nextFloat() * 120.0F - 60.0F);
-                this.targetZ += (double)(this.rand.nextFloat() * 120.0F - 60.0F);
-                double d0 = this.posX - this.targetX;
-                double d1 = this.posY - this.targetY;
-                double d2 = this.posZ - this.targetZ;
-                boolean flag = d0 * d0 + d1 * d1 + d2 * d2 > 100.0D;
-
-                if (flag)
-                {
-                    break;
-                }
-            }
-
-            this.target = null;
-        }
-    }
-
-    /**
      * Simplifies the value of a number by adding/subtracting 180 to the point that the number is between -180 and 180.
      */
     private float simplifyAngle(double p_70973_1_)
     {
-        return (float)MathHelper.wrapAngleTo180_double(p_70973_1_);
+        return (float)MathHelper.wrapDegrees(p_70973_1_);
     }
 
     /**
@@ -502,13 +520,25 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
                 for (int i2 = k; i2 <= j1; ++i2)
                 {
                     BlockPos blockpos = new BlockPos(k1, l1, i2);
-                    Block block = this.worldObj.getBlockState(blockpos).getBlock();
+                    IBlockState iblockstate = this.worldObj.getBlockState(blockpos);
+                    Block block = iblockstate.getBlock();
 
-                    if (!block.isAir(worldObj, new BlockPos(k1, l1, i2)))
+                    if (!block.isAir(iblockstate, this.worldObj, blockpos) && iblockstate.getMaterial() != Material.FIRE)
                     {
-                        if (block.canEntityDestroy(worldObj, new BlockPos(k1, l1, i2), this) && this.worldObj.getGameRules().getBoolean("mobGriefing"))
+                        if (!this.worldObj.getGameRules().getBoolean("mobGriefing"))
                         {
-                            flag1 = this.worldObj.setBlockToAir(blockpos) || flag1;
+                            flag = true;
+                        }
+                        else if (block.canEntityDestroy(iblockstate, this.worldObj, blockpos, this))
+                        {
+                            if (block != Blocks.COMMAND_BLOCK && block != Blocks.REPEATING_COMMAND_BLOCK && block != Blocks.CHAIN_COMMAND_BLOCK && block != Blocks.IRON_BARS && block != Blocks.END_GATEWAY)
+                            {
+                                flag1 = this.worldObj.setBlockToAir(blockpos) || flag1;
+                            }
+                            else
+                            {
+                                flag = true;
+                            }
                         }
                         else
                         {
@@ -530,27 +560,46 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
         return flag;
     }
 
-    public boolean attackEntityFromPart(EntityDragonPart dragonPart, DamageSource source, float p_70965_3_)
+    public boolean attackEntityFromPart(EntityDragonPart dragonPart, DamageSource source, float damage)
     {
+        damage = this.phaseManager.getCurrentPhase().getAdjustedDamage(dragonPart, source, damage);
+
         if (dragonPart != this.dragonPartHead)
         {
-            p_70965_3_ = p_70965_3_ / 4.0F + 1.0F;
+            damage = damage / 4.0F + Math.min(damage, 1.0F);
         }
 
-        float f = this.rotationYaw * (float)Math.PI / 180.0F;
-        float f1 = MathHelper.sin(f);
-        float f2 = MathHelper.cos(f);
-        this.targetX = this.posX + (double)(f1 * 5.0F) + (double)((this.rand.nextFloat() - 0.5F) * 2.0F);
-        this.targetY = this.posY + (double)(this.rand.nextFloat() * 3.0F) + 1.0D;
-        this.targetZ = this.posZ - (double)(f2 * 5.0F) + (double)((this.rand.nextFloat() - 0.5F) * 2.0F);
-        this.target = null;
-
-        if (source.getEntity() instanceof EntityPlayer || source.isExplosion())
+        if (damage < 0.01F)
         {
-            this.attackDragonFrom(source, p_70965_3_);
+            return false;
         }
+        else
+        {
+            if (source.getEntity() instanceof EntityPlayer || source.isExplosion())
+            {
+                float f = this.getHealth();
+                this.attackDragonFrom(source, damage);
 
-        return true;
+                if (this.getHealth() <= 0.0F && !this.phaseManager.getCurrentPhase().getIsStationary())
+                {
+                    this.setHealth(1.0F);
+                    this.phaseManager.setPhase(PhaseList.DYING);
+                }
+
+                if (this.phaseManager.getCurrentPhase().getIsStationary())
+                {
+                    this.sittingDamageReceived = (int)((float)this.sittingDamageReceived + (f - this.getHealth()));
+
+                    if ((float)this.sittingDamageReceived > 0.25F * this.getMaxHealth())
+                    {
+                        this.sittingDamageReceived = 0;
+                        this.phaseManager.setPhase(PhaseList.TAKEOFF);
+                    }
+                }
+            }
+
+            return true;
+        }
     }
 
     /**
@@ -560,7 +609,7 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
     {
         if (source instanceof EntityDamageSource && ((EntityDamageSource)source).getIsThornsDamage())
         {
-            this.attackDragonFrom(source, amount);
+            this.attackEntityFromPart(this.dragonPartBody, source, amount);
         }
 
         return false;
@@ -580,6 +629,12 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
     public void onKillCommand()
     {
         this.setDead();
+
+        if (this.fightManager != null)
+        {
+            this.fightManager.dragonUpdate(this);
+            this.fightManager.processDragonDeath(this);
+        }
     }
 
     /**
@@ -587,6 +642,11 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
      */
     protected void onDeathUpdate()
     {
+        if (this.fightManager != null)
+        {
+            this.fightManager.dragonUpdate(this);
+        }
+
         ++this.deathTicks;
 
         if (this.deathTicks >= 180 && this.deathTicks <= 200)
@@ -598,104 +658,322 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
         }
 
         boolean flag = this.worldObj.getGameRules().getBoolean("doMobLoot");
+        int i = 500;
+
+        if (this.fightManager != null && !this.fightManager.hasPreviouslyKilledDragon())
+        {
+            i = 12000;
+        }
 
         if (!this.worldObj.isRemote)
         {
             if (this.deathTicks > 150 && this.deathTicks % 5 == 0 && flag)
             {
-                int i = 1000;
-
-                while (i > 0)
-                {
-                    int k = EntityXPOrb.getXPSplit(i);
-                    i -= k;
-                    this.worldObj.spawnEntityInWorld(new EntityXPOrb(this.worldObj, this.posX, this.posY, this.posZ, k));
-                }
+                this.dropExperience(MathHelper.floor_float((float)i * 0.08F));
             }
 
             if (this.deathTicks == 1)
             {
-                this.worldObj.playBroadcastSound(1018, new BlockPos(this), 0);
+                this.worldObj.playBroadcastSound(1028, new BlockPos(this), 0);
             }
         }
 
         this.moveEntity(0.0D, 0.10000000149011612D, 0.0D);
-        this.renderYawOffset = this.rotationYaw += 20.0F;
+        this.rotationYaw += 20.0F;
+        this.renderYawOffset = this.rotationYaw;
 
         if (this.deathTicks == 200 && !this.worldObj.isRemote)
         {
             if (flag)
             {
-                int j = 2000;
-
-                while (j > 0)
-                {
-                    int l = EntityXPOrb.getXPSplit(j);
-                    j -= l;
-                    this.worldObj.spawnEntityInWorld(new EntityXPOrb(this.worldObj, this.posX, this.posY, this.posZ, l));
-                }
+                this.dropExperience(MathHelper.floor_float((float)i * 0.2F));
             }
 
-            this.generatePortal(new BlockPos(this.posX, 64.0D, this.posZ));
+            if (this.fightManager != null)
+            {
+                this.fightManager.processDragonDeath(this);
+            }
+
             this.setDead();
         }
     }
 
-    /**
-     * Generate the portal when the dragon dies
-     */
-    private void generatePortal(BlockPos pos)
+    private void dropExperience(int p_184668_1_)
     {
-        int i = 4;
-        double d0 = 12.25D;
-        double d1 = 6.25D;
-
-        for (int j = -1; j <= 32; ++j)
+        while (p_184668_1_ > 0)
         {
-            for (int k = -4; k <= 4; ++k)
+            int i = EntityXPOrb.getXPSplit(p_184668_1_);
+            p_184668_1_ -= i;
+            this.worldObj.spawnEntityInWorld(new EntityXPOrb(this.worldObj, this.posX, this.posY, this.posZ, i));
+        }
+    }
+
+    /**
+     * Generates values for the fields pathPoints, and neighbors, and then returns the nearest pathPoint to the
+     * specified position.
+     */
+    public int initPathPoints()
+    {
+        if (this.pathPoints[0] == null)
+        {
+            for (int i = 0; i < 24; ++i)
             {
-                for (int l = -4; l <= 4; ++l)
+                int j = 5;
+                int l;
+                int i1;
+
+                if (i < 12)
                 {
-                    double d2 = (double)(k * k + l * l);
+                    l = (int)(60.0F * MathHelper.cos(2.0F * (-(float)Math.PI + 0.2617994F * (float)i)));
+                    i1 = (int)(60.0F * MathHelper.sin(2.0F * (-(float)Math.PI + 0.2617994F * (float)i)));
+                }
+                else if (i < 20)
+                {
+                    int lvt_3_1_ = i - 12;
+                    l = (int)(40.0F * MathHelper.cos(2.0F * (-(float)Math.PI + 0.3926991F * (float)lvt_3_1_)));
+                    i1 = (int)(40.0F * MathHelper.sin(2.0F * (-(float)Math.PI + 0.3926991F * (float)lvt_3_1_)));
+                    j += 10;
+                }
+                else
+                {
+                    int k1 = i - 20;
+                    l = (int)(20.0F * MathHelper.cos(2.0F * (-(float)Math.PI + ((float)Math.PI / 4F) * (float)k1)));
+                    i1 = (int)(20.0F * MathHelper.sin(2.0F * (-(float)Math.PI + ((float)Math.PI / 4F) * (float)k1)));
+                }
 
-                    if (d2 <= 12.25D)
+                int j1 = Math.max(this.worldObj.getSeaLevel() + 10, this.worldObj.getTopSolidOrLiquidBlock(new BlockPos(l, 0, i1)).getY() + j);
+                this.pathPoints[i] = new PathPoint(l, j1, i1);
+            }
+
+            this.neighbors[0] = 6146;
+            this.neighbors[1] = 8197;
+            this.neighbors[2] = 8202;
+            this.neighbors[3] = 16404;
+            this.neighbors[4] = 32808;
+            this.neighbors[5] = 32848;
+            this.neighbors[6] = 65696;
+            this.neighbors[7] = 131392;
+            this.neighbors[8] = 131712;
+            this.neighbors[9] = 263424;
+            this.neighbors[10] = 526848;
+            this.neighbors[11] = 525313;
+            this.neighbors[12] = 1581057;
+            this.neighbors[13] = 3166214;
+            this.neighbors[14] = 2138120;
+            this.neighbors[15] = 6373424;
+            this.neighbors[16] = 4358208;
+            this.neighbors[17] = 12910976;
+            this.neighbors[18] = 9044480;
+            this.neighbors[19] = 9706496;
+            this.neighbors[20] = 15216640;
+            this.neighbors[21] = 13688832;
+            this.neighbors[22] = 11763712;
+            this.neighbors[23] = 8257536;
+        }
+
+        return this.getNearestPpIdx(this.posX, this.posY, this.posZ);
+    }
+
+    /**
+     * Returns the index into pathPoints of the nearest PathPoint.
+     */
+    public int getNearestPpIdx(double x, double y, double z)
+    {
+        float f = 10000.0F;
+        int i = 0;
+        PathPoint pathpoint = new PathPoint(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
+        int j = 0;
+
+        if (this.fightManager == null || this.fightManager.getNumAliveCrystals() == 0)
+        {
+            j = 12;
+        }
+
+        for (int k = j; k < 24; ++k)
+        {
+            if (this.pathPoints[k] != null)
+            {
+                float f1 = this.pathPoints[k].distanceToSquared(pathpoint);
+
+                if (f1 < f)
+                {
+                    f = f1;
+                    i = k;
+                }
+            }
+        }
+
+        return i;
+    }
+
+    /**
+     * Find and return a path among the circles described by pathPoints, or null if the shortest path would just be
+     * directly between the start and finish with no intermediate points.
+     *  
+     * Starting with pathPoint[startIdx], it searches the neighboring points (and their neighboring points, and so on)
+     * until it reaches pathPoint[finishIdx], at which point it calls makePath to seal the deal.
+     */
+    @Nullable
+    public Path findPath(int startIdx, int finishIdx, @Nullable PathPoint andThen)
+    {
+        for (int i = 0; i < 24; ++i)
+        {
+            PathPoint pathpoint = this.pathPoints[i];
+            pathpoint.visited = false;
+            pathpoint.distanceToTarget = 0.0F;
+            pathpoint.totalPathDistance = 0.0F;
+            pathpoint.distanceToNext = 0.0F;
+            pathpoint.previous = null;
+            pathpoint.index = -1;
+        }
+
+        PathPoint pathpoint4 = this.pathPoints[startIdx];
+        PathPoint pathpoint5 = this.pathPoints[finishIdx];
+        pathpoint4.totalPathDistance = 0.0F;
+        pathpoint4.distanceToNext = pathpoint4.distanceTo(pathpoint5);
+        pathpoint4.distanceToTarget = pathpoint4.distanceToNext;
+        this.pathFindQueue.clearPath();
+        this.pathFindQueue.addPoint(pathpoint4);
+        PathPoint pathpoint1 = pathpoint4;
+        int j = 0;
+
+        if (this.fightManager == null || this.fightManager.getNumAliveCrystals() == 0)
+        {
+            j = 12;
+        }
+
+        while (!this.pathFindQueue.isPathEmpty())
+        {
+            PathPoint pathpoint2 = this.pathFindQueue.dequeue();
+
+            if (pathpoint2.equals(pathpoint5))
+            {
+                if (andThen != null)
+                {
+                    andThen.previous = pathpoint5;
+                    pathpoint5 = andThen;
+                }
+
+                return this.makePath(pathpoint4, pathpoint5);
+            }
+
+            if (pathpoint2.distanceTo(pathpoint5) < pathpoint1.distanceTo(pathpoint5))
+            {
+                pathpoint1 = pathpoint2;
+            }
+
+            pathpoint2.visited = true;
+            int k = 0;
+
+            for (int l = 0; l < 24; ++l)
+            {
+                if (this.pathPoints[l] == pathpoint2)
+                {
+                    k = l;
+                    break;
+                }
+            }
+
+            for (int i1 = j; i1 < 24; ++i1)
+            {
+                if ((this.neighbors[k] & 1 << i1) > 0)
+                {
+                    PathPoint pathpoint3 = this.pathPoints[i1];
+
+                    if (!pathpoint3.visited)
                     {
-                        BlockPos blockpos = pos.add(k, j, l);
+                        float f = pathpoint2.totalPathDistance + pathpoint2.distanceTo(pathpoint3);
 
-                        if (j < 0)
+                        if (!pathpoint3.isAssigned() || f < pathpoint3.totalPathDistance)
                         {
-                            if (d2 <= 6.25D)
+                            pathpoint3.previous = pathpoint2;
+                            pathpoint3.totalPathDistance = f;
+                            pathpoint3.distanceToNext = pathpoint3.distanceTo(pathpoint5);
+
+                            if (pathpoint3.isAssigned())
                             {
-                                this.worldObj.setBlockState(blockpos, Blocks.bedrock.getDefaultState());
+                                this.pathFindQueue.changeDistance(pathpoint3, pathpoint3.totalPathDistance + pathpoint3.distanceToNext);
                             }
-                        }
-                        else if (j > 0)
-                        {
-                            this.worldObj.setBlockState(blockpos, Blocks.air.getDefaultState());
-                        }
-                        else if (d2 > 6.25D)
-                        {
-                            this.worldObj.setBlockState(blockpos, Blocks.bedrock.getDefaultState());
-                        }
-                        else
-                        {
-                            this.worldObj.setBlockState(blockpos, Blocks.end_portal.getDefaultState());
+                            else
+                            {
+                                pathpoint3.distanceToTarget = pathpoint3.totalPathDistance + pathpoint3.distanceToNext;
+                                this.pathFindQueue.addPoint(pathpoint3);
+                            }
                         }
                     }
                 }
             }
         }
 
-        this.worldObj.setBlockState(pos, Blocks.bedrock.getDefaultState());
-        this.worldObj.setBlockState(pos.up(), Blocks.bedrock.getDefaultState());
-        BlockPos blockpos1 = pos.up(2);
-        this.worldObj.setBlockState(blockpos1, Blocks.bedrock.getDefaultState());
-        this.worldObj.setBlockState(blockpos1.west(), Blocks.torch.getDefaultState().withProperty(BlockTorch.FACING, EnumFacing.EAST));
-        this.worldObj.setBlockState(blockpos1.east(), Blocks.torch.getDefaultState().withProperty(BlockTorch.FACING, EnumFacing.WEST));
-        this.worldObj.setBlockState(blockpos1.north(), Blocks.torch.getDefaultState().withProperty(BlockTorch.FACING, EnumFacing.SOUTH));
-        this.worldObj.setBlockState(blockpos1.south(), Blocks.torch.getDefaultState().withProperty(BlockTorch.FACING, EnumFacing.NORTH));
-        this.worldObj.setBlockState(pos.up(3), Blocks.bedrock.getDefaultState());
-        this.worldObj.setBlockState(pos.up(4), Blocks.dragon_egg.getDefaultState());
+        if (pathpoint1 == pathpoint4)
+        {
+            return null;
+        }
+        else
+        {
+            LOGGER.debug("Failed to find path from {} to {}", new Object[] {Integer.valueOf(startIdx), Integer.valueOf(finishIdx)});
+
+            if (andThen != null)
+            {
+                andThen.previous = pathpoint1;
+                pathpoint1 = andThen;
+            }
+
+            return this.makePath(pathpoint4, pathpoint1);
+        }
+    }
+
+    /**
+     * Create and return a new PathEntity defining a path from the start to the finish, using the connections already
+     * made by the caller, findPath.
+     */
+    private Path makePath(PathPoint start, PathPoint finish)
+    {
+        int i = 1;
+
+        for (PathPoint pathpoint = finish; pathpoint.previous != null; pathpoint = pathpoint.previous)
+        {
+            ++i;
+        }
+
+        PathPoint[] apathpoint = new PathPoint[i];
+        PathPoint pathpoint1 = finish;
+        --i;
+
+        for (apathpoint[i] = finish; pathpoint1.previous != null; apathpoint[i] = pathpoint1)
+        {
+            pathpoint1 = pathpoint1.previous;
+            --i;
+        }
+
+        return new Path(apathpoint);
+    }
+
+    public static void func_189755_b(DataFixer p_189755_0_)
+    {
+        EntityLiving.func_189752_a(p_189755_0_, "EnderDragon");
+    }
+
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
+    public void writeEntityToNBT(NBTTagCompound compound)
+    {
+        super.writeEntityToNBT(compound);
+        compound.setInteger("DragonPhase", this.phaseManager.getCurrentPhase().getPhaseList().getId());
+    }
+
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
+    public void readEntityFromNBT(NBTTagCompound compound)
+    {
+        super.readEntityFromNBT(compound);
+
+        if (compound.hasKey("DragonPhase"))
+        {
+            this.phaseManager.setPhase(PhaseList.getById(compound.getInteger("DragonPhase")));
+        }
     }
 
     /**
@@ -726,20 +1004,19 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
         return this.worldObj;
     }
 
-    /**
-     * Returns the sound this mob makes while it's alive.
-     */
-    protected String getLivingSound()
+    public SoundCategory getSoundCategory()
     {
-        return "mob.enderdragon.growl";
+        return SoundCategory.HOSTILE;
     }
 
-    /**
-     * Returns the sound this mob makes when it is hurt.
-     */
-    protected String getHurtSound()
+    protected SoundEvent getAmbientSound()
     {
-        return "mob.enderdragon.hit";
+        return SoundEvents.ENTITY_ENDERDRAGON_AMBIENT;
+    }
+
+    protected SoundEvent getHurtSound()
+    {
+        return SoundEvents.ENTITY_ENDERDRAGON_HURT;
     }
 
     /**
@@ -748,5 +1025,135 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
     protected float getSoundVolume()
     {
         return 5.0F;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public float getHeadPartYOffset(int p_184667_1_, double[] p_184667_2_, double[] p_184667_3_)
+    {
+        IPhase iphase = this.phaseManager.getCurrentPhase();
+        PhaseList <? extends IPhase > phaselist = iphase.getPhaseList();
+        double d0;
+
+        if (phaselist != PhaseList.LANDING && phaselist != PhaseList.TAKEOFF)
+        {
+            if (iphase.getIsStationary())
+            {
+                d0 = (double)p_184667_1_;
+            }
+            else if (p_184667_1_ == 6)
+            {
+                d0 = 0.0D;
+            }
+            else
+            {
+                d0 = p_184667_3_[1] - p_184667_2_[1];
+            }
+        }
+        else
+        {
+            BlockPos blockpos = this.worldObj.getTopSolidOrLiquidBlock(WorldGenEndPodium.END_PODIUM_LOCATION);
+            float f = Math.max(MathHelper.sqrt_double(this.getDistanceSqToCenter(blockpos)) / 4.0F, 1.0F);
+            d0 = (double)((float)p_184667_1_ / f);
+        }
+
+        return (float)d0;
+    }
+
+    public Vec3d getHeadLookVec(float p_184665_1_)
+    {
+        IPhase iphase = this.phaseManager.getCurrentPhase();
+        PhaseList <? extends IPhase > phaselist = iphase.getPhaseList();
+        Vec3d vec3d;
+
+        if (phaselist != PhaseList.LANDING && phaselist != PhaseList.TAKEOFF)
+        {
+            if (iphase.getIsStationary())
+            {
+                float f4 = this.rotationPitch;
+                float f5 = 1.5F;
+                this.rotationPitch = -45.0F;
+                vec3d = this.getLook(p_184665_1_);
+                this.rotationPitch = f4;
+            }
+            else
+            {
+                vec3d = this.getLook(p_184665_1_);
+            }
+        }
+        else
+        {
+            BlockPos blockpos = this.worldObj.getTopSolidOrLiquidBlock(WorldGenEndPodium.END_PODIUM_LOCATION);
+            float f = Math.max(MathHelper.sqrt_double(this.getDistanceSqToCenter(blockpos)) / 4.0F, 1.0F);
+            float f1 = 6.0F / f;
+            float f2 = this.rotationPitch;
+            float f3 = 1.5F;
+            this.rotationPitch = -f1 * 1.5F * 5.0F;
+            vec3d = this.getLook(p_184665_1_);
+            this.rotationPitch = f2;
+        }
+
+        return vec3d;
+    }
+
+    public void onCrystalDestroyed(EntityEnderCrystal crystal, BlockPos pos, DamageSource dmgSrc)
+    {
+        EntityPlayer entityplayer;
+
+        if (dmgSrc.getEntity() instanceof EntityPlayer)
+        {
+            entityplayer = (EntityPlayer)dmgSrc.getEntity();
+        }
+        else
+        {
+            entityplayer = this.worldObj.getNearestAttackablePlayer(pos, 64.0D, 64.0D);
+        }
+
+        if (crystal == this.healingEnderCrystal)
+        {
+            this.attackEntityFromPart(this.dragonPartHead, DamageSource.causeExplosionDamage(entityplayer), 10.0F);
+        }
+
+        this.phaseManager.getCurrentPhase().onCrystalDestroyed(crystal, pos, dmgSrc, entityplayer);
+    }
+
+    public void notifyDataManagerChange(DataParameter<?> key)
+    {
+        if (PHASE.equals(key) && this.worldObj.isRemote)
+        {
+            this.phaseManager.setPhase(PhaseList.getById(((Integer)this.getDataManager().get(PHASE)).intValue()));
+        }
+
+        super.notifyDataManagerChange(key);
+    }
+
+    public PhaseManager getPhaseManager()
+    {
+        return this.phaseManager;
+    }
+
+    @Nullable
+    public DragonFightManager getFightManager()
+    {
+        return this.fightManager;
+    }
+
+    /**
+     * adds a PotionEffect to the entity
+     */
+    public void addPotionEffect(PotionEffect potioneffectIn)
+    {
+    }
+
+    protected boolean canBeRidden(Entity entityIn)
+    {
+        return false;
+    }
+
+    /**
+     * Returns false if this Entity is a boss, true otherwise.
+     */
+    public boolean isNonBoss()
+    {
+        return false;
     }
 }

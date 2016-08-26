@@ -1,17 +1,65 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.asm.transformers;
 
-import net.minecraft.launchwrapper.IClassTransformer;
-import net.minecraftforge.fml.common.eventhandler.Event;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
+import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.F_SAME;
+import static org.objectweb.asm.Opcodes.GETSTATIC;
+import static org.objectweb.asm.Opcodes.IFNULL;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.NEW;
+import static org.objectweb.asm.Opcodes.PUTSTATIC;
+import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Type.VOID_TYPE;
+import static org.objectweb.asm.Type.BOOLEAN_TYPE;
+import static org.objectweb.asm.Type.getMethodDescriptor;
 
 import java.util.List;
 
-import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
-import static org.objectweb.asm.Opcodes.*;
-import static org.objectweb.asm.Type.*;
+import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraftforge.fml.common.eventhandler.Event;
+
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AnnotationNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.FrameNode;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 public class EventSubscriptionTransformer implements IClassTransformer
 {
@@ -76,7 +124,7 @@ public class EventSubscriptionTransformer implements IClassTransformer
         String listDesc            = tList.getDescriptor();
         String listDescM           = Type.getMethodDescriptor(tList);
 
-        for (MethodNode method : (List<MethodNode>)classNode.methods)
+        for (MethodNode method : classNode.methods)
         {
             if (method.name.equals("setup") && method.desc.equals(voidDesc) && (method.access & ACC_PROTECTED) == ACC_PROTECTED) hasSetup = true;
             if ((method.access & ACC_PUBLIC) == ACC_PUBLIC)
@@ -166,10 +214,10 @@ public class EventSubscriptionTransformer implements IClassTransformer
         method.instructions.add(new VarInsnNode(ALOAD, 0));
         method.instructions.add(new MethodInsnNode(INVOKESPECIAL, tSuper.getInternalName(), "setup", voidDesc, false));
         method.instructions.add(new FieldInsnNode(GETSTATIC, classNode.name, "LISTENER_LIST", listDesc));
-        LabelNode initLisitener = new LabelNode();
-        method.instructions.add(new JumpInsnNode(IFNULL, initLisitener));
+        LabelNode initListener = new LabelNode();
+        method.instructions.add(new JumpInsnNode(IFNULL, initListener));
         method.instructions.add(new InsnNode(RETURN));
-        method.instructions.add(initLisitener);
+        method.instructions.add(initListener);
         method.instructions.add(new FrameNode(F_SAME, 0, null, 0, null));
         method.instructions.add(new TypeInsnNode(NEW, tList.getInternalName()));
         method.instructions.add(new InsnNode(DUP));

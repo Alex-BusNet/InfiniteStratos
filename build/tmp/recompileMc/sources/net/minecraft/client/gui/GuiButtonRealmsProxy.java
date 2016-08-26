@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class GuiButtonRealmsProxy extends GuiButton
 {
-    private RealmsButton realmsButton;
+    private final RealmsButton realmsButton;
 
     public GuiButtonRealmsProxy(RealmsButton realmsButtonIn, int buttonId, int x, int y, String text)
     {
@@ -96,7 +96,7 @@ public class GuiButtonRealmsProxy extends GuiButton
         return this.realmsButton.getYImage(mouseOver);
     }
 
-    public int func_154312_c(boolean p_154312_1_)
+    public int getYImage(boolean p_154312_1_)
     {
         return super.getHoverState(p_154312_1_);
     }

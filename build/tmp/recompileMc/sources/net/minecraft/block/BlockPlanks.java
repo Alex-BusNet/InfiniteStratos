@@ -1,10 +1,11 @@
 package net.minecraft.block;
 
+import java.util.List;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -13,17 +14,15 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
-
 public class BlockPlanks extends Block
 {
     public static final PropertyEnum<BlockPlanks.EnumType> VARIANT = PropertyEnum.<BlockPlanks.EnumType>create("variant", BlockPlanks.EnumType.class);
 
     public BlockPlanks()
     {
-        super(Material.wood);
+        super(Material.WOOD);
         this.setDefaultState(this.blockState.getBaseState().withProperty(VARIANT, BlockPlanks.EnumType.OAK));
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -60,7 +59,7 @@ public class BlockPlanks extends Block
      */
     public MapColor getMapColor(IBlockState state)
     {
-        return ((BlockPlanks.EnumType)state.getValue(VARIANT)).func_181070_c();
+        return ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMapColor();
     }
 
     /**
@@ -71,37 +70,38 @@ public class BlockPlanks extends Block
         return ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {VARIANT});
+        return new BlockStateContainer(this, new IProperty[] {VARIANT});
     }
 
     public static enum EnumType implements IStringSerializable
     {
-        OAK(0, "oak", MapColor.woodColor),
-        SPRUCE(1, "spruce", MapColor.obsidianColor),
-        BIRCH(2, "birch", MapColor.sandColor),
-        JUNGLE(3, "jungle", MapColor.dirtColor),
-        ACACIA(4, "acacia", MapColor.adobeColor),
-        DARK_OAK(5, "dark_oak", "big_oak", MapColor.brownColor);
+        OAK(0, "oak", MapColor.WOOD),
+        SPRUCE(1, "spruce", MapColor.OBSIDIAN),
+        BIRCH(2, "birch", MapColor.SAND),
+        JUNGLE(3, "jungle", MapColor.DIRT),
+        ACACIA(4, "acacia", MapColor.ADOBE),
+        DARK_OAK(5, "dark_oak", "big_oak", MapColor.BROWN);
 
         private static final BlockPlanks.EnumType[] META_LOOKUP = new BlockPlanks.EnumType[values().length];
         private final int meta;
         private final String name;
         private final String unlocalizedName;
-        private final MapColor field_181071_k;
+        /** The color that represents this entry on a map. */
+        private final MapColor mapColor;
 
-        private EnumType(int p_i46388_3_, String p_i46388_4_, MapColor p_i46388_5_)
+        private EnumType(int metaIn, String nameIn, MapColor mapColorIn)
         {
-            this(p_i46388_3_, p_i46388_4_, p_i46388_4_, p_i46388_5_);
+            this(metaIn, nameIn, nameIn, mapColorIn);
         }
 
-        private EnumType(int p_i46389_3_, String p_i46389_4_, String p_i46389_5_, MapColor p_i46389_6_)
+        private EnumType(int metaIn, String nameIn, String unlocalizedNameIn, MapColor mapColorIn)
         {
-            this.meta = p_i46389_3_;
-            this.name = p_i46389_4_;
-            this.unlocalizedName = p_i46389_5_;
-            this.field_181071_k = p_i46389_6_;
+            this.meta = metaIn;
+            this.name = nameIn;
+            this.unlocalizedName = unlocalizedNameIn;
+            this.mapColor = mapColorIn;
         }
 
         public int getMetadata()
@@ -109,9 +109,12 @@ public class BlockPlanks extends Block
             return this.meta;
         }
 
-        public MapColor func_181070_c()
+        /**
+         * The color which represents this entry on a map.
+         */
+        public MapColor getMapColor()
         {
-            return this.field_181071_k;
+            return this.mapColor;
         }
 
         public String toString()

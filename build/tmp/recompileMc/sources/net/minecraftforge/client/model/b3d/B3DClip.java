@@ -1,22 +1,46 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.client.model.b3d;
 
-import com.google.common.collect.ImmutableSet;
-import net.minecraftforge.client.model.TRSRTransformation;
-import net.minecraftforge.client.model.animation.*;
 import net.minecraftforge.client.model.b3d.B3DLoader.NodeJoint;
 import net.minecraftforge.client.model.b3d.B3DModel.Key;
 import net.minecraftforge.client.model.b3d.B3DModel.Node;
+import net.minecraftforge.common.animation.Event;
+import net.minecraftforge.common.model.TRSRTransformation;
+import net.minecraftforge.common.model.animation.IClip;
+import net.minecraftforge.common.model.animation.IJoint;
+import net.minecraftforge.common.model.animation.IJointClip;
+import net.minecraftforge.common.model.animation.JointClips;
+
+import com.google.common.collect.ImmutableSet;
 
 // FIXME: is this fast enough?
 public enum B3DClip implements IClip
 {
-    instance;
+    INSTANCE;
 
     public IJointClip apply(final IJoint joint)
     {
         if(!(joint instanceof NodeJoint))
         {
-            return JointClips.IdentityJointClip.instance;
+            return JointClips.IdentityJointClip.INSTANCE;
         }
         return new NodeClip(((NodeJoint)joint).getNode());
     }
@@ -55,7 +79,7 @@ public enum B3DClip implements IClip
                 {
                     ret = ret.compose(new TRSRTransformation(node.getPos(), node.getRot(), node.getScale(), null));
                 }
-                // TODO animated TRSR for speed?
+                // TODO animated TRSRTransformation for speed?
                 else
                 {
                     ret = ret.compose(endTr);

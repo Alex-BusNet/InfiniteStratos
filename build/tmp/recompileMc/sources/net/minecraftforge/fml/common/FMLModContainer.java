@@ -1,40 +1,22 @@
 /*
- * The FML Forge Mod Loader suite. Copyright (C) 2012 cpw
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2.1 of the License, or any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
  *
- * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51
- * Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 package net.minecraftforge.fml.common;
-
-import com.google.common.base.Function;
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
-import com.google.common.collect.*;
-import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.Mod.Metadata;
-import net.minecraftforge.fml.common.asm.transformers.BlamingTransformer;
-import net.minecraftforge.fml.common.discovery.ASMDataTable;
-import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
-import net.minecraftforge.fml.common.discovery.ModCandidate;
-import net.minecraftforge.fml.common.event.FMLConstructionEvent;
-import net.minecraftforge.fml.common.event.FMLEvent;
-import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.versioning.ArtifactVersion;
-import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
-import net.minecraftforge.fml.common.versioning.VersionParser;
-import net.minecraftforge.fml.common.versioning.VersionRange;
-import net.minecraftforge.fml.relauncher.Side;
-import org.apache.logging.log4j.Level;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,9 +27,53 @@ import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.Certificate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.Mod.Metadata;
+import net.minecraftforge.fml.common.asm.transformers.BlamingTransformer;
+import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.common.discovery.ModCandidate;
+import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
+import net.minecraftforge.fml.common.event.FMLConstructionEvent;
+import net.minecraftforge.fml.common.event.FMLEvent;
+import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.versioning.ArtifactVersion;
+import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
+import net.minecraftforge.fml.common.versioning.VersionParser;
+import net.minecraftforge.fml.common.versioning.VersionRange;
+import net.minecraftforge.fml.relauncher.Side;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
+
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import com.google.common.base.Function;
+import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
+import net.minecraftforge.fml.common.ModContainer.Disableable;
 
 public class FMLModContainer implements ModContainer
 {
@@ -75,6 +101,7 @@ public class FMLModContainer implements ModContainer
     private Map<String, String> customModProperties;
     private ModCandidate candidate;
     private URL updateJSONUrl;
+    private int classVersion;
 
     public FMLModContainer(String className, ModCandidate container, Map<String, Object> modDescriptor)
     {
@@ -96,8 +123,24 @@ public class FMLModContainer implements ModContainer
             this.languageAdapter = null;
             FMLLog.finer("Using custom language adapter %s for %s (modid: %s)", languageAdapterType, this.className, getModId());
         }
+        sanityCheckModId();
     }
 
+    private void sanityCheckModId()
+    {
+        String modid = (String)this.descriptor.get("modid");
+        if (Strings.isNullOrEmpty(modid))
+        {
+            throw new IllegalArgumentException("Modid cannot be null or empty");
+        }
+        if (modid.length() > 64) {
+            FMLLog.bigWarning("The modid %s is longer than the recommended maximum of 64 characters. Truncation will be enforced in 1.11", modid);
+        }
+        if (!modid.equals(modid.toLowerCase(Locale.ENGLISH)))
+        {
+            FMLLog.bigWarning("The modid %s is not the same as it's lowercase version. Lowercasing will be enforced in 1.11", modid);
+        }
+    }
     private ILanguageAdapter getLanguageAdapter()
     {
         if (languageAdapter == null)
@@ -152,7 +195,7 @@ public class FMLModContainer implements ModContainer
 
         if (descriptor.containsKey("useMetadata"))
         {
-            overridesMetadata = !((Boolean)descriptor.get("useMetadata")).booleanValue();
+            overridesMetadata = !((Boolean)descriptor.get("useMetadata"));
         }
 
         if (overridesMetadata || !modMetadata.useDependencyInformation)
@@ -202,6 +245,11 @@ public class FMLModContainer implements ModContainer
 
         String mcVersionString = (String)descriptor.get("acceptedMinecraftVersions");
         if ("[1.8.8]".equals(mcVersionString)) mcVersionString = "[1.8.8,1.8.9]"; // MC 1.8.8 and 1.8.9 is forward SRG compatible so accept these versions by default.
+        if ("[1.9.4]".equals(mcVersionString) ||
+            "[1.9,1.9.4]".equals(mcVersionString) ||
+            "[1.9.4,1.10)".equals(mcVersionString) ||
+            "[1.10]".equals(mcVersionString))
+                mcVersionString = "[1.9.4,1.10.2]";
         if (!Strings.isNullOrEmpty(mcVersionString))
         {
             minecraftAccepted = VersionParser.parseRange(mcVersionString);
@@ -385,7 +433,7 @@ public class FMLModContainer implements ModContainer
         });
     }
 
-    private void parseSimpleFieldAnnotation(SetMultimap<String, ASMData> annotations, String annotationClassName, Function<ModContainer, Object> retreiver) throws IllegalAccessException
+    private void parseSimpleFieldAnnotation(SetMultimap<String, ASMData> annotations, String annotationClassName, Function<ModContainer, Object> retriever) throws IllegalAccessException
     {
         String[] annName = annotationClassName.split("\\.");
         String annotationName = annName[annName.length - 1];
@@ -416,7 +464,7 @@ public class FMLModContainer implements ModContainer
                     f = clz.getDeclaredField(targets.getObjectName());
                     f.setAccessible(true);
                     isStatic = Modifier.isStatic(f.getModifiers());
-                    injectedMod = retreiver.apply(mc);
+                    injectedMod = retriever.apply(mc);
                 }
                 catch (Exception e)
                 {
@@ -450,6 +498,10 @@ public class FMLModContainer implements ModContainer
             ModClassLoader modClassLoader = event.getModClassLoader();
             modClassLoader.addFile(source);
             modClassLoader.clearNegativeCacheFor(candidate.getClassList());
+
+            //Only place I could think to add this...
+            MinecraftForge.preloadCrashClasses(event.getASMHarvestedData(), getModId(), candidate.getClassList());
+
             Class<?> clazz = Class.forName(className, true, modClassLoader);
 
             Certificate[] certificates = clazz.getProtectionDomain().getCodeSource().getCertificates();
@@ -458,7 +510,7 @@ public class FMLModContainer implements ModContainer
             {
                 len = certificates.length;
             }
-            Builder<String> certBuilder = ImmutableList.<String>builder();
+            Builder<String> certBuilder = ImmutableList.builder();
             for (int i = 0; i < len; i++)
             {
                 certBuilder.add(CertificateHelper.getFingerprint(certificates[i]));
@@ -493,7 +545,7 @@ public class FMLModContainer implements ModContainer
             List<Map<String, Object>> props = (List<Map<String, Object>>)descriptor.get("customProperties");
             if (props != null)
             {
-                com.google.common.collect.ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder();
+                com.google.common.collect.ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
                 for (Map<String, Object> p : props)
                 {
                     builder.put((String)p.get("k"), (String)p.get("v"));
@@ -648,7 +700,7 @@ public class FMLModContainer implements ModContainer
         {
             return false;
         }
-        return value.booleanValue();
+        return value;
     }
 
     @Override
@@ -683,5 +735,17 @@ public class FMLModContainer implements ModContainer
     public URL getUpdateUrl()
     {
         return updateJSONUrl;
+    }
+
+    @Override
+    public void setClassVersion(int classVersion)
+    {
+        this.classVersion = classVersion;
+    }
+
+    @Override
+    public int getClassVersion()
+    {
+        return this.classVersion;
     }
 }

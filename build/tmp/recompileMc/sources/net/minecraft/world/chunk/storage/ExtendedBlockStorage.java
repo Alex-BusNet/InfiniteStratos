@@ -3,12 +3,13 @@ package net.minecraft.world.chunk.storage;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.NibbleArray;
 
 public class ExtendedBlockStorage
 {
     /** Contains the bottom-most Y block represented by this ExtendedBlockStorage. Typically a multiple of 16. */
-    private int yBase;
+    private final int yBase;
     /** A total count of the number of non-air blocks in this block storage's Chunk. */
     private int blockRefCount;
     /**
@@ -16,7 +17,7 @@ public class ExtendedBlockStorage
      * Chunk from random tick updates for performance reasons.
      */
     private int tickRefCount;
-    private char[] data;
+    private final BlockStateContainer data;
     /** The NibbleArray containing a block of Block-light data. */
     private NibbleArray blocklightArray;
     /** The NibbleArray containing a block of Sky-light data. */
@@ -25,7 +26,7 @@ public class ExtendedBlockStorage
     public ExtendedBlockStorage(int y, boolean storeSkylight)
     {
         this.yBase = y;
-        this.data = new char[4096];
+        this.data = new BlockStateContainer();
         this.blocklightArray = new NibbleArray();
 
         if (storeSkylight)
@@ -36,8 +37,7 @@ public class ExtendedBlockStorage
 
     public IBlockState get(int x, int y, int z)
     {
-        IBlockState iblockstate = (IBlockState)Block.BLOCK_STATE_IDS.getByValue(this.data[y << 8 | z << 4 | x]);
-        return iblockstate != null ? iblockstate : Blocks.air.getDefaultState();
+        return this.data.get(x, y, z);
     }
 
     public void set(int x, int y, int z, IBlockState state)
@@ -48,7 +48,7 @@ public class ExtendedBlockStorage
         Block block = iblockstate.getBlock();
         Block block1 = state.getBlock();
 
-        if (block != Blocks.air)
+        if (block != Blocks.AIR)
         {
             --this.blockRefCount;
 
@@ -58,7 +58,7 @@ public class ExtendedBlockStorage
             }
         }
 
-        if (block1 != Blocks.air)
+        if (block1 != Blocks.AIR)
         {
             ++this.blockRefCount;
 
@@ -68,25 +68,7 @@ public class ExtendedBlockStorage
             }
         }
 
-        this.data[y << 8 | z << 4 | x] = (char)Block.BLOCK_STATE_IDS.get(state);
-    }
-
-    /**
-     * Returns the block for a location in a chunk, with the extended ID merged from a byte array and a NibbleArray to
-     * form a full 12-bit block ID.
-     */
-    public Block getBlockByExtId(int x, int y, int z)
-    {
-        return this.get(x, y, z).getBlock();
-    }
-
-    /**
-     * Returns the metadata associated with the block at the given coordinates in this ExtendedBlockStorage.
-     */
-    public int getExtBlockMetadata(int x, int y, int z)
-    {
-        IBlockState iblockstate = this.get(x, y, z);
-        return iblockstate.getBlock().getMetaFromState(iblockstate);
+        this.data.set(x, y, z, state);
     }
 
     /**
@@ -157,9 +139,9 @@ public class ExtendedBlockStorage
             {
                 for (int k = 0; k < 16; ++k)
                 {
-                    Block block = this.getBlockByExtId(i, j, k);
+                    Block block = this.get(i, j, k).getBlock();
 
-                    if (block != Blocks.air)
+                    if (block != Blocks.AIR)
                     {
                         ++this.blockRefCount;
 
@@ -173,14 +155,9 @@ public class ExtendedBlockStorage
         }
     }
 
-    public char[] getData()
+    public BlockStateContainer getData()
     {
         return this.data;
-    }
-
-    public void setData(char[] dataArray)
-    {
-        this.data = dataArray;
     }
 
     /**

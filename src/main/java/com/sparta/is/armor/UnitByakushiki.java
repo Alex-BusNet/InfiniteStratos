@@ -18,14 +18,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.EnumAction;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.UsernameCache;
@@ -52,8 +53,8 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 
     public UnitByakushiki()
     {
-        super(Material.Armor.IS_ARMOR, 1, "Armor");
-        this.setUnlocalizedName(Names.Units.BYAKUSHIKI);
+        super(Material.Armor.IS_ARMOR, EntityEquipmentSlot.CHEST, "Armor");
+        this.setUnlocalizedName(InfiniteStratos.MOD_ID + Names.Units.BYAKUSHIKI);
         this.setShieldCapacity(20000);
         this.setRemainingShieldCapacity();
         initState();
@@ -88,13 +89,13 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
     {
         switch ( armorType )
         {
-            case 0:
+            case HEAD:
                 return 0;
-            case 1:
+            case CHEST:
                 return 100;
-            case 2:
+            case LEGS:
                 return 0;
-            case 3:
+            case FEET:
                 return 0;
         }
         return 0;
@@ -102,12 +103,12 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 
     protected int getEnergyPerDamage(ItemStack itemStack)
     {
-        int unbreakingLevel = MathHelper.clampI(EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, itemStack), 0, 4);
+        int unbreakingLevel = MathHelper.clamp(EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByID(34), itemStack), 0, 4);
         return energyPerDamage * (5 - unbreakingLevel) /5;
     }
 
     @Override
-    public String getArmorTexture(ItemStack itemStack, Entity entity, int slot, String type)
+    public String getArmorTexture(ItemStack itemStack, Entity entity, EntityEquipmentSlot slot, String type)
     {
         return Textures.Armor.BYAKUSHIKI.toString();
     }
@@ -134,7 +135,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 
     @Override
     @SideOnly(Side.CLIENT)
-    public ModelBiped getArmorModel(EntityLivingBase entityLivingBase, ItemStack itemStack, int armorSlot)
+    public ModelBiped getArmorModel(EntityLivingBase entityLivingBase, ItemStack itemStack, EntityEquipmentSlot armorSlot, ModelBiped defaultModel)
     {
         ModelBiped armorModel = null;
 
@@ -142,7 +143,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
         {
             if ( itemStack.getItem() instanceof UnitByakushiki )
             {
-                int type = ((ItemArmor) itemStack.getItem()).armorType;
+                int type = ((ItemArmor) itemStack.getItem()).armorType.getIndex();
 
                 if ( type == 1 || type == 3 )
                 {
@@ -165,33 +166,33 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
                 armorModel.bipedRightLeg.showModel = state == 2;
                 armorModel.bipedRightArm.showModel = (state == 1 || state == 2);
 
-                armorModel.isSneak = entityLivingBase.isSneaking();
-                armorModel.isRiding = entityLivingBase.isRiding();
-                armorModel.isChild = entityLivingBase.isChild();
-                armorModel.heldItemRight = entityLivingBase.getEquipmentInSlot(0) != null ? 1 : 0;
+                armorModel.isSneak = defaultModel.isSneak;
+                armorModel.isRiding = defaultModel.isRiding;
+                armorModel.isChild = defaultModel.isChild;
+                armorModel.rightArmPose = defaultModel.rightArmPose;
+                armorModel.leftArmPose = defaultModel.leftArmPose;
+//                EntityPlayer player = (EntityPlayer) entityLivingBase;
+//                ItemStack held_item = player.getHeldItem();
 
-                EntityPlayer player = (EntityPlayer) entityLivingBase;
-                ItemStack held_item = player.getHeldItem();
-
-                if ( held_item != null )
-                {
-                    armorModel.heldItemRight = 1;
-
-                    if ( player.getItemInUseCount() > 0 )
-                    {
-                        EnumAction action = held_item.getItemUseAction();
-
-                        if ( action == EnumAction.BOW )
-                        {
-                            armorModel.aimedBow = true;
-                        }
-                        else
-                        {
-                            armorModel.heldItemRight = 3;
-                        }
-                    }
-
-                }
+//                if ( held_item != null )
+//                {
+//                    armorModel.heldItemRight = 1;
+//
+//                    if ( player.getItemInUseCount() > 0 )
+//                    {
+//                        EnumAction action = held_item.getItemUseAction();
+//
+//                        if ( action == EnumAction.BOW )
+//                        {
+//                            armorModel.aimedBow = true;
+//                        }
+//                        else
+//                        {
+//                            armorModel.heldItemRight = 3;
+//                        }
+//                    }
+//
+//                }
 
                 return armorModel;
             }
@@ -219,8 +220,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 
     }
 
-    @Override
-    public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer entityPlayer)
+    public ActionResult<ItemStack> onItemRightClick(ItemStack itemStack, World world, EntityPlayer entityPlayer)
     {
         if(!world.isRemote)
         {
@@ -236,7 +236,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
                 ItemHelper.setOwner(itemStack, entityPlayer);
                 this.setOwnerName(entityPlayer.getDisplayNameString());
 
-                entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.OWNER_SET_TO_SELF, new Object[]{itemStack.func_151000_E()}));
+                entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.OWNER_SET_TO_SELF, new Object[]{itemStack.getDisplayName()}));
 
                 unitSettings.writeToNBT(nbtTagCompound);
                 EntityHelper.saveCustomEntityData(entityPlayer, nbtTagCompound);
@@ -246,16 +246,18 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
             {
                 if(entityPlayer.getUniqueID() != getOwnerUUID())
                 {
-                    entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.INVALID_OWNER, ItemHelper.getOwnerName(itemStack)));
+                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.INVALID_OWNER, ItemHelper.getOwnerName(itemStack)));
                 }
                 else if(entityPlayer.getUniqueID() == ItemHelper.getOwnerUUID(itemStack))
                 {
-                    entityPlayer.addChatComponentMessage(new ChatComponentTranslation(Messages.ALREADY_OWNER, itemStack.getUnlocalizedName()));
+                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ALREADY_OWNER, itemStack.getUnlocalizedName()));
                 }
             }
+
+            return new ActionResult<>(EnumActionResult.SUCCESS, itemStack);
         }
 
-        return itemStack;
+        return new ActionResult<>(EnumActionResult.FAIL, itemStack);
     }
 
     public int getState()
@@ -325,7 +327,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 
                 state = 0;
                 unitSettings.setDeployedState(0);
-                player.addChatMessage(new ChatComponentText("Unit in Standby"));
+                player.addChatMessage(new TextComponentTranslation("Unit in Standby"));
             }
             else if (key == Key.PARTIAL_DEPLOY  && state != 1 && state != 2)
             {
@@ -346,7 +348,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 
                 state = 1;
                 unitSettings.setDeployedState(1);
-                player.addChatMessage(new ChatComponentText("Unit Partially Deployed"));
+                player.addChatMessage(new TextComponentTranslation("Unit Partially Deployed"));
             }
             else if (key == Key.FULL_DEPLOY && state != 2)
             {
@@ -370,7 +372,7 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
 
                 state = 2;
                 unitSettings.setDeployedState(2);
-                player.addChatMessage(new ChatComponentText("Unit Fully Deployed"));
+                player.addChatMessage(new TextComponentTranslation("Unit Fully Deployed"));
             }
 
             unitSettings.writeToNBT(playerCustomData);
@@ -430,17 +432,17 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
     @Override
     public int receiveEnergy(ItemStack container, int maxReceive, boolean simulate)
     {
-        if(container.stackTagCompound == null)
+        if(container.getTagCompound() == null)
         {
             EnergyHelper.setDefaultEnergyTag(container, 0);
         }
-        int stored = container.stackTagCompound.getInteger("Energy");
+        int stored = container.getTagCompound().getInteger("Energy");
         int receive = Math.min(maxReceive, Math.min(maxEnergy - stored, maxTransfer));
 
         if(!simulate)
         {
             stored += receive;
-            container.stackTagCompound.setInteger("Energy", stored);
+            container.getTagCompound().setInteger("Energy", stored);
         }
 
         return receive;
@@ -449,17 +451,17 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
     @Override
     public int extractEnergy(ItemStack container, int maxExtract, boolean simulate)
     {
-        if (container.stackTagCompound == null)
+        if (container.getTagCompound() == null)
         {
             EnergyHelper.setDefaultEnergyTag(container, 0);
         }
-        int stored = container.stackTagCompound.getInteger("Energy");
+        int stored = container.getTagCompound().getInteger("Energy");
         int extract = Math.min(maxExtract, stored);
 
         if (!simulate)
         {
             stored -= extract;
-            container.stackTagCompound.setInteger("Energy", stored);
+            container.getTagCompound().setInteger("Energy", stored);
         }
         return extract;
     }
@@ -467,12 +469,12 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
     @Override
     public int getEnergyStored(ItemStack container)
     {
-        if(container.stackTagCompound == null)
+        if(container.getTagCompound() == null)
         {
             EnergyHelper.setDefaultEnergyTag(container, 0);
         }
 
-        return container.stackTagCompound.getInteger("Energy");
+        return container.getTagCompound().getInteger("Energy");
     }
 
     @Override
@@ -480,5 +482,4 @@ public class UnitByakushiki extends ArmorIS implements IKeyBound, IOwnable, IEne
     {
         return maxEnergy;
     }
-
 }

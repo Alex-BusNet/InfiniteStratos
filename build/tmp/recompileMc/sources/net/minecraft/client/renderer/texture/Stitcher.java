@@ -2,14 +2,13 @@ package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import net.minecraft.client.renderer.StitcherException;
-import net.minecraft.util.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import net.minecraft.client.renderer.StitcherException;
+import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class Stitcher
@@ -21,17 +20,15 @@ public class Stitcher
     private int currentHeight;
     private final int maxWidth;
     private final int maxHeight;
-    private final boolean forcePowerOf2;
     /** Max size (width or height) of a single tile */
     private final int maxTileDimension;
 
-    public Stitcher(int maxTextureWidth, int maxTextureHeight, boolean p_i45095_3_, int p_i45095_4_, int mipmapLevel)
+    public Stitcher(int maxWidthIn, int maxHeightIn, int maxTileDimensionIn, int mipmapLevelStitcherIn)
     {
-        this.mipmapLevelStitcher = mipmapLevel;
-        this.maxWidth = maxTextureWidth;
-        this.maxHeight = maxTextureHeight;
-        this.forcePowerOf2 = p_i45095_3_;
-        this.maxTileDimension = p_i45095_4_;
+        this.mipmapLevelStitcher = mipmapLevelStitcherIn;
+        this.maxWidth = maxWidthIn;
+        this.maxHeight = maxHeightIn;
+        this.maxTileDimension = maxTileDimensionIn;
     }
 
     public int getCurrentWidth()
@@ -44,9 +41,9 @@ public class Stitcher
         return this.currentHeight;
     }
 
-    public void addSprite(TextureAtlasSprite p_110934_1_)
+    public void addSprite(TextureAtlasSprite textureAtlas)
     {
-        Stitcher.Holder stitcher$holder = new Stitcher.Holder(p_110934_1_, this.mipmapLevelStitcher);
+        Stitcher.Holder stitcher$holder = new Stitcher.Holder(textureAtlas, this.mipmapLevelStitcher);
 
         if (this.maxTileDimension > 0)
         {
@@ -75,11 +72,8 @@ public class Stitcher
             }
         }
 
-        if (this.forcePowerOf2)
-        {
-            this.currentWidth = MathHelper.roundUpToPowerOfTwo(this.currentWidth);
-            this.currentHeight = MathHelper.roundUpToPowerOfTwo(this.currentHeight);
-        }
+        this.currentWidth = MathHelper.roundUpToPowerOfTwo(this.currentWidth);
+        this.currentHeight = MathHelper.roundUpToPowerOfTwo(this.currentHeight);
         net.minecraftforge.fml.common.ProgressManager.pop(bar);
     }
 
@@ -115,6 +109,9 @@ public class Stitcher
      */
     private boolean allocateSlot(Stitcher.Holder p_94310_1_)
     {
+        TextureAtlasSprite textureatlassprite = p_94310_1_.getAtlasSprite();
+        boolean flag = textureatlassprite.getIconWidth() != textureatlassprite.getIconHeight();
+
         for (int i = 0; i < this.stitchSlots.size(); ++i)
         {
             if (((Stitcher.Slot)this.stitchSlots.get(i)).addSlot(p_94310_1_))
@@ -122,14 +119,17 @@ public class Stitcher
                 return true;
             }
 
-            p_94310_1_.rotate();
-
-            if (((Stitcher.Slot)this.stitchSlots.get(i)).addSlot(p_94310_1_))
+            if (flag)
             {
-                return true;
-            }
+                p_94310_1_.rotate();
 
-            p_94310_1_.rotate();
+                if (((Stitcher.Slot)this.stitchSlots.get(i)).addSlot(p_94310_1_))
+                {
+                    return true;
+                }
+
+                p_94310_1_.rotate();
+            }
         }
 
         return this.expandAndAllocateSlot(p_94310_1_);
@@ -141,59 +141,36 @@ public class Stitcher
     private boolean expandAndAllocateSlot(Stitcher.Holder p_94311_1_)
     {
         int i = Math.min(p_94311_1_.getWidth(), p_94311_1_.getHeight());
-        boolean flag = this.currentWidth == 0 && this.currentHeight == 0;
-        boolean flag1;
+        int j = Math.max(p_94311_1_.getWidth(), p_94311_1_.getHeight());
+        int k = MathHelper.roundUpToPowerOfTwo(this.currentWidth);
+        int l = MathHelper.roundUpToPowerOfTwo(this.currentHeight);
+        int i1 = MathHelper.roundUpToPowerOfTwo(this.currentWidth + i);
+        int j1 = MathHelper.roundUpToPowerOfTwo(this.currentHeight + i);
+        boolean flag1 = i1 <= this.maxWidth;
+        boolean flag2 = j1 <= this.maxHeight;
 
-        if (this.forcePowerOf2)
-        {
-            int j = MathHelper.roundUpToPowerOfTwo(this.currentWidth);
-            int k = MathHelper.roundUpToPowerOfTwo(this.currentHeight);
-            int l = MathHelper.roundUpToPowerOfTwo(this.currentWidth + i);
-            int i1 = MathHelper.roundUpToPowerOfTwo(this.currentHeight + i);
-            boolean flag2 = l <= this.maxWidth;
-            boolean flag3 = i1 <= this.maxHeight;
-
-            if (!flag2 && !flag3)
-            {
-                return false;
-            }
-
-            boolean flag4 = j != l;
-            boolean flag5 = k != i1;
-
-            if (flag4 ^ flag5)
-            {
-                flag1 = !flag4;
-            }
-            else
-            {
-                flag1 = flag2 && j <= k;
-            }
-        }
-        else
-        {
-            boolean flag6 = this.currentWidth + i <= this.maxWidth;
-            boolean flag7 = this.currentHeight + i <= this.maxHeight;
-
-            if (!flag6 && !flag7)
-            {
-                return false;
-            }
-
-            flag1 = flag6 && (flag || this.currentWidth <= this.currentHeight);
-        }
-
-        int j1 = Math.max(p_94311_1_.getWidth(), p_94311_1_.getHeight());
-
-        if (MathHelper.roundUpToPowerOfTwo((flag1 ? this.currentHeight : this.currentWidth) + j1) > (flag1 ? this.maxHeight : this.maxWidth))
+        if (!flag1 && !flag2)
         {
             return false;
         }
         else
         {
+            boolean flag3 = flag1 && k != i1;
+            boolean flag4 = flag2 && l != j1;
+            boolean flag;
+
+            if (flag3 ^ flag4)
+            {
+                flag = flag3;
+            }
+            else
+            {
+                flag = flag1 && k <= l;
+            }
+
             Stitcher.Slot stitcher$slot;
 
-            if (flag1)
+            if (flag)
             {
                 if (p_94311_1_.getWidth() > p_94311_1_.getHeight())
                 {
@@ -230,13 +207,13 @@ public class Stitcher
             private boolean rotated;
             private float scaleFactor = 1.0F;
 
-            public Holder(TextureAtlasSprite p_i45094_1_, int p_i45094_2_)
+            public Holder(TextureAtlasSprite theTextureIn, int mipmapLevelHolderIn)
             {
-                this.theTexture = p_i45094_1_;
-                this.width = p_i45094_1_.getIconWidth();
-                this.height = p_i45094_1_.getIconHeight();
-                this.mipmapLevelHolder = p_i45094_2_;
-                this.rotated = Stitcher.getMipmapDimension(this.height, p_i45094_2_) > Stitcher.getMipmapDimension(this.width, p_i45094_2_);
+                this.theTexture = theTextureIn;
+                this.width = theTextureIn.getIconWidth();
+                this.height = theTextureIn.getIconHeight();
+                this.mipmapLevelHolder = mipmapLevelHolderIn;
+                this.rotated = Stitcher.getMipmapDimension(this.height, mipmapLevelHolderIn) > Stitcher.getMipmapDimension(this.width, mipmapLevelHolderIn);
             }
 
             public TextureAtlasSprite getAtlasSprite()
@@ -246,12 +223,14 @@ public class Stitcher
 
             public int getWidth()
             {
-                return this.rotated ? Stitcher.getMipmapDimension((int)((float)this.height * this.scaleFactor), this.mipmapLevelHolder) : Stitcher.getMipmapDimension((int)((float)this.width * this.scaleFactor), this.mipmapLevelHolder);
+                int i = this.rotated ? this.height : this.width;
+                return Stitcher.getMipmapDimension((int)((float)i * this.scaleFactor), this.mipmapLevelHolder);
             }
 
             public int getHeight()
             {
-                return this.rotated ? Stitcher.getMipmapDimension((int)((float)this.width * this.scaleFactor), this.mipmapLevelHolder) : Stitcher.getMipmapDimension((int)((float)this.height * this.scaleFactor), this.mipmapLevelHolder);
+                int i = this.rotated ? this.width : this.height;
+                return Stitcher.getMipmapDimension((int)((float)i * this.scaleFactor), this.mipmapLevelHolder);
             }
 
             public void rotate()
@@ -314,10 +293,10 @@ public class Stitcher
             private List<Stitcher.Slot> subSlots;
             private Stitcher.Holder holder;
 
-            public Slot(int p_i1277_1_, int p_i1277_2_, int widthIn, int heightIn)
+            public Slot(int originXIn, int originYIn, int widthIn, int heightIn)
             {
-                this.originX = p_i1277_1_;
-                this.originY = p_i1277_2_;
+                this.originX = originXIn;
+                this.originY = originYIn;
                 this.width = widthIn;
                 this.height = heightIn;
             }

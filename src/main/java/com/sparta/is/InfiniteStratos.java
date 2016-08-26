@@ -21,6 +21,8 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, certificateFingerprint = Reference.FINGERPRINT, version = Reference.MOD_VERSION, dependencies = Reference.DEPENDENCIES, guiFactory = Reference.GUI_FACTORY_CLASS)
 public class InfiniteStratos
 {
+    public static final String MOD_ID = "is";
+
     @Mod.Instance(Reference.MOD_ID)
     public static InfiniteStratos instance;
 
@@ -57,7 +59,7 @@ public class InfiniteStratos
 
         ModUnits.init();
 
-        ModEntities.init();
+        ModEntities.init(this);
 
         LogHelper.info("Pre-Initialization Complete");
     }

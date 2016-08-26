@@ -1,12 +1,17 @@
 package net.minecraft.entity.item;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Enchantments;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -91,14 +96,18 @@ public class EntityXPOrb extends Entity
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
-        this.motionY -= 0.029999999329447746D;
 
-        if (this.worldObj.getBlockState(new BlockPos(this)).getBlock().getMaterial() == Material.lava)
+        if (!this.func_189652_ae())
+        {
+            this.motionY -= 0.029999999329447746D;
+        }
+
+        if (this.worldObj.getBlockState(new BlockPos(this)).getMaterial() == Material.LAVA)
         {
             this.motionY = 0.20000000298023224D;
             this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
             this.motionZ = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
-            this.playSound("random.fizz", 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
+            this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
         }
 
         this.pushOutOfBlocks(this.posX, (this.getEntityBoundingBox().minY + this.getEntityBoundingBox().maxY) / 2.0D, this.posZ);
@@ -106,9 +115,9 @@ public class EntityXPOrb extends Entity
 
         if (this.xpTargetColor < this.xpColor - 20 + this.getEntityId() % 100)
         {
-            if (this.closestPlayer == null || this.closestPlayer.getDistanceSqToEntity(this) > d0 * d0)
+            if (this.closestPlayer == null || this.closestPlayer.getDistanceSqToEntity(this) > 64.0D)
             {
-                this.closestPlayer = this.worldObj.getClosestPlayerToEntity(this, d0);
+                this.closestPlayer = this.worldObj.getClosestPlayerToEntity(this, 8.0D);
             }
 
             this.xpTargetColor = this.xpColor;
@@ -121,9 +130,9 @@ public class EntityXPOrb extends Entity
 
         if (this.closestPlayer != null)
         {
-            double d1 = (this.closestPlayer.posX - this.posX) / d0;
-            double d2 = (this.closestPlayer.posY + (double)this.closestPlayer.getEyeHeight() - this.posY) / d0;
-            double d3 = (this.closestPlayer.posZ - this.posZ) / d0;
+            double d1 = (this.closestPlayer.posX - this.posX) / 8.0D;
+            double d2 = (this.closestPlayer.posY + (double)this.closestPlayer.getEyeHeight() / 2.0D - this.posY) / 8.0D;
+            double d3 = (this.closestPlayer.posZ - this.posZ) / 8.0D;
             double d4 = Math.sqrt(d1 * d1 + d2 * d2 + d3 * d3);
             double d5 = 1.0D - d4;
 
@@ -167,12 +176,11 @@ public class EntityXPOrb extends Entity
      */
     public boolean handleWaterMovement()
     {
-        return this.worldObj.handleMaterialAcceleration(this.getEntityBoundingBox(), Material.water, this);
+        return this.worldObj.handleMaterialAcceleration(this.getEntityBoundingBox(), Material.WATER, this);
     }
 
     /**
-     * Will deal the specified amount of damage to the entity if the entity isn't immune to fire damage. Args:
-     * amountDamage
+     * Will deal the specified amount of fire damage to the entity if the entity isn't immune to fire damage.
      */
     protected void dealFireDamage(int amount)
     {
@@ -205,21 +213,21 @@ public class EntityXPOrb extends Entity
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound tagCompound)
+    public void writeEntityToNBT(NBTTagCompound compound)
     {
-        tagCompound.setShort("Health", (short)((byte)this.xpOrbHealth));
-        tagCompound.setShort("Age", (short)this.xpOrbAge);
-        tagCompound.setShort("Value", (short)this.xpValue);
+        compound.setShort("Health", (short)this.xpOrbHealth);
+        compound.setShort("Age", (short)this.xpOrbAge);
+        compound.setShort("Value", (short)this.xpValue);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound tagCompund)
+    public void readEntityFromNBT(NBTTagCompound compound)
     {
-        this.xpOrbHealth = tagCompund.getShort("Health") & 255;
-        this.xpOrbAge = tagCompund.getShort("Age");
-        this.xpValue = tagCompund.getShort("Value");
+        this.xpOrbHealth = compound.getShort("Health");
+        this.xpOrbAge = compound.getShort("Age");
+        this.xpValue = compound.getShort("Value");
     }
 
     /**
@@ -233,12 +241,35 @@ public class EntityXPOrb extends Entity
             {
                 if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerPickupXpEvent(entityIn, this))) return;
                 entityIn.xpCooldown = 2;
-                this.worldObj.playSoundAtEntity(entityIn, "random.orb", 0.1F, 0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
+                this.worldObj.playSound((EntityPlayer)null, entityIn.posX, entityIn.posY, entityIn.posZ, SoundEvents.ENTITY_EXPERIENCE_ORB_TOUCH, SoundCategory.PLAYERS, 0.1F, 0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
                 entityIn.onItemPickup(this, 1);
-                entityIn.addExperience(this.xpValue);
+                ItemStack itemstack = EnchantmentHelper.getEnchantedItem(Enchantments.MENDING, entityIn);
+
+                if (itemstack != null && itemstack.isItemDamaged())
+                {
+                    int i = Math.min(this.xpToDurability(this.xpValue), itemstack.getItemDamage());
+                    this.xpValue -= this.durabilityToXp(i);
+                    itemstack.setItemDamage(itemstack.getItemDamage() - i);
+                }
+
+                if (this.xpValue > 0)
+                {
+                    entityIn.addExperience(this.xpValue);
+                }
+
                 this.setDead();
             }
         }
+    }
+
+    private int durabilityToXp(int durability)
+    {
+        return durability / 2;
+    }
+
+    private int xpToDurability(int xp)
+    {
+        return xp * 2;
     }
 
     /**
@@ -268,9 +299,9 @@ public class EntityXPOrb extends Entity
     }
 
     /**
-     * If returns false, the item will not inflict any damage against entities.
+     * Returns true if it's possible to attack this entity with an item.
      */
-    public boolean canAttackWithItem()
+    public boolean canBeAttackedWithItem()
     {
         return false;
     }

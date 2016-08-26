@@ -1,6 +1,46 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fml.common.patcher;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Pack200;
+import java.util.regex.Pattern;
+
+import org.apache.logging.log4j.Level;
+
+import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraftforge.fml.relauncher.FMLRelaunchLog;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.repackage.com.nothome.delta.GDiffPatcher;
 import LZMA.LzmaInputStream;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;
@@ -10,21 +50,6 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraftforge.fml.relauncher.FMLRelaunchLog;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.repackage.com.nothome.delta.GDiffPatcher;
-import org.apache.logging.log4j.Level;
-
-import java.io.*;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Pack200;
-import java.util.regex.Pattern;
 
 public class ClassPatchManager {
     public static final ClassPatchManager INSTANCE = new ClassPatchManager();
@@ -93,7 +118,7 @@ public class ClassPatchManager {
                 int inputChecksum = Hashing.adler32().hashBytes(inputData).asInt();
                 if (patch.inputChecksum != inputChecksum)
                 {
-                    FMLRelaunchLog.severe("There is a binary discrepency between the expected input class %s (%s) and the actual class. Checksum on disk is %x, in patch %x. Things are probably about to go very wrong. Did you put something into the jar file?", mappedName, name, inputChecksum, patch.inputChecksum);
+                    FMLRelaunchLog.severe("There is a binary discrepancy between the expected input class %s (%s) and the actual class. Checksum on disk is %x, in patch %x. Things are probably about to go very wrong. Did you put something into the jar file?", mappedName, name, inputChecksum, patch.inputChecksum);
                     if (!Boolean.parseBoolean(System.getProperty("fml.ignorePatchDiscrepancies","false")))
                     {
                         FMLRelaunchLog.severe("The game is going to exit, because this is a critical error, and it is very improbable that the modded game will work, please obtain clean jar files.");

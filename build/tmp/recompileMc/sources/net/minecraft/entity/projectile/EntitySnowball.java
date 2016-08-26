@@ -4,7 +4,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 public class EntitySnowball extends EntityThrowable
@@ -24,21 +25,26 @@ public class EntitySnowball extends EntityThrowable
         super(worldIn, x, y, z);
     }
 
+    public static void func_189662_a(DataFixer p_189662_0_)
+    {
+        EntityThrowable.func_189661_a(p_189662_0_, "Snowball");
+    }
+
     /**
      * Called when this EntityThrowable hits a block or entity.
      */
-    protected void onImpact(MovingObjectPosition p_70184_1_)
+    protected void onImpact(RayTraceResult result)
     {
-        if (p_70184_1_.entityHit != null)
+        if (result.entityHit != null)
         {
             int i = 0;
 
-            if (p_70184_1_.entityHit instanceof EntityBlaze)
+            if (result.entityHit instanceof EntityBlaze)
             {
                 i = 3;
             }
 
-            p_70184_1_.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), (float)i);
+            result.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), (float)i);
         }
 
         for (int j = 0; j < 8; ++j)

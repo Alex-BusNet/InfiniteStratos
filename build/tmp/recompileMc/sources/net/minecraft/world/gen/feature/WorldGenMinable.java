@@ -1,14 +1,13 @@
 package net.minecraft.world.gen.feature;
 
 import com.google.common.base.Predicate;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.block.state.pattern.BlockHelper;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
-
 import java.util.Random;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.state.pattern.BlockMatcher;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 
 public class WorldGenMinable extends WorldGenerator
 {
@@ -19,7 +18,7 @@ public class WorldGenMinable extends WorldGenerator
 
     public WorldGenMinable(IBlockState state, int blockCount)
     {
-        this(state, blockCount, BlockHelper.forBlock(Blocks.stone));
+        this(state, blockCount, BlockMatcher.forBlock(Blocks.STONE));
     }
 
     public WorldGenMinable(IBlockState state, int blockCount, Predicate<IBlockState> p_i45631_3_)
@@ -75,7 +74,8 @@ public class WorldGenMinable extends WorldGenerator
                                 {
                                     BlockPos blockpos = new BlockPos(l1, i2, j2);
 
-                                    if (worldIn.getBlockState(blockpos).getBlock().isReplaceableOreGen(worldIn, blockpos, this.predicate))
+                                    IBlockState state = worldIn.getBlockState(blockpos);
+                                    if (state.getBlock().isReplaceableOreGen(state, worldIn, blockpos, this.predicate))
                                     {
                                         worldIn.setBlockState(blockpos, this.oreBlock, 2);
                                     }

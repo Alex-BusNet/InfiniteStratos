@@ -1,4 +1,23 @@
 
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.fluids;
 
 import net.minecraft.item.ItemStack;
@@ -12,8 +31,6 @@ import net.minecraftforge.fml.common.registry.RegistryDelegate;
  * NOTE: Equality is based on the Fluid, not the amount. Use
  * {@link #isFluidStackIdentical(FluidStack)} to determine if FluidID, Amount and NBT Tag are all
  * equal.
- *
- * @author King Lemming, SirSengir (LiquidStack)
  *
  */
 public class FluidStack
@@ -34,7 +51,7 @@ public class FluidStack
             FMLLog.bigWarning("Failed attempt to create a FluidStack for an unregistered Fluid %s (type %s)", fluid.getName(), fluid.getClass().getName());
             throw new IllegalArgumentException("Cannot create a fluidstack from an unregistered fluid");
         }
-    	this.fluidDelegate = FluidRegistry.makeDelegate(fluid);
+        this.fluidDelegate = FluidRegistry.makeDelegate(fluid);
         this.amount = amount;
     }
 
@@ -176,23 +193,18 @@ public class FluidStack
             return false;
         }
 
-        if (other.getItem() instanceof IFluidContainerItem)
-        {
-            return isFluidEqual(((IFluidContainerItem) other.getItem()).getFluid(other));
-        }
-
-        return isFluidEqual(FluidContainerRegistry.getFluidForFilledItem(other));
+        return isFluidEqual(FluidUtil.getFluidContained(other));
     }
 
     @Override
     public final int hashCode()
     {
-    	int code = 1;
-    	code = 31*code + getFluid().hashCode();
-    	code = 31*code + amount;
-    	if (tag != null)
-    		code = 31*code + tag.hashCode();
-    	return code;
+        int code = 1;
+        code = 31*code + getFluid().hashCode();
+        code = 31*code + amount;
+        if (tag != null)
+            code = 31*code + tag.hashCode();
+        return code;
     }
 
     /**

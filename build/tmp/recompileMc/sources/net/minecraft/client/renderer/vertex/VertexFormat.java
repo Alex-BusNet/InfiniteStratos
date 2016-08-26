@@ -1,12 +1,11 @@
 package net.minecraft.client.renderer.vertex;
 
 import com.google.common.collect.Lists;
+import java.util.List;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class VertexFormat
@@ -17,7 +16,7 @@ public class VertexFormat
     /** The next available offset in this vertex format */
     private int nextOffset;
     private int colorElementOffset;
-    private List<Integer> uvOffsetsById;
+    private final List<Integer> uvOffsetsById;
     private int normalElementOffset;
 
     public VertexFormat(VertexFormat vertexFormatIn)
@@ -36,7 +35,6 @@ public class VertexFormat
     {
         this.elements = Lists.<VertexFormatElement>newArrayList();
         this.offsets = Lists.<Integer>newArrayList();
-        this.nextOffset = 0;
         this.colorElementOffset = -1;
         this.uvOffsetsById = Lists.<Integer>newArrayList();
         this.normalElementOffset = -1;
@@ -146,7 +144,7 @@ public class VertexFormat
         return false;
     }
 
-    public int func_181719_f()
+    public int getIntegerSize()
     {
         return this.getNextOffset() / 4;
     }
@@ -171,9 +169,9 @@ public class VertexFormat
         return (VertexFormatElement)this.elements.get(index);
     }
 
-    public int func_181720_d(int p_181720_1_)
+    public int getOffset(int index)
     {
-        return ((Integer)this.offsets.get(p_181720_1_)).intValue();
+        return ((Integer)this.offsets.get(index)).intValue();
     }
 
     public boolean equals(Object p_equals_1_)

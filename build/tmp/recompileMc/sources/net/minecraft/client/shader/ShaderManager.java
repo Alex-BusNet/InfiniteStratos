@@ -7,9 +7,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.ITextureObject;
+import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.util.JsonBlendingMode;
 import net.minecraft.client.util.JsonException;
@@ -21,19 +26,14 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-
 @SideOnly(Side.CLIENT)
 public class ShaderManager
 {
-    private static final Logger logger = LogManager.getLogger();
-    private static final ShaderDefault defaultShaderUniform = new ShaderDefault();
-    private static ShaderManager staticShaderManager = null;
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final ShaderDefault DEFAULT_SHADER_UNIFORM = new ShaderDefault();
+    private static ShaderManager staticShaderManager;
     private static int currentProgram = -1;
-    private static boolean field_148000_e = true;
+    private static boolean lastCull = true;
     private final Map<String, Object> shaderSamplers = Maps.<String, Object>newHashMap();
     private final List<String> samplerNames = Lists.<String>newArrayList();
     private final List<Integer> shaderSamplerLocations = Lists.<Integer>newArrayList();
@@ -44,7 +44,7 @@ public class ShaderManager
     private final String programFilename;
     private final boolean useFaceCulling;
     private boolean isDirty;
-    private final JsonBlendingMode field_148016_p;
+    private final JsonBlendingMode blendingMode;
     private final List<Integer> attribLocations;
     private final List<String> attributes;
     private final ShaderLoader vertexShaderLoader;
@@ -55,12 +55,12 @@ public class ShaderManager
         JsonParser jsonparser = new JsonParser();
         ResourceLocation resourcelocation = new ResourceLocation("shaders/program/" + programName + ".json");
         this.programFilename = programName;
-        InputStream inputstream = null;
+        IResource iresource = null;
 
         try
         {
-            inputstream = resourceManager.getResource(resourcelocation).getInputStream();
-            JsonObject jsonobject = jsonparser.parse(IOUtils.toString(inputstream, Charsets.UTF_8)).getAsJsonObject();
+            iresource = resourceManager.getResource(resourcelocation);
+            JsonObject jsonobject = jsonparser.parse(IOUtils.toString(iresource.getInputStream(), Charsets.UTF_8)).getAsJsonObject();
             String s = JsonUtils.getString(jsonobject, "vertex");
             String s1 = JsonUtils.getString(jsonobject, "fragment");
             JsonArray jsonarray = JsonUtils.getJsonArray(jsonobject, "samplers", (JsonArray)null);
@@ -77,8 +77,8 @@ public class ShaderManager
                     }
                     catch (Exception exception2)
                     {
-                        JsonException jsonexception1 = JsonException.func_151379_a(exception2);
-                        jsonexception1.func_151380_a("samplers[" + i + "]");
+                        JsonException jsonexception1 = JsonException.forException(exception2);
+                        jsonexception1.prependJsonKey("samplers[" + i + "]");
                         throw jsonexception1;
                     }
 
@@ -102,8 +102,8 @@ public class ShaderManager
                     }
                     catch (Exception exception1)
                     {
-                        JsonException jsonexception2 = JsonException.func_151379_a(exception1);
-                        jsonexception2.func_151380_a("attributes[" + j + "]");
+                        JsonException jsonexception2 = JsonException.forException(exception1);
+                        jsonexception2.prependJsonKey("attributes[" + j + "]");
                         throw jsonexception2;
                     }
 
@@ -130,8 +130,8 @@ public class ShaderManager
                     }
                     catch (Exception exception)
                     {
-                        JsonException jsonexception3 = JsonException.func_151379_a(exception);
-                        jsonexception3.func_151380_a("uniforms[" + k + "]");
+                        JsonException jsonexception3 = JsonException.forException(exception);
+                        jsonexception3.prependJsonKey("uniforms[" + k + "]");
                         throw jsonexception3;
                     }
 
@@ -139,7 +139,7 @@ public class ShaderManager
                 }
             }
 
-            this.field_148016_p = JsonBlendingMode.func_148110_a(JsonUtils.getJsonObject(jsonobject, "blend", (JsonObject)null));
+            this.blendingMode = JsonBlendingMode.parseBlendNode(JsonUtils.getJsonObject(jsonobject, "blend", (JsonObject)null));
             this.useFaceCulling = JsonUtils.getBoolean(jsonobject, "cull", true);
             this.vertexShaderLoader = ShaderLoader.loadShader(resourceManager, ShaderLoader.ShaderType.VERTEX, s);
             this.fragmentShaderLoader = ShaderLoader.loadShader(resourceManager, ShaderLoader.ShaderType.FRAGMENT, s1);
@@ -158,13 +158,13 @@ public class ShaderManager
         }
         catch (Exception exception3)
         {
-            JsonException jsonexception = JsonException.func_151379_a(exception3);
-            jsonexception.func_151381_b(resourcelocation.getResourcePath());
+            JsonException jsonexception = JsonException.forException(exception3);
+            jsonexception.setFilenameAndFlush(resourcelocation.getResourcePath());
             throw jsonexception;
         }
         finally
         {
-            IOUtils.closeQuietly(inputstream);
+            IOUtils.closeQuietly((Closeable)iresource);
         }
 
         this.markDirty();
@@ -180,7 +180,7 @@ public class ShaderManager
         OpenGlHelper.glUseProgram(0);
         currentProgram = -1;
         staticShaderManager = null;
-        field_148000_e = true;
+        lastCull = true;
 
         for (int i = 0; i < this.shaderSamplerLocations.size(); ++i)
         {
@@ -196,7 +196,7 @@ public class ShaderManager
     {
         this.isDirty = false;
         staticShaderManager = this;
-        this.field_148016_p.func_148109_a();
+        this.blendingMode.apply();
 
         if (this.program != currentProgram)
         {
@@ -257,17 +257,17 @@ public class ShaderManager
     /**
      * gets a shader uniform for the name given. null if not found.
      */
-    public ShaderUniform getShaderUniform(String p_147991_1_)
+    public ShaderUniform getShaderUniform(String name)
     {
-        return this.mappedShaderUniforms.containsKey(p_147991_1_) ? (ShaderUniform)this.mappedShaderUniforms.get(p_147991_1_) : null;
+        return this.mappedShaderUniforms.containsKey(name) ? (ShaderUniform)this.mappedShaderUniforms.get(name) : null;
     }
 
     /**
      * gets a shader uniform for the name given. if not found, returns a default not-null value
      */
-    public ShaderUniform getShaderUniformOrDefault(String p_147984_1_)
+    public ShaderUniform getShaderUniformOrDefault(String name)
     {
-        return (ShaderUniform)(this.mappedShaderUniforms.containsKey(p_147984_1_) ? (ShaderUniform)this.mappedShaderUniforms.get(p_147984_1_) : defaultShaderUniform);
+        return (ShaderUniform)(this.mappedShaderUniforms.containsKey(name) ? (ShaderUniform)this.mappedShaderUniforms.get(name) : DEFAULT_SHADER_UNIFORM);
     }
 
     /**
@@ -284,7 +284,7 @@ public class ShaderManager
 
             if (k == -1)
             {
-                logger.warn("Shader " + this.programFilename + "could not find sampler named " + s + " in the specified shader program.");
+                LOGGER.warn("Shader {}could not find sampler named {} in the specified shader program.", new Object[] {this.programFilename, s});
                 this.shaderSamplers.remove(s);
                 this.samplerNames.remove(j);
                 --j;
@@ -304,7 +304,7 @@ public class ShaderManager
 
             if (l == -1)
             {
-                logger.warn("Could not find uniform named " + s1 + " in the specified" + " shader program.");
+                LOGGER.warn("Could not find uniform named {} in the specified shader program.", new Object[] {s1});
             }
             else
             {
@@ -315,9 +315,9 @@ public class ShaderManager
         }
     }
 
-    private void parseSampler(JsonElement p_147996_1_) throws JsonException
+    private void parseSampler(JsonElement element) throws JsonException
     {
-        JsonObject jsonobject = JsonUtils.getJsonObject(p_147996_1_, "sampler");
+        JsonObject jsonobject = JsonUtils.getJsonObject(element, "sampler");
         String s = JsonUtils.getString(jsonobject, "name");
 
         if (!JsonUtils.isString(jsonobject, "file"))
@@ -334,20 +334,20 @@ public class ShaderManager
     /**
      * adds a shader sampler texture. if it already exists, replaces it.
      */
-    public void addSamplerTexture(String p_147992_1_, Object p_147992_2_)
+    public void addSamplerTexture(String name, Object samplerTexture)
     {
-        if (this.shaderSamplers.containsKey(p_147992_1_))
+        if (this.shaderSamplers.containsKey(name))
         {
-            this.shaderSamplers.remove(p_147992_1_);
+            this.shaderSamplers.remove(name);
         }
 
-        this.shaderSamplers.put(p_147992_1_, p_147992_2_);
+        this.shaderSamplers.put(name, samplerTexture);
         this.markDirty();
     }
 
-    private void parseUniform(JsonElement p_147987_1_) throws JsonException
+    private void parseUniform(JsonElement element) throws JsonException
     {
-        JsonObject jsonobject = JsonUtils.getJsonObject(p_147987_1_, "uniform");
+        JsonObject jsonobject = JsonUtils.getJsonObject(element, "uniform");
         String s = JsonUtils.getString(jsonobject, "name");
         int i = ShaderUniform.parseType(JsonUtils.getString(jsonobject, "type"));
         int j = JsonUtils.getInt(jsonobject, "count");
@@ -370,8 +370,8 @@ public class ShaderManager
                 }
                 catch (Exception exception)
                 {
-                    JsonException jsonexception = JsonException.func_151379_a(exception);
-                    jsonexception.func_151380_a("values[" + k + "]");
+                    JsonException jsonexception = JsonException.forException(exception);
+                    jsonexception.prependJsonKey("values[" + k + "]");
                     throw jsonexception;
                 }
 
@@ -396,7 +396,7 @@ public class ShaderManager
             }
             else if (i <= 7)
             {
-                shaderuniform.func_148092_b(afloat[0], afloat[1], afloat[2], afloat[3]);
+                shaderuniform.setSafe(afloat[0], afloat[1], afloat[2], afloat[3]);
             }
             else
             {

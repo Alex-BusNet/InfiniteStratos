@@ -1,15 +1,15 @@
 package net.minecraft.client.model;
 
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ModelBox
 {
     /** The (x,y,z) vertex positions and (u,v) texture coordinates for each of the 8 points on a cube */
-    private PositionTextureVertex[] vertexPositions;
+    private final PositionTextureVertex[] vertexPositions;
     /** An array of 6 TexturedQuads, one for each face of a cube */
-    private TexturedQuad[] quadList;
+    private final TexturedQuad[] quadList;
     /** X vertex coordinate of lower box corner */
     public final float posX1;
     /** Y vertex coordinate of lower box corner */
@@ -81,19 +81,19 @@ public class ModelBox
 
         if (p_i46301_11_)
         {
-            for (int i = 0; i < this.quadList.length; ++i)
+            for (TexturedQuad texturedquad : this.quadList)
             {
-                this.quadList[i].flipFace();
+                texturedquad.flipFace();
             }
         }
     }
 
     @SideOnly(Side.CLIENT)
-    public void render(WorldRenderer renderer, float scale)
+    public void render(VertexBuffer renderer, float scale)
     {
-        for (int i = 0; i < this.quadList.length; ++i)
+        for (TexturedQuad texturedquad : this.quadList)
         {
-            this.quadList[i].draw(renderer, scale);
+            texturedquad.draw(renderer, scale);
         }
     }
 

@@ -1,27 +1,31 @@
 package net.minecraft.block;
 
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.world.ColorizerFoliage;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.Random;
 
 public class BlockVine extends Block implements net.minecraftforge.common.IShearable
 {
@@ -31,13 +35,63 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
     public static final PropertyBool SOUTH = PropertyBool.create("south");
     public static final PropertyBool WEST = PropertyBool.create("west");
     public static final PropertyBool[] ALL_FACES = new PropertyBool[] {UP, NORTH, SOUTH, WEST, EAST};
+    protected static final AxisAlignedBB UP_AABB = new AxisAlignedBB(0.0D, 0.9375D, 0.0D, 1.0D, 1.0D, 1.0D);
+    protected static final AxisAlignedBB WEST_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0625D, 1.0D, 1.0D);
+    protected static final AxisAlignedBB EAST_AABB = new AxisAlignedBB(0.9375D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+    protected static final AxisAlignedBB NORTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.0625D);
+    protected static final AxisAlignedBB SOUTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.9375D, 1.0D, 1.0D, 1.0D);
 
     public BlockVine()
     {
-        super(Material.vine);
+        super(Material.VINE);
         this.setDefaultState(this.blockState.getBaseState().withProperty(UP, Boolean.valueOf(false)).withProperty(NORTH, Boolean.valueOf(false)).withProperty(EAST, Boolean.valueOf(false)).withProperty(SOUTH, Boolean.valueOf(false)).withProperty(WEST, Boolean.valueOf(false)));
         this.setTickRandomly(true);
-        this.setCreativeTab(CreativeTabs.tabDecorations);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
+    }
+
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos)
+    {
+        return NULL_AABB;
+    }
+
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        state = state.getActualState(source, pos);
+        int i = 0;
+        AxisAlignedBB axisalignedbb = FULL_BLOCK_AABB;
+
+        if (((Boolean)state.getValue(UP)).booleanValue())
+        {
+            axisalignedbb = UP_AABB;
+            ++i;
+        }
+
+        if (((Boolean)state.getValue(NORTH)).booleanValue())
+        {
+            axisalignedbb = NORTH_AABB;
+            ++i;
+        }
+
+        if (((Boolean)state.getValue(EAST)).booleanValue())
+        {
+            axisalignedbb = EAST_AABB;
+            ++i;
+        }
+
+        if (((Boolean)state.getValue(SOUTH)).booleanValue())
+        {
+            axisalignedbb = SOUTH_AABB;
+            ++i;
+        }
+
+        if (((Boolean)state.getValue(WEST)).booleanValue())
+        {
+            axisalignedbb = WEST_AABB;
+            ++i;
+        }
+
+        return i == 1 ? axisalignedbb : FULL_BLOCK_AABB;
     }
 
     /**
@@ -46,26 +100,18 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
      */
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        return state.withProperty(UP, Boolean.valueOf(worldIn.getBlockState(pos.up()).getBlock().isBlockNormalCube()));
-    }
-
-    /**
-     * Sets the block's bounds for rendering it as an item
-     */
-    public void setBlockBoundsForItemRender()
-    {
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+        return state.withProperty(UP, Boolean.valueOf(worldIn.getBlockState(pos.up()).isBlockNormalCube()));
     }
 
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -73,82 +119,9 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
     /**
      * Whether this Block can be replaced directly by other blocks (true for e.g. tall grass)
      */
-    public boolean isReplaceable(World worldIn, BlockPos pos)
+    public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos)
     {
         return true;
-    }
-
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
-    {
-        float f = 0.0625F;
-        float f1 = 1.0F;
-        float f2 = 1.0F;
-        float f3 = 1.0F;
-        float f4 = 0.0F;
-        float f5 = 0.0F;
-        float f6 = 0.0F;
-        boolean flag = false;
-
-        if (((Boolean)worldIn.getBlockState(pos).getValue(WEST)).booleanValue())
-        {
-            f4 = Math.max(f4, 0.0625F);
-            f1 = 0.0F;
-            f2 = 0.0F;
-            f5 = 1.0F;
-            f3 = 0.0F;
-            f6 = 1.0F;
-            flag = true;
-        }
-
-        if (((Boolean)worldIn.getBlockState(pos).getValue(EAST)).booleanValue())
-        {
-            f1 = Math.min(f1, 0.9375F);
-            f4 = 1.0F;
-            f2 = 0.0F;
-            f5 = 1.0F;
-            f3 = 0.0F;
-            f6 = 1.0F;
-            flag = true;
-        }
-
-        if (((Boolean)worldIn.getBlockState(pos).getValue(NORTH)).booleanValue())
-        {
-            f6 = Math.max(f6, 0.0625F);
-            f3 = 0.0F;
-            f1 = 0.0F;
-            f4 = 1.0F;
-            f2 = 0.0F;
-            f5 = 1.0F;
-            flag = true;
-        }
-
-        if (((Boolean)worldIn.getBlockState(pos).getValue(SOUTH)).booleanValue())
-        {
-            f3 = Math.min(f3, 0.9375F);
-            f6 = 1.0F;
-            f1 = 0.0F;
-            f4 = 1.0F;
-            f2 = 0.0F;
-            f5 = 1.0F;
-            flag = true;
-        }
-
-        if (!flag && this.canPlaceOn(worldIn.getBlockState(pos.up()).getBlock()))
-        {
-            f2 = Math.min(f2, 0.9375F);
-            f5 = 1.0F;
-            f1 = 0.0F;
-            f4 = 1.0F;
-            f3 = 0.0F;
-            f6 = 1.0F;
-        }
-
-        this.setBlockBounds(f1, f2, f3, f4, f5, f6);
-    }
-
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
-    {
-        return null;
     }
 
     /**
@@ -159,20 +132,23 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
         switch (side)
         {
             case UP:
-                return this.canPlaceOn(worldIn.getBlockState(pos.up()).getBlock());
+                return this.canAttachVineOn(worldIn.getBlockState(pos.up()));
             case NORTH:
             case SOUTH:
             case EAST:
             case WEST:
-                return this.canPlaceOn(worldIn.getBlockState(pos.offset(side.getOpposite())).getBlock());
+                return this.canAttachVineOn(worldIn.getBlockState(pos.offset(side.getOpposite())));
             default:
                 return false;
         }
     }
 
-    private boolean canPlaceOn(Block blockIn)
+    /**
+     * Determines whether you can place a vine block on this kind of block.
+     */
+    private boolean canAttachVineOn(IBlockState state)
     {
-        return blockIn.isFullCube() && blockIn.blockMaterial.blocksMovement();
+        return state.isFullCube() && state.getMaterial().blocksMovement();
     }
 
     private boolean recheckGrownSides(World worldIn, BlockPos pos, IBlockState state)
@@ -183,7 +159,7 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
         {
             PropertyBool propertybool = getPropertyFor(enumfacing);
 
-            if (((Boolean)state.getValue(propertybool)).booleanValue() && !this.canPlaceOn(worldIn.getBlockState(pos.offset(enumfacing)).getBlock()))
+            if (((Boolean)state.getValue(propertybool)).booleanValue() && !this.canAttachVineOn(worldIn.getBlockState(pos.offset(enumfacing))))
             {
                 IBlockState iblockstate1 = worldIn.getBlockState(pos.up());
 
@@ -209,28 +185,12 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    public int getBlockColor()
-    {
-        return ColorizerFoliage.getFoliageColorBasic();
-    }
-
-    @SideOnly(Side.CLIENT)
-    public int getRenderColor(IBlockState state)
-    {
-        return ColorizerFoliage.getFoliageColorBasic();
-    }
-
-    @SideOnly(Side.CLIENT)
-    public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
-    {
-        return worldIn.getBiomeGenForCoords(pos).getFoliageColorAtPos(pos);
-    }
-
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn)
     {
         if (!worldIn.isRemote && !this.recheckGrownSides(worldIn, pos, state))
         {
@@ -248,11 +208,11 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
                 int i = 4;
                 int j = 5;
                 boolean flag = false;
-                label62:
+                label58:
 
-                for (int k = -i; k <= i; ++k)
+                for (int k = -4; k <= 4; ++k)
                 {
-                    for (int l = -i; l <= i; ++l)
+                    for (int l = -4; l <= 4; ++l)
                     {
                         for (int i1 = -1; i1 <= 1; ++i1)
                         {
@@ -263,7 +223,7 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
                                 if (j <= 0)
                                 {
                                     flag = true;
-                                    break label62;
+                                    break label58;
                                 }
                             }
                         }
@@ -271,25 +231,25 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
                 }
 
                 EnumFacing enumfacing1 = EnumFacing.random(rand);
-                BlockPos blockpos1 = pos.up();
+                BlockPos blockpos2 = pos.up();
 
-                if (enumfacing1 == EnumFacing.UP && pos.getY() < 255 && worldIn.isAirBlock(blockpos1))
+                if (enumfacing1 == EnumFacing.UP && pos.getY() < 255 && worldIn.isAirBlock(blockpos2))
                 {
                     if (!flag)
                     {
                         IBlockState iblockstate2 = state;
 
-                        for (EnumFacing enumfacing3 : EnumFacing.Plane.HORIZONTAL)
+                        for (EnumFacing enumfacing2 : EnumFacing.Plane.HORIZONTAL)
                         {
-                            if (rand.nextBoolean() || !this.canPlaceOn(worldIn.getBlockState(blockpos1.offset(enumfacing3)).getBlock()))
+                            if (rand.nextBoolean() || !this.canAttachVineOn(worldIn.getBlockState(blockpos2.offset(enumfacing2))))
                             {
-                                iblockstate2 = iblockstate2.withProperty(getPropertyFor(enumfacing3), Boolean.valueOf(false));
+                                iblockstate2 = iblockstate2.withProperty(getPropertyFor(enumfacing2), Boolean.valueOf(false));
                             }
                         }
 
                         if (((Boolean)iblockstate2.getValue(NORTH)).booleanValue() || ((Boolean)iblockstate2.getValue(EAST)).booleanValue() || ((Boolean)iblockstate2.getValue(SOUTH)).booleanValue() || ((Boolean)iblockstate2.getValue(WEST)).booleanValue())
                         {
-                            worldIn.setBlockState(blockpos1, iblockstate2, 2);
+                            worldIn.setBlockState(blockpos2, iblockstate2, 2);
                         }
                     }
                 }
@@ -297,40 +257,41 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
                 {
                     if (!flag)
                     {
-                        BlockPos blockpos3 = pos.offset(enumfacing1);
-                        Block block1 = worldIn.getBlockState(blockpos3).getBlock();
+                        BlockPos blockpos4 = pos.offset(enumfacing1);
+                        IBlockState iblockstate3 = worldIn.getBlockState(blockpos4);
+                        Block block1 = iblockstate3.getBlock();
 
-                        if (block1.blockMaterial == Material.air)
+                        if (block1.blockMaterial == Material.AIR)
                         {
-                            EnumFacing enumfacing2 = enumfacing1.rotateY();
+                            EnumFacing enumfacing3 = enumfacing1.rotateY();
                             EnumFacing enumfacing4 = enumfacing1.rotateYCCW();
-                            boolean flag1 = ((Boolean)state.getValue(getPropertyFor(enumfacing2))).booleanValue();
+                            boolean flag1 = ((Boolean)state.getValue(getPropertyFor(enumfacing3))).booleanValue();
                             boolean flag2 = ((Boolean)state.getValue(getPropertyFor(enumfacing4))).booleanValue();
-                            BlockPos blockpos4 = blockpos3.offset(enumfacing2);
-                            BlockPos blockpos = blockpos3.offset(enumfacing4);
+                            BlockPos blockpos = blockpos4.offset(enumfacing3);
+                            BlockPos blockpos1 = blockpos4.offset(enumfacing4);
 
-                            if (flag1 && this.canPlaceOn(worldIn.getBlockState(blockpos4).getBlock()))
+                            if (flag1 && this.canAttachVineOn(worldIn.getBlockState(blockpos)))
                             {
-                                worldIn.setBlockState(blockpos3, this.getDefaultState().withProperty(getPropertyFor(enumfacing2), Boolean.valueOf(true)), 2);
+                                worldIn.setBlockState(blockpos4, this.getDefaultState().withProperty(getPropertyFor(enumfacing3), Boolean.valueOf(true)), 2);
                             }
-                            else if (flag2 && this.canPlaceOn(worldIn.getBlockState(blockpos).getBlock()))
+                            else if (flag2 && this.canAttachVineOn(worldIn.getBlockState(blockpos1)))
                             {
-                                worldIn.setBlockState(blockpos3, this.getDefaultState().withProperty(getPropertyFor(enumfacing4), Boolean.valueOf(true)), 2);
+                                worldIn.setBlockState(blockpos4, this.getDefaultState().withProperty(getPropertyFor(enumfacing4), Boolean.valueOf(true)), 2);
                             }
-                            else if (flag1 && worldIn.isAirBlock(blockpos4) && this.canPlaceOn(worldIn.getBlockState(pos.offset(enumfacing2)).getBlock()))
-                            {
-                                worldIn.setBlockState(blockpos4, this.getDefaultState().withProperty(getPropertyFor(enumfacing1.getOpposite()), Boolean.valueOf(true)), 2);
-                            }
-                            else if (flag2 && worldIn.isAirBlock(blockpos) && this.canPlaceOn(worldIn.getBlockState(pos.offset(enumfacing4)).getBlock()))
+                            else if (flag1 && worldIn.isAirBlock(blockpos) && this.canAttachVineOn(worldIn.getBlockState(pos.offset(enumfacing3))))
                             {
                                 worldIn.setBlockState(blockpos, this.getDefaultState().withProperty(getPropertyFor(enumfacing1.getOpposite()), Boolean.valueOf(true)), 2);
                             }
-                            else if (this.canPlaceOn(worldIn.getBlockState(blockpos3.up()).getBlock()))
+                            else if (flag2 && worldIn.isAirBlock(blockpos1) && this.canAttachVineOn(worldIn.getBlockState(pos.offset(enumfacing4))))
                             {
-                                worldIn.setBlockState(blockpos3, this.getDefaultState(), 2);
+                                worldIn.setBlockState(blockpos1, this.getDefaultState().withProperty(getPropertyFor(enumfacing1.getOpposite()), Boolean.valueOf(true)), 2);
+                            }
+                            else if (this.canAttachVineOn(worldIn.getBlockState(blockpos4.up())))
+                            {
+                                worldIn.setBlockState(blockpos4, this.getDefaultState(), 2);
                             }
                         }
-                        else if (block1.blockMaterial.isOpaque() && block1.isFullCube())
+                        else if (block1.blockMaterial.isOpaque() && iblockstate3.isFullCube())
                         {
                             worldIn.setBlockState(pos, state.withProperty(getPropertyFor(enumfacing1), Boolean.valueOf(true)), 2);
                         }
@@ -340,11 +301,11 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
                 {
                     if (pos.getY() > 1)
                     {
-                        BlockPos blockpos2 = pos.down();
-                        IBlockState iblockstate = worldIn.getBlockState(blockpos2);
+                        BlockPos blockpos3 = pos.down();
+                        IBlockState iblockstate = worldIn.getBlockState(blockpos3);
                         Block block = iblockstate.getBlock();
 
-                        if (block.blockMaterial == Material.air)
+                        if (block.blockMaterial == Material.AIR)
                         {
                             IBlockState iblockstate1 = state;
 
@@ -358,12 +319,12 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
 
                             if (((Boolean)iblockstate1.getValue(NORTH)).booleanValue() || ((Boolean)iblockstate1.getValue(EAST)).booleanValue() || ((Boolean)iblockstate1.getValue(SOUTH)).booleanValue() || ((Boolean)iblockstate1.getValue(WEST)).booleanValue())
                             {
-                                worldIn.setBlockState(blockpos2, iblockstate1, 2);
+                                worldIn.setBlockState(blockpos3, iblockstate1, 2);
                             }
                         }
                         else if (block == this)
                         {
-                            IBlockState iblockstate3 = iblockstate;
+                            IBlockState iblockstate4 = iblockstate;
 
                             for (EnumFacing enumfacing5 : EnumFacing.Plane.HORIZONTAL)
                             {
@@ -371,13 +332,13 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
 
                                 if (rand.nextBoolean() && ((Boolean)state.getValue(propertybool)).booleanValue())
                                 {
-                                    iblockstate3 = iblockstate3.withProperty(propertybool, Boolean.valueOf(true));
+                                    iblockstate4 = iblockstate4.withProperty(propertybool, Boolean.valueOf(true));
                                 }
                             }
 
-                            if (((Boolean)iblockstate3.getValue(NORTH)).booleanValue() || ((Boolean)iblockstate3.getValue(EAST)).booleanValue() || ((Boolean)iblockstate3.getValue(SOUTH)).booleanValue() || ((Boolean)iblockstate3.getValue(WEST)).booleanValue())
+                            if (((Boolean)iblockstate4.getValue(NORTH)).booleanValue() || ((Boolean)iblockstate4.getValue(EAST)).booleanValue() || ((Boolean)iblockstate4.getValue(SOUTH)).booleanValue() || ((Boolean)iblockstate4.getValue(WEST)).booleanValue())
                             {
-                                worldIn.setBlockState(blockpos2, iblockstate3, 2);
+                                worldIn.setBlockState(blockpos3, iblockstate4, 2);
                             }
                         }
                     }
@@ -399,6 +360,7 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
     /**
      * Get the Item that this Block should drop when harvested.
      */
+    @Nullable
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return null;
@@ -412,10 +374,16 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
         return 0;
     }
 
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te)
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack)
     {
+        if (false && !worldIn.isRemote && stack != null && stack.getItem() == Items.SHEARS) // Forge: Noop, Covered by IShearable
         {
-            super.harvestBlock(worldIn, player, pos, state, te);
+            player.addStat(StatList.getBlockStats(this));
+            spawnAsEntity(worldIn, pos, new ItemStack(Blocks.VINE, 1, 0));
+        }
+        else
+        {
+            super.harvestBlock(worldIn, player, pos, state, te, stack);
         }
     }
 
@@ -428,9 +396,9 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
     }
 
     @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.CUTOUT;
+        return BlockRenderLayer.CUTOUT;
     }
 
     /**
@@ -463,9 +431,45 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
         return i;
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {UP, NORTH, EAST, SOUTH, WEST});
+        return new BlockStateContainer(this, new IProperty[] {UP, NORTH, EAST, SOUTH, WEST});
+    }
+
+    /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
+    {
+        switch (rot)
+        {
+            case CLOCKWISE_180:
+                return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(EAST, state.getValue(WEST)).withProperty(SOUTH, state.getValue(NORTH)).withProperty(WEST, state.getValue(EAST));
+            case COUNTERCLOCKWISE_90:
+                return state.withProperty(NORTH, state.getValue(EAST)).withProperty(EAST, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(WEST)).withProperty(WEST, state.getValue(NORTH));
+            case CLOCKWISE_90:
+                return state.withProperty(NORTH, state.getValue(WEST)).withProperty(EAST, state.getValue(NORTH)).withProperty(SOUTH, state.getValue(EAST)).withProperty(WEST, state.getValue(SOUTH));
+            default:
+                return state;
+        }
+    }
+
+    /**
+     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+    {
+        switch (mirrorIn)
+        {
+            case LEFT_RIGHT:
+                return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(NORTH));
+            case FRONT_BACK:
+                return state.withProperty(EAST, state.getValue(WEST)).withProperty(WEST, state.getValue(EAST));
+            default:
+                return super.withMirror(state, mirrorIn);
+        }
     }
 
     public static PropertyBool getPropertyFor(EnumFacing side)
@@ -502,7 +506,7 @@ public class BlockVine extends Block implements net.minecraftforge.common.IShear
         return i;
     }
     /*************************FORGE START***********************************/
-    @Override public boolean isLadder(IBlockAccess world, BlockPos pos, EntityLivingBase entity){ return true; }
+    @Override public boolean isLadder(IBlockState state, IBlockAccess world, BlockPos pos, EntityLivingBase entity){ return true; }
     @Override public boolean isShearable(ItemStack item, IBlockAccess world, BlockPos pos){ return true; }
     @Override
     public java.util.List<ItemStack> onSheared(ItemStack item, IBlockAccess world, BlockPos pos, int fortune)

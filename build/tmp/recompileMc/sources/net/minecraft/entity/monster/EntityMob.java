@@ -3,11 +3,20 @@ package net.minecraft.entity.monster;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.util.BlockPos;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemAxe;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -18,6 +27,16 @@ public abstract class EntityMob extends EntityCreature implements IMob
     {
         super(worldIn);
         this.experienceValue = 5;
+    }
+
+    public static void func_189760_c(DataFixer p_189760_0_)
+    {
+        EntityLiving.func_189752_a(p_189760_0_, "Monster");
+    }
+
+    public SoundCategory getSoundCategory()
+    {
+        return SoundCategory.HOSTILE;
     }
 
     /**
@@ -50,14 +69,14 @@ public abstract class EntityMob extends EntityCreature implements IMob
         }
     }
 
-    protected String getSwimSound()
+    protected SoundEvent getSwimSound()
     {
-        return "game.hostile.swim";
+        return SoundEvents.ENTITY_HOSTILE_SWIM;
     }
 
-    protected String getSplashSound()
+    protected SoundEvent getSplashSound()
     {
-        return "game.hostile.swim.splash";
+        return SoundEvents.ENTITY_HOSTILE_SPLASH;
     }
 
     /**
@@ -65,50 +84,32 @@ public abstract class EntityMob extends EntityCreature implements IMob
      */
     public boolean attackEntityFrom(DamageSource source, float amount)
     {
-        if (this.isEntityInvulnerable(source))
-        {
-            return false;
-        }
-        else if (super.attackEntityFrom(source, amount))
-        {
-            Entity entity = source.getEntity();
-            return this.riddenByEntity != entity && this.ridingEntity != entity ? true : true;
-        }
-        else
-        {
-            return false;
-        }
+        return this.isEntityInvulnerable(source) ? false : super.attackEntityFrom(source, amount);
     }
 
-    /**
-     * Returns the sound this mob makes when it is hurt.
-     */
-    protected String getHurtSound()
+    protected SoundEvent getHurtSound()
     {
-        return "game.hostile.hurt";
+        return SoundEvents.ENTITY_HOSTILE_HURT;
     }
 
-    /**
-     * Returns the sound this mob makes on death.
-     */
-    protected String getDeathSound()
+    protected SoundEvent getDeathSound()
     {
-        return "game.hostile.die";
+        return SoundEvents.ENTITY_HOSTILE_DEATH;
     }
 
-    protected String getFallSoundString(int damageValue)
+    protected SoundEvent getFallSound(int heightIn)
     {
-        return damageValue > 4 ? "game.hostile.hurt.fall.big" : "game.hostile.hurt.fall.small";
+        return heightIn > 4 ? SoundEvents.ENTITY_HOSTILE_BIG_FALL : SoundEvents.ENTITY_HOSTILE_SMALL_FALL;
     }
 
     public boolean attackEntityAsMob(Entity entityIn)
     {
-        float f = (float)this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+        float f = (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
         int i = 0;
 
         if (entityIn instanceof EntityLivingBase)
         {
-            f += EnchantmentHelper.func_152377_a(this.getHeldItem(), ((EntityLivingBase)entityIn).getCreatureAttribute());
+            f += EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), ((EntityLivingBase)entityIn).getCreatureAttribute());
             i += EnchantmentHelper.getKnockbackModifier(this);
         }
 
@@ -116,9 +117,9 @@ public abstract class EntityMob extends EntityCreature implements IMob
 
         if (flag)
         {
-            if (i > 0)
+            if (i > 0 && entityIn instanceof EntityLivingBase)
             {
-                entityIn.addVelocity((double)(-MathHelper.sin(this.rotationYaw * (float)Math.PI / 180.0F) * (float)i * 0.5F), 0.1D, (double)(MathHelper.cos(this.rotationYaw * (float)Math.PI / 180.0F) * (float)i * 0.5F));
+                ((EntityLivingBase)entityIn).knockBack(this, (float)i * 0.5F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                 this.motionX *= 0.6D;
                 this.motionZ *= 0.6D;
             }
@@ -128,6 +129,24 @@ public abstract class EntityMob extends EntityCreature implements IMob
             if (j > 0)
             {
                 entityIn.setFire(j * 4);
+            }
+
+            if (entityIn instanceof EntityPlayer)
+            {
+                EntityPlayer entityplayer = (EntityPlayer)entityIn;
+                ItemStack itemstack = this.getHeldItemMainhand();
+                ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.getActiveItemStack() : null;
+
+                if (itemstack != null && itemstack1 != null && itemstack.getItem() instanceof ItemAxe && itemstack1.getItem() == Items.SHIELD)
+                {
+                    float f1 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier(this) * 0.05F;
+
+                    if (this.rand.nextFloat() < f1)
+                    {
+                        entityplayer.getCooldownTracker().setCooldown(Items.SHIELD, 100);
+                        this.worldObj.setEntityState(entityplayer, (byte)30);
+                    }
+                }
             }
 
             this.applyEnchantments(this, entityIn);
@@ -179,7 +198,7 @@ public abstract class EntityMob extends EntityCreature implements IMob
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage);
+        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
     }
 
     /**

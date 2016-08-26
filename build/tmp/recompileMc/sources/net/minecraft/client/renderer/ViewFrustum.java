@@ -1,9 +1,10 @@
 package net.minecraft.client.renderer;
 
+import javax.annotation.Nullable;
 import net.minecraft.client.renderer.chunk.IRenderChunkFactory;
 import net.minecraft.client.renderer.chunk.RenderChunk;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -18,9 +19,9 @@ public class ViewFrustum
     protected int countChunksZ;
     public RenderChunk[] renderChunks;
 
-    public ViewFrustum(World worldIn, int renderDistanceChunks, RenderGlobal p_i46246_3_, IRenderChunkFactory renderChunkFactory)
+    public ViewFrustum(World worldIn, int renderDistanceChunks, RenderGlobal renderGlobalIn, IRenderChunkFactory renderChunkFactory)
     {
-        this.renderGlobal = p_i46246_3_;
+        this.renderGlobal = renderGlobalIn;
         this.world = worldIn;
         this.setCountChunksXYZ(renderDistanceChunks);
         this.createRenderChunks(renderChunkFactory);
@@ -39,8 +40,8 @@ public class ViewFrustum
                 for (int i1 = 0; i1 < this.countChunksZ; ++i1)
                 {
                     int j1 = (i1 * this.countChunksY + l) * this.countChunksX + k;
-                    BlockPos blockpos = new BlockPos(k * 16, l * 16, i1 * 16);
-                    this.renderChunks[j1] = renderChunkFactory.makeRenderChunk(this.world, this.renderGlobal, blockpos, j++);
+                    this.renderChunks[j1] = renderChunkFactory.create(this.world, this.renderGlobal, j++);
+                    this.renderChunks[j1].setOrigin(k * 16, l * 16, i1 * 16);
                 }
             }
         }
@@ -70,28 +71,23 @@ public class ViewFrustum
 
         for (int l = 0; l < this.countChunksX; ++l)
         {
-            int i1 = this.func_178157_a(i, k, l);
+            int i1 = this.getBaseCoordinate(i, k, l);
 
             for (int j1 = 0; j1 < this.countChunksZ; ++j1)
             {
-                int k1 = this.func_178157_a(j, k, j1);
+                int k1 = this.getBaseCoordinate(j, k, j1);
 
                 for (int l1 = 0; l1 < this.countChunksY; ++l1)
                 {
                     int i2 = l1 * 16;
                     RenderChunk renderchunk = this.renderChunks[(j1 * this.countChunksY + l1) * this.countChunksX + l];
-                    BlockPos blockpos = new BlockPos(i1, i2, k1);
-
-                    if (!blockpos.equals(renderchunk.getPosition()))
-                    {
-                        renderchunk.setPosition(blockpos);
-                    }
+                    renderchunk.setOrigin(i1, i2, k1);
                 }
             }
         }
     }
 
-    private int func_178157_a(int p_178157_1_, int p_178157_2_, int p_178157_3_)
+    private int getBaseCoordinate(int p_178157_1_, int p_178157_2_, int p_178157_3_)
     {
         int i = p_178157_3_ * 16;
         int j = i - p_178157_1_ + p_178157_2_ / 2;
@@ -104,14 +100,14 @@ public class ViewFrustum
         return i - j / p_178157_2_ * p_178157_2_;
     }
 
-    public void markBlocksForUpdate(int fromX, int fromY, int fromZ, int toX, int toY, int toZ)
+    public void markBlocksForUpdate(int p_187474_1_, int p_187474_2_, int p_187474_3_, int p_187474_4_, int p_187474_5_, int p_187474_6_, boolean p_187474_7_)
     {
-        int i = MathHelper.bucketInt(fromX, 16);
-        int j = MathHelper.bucketInt(fromY, 16);
-        int k = MathHelper.bucketInt(fromZ, 16);
-        int l = MathHelper.bucketInt(toX, 16);
-        int i1 = MathHelper.bucketInt(toY, 16);
-        int j1 = MathHelper.bucketInt(toZ, 16);
+        int i = MathHelper.bucketInt(p_187474_1_, 16);
+        int j = MathHelper.bucketInt(p_187474_2_, 16);
+        int k = MathHelper.bucketInt(p_187474_3_, 16);
+        int l = MathHelper.bucketInt(p_187474_4_, 16);
+        int i1 = MathHelper.bucketInt(p_187474_5_, 16);
+        int j1 = MathHelper.bucketInt(p_187474_6_, 16);
 
         for (int k1 = i; k1 <= l; ++k1)
         {
@@ -142,12 +138,13 @@ public class ViewFrustum
 
                     int i3 = (l2 * this.countChunksY + j2) * this.countChunksX + l1;
                     RenderChunk renderchunk = this.renderChunks[i3];
-                    renderchunk.setNeedsUpdate(true);
+                    renderchunk.setNeedsUpdate(p_187474_7_);
                 }
             }
         }
     }
 
+    @Nullable
     protected RenderChunk getRenderChunk(BlockPos pos)
     {
         int i = MathHelper.bucketInt(pos.getX(), 16);

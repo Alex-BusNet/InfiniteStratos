@@ -1,25 +1,26 @@
 package net.minecraft.item;
 
 import com.google.common.collect.Lists;
+import java.util.List;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 public class ItemFirework extends Item
 {
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
         if (!worldIn.isRemote)
         {
@@ -30,13 +31,9 @@ public class ItemFirework extends Item
             {
                 --stack.stackSize;
             }
+        }
 
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return EnumActionResult.SUCCESS;
     }
 
     /**
@@ -53,12 +50,12 @@ public class ItemFirework extends Item
             {
                 if (nbttagcompound.hasKey("Flight", 99))
                 {
-                    tooltip.add(StatCollector.translateToLocal("item.fireworks.flight") + " " + nbttagcompound.getByte("Flight"));
+                    tooltip.add(I18n.translateToLocal("item.fireworks.flight") + " " + nbttagcompound.getByte("Flight"));
                 }
 
                 NBTTagList nbttaglist = nbttagcompound.getTagList("Explosions", 10);
 
-                if (nbttaglist != null && nbttaglist.tagCount() > 0)
+                if (nbttaglist != null && !nbttaglist.hasNoTags())
                 {
                     for (int i = 0; i < nbttaglist.tagCount(); ++i)
                     {
@@ -66,7 +63,7 @@ public class ItemFirework extends Item
                         List<String> list = Lists.<String>newArrayList();
                         ItemFireworkCharge.addExplosionInfo(nbttagcompound1, list);
 
-                        if (list.size() > 0)
+                        if (!list.isEmpty())
                         {
                             for (int j = 1; j < ((List)list).size(); ++j)
                             {

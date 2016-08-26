@@ -1,17 +1,15 @@
 package net.minecraft.item;
 
 import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.potion.Potion;
+import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.potion.PotionHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
-import java.util.Map;
 
 public class ItemFishFood extends ItemFood
 {
@@ -36,20 +34,15 @@ public class ItemFishFood extends ItemFood
         return this.cooked && itemfishfood$fishtype.canCook() ? itemfishfood$fishtype.getCookedSaturationModifier() : itemfishfood$fishtype.getUncookedSaturationModifier();
     }
 
-    public String getPotionEffect(ItemStack stack)
-    {
-        return ItemFishFood.FishType.byItemStack(stack) == ItemFishFood.FishType.PUFFERFISH ? PotionHelper.pufferfishEffect : null;
-    }
-
     protected void onFoodEaten(ItemStack stack, World worldIn, EntityPlayer player)
     {
         ItemFishFood.FishType itemfishfood$fishtype = ItemFishFood.FishType.byItemStack(stack);
 
         if (itemfishfood$fishtype == ItemFishFood.FishType.PUFFERFISH)
         {
-            player.addPotionEffect(new PotionEffect(Potion.poison.id, 1200, 3));
-            player.addPotionEffect(new PotionEffect(Potion.hunger.id, 300, 2));
-            player.addPotionEffect(new PotionEffect(Potion.confusion.id, 300, 1));
+            player.addPotionEffect(new PotionEffect(MobEffects.POISON, 1200, 3));
+            player.addPotionEffect(new PotionEffect(MobEffects.HUNGER, 300, 2));
+            player.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 300, 1));
         }
 
         super.onFoodEaten(stack, worldIn, player);
@@ -104,7 +97,7 @@ public class ItemFishFood extends ItemFood
         /** The saturation modifier to apply to the heal amount when the player eats the cooked version of this fish. */
         private final float cookedSaturationModifier;
         /** Indicates whether this type of fish has "raw" and "cooked" variants */
-        private boolean cookable = false;
+        private boolean cookable;
 
         private FishType(int meta, String unlocalizedName, int uncookedHeal, float uncookedSaturation, int cookedHeal, float cookedSaturation)
         {

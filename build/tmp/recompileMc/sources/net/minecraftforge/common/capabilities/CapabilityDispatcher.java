@@ -1,14 +1,35 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.common.capabilities;
 
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
+
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * A high-speed implementation of a capability delegator.
@@ -65,7 +86,7 @@ public final class CapabilityDispatcher implements INBTSerializable<NBTTagCompou
     }
 
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
     {
         for (ICapabilityProvider cap : caps)
         {
@@ -78,7 +99,7 @@ public final class CapabilityDispatcher implements INBTSerializable<NBTTagCompou
     }
 
     @Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
     {
         for (ICapabilityProvider cap : caps)
         {
@@ -112,5 +133,12 @@ public final class CapabilityDispatcher implements INBTSerializable<NBTTagCompou
                 writers[x].deserializeNBT(nbt.getTag(names[x]));
             }
         }
+    }
+
+    public boolean areCompatible(CapabilityDispatcher other) //Called from ItemStack to compare equality.
+    {                                                        // Only compares serializeable caps.
+        if (other == null) return this.writers.length == 0;  // Done this way so we can do some pre-checks before doing the costly NBT serialization and compare
+        if (this.writers.length == 0) return other.writers.length == 0;
+        return this.serializeNBT().equals(other.serializeNBT());
     }
 }

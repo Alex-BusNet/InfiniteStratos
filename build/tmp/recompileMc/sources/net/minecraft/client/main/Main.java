@@ -4,14 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.properties.PropertyMap.Serializer;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.Session;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.io.File;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
@@ -19,13 +11,20 @@ import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.util.List;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.JsonUtils;
+import net.minecraft.util.Session;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class Main
 {
     public static void main(String[] p_main_0_)
     {
-        System.setProperty("java.net.preferIPv4Stack", "true");
         OptionParser optionparser = new OptionParser();
         optionparser.allowsUnrecognizedOptions();
         optionparser.accepts("demo");
@@ -50,9 +49,10 @@ public class Main
         OptionSpec<String> optionspec16 = optionparser.accepts("profileProperties").withRequiredArg().defaultsTo("{}", new String[0]);
         OptionSpec<String> optionspec17 = optionparser.accepts("assetIndex").withRequiredArg();
         OptionSpec<String> optionspec18 = optionparser.accepts("userType").withRequiredArg().defaultsTo("legacy", new String[0]);
-        OptionSpec<String> optionspec19 = optionparser.nonOptions();
+        OptionSpec<String> optionspec19 = optionparser.accepts("versionType").withRequiredArg().defaultsTo("release", new String[0]);
+        OptionSpec<String> optionspec20 = optionparser.nonOptions();
         OptionSet optionset = optionparser.parse(p_main_0_);
-        List<String> list = optionset.valuesOf(optionspec19);
+        List<String> list = optionset.valuesOf(optionspec20);
 
         if (!list.isEmpty())
         {
@@ -68,7 +68,7 @@ public class Main
             {
                 proxy = new Proxy(Type.SOCKS, new InetSocketAddress(s, ((Integer)optionset.valueOf(optionspec6)).intValue()));
             }
-            catch (Exception var46)
+            catch (Exception var48)
             {
                 ;
             }
@@ -95,17 +95,18 @@ public class Main
         boolean flag2 = optionset.has("demo");
         String s3 = (String)optionset.valueOf(optionspec12);
         Gson gson = (new GsonBuilder()).registerTypeAdapter(PropertyMap.class, new Serializer()).create();
-        PropertyMap propertymap = (PropertyMap)gson.fromJson((String)optionset.valueOf(optionspec15), PropertyMap.class);
-        PropertyMap propertymap1 = (PropertyMap)gson.fromJson((String)optionset.valueOf(optionspec16), PropertyMap.class);
+        PropertyMap propertymap = (PropertyMap)JsonUtils.gsonDeserialize(gson, (String)optionset.valueOf(optionspec15), PropertyMap.class);
+        PropertyMap propertymap1 = (PropertyMap)JsonUtils.gsonDeserialize(gson, (String)optionset.valueOf(optionspec16), PropertyMap.class);
+        String s4 = (String)optionset.valueOf(optionspec19);
         File file1 = (File)optionset.valueOf(optionspec2);
         File file2 = optionset.has(optionspec3) ? (File)optionset.valueOf(optionspec3) : new File(file1, "assets/");
         File file3 = optionset.has(optionspec4) ? (File)optionset.valueOf(optionspec4) : new File(file1, "resourcepacks/");
-        String s4 = optionset.has(optionspec10) ? (String)optionspec10.value(optionset) : (String)optionspec9.value(optionset);
-        String s5 = optionset.has(optionspec17) ? (String)optionspec17.value(optionset) : null;
-        String s6 = (String)optionset.valueOf(optionspec);
+        String s5 = optionset.has(optionspec10) ? (String)optionspec10.value(optionset) : (String)optionspec9.value(optionset);
+        String s6 = optionset.has(optionspec17) ? (String)optionspec17.value(optionset) : null;
+        String s7 = (String)optionset.valueOf(optionspec);
         Integer integer = (Integer)optionset.valueOf(optionspec1);
-        Session session = new Session((String)optionspec9.value(optionset), s4, (String)optionspec11.value(optionset), (String)optionspec18.value(optionset));
-        GameConfiguration gameconfiguration = new GameConfiguration(new GameConfiguration.UserInformation(session, propertymap, propertymap1, proxy), new GameConfiguration.DisplayInformation(i, j, flag, flag1), new GameConfiguration.FolderInformation(file1, file3, file2, s5), new GameConfiguration.GameInformation(flag2, s3), new GameConfiguration.ServerInformation(s6, integer.intValue()));
+        Session session = new Session((String)optionspec9.value(optionset), s5, (String)optionspec11.value(optionset), (String)optionspec18.value(optionset));
+        GameConfiguration gameconfiguration = new GameConfiguration(new GameConfiguration.UserInformation(session, propertymap, propertymap1, proxy), new GameConfiguration.DisplayInformation(i, j, flag, flag1), new GameConfiguration.FolderInformation(file1, file3, file2, s6), new GameConfiguration.GameInformation(flag2, s3, s4), new GameConfiguration.ServerInformation(s7, integer.intValue()));
         Runtime.getRuntime().addShutdownHook(new Thread("Client Shutdown Thread")
         {
             public void run()

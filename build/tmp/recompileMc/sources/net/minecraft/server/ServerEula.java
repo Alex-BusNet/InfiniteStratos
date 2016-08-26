@@ -1,13 +1,16 @@
 package net.minecraft.server;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Properties;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.io.*;
-import java.util.Properties;
 
 @SideOnly(Side.SERVER)
 public class ServerEula
@@ -36,7 +39,7 @@ public class ServerEula
         }
         catch (Exception var8)
         {
-            LOG.warn("Failed to load " + inFile);
+            LOG.warn("Failed to load {}", new Object[] {inFile});
             this.createEULAFile();
         }
         finally
@@ -65,7 +68,7 @@ public class ServerEula
         }
         catch (Exception exception)
         {
-            LOG.warn((String)("Failed to save " + this.eulaFile), (Throwable)exception);
+            LOG.warn("Failed to save {}", new Object[] {this.eulaFile, exception});
         }
         finally
         {

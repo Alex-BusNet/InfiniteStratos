@@ -1,17 +1,37 @@
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package net.minecraftforge.items;
 
-import com.google.common.base.Objects;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 import java.lang.ref.WeakReference;
 
-public class VanillaDoubleChestItemHandler extends WeakReference<TileEntityChest> implements IItemHandler
+import com.google.common.base.Objects;
+
+public class VanillaDoubleChestItemHandler extends WeakReference<TileEntityChest> implements IItemHandlerModifiable
 {
     // Dummy cache value to signify that we have checked and definitely found no adjacent chests
     public static final VanillaDoubleChestItemHandler NO_ADJACENT_CHESTS_INSTANCE = new VanillaDoubleChestItemHandler(null, null, false);
@@ -88,6 +108,22 @@ public class VanillaDoubleChestItemHandler extends WeakReference<TileEntityChest
         int targetSlot = accessingUpperChest ? slot : slot - 27;
         TileEntityChest chest = getChest(accessingUpperChest);
         return chest != null ? chest.getStackInSlot(targetSlot) : null;
+    }
+
+    @Override
+    public void setStackInSlot(int slot, ItemStack stack)
+    {
+        boolean accessingUpperChest = slot < 27;
+        int targetSlot = accessingUpperChest ? slot : slot - 27;
+        TileEntityChest chest = getChest(accessingUpperChest);
+        if (chest != null)
+        {
+            IItemHandler singleHandler = chest.getSingleChestHandler();
+            if (singleHandler instanceof IItemHandlerModifiable)
+            {
+                ((IItemHandlerModifiable) singleHandler).setStackInSlot(targetSlot, stack);
+            }
+        }
     }
 
     @Override

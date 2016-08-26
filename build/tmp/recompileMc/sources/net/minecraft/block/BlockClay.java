@@ -1,27 +1,28 @@
 package net.minecraft.block;
 
+import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 
-import java.util.Random;
-
 public class BlockClay extends Block
 {
     public BlockClay()
     {
-        super(Material.clay);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        super(Material.CLAY);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
      * Get the Item that this Block should drop when harvested.
      */
+    @Nullable
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.clay_ball;
+        return Items.CLAY_BALL;
     }
 
     /**

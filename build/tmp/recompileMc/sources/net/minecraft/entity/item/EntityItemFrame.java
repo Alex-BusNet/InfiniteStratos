@@ -1,16 +1,26 @@
 package net.minecraft.entity.item;
 
+import com.google.common.base.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.datafix.FixTypes;
+import net.minecraft.util.datafix.walkers.ItemStackData;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
 import net.minecraftforge.fml.relauncher.Side;
@@ -18,6 +28,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityItemFrame extends EntityHanging
 {
+    private static final DataParameter<Optional<ItemStack>> ITEM = EntityDataManager.<Optional<ItemStack>>createKey(EntityItemFrame.class, DataSerializers.OPTIONAL_ITEM_STACK);
+    private static final DataParameter<Integer> ROTATION = EntityDataManager.<Integer>createKey(EntityItemFrame.class, DataSerializers.VARINT);
     /** Chance for this item frame's item to drop from the frame. */
     private float itemDropChance = 1.0F;
 
@@ -34,8 +46,8 @@ public class EntityItemFrame extends EntityHanging
 
     protected void entityInit()
     {
-        this.getDataWatcher().addObjectByDataType(8, 5);
-        this.getDataWatcher().addObject(9, Byte.valueOf((byte)0));
+        this.getDataManager().register(ITEM, Optional.<ItemStack>absent());
+        this.getDataManager().register(ROTATION, Integer.valueOf(0));
     }
 
     public float getCollisionBorderSize()
@@ -57,6 +69,7 @@ public class EntityItemFrame extends EntityHanging
             if (!this.worldObj.isRemote)
             {
                 this.dropItemOrSelf(source.getEntity(), false);
+                this.playSound(SoundEvents.ENTITY_ITEMFRAME_REMOVE_ITEM, 1.0F, 1.0F);
                 this.setDisplayedItem((ItemStack)null);
             }
 
@@ -79,34 +92,39 @@ public class EntityItemFrame extends EntityHanging
     }
 
     /**
-     * Checks if the entity is in range to render by using the past in distance and comparing it to its average edge
-     * length * 64 * renderDistanceWeight Args: distance
+     * Checks if the entity is in range to render.
      */
     @SideOnly(Side.CLIENT)
     public boolean isInRangeToRenderDist(double distance)
     {
         double d0 = 16.0D;
-        d0 = d0 * 64.0D * this.renderDistanceWeight;
+        d0 = d0 * 64.0D * getRenderDistanceWeight();
         return distance < d0 * d0;
     }
 
     /**
      * Called when this entity is broken. Entity parameter may be null.
      */
-    public void onBroken(Entity brokenEntity)
+    public void onBroken(@Nullable Entity brokenEntity)
     {
+        this.playSound(SoundEvents.ENTITY_ITEMFRAME_BREAK, 1.0F, 1.0F);
         this.dropItemOrSelf(brokenEntity, true);
     }
 
-    public void dropItemOrSelf(Entity p_146065_1_, boolean p_146065_2_)
+    public void playPlaceSound()
+    {
+        this.playSound(SoundEvents.ENTITY_ITEMFRAME_PLACE, 1.0F, 1.0F);
+    }
+
+    public void dropItemOrSelf(@Nullable Entity entityIn, boolean p_146065_2_)
     {
         if (this.worldObj.getGameRules().getBoolean("doEntityDrops"))
         {
             ItemStack itemstack = this.getDisplayedItem();
 
-            if (p_146065_1_ instanceof EntityPlayer)
+            if (entityIn instanceof EntityPlayer)
             {
-                EntityPlayer entityplayer = (EntityPlayer)p_146065_1_;
+                EntityPlayer entityplayer = (EntityPlayer)entityIn;
 
                 if (entityplayer.capabilities.isCreativeMode)
                 {
@@ -117,7 +135,7 @@ public class EntityItemFrame extends EntityHanging
 
             if (p_146065_2_)
             {
-                this.entityDropItem(new ItemStack(Items.item_frame), 0.0F);
+                this.entityDropItem(new ItemStack(Items.ITEM_FRAME), 0.0F);
             }
 
             if (itemstack != null && this.rand.nextFloat() < this.itemDropChance)
@@ -132,45 +150,64 @@ public class EntityItemFrame extends EntityHanging
     /**
      * Removes the dot representing this frame's position from the map when the item frame is broken.
      */
-    private void removeFrameFromMap(ItemStack p_110131_1_)
+    private void removeFrameFromMap(ItemStack stack)
     {
-        if (p_110131_1_ != null)
+        if (stack != null)
         {
-            if (p_110131_1_.getItem() instanceof net.minecraft.item.ItemMap)
+            if (stack.getItem() instanceof net.minecraft.item.ItemMap)
             {
-                MapData mapdata = ((ItemMap)p_110131_1_.getItem()).getMapData(p_110131_1_, this.worldObj);
+                MapData mapdata = ((ItemMap)stack.getItem()).getMapData(stack, this.worldObj);
                 mapdata.mapDecorations.remove("frame-" + this.getEntityId());
             }
 
-            p_110131_1_.setItemFrame((EntityItemFrame)null);
+            stack.setItemFrame((EntityItemFrame)null);
         }
     }
 
+    @Nullable
     public ItemStack getDisplayedItem()
     {
-        return this.getDataWatcher().getWatchableObjectItemStack(8);
+        return (ItemStack)((Optional)this.getDataManager().get(ITEM)).orNull();
     }
 
-    public void setDisplayedItem(ItemStack p_82334_1_)
+    public void setDisplayedItem(@Nullable ItemStack stack)
     {
-        this.setDisplayedItemWithUpdate(p_82334_1_, true);
+        this.setDisplayedItemWithUpdate(stack, true);
     }
 
-    private void setDisplayedItemWithUpdate(ItemStack p_174864_1_, boolean p_174864_2_)
+    private void setDisplayedItemWithUpdate(@Nullable ItemStack stack, boolean p_174864_2_)
     {
-        if (p_174864_1_ != null)
+        if (stack != null)
         {
-            p_174864_1_ = p_174864_1_.copy();
-            p_174864_1_.stackSize = 1;
-            p_174864_1_.setItemFrame(this);
+            stack = stack.copy();
+            stack.stackSize = 1;
+            stack.setItemFrame(this);
         }
 
-        this.getDataWatcher().updateObject(8, p_174864_1_);
-        this.getDataWatcher().setObjectWatched(8);
+        this.getDataManager().set(ITEM, Optional.fromNullable(stack));
+        this.getDataManager().setDirty(ITEM);
+
+        if (stack != null)
+        {
+            this.playSound(SoundEvents.ENTITY_ITEMFRAME_ADD_ITEM, 1.0F, 1.0F);
+        }
 
         if (p_174864_2_ && this.hangingPosition != null)
         {
-            this.worldObj.updateComparatorOutputLevel(this.hangingPosition, Blocks.air);
+            this.worldObj.updateComparatorOutputLevel(this.hangingPosition, Blocks.AIR);
+        }
+    }
+
+    public void notifyDataManagerChange(DataParameter<?> key)
+    {
+        if (key.equals(ITEM))
+        {
+            ItemStack itemstack = this.getDisplayedItem();
+
+            if (itemstack != null && itemstack.getItemFrame() != this)
+            {
+                itemstack.setItemFrame(this);
+            }
         }
     }
 
@@ -179,93 +216,89 @@ public class EntityItemFrame extends EntityHanging
      */
     public int getRotation()
     {
-        return this.getDataWatcher().getWatchableObjectByte(9);
+        return ((Integer)this.getDataManager().get(ROTATION)).intValue();
     }
 
-    public void setItemRotation(int p_82336_1_)
+    public void setItemRotation(int rotationIn)
     {
-        this.func_174865_a(p_82336_1_, true);
+        this.setRotation(rotationIn, true);
     }
 
-    private void func_174865_a(int p_174865_1_, boolean p_174865_2_)
+    private void setRotation(int rotationIn, boolean p_174865_2_)
     {
-        this.getDataWatcher().updateObject(9, Byte.valueOf((byte)(p_174865_1_ % 8)));
+        this.getDataManager().set(ROTATION, Integer.valueOf(rotationIn % 8));
 
         if (p_174865_2_ && this.hangingPosition != null)
         {
-            this.worldObj.updateComparatorOutputLevel(this.hangingPosition, Blocks.air);
+            this.worldObj.updateComparatorOutputLevel(this.hangingPosition, Blocks.AIR);
         }
+    }
+
+    public static void func_189738_a(DataFixer p_189738_0_)
+    {
+        p_189738_0_.registerWalker(FixTypes.ENTITY, new ItemStackData("ItemFrame", new String[] {"Item"}));
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound tagCompound)
+    public void writeEntityToNBT(NBTTagCompound compound)
     {
         if (this.getDisplayedItem() != null)
         {
-            tagCompound.setTag("Item", this.getDisplayedItem().writeToNBT(new NBTTagCompound()));
-            tagCompound.setByte("ItemRotation", (byte)this.getRotation());
-            tagCompound.setFloat("ItemDropChance", this.itemDropChance);
+            compound.setTag("Item", this.getDisplayedItem().writeToNBT(new NBTTagCompound()));
+            compound.setByte("ItemRotation", (byte)this.getRotation());
+            compound.setFloat("ItemDropChance", this.itemDropChance);
         }
 
-        super.writeEntityToNBT(tagCompound);
+        super.writeEntityToNBT(compound);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound tagCompund)
+    public void readEntityFromNBT(NBTTagCompound compound)
     {
-        NBTTagCompound nbttagcompound = tagCompund.getCompoundTag("Item");
+        NBTTagCompound nbttagcompound = compound.getCompoundTag("Item");
 
         if (nbttagcompound != null && !nbttagcompound.hasNoTags())
         {
             this.setDisplayedItemWithUpdate(ItemStack.loadItemStackFromNBT(nbttagcompound), false);
-            this.func_174865_a(tagCompund.getByte("ItemRotation"), false);
+            this.setRotation(compound.getByte("ItemRotation"), false);
 
-            if (tagCompund.hasKey("ItemDropChance", 99))
+            if (compound.hasKey("ItemDropChance", 99))
             {
-                this.itemDropChance = tagCompund.getFloat("ItemDropChance");
-            }
-
-            if (tagCompund.hasKey("Direction"))
-            {
-                this.func_174865_a(this.getRotation() * 2, false);
+                this.itemDropChance = compound.getFloat("ItemDropChance");
             }
         }
 
-        super.readEntityFromNBT(tagCompund);
+        super.readEntityFromNBT(compound);
     }
 
-    /**
-     * First layer of player interaction
-     */
-    public boolean interactFirst(EntityPlayer playerIn)
+    public boolean processInitialInteract(EntityPlayer player, @Nullable ItemStack stack, EnumHand hand)
     {
         if (this.getDisplayedItem() == null)
         {
-            ItemStack itemstack = playerIn.getHeldItem();
-
-            if (itemstack != null && !this.worldObj.isRemote)
+            if (stack != null && !this.worldObj.isRemote)
             {
-                this.setDisplayedItem(itemstack);
+                this.setDisplayedItem(stack);
 
-                if (!playerIn.capabilities.isCreativeMode && --itemstack.stackSize <= 0)
+                if (!player.capabilities.isCreativeMode)
                 {
-                    playerIn.inventory.setInventorySlotContents(playerIn.inventory.currentItem, (ItemStack)null);
+                    --stack.stackSize;
                 }
             }
         }
         else if (!this.worldObj.isRemote)
         {
+            this.playSound(SoundEvents.ENTITY_ITEMFRAME_ROTATE_ITEM, 1.0F, 1.0F);
             this.setItemRotation(this.getRotation() + 1);
         }
 
         return true;
     }
 
-    public int func_174866_q()
+    public int getAnalogOutput()
     {
         return this.getDisplayedItem() == null ? 0 : this.getRotation() % 8 + 1;
     }

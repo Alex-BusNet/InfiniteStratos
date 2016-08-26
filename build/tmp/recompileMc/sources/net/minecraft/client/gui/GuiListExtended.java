@@ -31,14 +31,14 @@ public abstract class GuiListExtended extends GuiSlot
     {
     }
 
-    protected void drawSlot(int entryID, int p_180791_2_, int p_180791_3_, int p_180791_4_, int mouseXIn, int mouseYIn)
+    protected void drawSlot(int entryID, int insideLeft, int yPos, int insideSlotHeight, int mouseXIn, int mouseYIn)
     {
-        this.getListEntry(entryID).drawEntry(entryID, p_180791_2_, p_180791_3_, this.getListWidth(), p_180791_4_, mouseXIn, mouseYIn, this.getSlotIndexFromScreenCoords(mouseXIn, mouseYIn) == entryID);
+        this.getListEntry(entryID).drawEntry(entryID, insideLeft, yPos, this.getListWidth(), insideSlotHeight, mouseXIn, mouseYIn, this.isMouseYWithinSlotBounds(mouseYIn) && this.getSlotIndexFromScreenCoords(mouseXIn, mouseYIn) == entryID);
     }
 
-    protected void func_178040_a(int p_178040_1_, int p_178040_2_, int p_178040_3_)
+    protected void updateItemPos(int entryID, int insideLeft, int yPos)
     {
-        this.getListEntry(p_178040_1_).setSelected(p_178040_1_, p_178040_2_, p_178040_3_);
+        this.getListEntry(entryID).setSelected(entryID, insideLeft, yPos);
     }
 
     public boolean mouseClicked(int mouseX, int mouseY, int mouseEvent)
@@ -93,9 +93,10 @@ public abstract class GuiListExtended extends GuiSlot
         void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected);
 
         /**
-         * Returns true if the mouse has been pressed on this control.
+         * Called when the mouse is clicked within this entry. Returning true means that something within this entry was
+         * clicked and the list should not be dragged.
          */
-        boolean mousePressed(int slotIndex, int p_148278_2_, int p_148278_3_, int p_148278_4_, int p_148278_5_, int p_148278_6_);
+        boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY);
 
         /**
          * Fired when the mouse button is released. Arguments: index, x, y, mouseEvent, relativeX, relativeY

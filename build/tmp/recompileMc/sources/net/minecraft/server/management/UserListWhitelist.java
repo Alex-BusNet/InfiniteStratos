@@ -2,10 +2,9 @@ package net.minecraft.server.management;
 
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
+import java.io.File;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.io.File;
 
 public class UserListWhitelist extends UserList<GameProfile, UserListWhitelistEntry>
 {
@@ -50,13 +49,13 @@ public class UserListWhitelist extends UserList<GameProfile, UserListWhitelistEn
     }
 
     /**
-     * Gets the GameProfile for the UserListBanEntry with the specified username, if present
+     * Get a GameProfile entry by its name
      */
-    public GameProfile getBannedProfile(String p_152706_1_)
+    public GameProfile getByName(String profileName)
     {
         for (UserListWhitelistEntry userlistwhitelistentry : this.getValues().values())
         {
-            if (p_152706_1_.equalsIgnoreCase(((GameProfile)userlistwhitelistentry.getValue()).getName()))
+            if (profileName.equalsIgnoreCase(((GameProfile)userlistwhitelistentry.getValue()).getName()))
             {
                 return (GameProfile)userlistwhitelistentry.getValue();
             }

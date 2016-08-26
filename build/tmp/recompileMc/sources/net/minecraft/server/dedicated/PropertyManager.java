@@ -1,12 +1,16 @@
 package net.minecraft.server.dedicated;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Properties;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.io.*;
-import java.util.Properties;
 
 @SideOnly(Side.SERVER)
 public class PropertyManager
@@ -32,7 +36,7 @@ public class PropertyManager
             }
             catch (Exception exception)
             {
-                LOGGER.warn((String)("Failed to load " + propertiesFile), (Throwable)exception);
+                LOGGER.warn("Failed to load {}", new Object[] {propertiesFile, exception});
                 this.generateNewProperties();
             }
             finally
@@ -52,7 +56,7 @@ public class PropertyManager
         }
         else
         {
-            LOGGER.warn(propertiesFile + " does not exist");
+            LOGGER.warn("{} does not exist", new Object[] {propertiesFile});
             this.generateNewProperties();
         }
     }
@@ -80,7 +84,7 @@ public class PropertyManager
         }
         catch (Exception exception)
         {
-            LOGGER.warn((String)("Failed to save " + this.serverPropertiesFile), (Throwable)exception);
+            LOGGER.warn("Failed to save {}", new Object[] {this.serverPropertiesFile, exception});
             this.generateNewProperties();
         }
         finally
@@ -176,5 +180,15 @@ public class PropertyManager
     public void setProperty(String key, Object value)
     {
         this.serverProperties.setProperty(key, "" + value);
+    }
+
+    public boolean hasProperty(String key)
+    {
+        return this.serverProperties.containsKey(key);
+    }
+
+    public void removeProperty(String key)
+    {
+        this.serverProperties.remove(key);
     }
 }

@@ -4,9 +4,16 @@ import com.google.common.base.Charsets;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.data.IMetadataSection;
-import net.minecraft.client.resources.data.IMetadataSerializer;
+import net.minecraft.client.resources.data.MetadataSerializer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -14,13 +21,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.awt.image.BufferedImage;
-import java.io.*;
-
 @SideOnly(Side.CLIENT)
 public abstract class AbstractResourcePack implements IResourcePack
 {
-    private static final Logger resourceLog = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     protected final File resourcePackFile;
 
     public AbstractResourcePack(File resourcePackFileIn)
@@ -52,17 +56,17 @@ public abstract class AbstractResourcePack implements IResourcePack
 
     protected abstract boolean hasResourceName(String name);
 
-    protected void logNameNotLowercase(String p_110594_1_)
+    protected void logNameNotLowercase(String name)
     {
-        resourceLog.warn("ResourcePack: ignored non-lowercase namespace: {} in {}", new Object[] {p_110594_1_, this.resourcePackFile});
+        LOGGER.warn("ResourcePack: ignored non-lowercase namespace: {} in {}", new Object[] {name, this.resourcePackFile});
     }
 
-    public <T extends IMetadataSection> T getPackMetadata(IMetadataSerializer p_135058_1_, String p_135058_2_) throws IOException
+    public <T extends IMetadataSection> T getPackMetadata(MetadataSerializer metadataSerializer, String metadataSectionName) throws IOException
     {
-        return readMetadata(p_135058_1_, this.getInputStreamByName("pack.mcmeta"), p_135058_2_);
+        return readMetadata(metadataSerializer, this.getInputStreamByName("pack.mcmeta"), metadataSectionName);
     }
 
-    static <T extends IMetadataSection> T readMetadata(IMetadataSerializer p_110596_0_, InputStream p_110596_1_, String p_110596_2_)
+    static <T extends IMetadataSection> T readMetadata(MetadataSerializer metadataSerializer, InputStream p_110596_1_, String sectionName)
     {
         JsonObject jsonobject = null;
         BufferedReader bufferedreader = null;
@@ -81,7 +85,7 @@ public abstract class AbstractResourcePack implements IResourcePack
             IOUtils.closeQuietly((Reader)bufferedreader);
         }
 
-        return p_110596_0_.parseMetadataSection(p_110596_2_, jsonobject);
+        return metadataSerializer.parseMetadataSection(sectionName, jsonobject);
     }
 
     public BufferedImage getPackImage() throws IOException

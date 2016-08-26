@@ -6,7 +6,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class WorldType
 {
     /** List of world types. */
-    public static WorldType[] worldTypes = new WorldType[16];
+    public static WorldType[] WORLD_TYPES = new WorldType[16];
     /** Default world type. */
     public static final WorldType DEFAULT = (new WorldType(0, "default", 1)).setVersioned();
     /** Flat world type. */
@@ -42,7 +42,7 @@ public class WorldType
         this.generatorVersion = version;
         this.canBeCreated = true;
         this.worldTypeId = id;
-        worldTypes[id] = this;
+        WORLD_TYPES[id] = this;
     }
 
     public String getWorldTypeName()
@@ -59,8 +59,11 @@ public class WorldType
         return "generator." + this.worldType;
     }
 
+    /**
+     * Gets the translation key for the info text for this world type.
+     */
     @SideOnly(Side.CLIENT)
-    public String func_151359_c()
+    public String getTranslatedInfo()
     {
         return this.getTranslateName() + ".info";
     }
@@ -115,11 +118,11 @@ public class WorldType
 
     public static WorldType parseWorldType(String type)
     {
-        for (int i = 0; i < worldTypes.length; ++i)
+        for (WorldType worldtype : WORLD_TYPES)
         {
-            if (worldTypes[i] != null && worldTypes[i].worldType.equalsIgnoreCase(type))
+            if (worldtype != null && worldtype.worldType.equalsIgnoreCase(type))
             {
-                return worldTypes[i];
+                return worldtype;
             }
         }
 
@@ -150,33 +153,34 @@ public class WorldType
         return this;
     }
 
-    public net.minecraft.world.biome.WorldChunkManager getChunkManager(World world)
+    public net.minecraft.world.biome.BiomeProvider getBiomeProvider(World world)
     {
         if (this == FLAT)
         {
             net.minecraft.world.gen.FlatGeneratorInfo flatgeneratorinfo = net.minecraft.world.gen.FlatGeneratorInfo.createFlatGeneratorFromString(world.getWorldInfo().getGeneratorOptions());
-            return new net.minecraft.world.biome.WorldChunkManagerHell(net.minecraft.world.biome.BiomeGenBase.getBiomeFromBiomeList(flatgeneratorinfo.getBiome(), net.minecraft.world.biome.BiomeGenBase.field_180279_ad), 0.5F);
+            return new net.minecraft.world.biome.BiomeProviderSingle(net.minecraft.world.biome.Biome.getBiome(flatgeneratorinfo.getBiome(), net.minecraft.init.Biomes.DEFAULT));
         }
         else if (this == DEBUG_WORLD)
         {
-            return new net.minecraft.world.biome.WorldChunkManagerHell(net.minecraft.world.biome.BiomeGenBase.plains, 0.0F);
+            return new net.minecraft.world.biome.BiomeProviderSingle(net.minecraft.init.Biomes.PLAINS);
         }
         else
         {
-            return new net.minecraft.world.biome.WorldChunkManager(world);
+            return new net.minecraft.world.biome.BiomeProvider(world.getWorldInfo());
         }
     }
 
-    public net.minecraft.world.chunk.IChunkProvider getChunkGenerator(World world, String generatorOptions)
+    public net.minecraft.world.chunk.IChunkGenerator getChunkGenerator(World world, String generatorOptions)
     {
         if (this == FLAT) return new net.minecraft.world.gen.ChunkProviderFlat(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
         if (this == DEBUG_WORLD) return new net.minecraft.world.gen.ChunkProviderDebug(world);
-        return new net.minecraft.world.gen.ChunkProviderGenerate(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
+        if (this == CUSTOMIZED) return new net.minecraft.world.gen.ChunkProviderOverworld(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
+        return new net.minecraft.world.gen.ChunkProviderOverworld(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
     }
 
     public int getMinimumSpawnHeight(World world)
     {
-        return this == FLAT ? 4 : 64;
+        return this == FLAT ? 4 : world.getSeaLevel() + 1;
     }
 
     public double getHorizon(World world)
@@ -197,16 +201,16 @@ public class WorldType
     /*=================================================== FORGE START ======================================*/
     private static int getNextID()
     {
-        for (int x = 0; x < worldTypes.length; x++)
+        for (int x = 0; x < WORLD_TYPES.length; x++)
         {
-            if (worldTypes[x] == null)
+            if (WORLD_TYPES[x] == null)
             {
                 return x;
             }
         }
 
-        int oldLen = worldTypes.length;
-        worldTypes = java.util.Arrays.copyOf(worldTypes, oldLen + 16);
+        int oldLen = WORLD_TYPES.length;
+        WORLD_TYPES = java.util.Arrays.copyOf(WORLD_TYPES, oldLen + 16);
         return oldLen;
     }
 
@@ -230,9 +234,9 @@ public class WorldType
      * Useful for void world types.
      * @return Fuzz for entity initial spawn in blocks.
      */
-    public int getSpawnFuzz()
+    public int getSpawnFuzz(WorldServer world, net.minecraft.server.MinecraftServer server)
     {
-        return Math.max(5, net.minecraft.server.MinecraftServer.getServer().getSpawnProtectionSize() - 6);
+        return Math.max(0, server.getSpawnRadius(world));
     }
 
     /**

@@ -1,10 +1,7 @@
 
 package ibxm;
 
-import java.io.DataInput;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 public class ScreamTracker3 {
 	private static final int[] effect_map = new int[] {

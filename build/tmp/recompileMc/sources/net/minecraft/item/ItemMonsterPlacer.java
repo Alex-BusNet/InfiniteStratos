@@ -1,97 +1,103 @@
 package net.minecraft.item;
 
+import java.util.List;
+import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 public class ItemMonsterPlacer extends Item
 {
     public ItemMonsterPlacer()
     {
-        this.setHasSubtypes(true);
-        this.setCreativeTab(CreativeTabs.tabMisc);
+        this.setCreativeTab(CreativeTabs.MISC);
     }
 
     public String getItemStackDisplayName(ItemStack stack)
     {
-        String s = ("" + StatCollector.translateToLocal(this.getUnlocalizedName() + ".name")).trim();
-        String s1 = ItemMonsterPlacer.getEntityName(stack);
+        String s = ("" + I18n.translateToLocal(this.getUnlocalizedName() + ".name")).trim();
+        String s1 = getEntityIdFromItem(stack);
 
         if (s1 != null)
         {
-            s = s + " " + StatCollector.translateToLocal("entity." + s1 + ".name");
+            s = s + " " + I18n.translateToLocal("entity." + s1 + ".name");
         }
 
         return s;
     }
 
-    @SideOnly(Side.CLIENT)
-    public int getColorFromItemStack(ItemStack stack, int renderPass)
-    {
-        EntityList.EntityEggInfo entitylist$entityegginfo = ItemMonsterPlacer.getEggInfo(stack);
-        return entitylist$entityegginfo != null ? (renderPass == 0 ? entitylist$entityegginfo.primaryColor : entitylist$entityegginfo.secondaryColor) : 16777215;
-    }
-
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
         if (worldIn.isRemote)
         {
-            return true;
+            return EnumActionResult.SUCCESS;
         }
-        else if (!playerIn.canPlayerEdit(pos.offset(side), side, stack))
+        else if (!playerIn.canPlayerEdit(pos.offset(facing), facing, stack))
         {
-            return false;
+            return EnumActionResult.FAIL;
         }
         else
         {
             IBlockState iblockstate = worldIn.getBlockState(pos);
 
-            if (iblockstate.getBlock() == Blocks.mob_spawner)
+            if (iblockstate.getBlock() == Blocks.MOB_SPAWNER)
             {
                 TileEntity tileentity = worldIn.getTileEntity(pos);
 
                 if (tileentity instanceof TileEntityMobSpawner)
                 {
                     MobSpawnerBaseLogic mobspawnerbaselogic = ((TileEntityMobSpawner)tileentity).getSpawnerBaseLogic();
-                    mobspawnerbaselogic.setEntityName(ItemMonsterPlacer.getEntityName(stack));
+                    mobspawnerbaselogic.setEntityName(getEntityIdFromItem(stack));
                     tileentity.markDirty();
-                    worldIn.markBlockForUpdate(pos);
+                    worldIn.notifyBlockUpdate(pos, iblockstate, iblockstate, 3);
 
                     if (!playerIn.capabilities.isCreativeMode)
                     {
                         --stack.stackSize;
                     }
 
-                    return true;
+                    return EnumActionResult.SUCCESS;
                 }
             }
 
-            pos = pos.offset(side);
+            pos = pos.offset(facing);
             double d0 = 0.0D;
 
-            if (side == EnumFacing.UP && iblockstate.getBlock() instanceof BlockFence) //Forge: Fix Vanilla bug comparing state instead of block
+            if (facing == EnumFacing.UP && iblockstate.getBlock() instanceof BlockFence) //Forge: Fix Vanilla bug comparing state instead of block
             {
                 d0 = 0.5D;
             }
 
-            Entity entity = spawnCreature(worldIn, ItemMonsterPlacer.getEntityName(stack), (double)pos.getX() + 0.5D, (double)pos.getY() + d0, (double)pos.getZ() + 0.5D);
+            Entity entity = spawnCreature(worldIn, getEntityIdFromItem(stack), (double)pos.getX() + 0.5D, (double)pos.getY() + d0, (double)pos.getZ() + 0.5D);
 
             if (entity != null)
             {
@@ -100,71 +106,97 @@ public class ItemMonsterPlacer extends Item
                     entity.setCustomNameTag(stack.getDisplayName());
                 }
 
+                applyItemEntityDataToEntity(worldIn, playerIn, stack, entity);
+
                 if (!playerIn.capabilities.isCreativeMode)
                 {
                     --stack.stackSize;
                 }
             }
 
-            return true;
+            return EnumActionResult.SUCCESS;
         }
     }
 
     /**
-     * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
+     * Applies the data in the EntityTag tag of the given ItemStack to the given Entity.
      */
-    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn)
+    public static void applyItemEntityDataToEntity(World entityWorld, @Nullable EntityPlayer player, ItemStack stack, @Nullable Entity targetEntity)
+    {
+        MinecraftServer minecraftserver = entityWorld.getMinecraftServer();
+
+        if (minecraftserver != null && targetEntity != null)
+        {
+            NBTTagCompound nbttagcompound = stack.getTagCompound();
+
+            if (nbttagcompound != null && nbttagcompound.hasKey("EntityTag", 10))
+            {
+                if (!entityWorld.isRemote && targetEntity.ignoreItemEntityData() && (player == null || !minecraftserver.getPlayerList().canSendCommands(player.getGameProfile())))
+                {
+                    return;
+                }
+
+                NBTTagCompound nbttagcompound1 = targetEntity.writeToNBT(new NBTTagCompound());
+                UUID uuid = targetEntity.getUniqueID();
+                nbttagcompound1.merge(nbttagcompound.getCompoundTag("EntityTag"));
+                targetEntity.setUniqueId(uuid);
+                targetEntity.readFromNBT(nbttagcompound1);
+            }
+        }
+    }
+
+    public ActionResult<ItemStack> onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand)
     {
         if (worldIn.isRemote)
         {
-            return itemStackIn;
+            return new ActionResult(EnumActionResult.PASS, itemStackIn);
         }
         else
         {
-            MovingObjectPosition movingobjectposition = this.getMovingObjectPositionFromPlayer(worldIn, playerIn, true);
+            RayTraceResult raytraceresult = this.rayTrace(worldIn, playerIn, true);
 
-            if (movingobjectposition == null)
+            if (raytraceresult != null && raytraceresult.typeOfHit == RayTraceResult.Type.BLOCK)
             {
-                return itemStackIn;
+                BlockPos blockpos = raytraceresult.getBlockPos();
+
+                if (!(worldIn.getBlockState(blockpos).getBlock() instanceof BlockLiquid))
+                {
+                    return new ActionResult(EnumActionResult.PASS, itemStackIn);
+                }
+                else if (worldIn.isBlockModifiable(playerIn, blockpos) && playerIn.canPlayerEdit(blockpos, raytraceresult.sideHit, itemStackIn))
+                {
+                    Entity entity = spawnCreature(worldIn, getEntityIdFromItem(itemStackIn), (double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.5D, (double)blockpos.getZ() + 0.5D);
+
+                    if (entity == null)
+                    {
+                        return new ActionResult(EnumActionResult.PASS, itemStackIn);
+                    }
+                    else
+                    {
+                        if (entity instanceof EntityLivingBase && itemStackIn.hasDisplayName())
+                        {
+                            entity.setCustomNameTag(itemStackIn.getDisplayName());
+                        }
+
+                        applyItemEntityDataToEntity(worldIn, playerIn, itemStackIn, entity);
+
+                        if (!playerIn.capabilities.isCreativeMode)
+                        {
+                            --itemStackIn.stackSize;
+                        }
+
+                        playerIn.addStat(StatList.getObjectUseStats(this));
+                        return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
+                    }
+                }
+                else
+                {
+                    return new ActionResult(EnumActionResult.FAIL, itemStackIn);
+                }
             }
             else
             {
-                if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
-                {
-                    BlockPos blockpos = movingobjectposition.getBlockPos();
-
-                    if (!worldIn.isBlockModifiable(playerIn, blockpos))
-                    {
-                        return itemStackIn;
-                    }
-
-                    if (!playerIn.canPlayerEdit(blockpos, movingobjectposition.sideHit, itemStackIn))
-                    {
-                        return itemStackIn;
-                    }
-
-                    if (worldIn.getBlockState(blockpos).getBlock() instanceof BlockLiquid)
-                    {
-                        Entity entity = spawnCreature(worldIn, ItemMonsterPlacer.getEntityName(itemStackIn), (double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.5D, (double)blockpos.getZ() + 0.5D);
-
-                        if (entity != null)
-                        {
-                            if (entity instanceof EntityLivingBase && itemStackIn.hasDisplayName())
-                            {
-                                ((EntityLiving)entity).setCustomNameTag(itemStackIn.getDisplayName());
-                            }
-
-                            if (!playerIn.capabilities.isCreativeMode)
-                            {
-                                --itemStackIn.stackSize;
-                            }
-
-                            playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
-                        }
-                    }
-                }
-
-                return itemStackIn;
+                return new ActionResult(EnumActionResult.PASS, itemStackIn);
             }
         }
     }
@@ -173,34 +205,21 @@ public class ItemMonsterPlacer extends Item
      * Spawns the creature specified by the egg's type in the location specified by the last three parameters.
      * Parameters: world, entityID, x, y, z.
      */
-    @Deprecated // Use string version below.
-    public static Entity spawnCreature(World worldIn, int entityID, double x, double y, double z)
+    @Nullable
+    public static Entity spawnCreature(World worldIn, @Nullable String entityID, double x, double y, double z)
     {
-        if (!EntityList.entityEggs.containsKey(Integer.valueOf(entityID)))
-        {
-            return null;
-        }
-        return spawnCreature(worldIn, EntityList.getStringFromID(entityID), x, y, z);
-    }
-
-    public static Entity spawnCreature(World worldIn, String name, double x, double y, double z)
-    {
-        if (!EntityList.stringToClassMapping.containsKey(name))
-        {
-            return null;
-        }
-        else
+        if (entityID != null && EntityList.ENTITY_EGGS.containsKey(entityID))
         {
             Entity entity = null;
 
             for (int i = 0; i < 1; ++i)
             {
-                entity = EntityList.createEntityByName(name, worldIn);
+                entity = EntityList.createEntityByIDFromName(entityID, worldIn);
 
                 if (entity instanceof EntityLivingBase)
                 {
                     EntityLiving entityliving = (EntityLiving)entity;
-                    entity.setLocationAndAngles(x, y, z, MathHelper.wrapAngleTo180_float(worldIn.rand.nextFloat() * 360.0F), 0.0F);
+                    entity.setLocationAndAngles(x, y, z, MathHelper.wrapDegrees(worldIn.rand.nextFloat() * 360.0F), 0.0F);
                     entityliving.rotationYawHead = entityliving.rotationYaw;
                     entityliving.renderYawOffset = entityliving.rotationYaw;
                     entityliving.onInitialSpawn(worldIn.getDifficultyForLocation(new BlockPos(entityliving)), (IEntityLivingData)null);
@@ -211,6 +230,10 @@ public class ItemMonsterPlacer extends Item
 
             return entity;
         }
+        else
+        {
+            return null;
+        }
     }
 
     /**
@@ -219,32 +242,47 @@ public class ItemMonsterPlacer extends Item
     @SideOnly(Side.CLIENT)
     public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems)
     {
-        for (EntityList.EntityEggInfo entitylist$entityegginfo : EntityList.entityEggs.values())
+        for (EntityList.EntityEggInfo entitylist$entityegginfo : EntityList.ENTITY_EGGS.values())
         {
-            subItems.add(new ItemStack(itemIn, 1, entitylist$entityegginfo.spawnedID));
-        }
-
-        for (String name : net.minecraftforge.fml.common.registry.EntityRegistry.getEggs().keySet())
-        {
-            ItemStack stack = new ItemStack(itemIn);
-            net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
-            nbt.setString("entity_name", name);
-            stack.setTagCompound(nbt);
-            subItems.add(stack);
+            ItemStack itemstack = new ItemStack(itemIn, 1);
+            applyEntityIdToItemStack(itemstack, entitylist$entityegginfo.spawnedID);
+            subItems.add(itemstack);
         }
     }
 
-    public static String getEntityName(ItemStack stack)
+    /**
+     * APplies the given entity ID to the given ItemStack's NBT data.
+     */
+    @SideOnly(Side.CLIENT)
+    public static void applyEntityIdToItemStack(ItemStack stack, String entityId)
     {
-        if (stack.hasTagCompound() && stack.getTagCompound().hasKey("entity_name", 8))
-            return stack.getTagCompound().getString("entity_name");
-        return EntityList.getStringFromID(stack.getMetadata());
+        NBTTagCompound nbttagcompound = stack.hasTagCompound() ? stack.getTagCompound() : new NBTTagCompound();
+        NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+        nbttagcompound1.setString("id", entityId);
+        nbttagcompound.setTag("EntityTag", nbttagcompound1);
+        stack.setTagCompound(nbttagcompound);
     }
 
-    private static EntityList.EntityEggInfo getEggInfo(ItemStack stack)
+    /**
+     * Gets the entity ID associated with a given ItemStack in its NBT data.
+     */
+    @Nullable
+    public static String getEntityIdFromItem(ItemStack stack)
     {
-        if (stack.hasTagCompound() && stack.getTagCompound().hasKey("entity_name", 8))
-            return net.minecraftforge.fml.common.registry.EntityRegistry.getEggs().get(stack.getTagCompound().getString("entity_name"));
-        return (EntityList.EntityEggInfo)EntityList.entityEggs.get(stack.getMetadata());
+        NBTTagCompound nbttagcompound = stack.getTagCompound();
+
+        if (nbttagcompound == null)
+        {
+            return null;
+        }
+        else if (!nbttagcompound.hasKey("EntityTag", 10))
+        {
+            return null;
+        }
+        else
+        {
+            NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("EntityTag");
+            return !nbttagcompound1.hasKey("id", 8) ? null : nbttagcompound1.getString("id");
+        }
     }
 }

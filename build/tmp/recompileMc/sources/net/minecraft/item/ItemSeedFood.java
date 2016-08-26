@@ -2,15 +2,17 @@ package net.minecraft.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class ItemSeedFood extends ItemFood implements net.minecraftforge.common.IPlantable
 {
-    private Block crops;
+    private final Block crops;
     /** Block ID of the soil this seed food should be planted on. */
-    private Block soilId;
+    private final Block soilId;
 
     public ItemSeedFood(int healAmount, float saturation, Block crops, Block soil)
     {
@@ -22,25 +24,18 @@ public class ItemSeedFood extends ItemFood implements net.minecraftforge.common.
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        if (side != EnumFacing.UP)
+        net.minecraft.block.state.IBlockState state = worldIn.getBlockState(pos);
+        if (facing == EnumFacing.UP && playerIn.canPlayerEdit(pos.offset(facing), facing, stack) && state.getBlock().canSustainPlant(state, worldIn, pos, EnumFacing.UP, this) && worldIn.isAirBlock(pos.up()))
         {
-            return false;
-        }
-        else if (!playerIn.canPlayerEdit(pos.offset(side), side, stack))
-        {
-            return false;
-        }
-        else if (worldIn.getBlockState(pos).getBlock().canSustainPlant(worldIn, pos, EnumFacing.UP, this) && worldIn.isAirBlock(pos.up()))
-        {
-            worldIn.setBlockState(pos.up(), this.crops.getDefaultState());
+            worldIn.setBlockState(pos.up(), this.crops.getDefaultState(), 11);
             --stack.stackSize;
-            return true;
+            return EnumActionResult.SUCCESS;
         }
         else
         {
-            return false;
+            return EnumActionResult.FAIL;
         }
     }
 

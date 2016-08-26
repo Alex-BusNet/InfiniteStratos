@@ -3,18 +3,17 @@ package net.minecraft.network;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-
 import java.util.zip.Deflater;
 
 public class NettyCompressionEncoder extends MessageToByteEncoder<ByteBuf>
 {
     private final byte[] buffer = new byte[8192];
     private final Deflater deflater;
-    private int treshold;
+    private int threshold;
 
-    public NettyCompressionEncoder(int treshold)
+    public NettyCompressionEncoder(int thresholdIn)
     {
-        this.treshold = treshold;
+        this.threshold = thresholdIn;
         this.deflater = new Deflater();
     }
 
@@ -23,7 +22,7 @@ public class NettyCompressionEncoder extends MessageToByteEncoder<ByteBuf>
         int i = p_encode_2_.readableBytes();
         PacketBuffer packetbuffer = new PacketBuffer(p_encode_3_);
 
-        if (i < this.treshold)
+        if (i < this.threshold)
         {
             packetbuffer.writeVarIntToBuffer(0);
             packetbuffer.writeBytes(p_encode_2_);
@@ -46,8 +45,8 @@ public class NettyCompressionEncoder extends MessageToByteEncoder<ByteBuf>
         }
     }
 
-    public void setCompressionTreshold(int treshold)
+    public void setCompressionThreshold(int thresholdIn)
     {
-        this.treshold = treshold;
+        this.threshold = thresholdIn;
     }
 }

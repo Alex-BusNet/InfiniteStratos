@@ -12,11 +12,10 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 
 import java.util.Random;
 
@@ -30,7 +29,7 @@ public class BlockIS extends Block
 
     public BlockIS()
     {
-        this(Material.rock);
+        this(Material.ROCK);
     }
 
 
@@ -88,14 +87,6 @@ public class BlockIS extends Block
             ((TileEntityIS) world.getTileEntity(blockPos)).setOrientation(direction);
         }
     }
-
-    @Override
-    public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos blockPos, IBlockState iBlockState)
-    {
-        this.setBlockBoundsBasedOnState(world, blockPos);
-        return super.getCollisionBoundingBox(world, blockPos, iBlockState);
-    }
-
 
     protected void dropInventory(World world, BlockPos blockPos)
     {

@@ -1,22 +1,21 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.IOException;
-
 @SideOnly(Side.CLIENT)
 public class GuiVideoSettings extends GuiScreen
 {
-    private GuiScreen parentGuiScreen;
+    private final GuiScreen parentGuiScreen;
     protected String screenTitle = "Video Settings";
-    private GameSettings guiGameSettings;
+    private final GameSettings guiGameSettings;
     private GuiListExtended optionsRowList;
     /** An array of all of GameSettings.Options's video options. */
-    private static final GameSettings.Options[] videoOptions = new GameSettings.Options[] {GameSettings.Options.GRAPHICS, GameSettings.Options.RENDER_DISTANCE, GameSettings.Options.AMBIENT_OCCLUSION, GameSettings.Options.FRAMERATE_LIMIT, GameSettings.Options.ANAGLYPH, GameSettings.Options.VIEW_BOBBING, GameSettings.Options.GUI_SCALE, GameSettings.Options.GAMMA, GameSettings.Options.RENDER_CLOUDS, GameSettings.Options.PARTICLES, GameSettings.Options.USE_FULLSCREEN, GameSettings.Options.ENABLE_VSYNC, GameSettings.Options.MIPMAP_LEVELS, GameSettings.Options.BLOCK_ALTERNATIVES, GameSettings.Options.USE_VBO, GameSettings.Options.ENTITY_SHADOWS};
+    private static final GameSettings.Options[] VIDEO_OPTIONS = new GameSettings.Options[] {GameSettings.Options.GRAPHICS, GameSettings.Options.RENDER_DISTANCE, GameSettings.Options.AMBIENT_OCCLUSION, GameSettings.Options.FRAMERATE_LIMIT, GameSettings.Options.ANAGLYPH, GameSettings.Options.VIEW_BOBBING, GameSettings.Options.GUI_SCALE, GameSettings.Options.ATTACK_INDICATOR, GameSettings.Options.GAMMA, GameSettings.Options.RENDER_CLOUDS, GameSettings.Options.PARTICLES, GameSettings.Options.USE_FULLSCREEN, GameSettings.Options.ENABLE_VSYNC, GameSettings.Options.MIPMAP_LEVELS, GameSettings.Options.USE_VBO, GameSettings.Options.ENTITY_SHADOWS};
 
     public GuiVideoSettings(GuiScreen parentScreenIn, GameSettings gameSettingsIn)
     {
@@ -34,12 +33,16 @@ public class GuiVideoSettings extends GuiScreen
         this.buttonList.clear();
         this.buttonList.add(new GuiButton(200, this.width / 2 - 100, this.height - 27, I18n.format("gui.done", new Object[0])));
 
-        if (!OpenGlHelper.vboSupported)
+        if (OpenGlHelper.vboSupported)
         {
-            GameSettings.Options[] agamesettings$options = new GameSettings.Options[videoOptions.length - 1];
+            this.optionsRowList = new GuiOptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25, VIDEO_OPTIONS);
+        }
+        else
+        {
+            GameSettings.Options[] agamesettings$options = new GameSettings.Options[VIDEO_OPTIONS.length - 1];
             int i = 0;
 
-            for (GameSettings.Options gamesettings$options : videoOptions)
+            for (GameSettings.Options gamesettings$options : VIDEO_OPTIONS)
             {
                 if (gamesettings$options == GameSettings.Options.USE_VBO)
                 {
@@ -51,10 +54,6 @@ public class GuiVideoSettings extends GuiScreen
             }
 
             this.optionsRowList = new GuiOptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25, agamesettings$options);
-        }
-        else
-        {
-            this.optionsRowList = new GuiOptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25, videoOptions);
         }
     }
 
@@ -101,7 +100,7 @@ public class GuiVideoSettings extends GuiScreen
     }
 
     /**
-     * Called when a mouse button is released.  Args : mouseX, mouseY, releaseButton
+     * Called when a mouse button is released.
      */
     protected void mouseReleased(int mouseX, int mouseY, int state)
     {
@@ -119,7 +118,7 @@ public class GuiVideoSettings extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {

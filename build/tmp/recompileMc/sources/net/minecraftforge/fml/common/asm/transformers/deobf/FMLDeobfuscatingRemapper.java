@@ -1,33 +1,23 @@
 /*
- * Forge Mod Loader
- * Copyright (c) 2012-2013 cpw.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Minecraft Forge
+ * Copyright (c) 2016.
  *
- * Contributors:
- *     cpw - implementation
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 package net.minecraftforge.fml.common.asm.transformers.deobf;
-
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.*;
-import com.google.common.collect.ImmutableBiMap.Builder;
-import com.google.common.io.CharSource;
-import com.google.common.io.Files;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraftforge.fml.common.patcher.ClassPatchManager;
-import net.minecraftforge.fml.relauncher.FMLRelaunchLog;
-import org.apache.logging.log4j.Level;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.commons.Remapper;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldNode;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +27,32 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraftforge.fml.common.patcher.ClassPatchManager;
+import net.minecraftforge.fml.relauncher.FMLRelaunchLog;
+
+import org.apache.logging.log4j.Level;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.commons.Remapper;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
+
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableBiMap.Builder;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.io.CharSource;
+import com.google.common.io.Files;
 
 public class FMLDeobfuscatingRemapper extends Remapper {
     public static final FMLDeobfuscatingRemapper INSTANCE = new FMLDeobfuscatingRemapper();
@@ -71,7 +87,7 @@ public class FMLDeobfuscatingRemapper extends Remapper {
             List<String> srgList = srgSource.readLines();
             rawMethodMaps = Maps.newHashMap();
             rawFieldMaps = Maps.newHashMap();
-            Builder<String, String> builder = ImmutableBiMap.<String,String>builder();
+            Builder<String, String> builder = ImmutableBiMap.builder();
             Splitter splitter = Splitter.on(CharMatcher.anyOf(": ")).omitEmptyStrings().trimResults();
             for (String line : srgList)
             {
@@ -125,7 +141,7 @@ public class FMLDeobfuscatingRemapper extends Remapper {
 
             rawMethodMaps = Maps.newHashMap();
             rawFieldMaps = Maps.newHashMap();
-            Builder<String, String> builder = ImmutableBiMap.<String,String>builder();
+            Builder<String, String> builder = ImmutableBiMap.builder();
             Splitter splitter = Splitter.on(CharMatcher.anyOf(": ")).omitEmptyStrings().trimResults();
             for (String line : srgList)
             {
@@ -207,7 +223,7 @@ public class FMLDeobfuscatingRemapper extends Remapper {
                 ClassNode classNode = new ClassNode();
                 cr.accept(classNode, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
                 Map<String,String> resMap = Maps.newHashMap();
-                for (FieldNode fieldNode : (List<FieldNode>) classNode.fields) {
+                for (FieldNode fieldNode : classNode.fields) {
                     resMap.put(fieldNode.name, fieldNode.desc);
                 }
                 fieldDescriptions.put(owner, resMap);
@@ -215,7 +231,7 @@ public class FMLDeobfuscatingRemapper extends Remapper {
             }
             catch (IOException e)
             {
-                FMLRelaunchLog.log(Level.ERROR,e, "A critical exception occured reading a class file %s", owner);
+                FMLRelaunchLog.log(Level.ERROR,e, "A critical exception occurred reading a class file %s", owner);
             }
             return null;
         }
@@ -243,15 +259,43 @@ public class FMLDeobfuscatingRemapper extends Remapper {
         rawMethodMaps.get(cl).put(oldName+sig, newName);
     }
 
+    String mapMemberFieldName(String owner, String name, String desc)
+    {
+        String remappedName = mapFieldName(owner, name, desc, true);
+        storeMemberFieldMapping(owner, name, desc, remappedName);
+        return remappedName;
+    }
+
+    private void storeMemberFieldMapping(String owner, String name, String desc, String remappedName) {
+        Map<String, String> fieldMap = getRawFieldMap(owner);
+
+        String key = name + ":" + desc;
+        String altKey = name + ":null";
+
+        if (!fieldMap.containsKey(key)) {
+            fieldMap.put(key, remappedName);
+            fieldMap.put(altKey, remappedName);
+
+            // Alternatively, maps could be made mutable and we could just set the relevant entry, saving
+            // the need to regenerate the super map each time
+            fieldNameMaps.remove(owner);
+        }
+    }
+
     @Override
     public String mapFieldName(String owner, String name, String desc)
+    {
+        return mapFieldName(owner, name, desc, false);
+    }
+
+    String mapFieldName(String owner, String name, String desc, boolean raw)
     {
         if (classNameBiMap == null || classNameBiMap.isEmpty())
         {
             return name;
         }
-        Map<String, String> fieldMap = getFieldMap(owner);
-        return fieldMap!=null && fieldMap.containsKey(name+":"+desc) ? fieldMap.get(name+":"+desc) : name;
+        Map<String, String> fieldMap = getFieldMap(owner, raw);
+        return fieldMap!=null && fieldMap.containsKey(name+":"+desc) ? fieldMap.get(name+":"+desc) : fieldMap!=null && fieldMap.containsKey(name+":null") ? fieldMap.get(name+":null") :name;
     }
 
     @Override
@@ -316,8 +360,22 @@ public class FMLDeobfuscatingRemapper extends Remapper {
         return super.mapSignature(signature, typeSignature);
     }
 
-    private Map<String,String> getFieldMap(String className)
+    private Map<String,String> getRawFieldMap(String className)
     {
+        if (!rawFieldMaps.containsKey(className))
+        {
+            rawFieldMaps.put(className, Maps.<String,String>newHashMap());
+        }
+        return rawFieldMaps.get(className);
+    }
+
+    private Map<String,String> getFieldMap(String className, boolean raw)
+    {
+        if (raw)
+        {
+            return getRawFieldMap(className);
+        }
+
         if (!fieldNameMaps.containsKey(className) && !negativeCacheFields.contains(className))
         {
             findAndMergeSuperMaps(className);
@@ -394,8 +452,8 @@ public class FMLDeobfuscatingRemapper extends Remapper {
                 findAndMergeSuperMaps(parentThing);
             }
         }
-        Map<String, String> methodMap = Maps.<String,String>newHashMap();
-        Map<String, String> fieldMap = Maps.<String,String>newHashMap();
+        Map<String, String> methodMap = Maps.newHashMap();
+        Map<String, String> fieldMap = Maps.newHashMap();
         for (String parentThing : allParents)
         {
             if (methodNameMaps.containsKey(parentThing))
@@ -427,7 +485,7 @@ public class FMLDeobfuscatingRemapper extends Remapper {
 
     public String getStaticFieldType(String oldType, String oldName, String newType, String newName)
     {
-        String fType = getFieldType(oldType, oldName);
+        String fType = getFieldType(newType, newName);
         if (oldType.equals(newType))
         {
             return fType;

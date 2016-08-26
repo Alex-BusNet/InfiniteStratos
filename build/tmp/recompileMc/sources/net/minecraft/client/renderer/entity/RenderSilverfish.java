@@ -9,7 +9,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderSilverfish extends RenderLiving<EntitySilverfish>
 {
-    private static final ResourceLocation silverfishTextures = new ResourceLocation("textures/entity/silverfish.png");
+    private static final ResourceLocation SILVERFISH_TEXTURES = new ResourceLocation("textures/entity/silverfish.png");
 
     public RenderSilverfish(RenderManager renderManagerIn)
     {
@@ -26,6 +26,6 @@ public class RenderSilverfish extends RenderLiving<EntitySilverfish>
      */
     protected ResourceLocation getEntityTexture(EntitySilverfish entity)
     {
-        return silverfishTextures;
+        return SILVERFISH_TEXTURES;
     }
 }

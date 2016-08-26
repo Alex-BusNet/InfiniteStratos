@@ -1,8 +1,10 @@
 package com.sparta.is.glUtils;
 
 import com.sparta.is.glUtils.TessellatorModelEvent.RenderGroupEvent;
-import cpw.mods.fml.common.eventhandler.EventBus;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraftforge.fml.common.eventhandler.EventBus;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -83,8 +85,9 @@ public class TessellatorModel extends GLModel
                 t = triangles[i];
                 
                 // draw triangles until material changes
-                Tessellator tess = Tessellator.instance;
-                tess.startDrawing(GL11.GL_TRIANGLES);
+                Tessellator tess = Tessellator.getInstance();
+                VertexBuffer worldRenderer = tess.getBuffer();
+                worldRenderer.begin(GL11.GL_TRIANGLES, new VertexFormat());
 
                 // activate new material and texture
                 currMtl = t.materialID;
@@ -96,20 +99,22 @@ public class TessellatorModel extends GLModel
                 for (; i < triangles.length && (t = triangles[i]) != null
                         && currMtl == t.materialID; i++)
                 {
-                    tess.setNormal(t.norm1.x, t.norm1.y, t.norm1.z);
-                    tess.setTextureUV(t.uvw1.x, t.uvw1.y);
-                    tess.addVertex((float) t.p1.pos.x, (float) t.p1.pos.y,
-                            (float) t.p1.pos.z);
+                    worldRenderer.putNormal(t.norm1.x, t.norm1.y, t.norm1.z);
+                    worldRenderer.tex(t.uvw1.x, t.uvw1.y);
 
-                    tess.setTextureUV(t.uvw2.x, t.uvw2.y);
-                    tess.setNormal(t.norm2.x, t.norm2.y, t.norm2.z);
-                    tess.addVertex((float) t.p2.pos.x, (float) t.p2.pos.y,
-                            (float) t.p2.pos.z);
+                    worldRenderer.addVertexData(new int[] { (int) t.p1.pos.x, (int) t.p1.pos.y,
+                            (int) t.p1.pos.z});
 
-                    tess.setTextureUV(t.uvw3.x, t.uvw3.y);
-                    tess.setNormal(t.norm3.x, t.norm3.y, t.norm3.z);
-                    tess.addVertex((float) t.p3.pos.x, (float) t.p3.pos.y,
-                            (float) t.p3.pos.z);
+                    worldRenderer.tex(t.uvw2.x, t.uvw2.y);
+                    worldRenderer.putNormal(t.norm2.x, t.norm2.y, t.norm2.z);
+
+                    worldRenderer.addVertexData(new int[] { (int) t.p2.pos.x, (int) t.p2.pos.y,
+                            (int) t.p2.pos.z});
+
+                    worldRenderer.tex(t.uvw3.x, t.uvw3.y);
+                    worldRenderer.putNormal(t.norm3.x, t.norm3.y, t.norm3.z);
+                    worldRenderer.addVertexData(new int[]{(int) t.p3.pos.x, (int) t.p3.pos.y,
+                            (int) t.p3.pos.z});
                 }
                 tess.draw();
             }
@@ -129,27 +134,28 @@ public class TessellatorModel extends GLModel
     public void renderTextured(int textureHandle)
     {
         GL_Triangle t;
-        Tessellator tess = Tessellator.instance;
+        Tessellator tess = Tessellator.getInstance();
+        VertexBuffer worldRenderer = tess.getBuffer();
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureHandle);
-        tess.startDrawing(GL11.GL_TRIANGLES);
+        worldRenderer.begin(GL11.GL_TRIANGLES, new VertexFormat());
         for (int j = 0; j < mesh.triangles.length; j++)
         { // draw all triangles in object
             t = mesh.triangles[j];
 
-            tess.setTextureUV(t.uvw1.x, t.uvw1.y);
-            tess.setNormal(t.norm1.x, t.norm1.y, t.norm1.z);
-            tess.addVertex((float) t.p1.pos.x, (float) t.p1.pos.y,
-                    (float) t.p1.pos.z);
+            worldRenderer.tex(t.uvw1.x, t.uvw1.y);
+            worldRenderer.putNormal(t.norm1.x, t.norm1.y, t.norm1.z);
+            worldRenderer.addVertexData(new int[]{(int) t.p1.pos.x, (int) t.p1.pos.y,
+                    (int) t.p1.pos.z});
 
-            tess.setTextureUV(t.uvw2.x, t.uvw2.y);
-            tess.setNormal(t.norm2.x, t.norm2.y, t.norm2.z);
-            tess.addVertex((float) t.p2.pos.x, (float) t.p2.pos.y,
-                    (float) t.p2.pos.z);
+            worldRenderer.tex(t.uvw2.x, t.uvw2.y);
+            worldRenderer.putNormal(t.norm2.x, t.norm2.y, t.norm2.z);
+            worldRenderer.addVertexData(new int[]{(int) t.p2.pos.x, (int) t.p2.pos.y,
+                    (int) t.p2.pos.z});
 
-            tess.setTextureUV(t.uvw3.x, t.uvw3.y);
-            tess.setNormal(t.norm3.x, t.norm3.y, t.norm3.z);
-            tess.addVertex((float) t.p3.pos.x, (float) t.p3.pos.y,
-                    (float) t.p3.pos.z);
+            worldRenderer.tex(t.uvw3.x, t.uvw3.y);
+            worldRenderer.putNormal(t.norm3.x, t.norm3.y, t.norm3.z);
+            worldRenderer.addVertexData(new int[]{(int) t.p3.pos.x, (int) t.p3.pos.y,
+                    (int) t.p3.pos.z});
         }
         tess.draw();
     }
@@ -175,8 +181,9 @@ public class TessellatorModel extends GLModel
         GL_Triangle t;
         GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glColor3f(0, 1, 0);
-        Tessellator tess = Tessellator.instance;
-        tess.startDrawing(GL11.GL_LINES);
+        Tessellator tess = Tessellator.getInstance();
+        VertexBuffer worldRenderer = tess.getBuffer();
+        worldRenderer.begin(GL11.GL_LINES, new VertexFormat());
         {
             for (int j = 0; j < mesh.triangles.length; j++)
             { // draw all triangles in object
@@ -185,26 +192,26 @@ public class TessellatorModel extends GLModel
                 t.norm2.normalize();
                 t.norm3.normalize();
 
-                tess.addVertex((float) t.p1.pos.x, (float) t.p1.pos.y,
-                        (float) t.p1.pos.z);
-                tess.addVertex((float) (t.p1.pos.x + t.norm1.x),
-                        (float) (t.p1.pos.y + t.norm1.y),
-                        (float) (t.p1.pos.z + t.norm1.z));
+                worldRenderer.addVertexData(new int[]{(int) t.p1.pos.x, (int) t.p1.pos.y,
+                        (int) t.p1.pos.z});
+                worldRenderer.addVertexData(new int[]{(int) (t.p1.pos.x + t.norm1.x),
+                        (int) (t.p1.pos.y + t.norm1.y),
+                        (int) (t.p1.pos.z + t.norm1.z)});
 
-                tess.addVertex((float) t.p2.pos.x, (float) t.p2.pos.y,
-                        (float) t.p2.pos.z);
-                tess.addVertex((float) (t.p2.pos.x + t.norm2.x),
-                        (float) (t.p2.pos.y + t.norm2.y),
-                        (float) (t.p2.pos.z + t.norm2.z));
+                worldRenderer.addVertexData(new int[]{(int) t.p2.pos.x, (int) t.p2.pos.y,
+                        (int) t.p2.pos.z});
+                worldRenderer.addVertexData(new int[]{(int) (t.p2.pos.x + t.norm2.x),
+                        (int) (t.p2.pos.y + t.norm2.y),
+                        (int) (t.p2.pos.z + t.norm2.z)});
 
-                tess.addVertex((float) t.p3.pos.x, (float) t.p3.pos.y,
-                        (float) t.p3.pos.z);
-                tess.addVertex((float) (t.p3.pos.x + t.norm3.x),
-                        (float) (t.p3.pos.y + t.norm3.y),
-                        (float) (t.p3.pos.z + t.norm3.z));
+                worldRenderer.addVertexData(new int[]{(int) t.p3.pos.x, (int) t.p3.pos.y,
+                        (int) t.p3.pos.z});
+                worldRenderer.addVertexData(new int[] {(int) (t.p3.pos.x + t.norm3.x),
+                        (int) (t.p3.pos.y + t.norm3.y),
+                        (int) (t.p3.pos.z + t.norm3.z)});
             }
-        }
+                }
         tess.draw();
-        GL11.glEnable(GL11.GL_LIGHTING);
+                GL11.glEnable(GL11.GL_LIGHTING);
     }
 }

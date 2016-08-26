@@ -1,12 +1,32 @@
-package net.minecraftforge.event;
+/*
+ * Minecraft Forge
+ * Copyright (c) 2016.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation version 2.1
+ * of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-import com.google.common.collect.Maps;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.fml.common.eventhandler.Event;
+package net.minecraftforge.event;
 
 import java.util.Collections;
 import java.util.Map;
+
+import com.google.common.collect.Maps;
+
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 /**
  * Fired whenever an object with Capabilities support {currently TileEntity/Item/Entity)
@@ -36,7 +56,7 @@ public class AttachCapabilitiesEvent extends Event
     /**
      * Adds a capability to be attached to this object.
      * Keys MUST be unique, it is suggested that you set the domain to your mod ID.
-     * If the capability is an instance of INBTSerializeable, this key will be used when serializing this capability.
+     * If the capability is an instance of INBTSerializable, this key will be used when serializing this capability.
      *
      * @param key The name of owner of this capability provider.
      * @param cap The capability provider
@@ -111,6 +131,23 @@ public class AttachCapabilitiesEvent extends Event
         public net.minecraft.item.ItemStack getItemStack()
         {
             return this.stack;
+        }
+    }
+
+    /**
+     * A version of the parent event which is only fired for Worlds.
+     */
+    public static class World extends AttachCapabilitiesEvent
+    {
+        private final net.minecraft.world.World world;
+        public World(net.minecraft.world.World world)
+        {
+            super(world);
+            this.world = world;
+        }
+        public net.minecraft.world.World getWorld()
+        {
+            return this.world;
         }
     }
 }

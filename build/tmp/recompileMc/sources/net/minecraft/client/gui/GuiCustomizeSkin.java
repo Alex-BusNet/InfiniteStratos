@@ -1,11 +1,11 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.io.IOException;
 
 @SideOnly(Side.CLIENT)
 public class GuiCustomizeSkin extends GuiScreen
@@ -35,6 +35,9 @@ public class GuiCustomizeSkin extends GuiScreen
             ++i;
         }
 
+        this.buttonList.add(new GuiOptionButton(199, this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), GameSettings.Options.MAIN_HAND, this.mc.gameSettings.getKeyBinding(GameSettings.Options.MAIN_HAND)));
+        ++i;
+
         if (i % 2 == 1)
         {
             ++i;
@@ -55,17 +58,23 @@ public class GuiCustomizeSkin extends GuiScreen
                 this.mc.gameSettings.saveOptions();
                 this.mc.displayGuiScreen(this.parentScreen);
             }
+            else if (button.id == 199)
+            {
+                this.mc.gameSettings.setOptionValue(GameSettings.Options.MAIN_HAND, 1);
+                button.displayString = this.mc.gameSettings.getKeyBinding(GameSettings.Options.MAIN_HAND);
+                this.mc.gameSettings.sendSettingsToServer();
+            }
             else if (button instanceof GuiCustomizeSkin.ButtonPart)
             {
                 EnumPlayerModelParts enumplayermodelparts = ((GuiCustomizeSkin.ButtonPart)button).playerModelParts;
                 this.mc.gameSettings.switchModelPartEnabled(enumplayermodelparts);
-                button.displayString = this.func_175358_a(enumplayermodelparts);
+                button.displayString = this.getMessage(enumplayermodelparts);
             }
         }
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
@@ -74,7 +83,7 @@ public class GuiCustomizeSkin extends GuiScreen
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
-    private String func_175358_a(EnumPlayerModelParts playerModelParts)
+    private String getMessage(EnumPlayerModelParts playerModelParts)
     {
         String s;
 
@@ -87,7 +96,7 @@ public class GuiCustomizeSkin extends GuiScreen
             s = I18n.format("options.off", new Object[0]);
         }
 
-        return playerModelParts.func_179326_d().getFormattedText() + ": " + s;
+        return playerModelParts.getName().getFormattedText() + ": " + s;
     }
 
     @SideOnly(Side.CLIENT)
@@ -97,7 +106,7 @@ public class GuiCustomizeSkin extends GuiScreen
 
         private ButtonPart(int p_i45514_2_, int p_i45514_3_, int p_i45514_4_, int p_i45514_5_, int p_i45514_6_, EnumPlayerModelParts playerModelParts)
         {
-            super(p_i45514_2_, p_i45514_3_, p_i45514_4_, p_i45514_5_, p_i45514_6_, GuiCustomizeSkin.this.func_175358_a(playerModelParts));
+            super(p_i45514_2_, p_i45514_3_, p_i45514_4_, p_i45514_5_, p_i45514_6_, GuiCustomizeSkin.this.getMessage(playerModelParts));
             this.playerModelParts = playerModelParts;
         }
     }

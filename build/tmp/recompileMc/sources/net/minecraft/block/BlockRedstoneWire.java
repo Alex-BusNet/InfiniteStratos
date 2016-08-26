@@ -2,25 +2,34 @@ package net.minecraft.block;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.util.*;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import javax.annotation.Nullable;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockRedstoneWire extends Block
 {
@@ -29,14 +38,50 @@ public class BlockRedstoneWire extends Block
     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> SOUTH = PropertyEnum.<BlockRedstoneWire.EnumAttachPosition>create("south", BlockRedstoneWire.EnumAttachPosition.class);
     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> WEST = PropertyEnum.<BlockRedstoneWire.EnumAttachPosition>create("west", BlockRedstoneWire.EnumAttachPosition.class);
     public static final PropertyInteger POWER = PropertyInteger.create("power", 0, 15);
+    protected static final AxisAlignedBB[] REDSTONE_WIRE_AABB = new AxisAlignedBB[] {new AxisAlignedBB(0.1875D, 0.0D, 0.1875D, 0.8125D, 0.0625D, 0.8125D), new AxisAlignedBB(0.1875D, 0.0D, 0.1875D, 0.8125D, 0.0625D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.1875D, 0.8125D, 0.0625D, 0.8125D), new AxisAlignedBB(0.0D, 0.0D, 0.1875D, 0.8125D, 0.0625D, 1.0D), new AxisAlignedBB(0.1875D, 0.0D, 0.0D, 0.8125D, 0.0625D, 0.8125D), new AxisAlignedBB(0.1875D, 0.0D, 0.0D, 0.8125D, 0.0625D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.8125D, 0.0625D, 0.8125D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.8125D, 0.0625D, 1.0D), new AxisAlignedBB(0.1875D, 0.0D, 0.1875D, 1.0D, 0.0625D, 0.8125D), new AxisAlignedBB(0.1875D, 0.0D, 0.1875D, 1.0D, 0.0625D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.1875D, 1.0D, 0.0625D, 0.8125D), new AxisAlignedBB(0.0D, 0.0D, 0.1875D, 1.0D, 0.0625D, 1.0D), new AxisAlignedBB(0.1875D, 0.0D, 0.0D, 1.0D, 0.0625D, 0.8125D), new AxisAlignedBB(0.1875D, 0.0D, 0.0D, 1.0D, 0.0625D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.0625D, 0.8125D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.0625D, 1.0D)};
     private boolean canProvidePower = true;
     private final Set<BlockPos> blocksNeedingUpdate = Sets.<BlockPos>newHashSet();
 
     public BlockRedstoneWire()
     {
-        super(Material.circuits);
+        super(Material.CIRCUITS);
         this.setDefaultState(this.blockState.getBaseState().withProperty(NORTH, BlockRedstoneWire.EnumAttachPosition.NONE).withProperty(EAST, BlockRedstoneWire.EnumAttachPosition.NONE).withProperty(SOUTH, BlockRedstoneWire.EnumAttachPosition.NONE).withProperty(WEST, BlockRedstoneWire.EnumAttachPosition.NONE).withProperty(POWER, Integer.valueOf(0)));
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.0625F, 1.0F);
+    }
+
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        return REDSTONE_WIRE_AABB[getAABBIndex(state.getActualState(source, pos))];
+    }
+
+    private static int getAABBIndex(IBlockState state)
+    {
+        int i = 0;
+        boolean flag = state.getValue(NORTH) != BlockRedstoneWire.EnumAttachPosition.NONE;
+        boolean flag1 = state.getValue(EAST) != BlockRedstoneWire.EnumAttachPosition.NONE;
+        boolean flag2 = state.getValue(SOUTH) != BlockRedstoneWire.EnumAttachPosition.NONE;
+        boolean flag3 = state.getValue(WEST) != BlockRedstoneWire.EnumAttachPosition.NONE;
+
+        if (flag || flag2 && !flag && !flag1 && !flag3)
+        {
+            i |= 1 << EnumFacing.NORTH.getHorizontalIndex();
+        }
+
+        if (flag1 || flag3 && !flag && !flag1 && !flag2)
+        {
+            i |= 1 << EnumFacing.EAST.getHorizontalIndex();
+        }
+
+        if (flag2 || flag && !flag1 && !flag2 && !flag3)
+        {
+            i |= 1 << EnumFacing.SOUTH.getHorizontalIndex();
+        }
+
+        if (flag3 || flag1 && !flag && !flag2 && !flag3)
+        {
+            i |= 1 << EnumFacing.WEST.getHorizontalIndex();
+        }
+
+        return i;
     }
 
     /**
@@ -55,12 +100,28 @@ public class BlockRedstoneWire extends Block
     private BlockRedstoneWire.EnumAttachPosition getAttachPosition(IBlockAccess worldIn, BlockPos pos, EnumFacing direction)
     {
         BlockPos blockpos = pos.offset(direction);
-        Block block = worldIn.getBlockState(pos.offset(direction)).getBlock();
+        IBlockState iblockstate = worldIn.getBlockState(pos.offset(direction));
 
-        if (!canRestoneConnect(worldIn, blockpos, direction) && (block.isBlockNormalCube() || !canRestoneConnect(worldIn, blockpos.down(), null)))
+        if (!canConnectTo(worldIn.getBlockState(blockpos), direction, worldIn, blockpos) && (iblockstate.isNormalCube() || !canConnectUpwardsTo(worldIn, blockpos.down())))
         {
-            Block block1 = worldIn.getBlockState(pos.up()).getBlock();
-            return !block1.isBlockNormalCube() && block.isBlockNormalCube() && canRestoneConnect(worldIn, blockpos.up(), null) ? BlockRedstoneWire.EnumAttachPosition.UP : BlockRedstoneWire.EnumAttachPosition.NONE;
+            IBlockState iblockstate1 = worldIn.getBlockState(pos.up());
+
+            if (!iblockstate1.isNormalCube())
+            {
+                boolean flag = worldIn.getBlockState(blockpos).isSideSolid(worldIn, blockpos, EnumFacing.UP) || worldIn.getBlockState(blockpos).getBlock() == Blocks.GLOWSTONE;
+
+                if (flag && canConnectUpwardsTo(worldIn, blockpos.up()))
+                {
+                    if (iblockstate.isBlockNormalCube())
+                    {
+                        return BlockRedstoneWire.EnumAttachPosition.UP;
+                    }
+
+                    return BlockRedstoneWire.EnumAttachPosition.SIDE;
+                }
+            }
+
+            return BlockRedstoneWire.EnumAttachPosition.NONE;
         }
         else
         {
@@ -68,34 +129,28 @@ public class BlockRedstoneWire extends Block
         }
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos)
     {
-        return null;
+        return NULL_AABB;
     }
 
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
 
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
-        return World.doesBlockHaveSolidTopSurface(worldIn, pos.down()) || worldIn.getBlockState(pos.down()).getBlock() == Blocks.glowstone;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
-    {
-        IBlockState iblockstate = worldIn.getBlockState(pos);
-        return iblockstate.getBlock() != this ? super.colorMultiplier(worldIn, pos, renderPass) : this.colorMultiplier(((Integer)iblockstate.getValue(POWER)).intValue());
+        return worldIn.getBlockState(pos.down()).isFullyOpaque() || worldIn.getBlockState(pos.down()).getBlock() == Blocks.GLOWSTONE;
     }
 
     private IBlockState updateSurroundingRedstone(World worldIn, BlockPos pos, IBlockState state)
@@ -139,14 +194,14 @@ public class BlockRedstoneWire extends Block
                 l = this.getMaxCurrentStrength(worldIn, blockpos, l);
             }
 
-            if (worldIn.getBlockState(blockpos).getBlock().isNormalCube() && !worldIn.getBlockState(pos1.up()).getBlock().isNormalCube())
+            if (worldIn.getBlockState(blockpos).isNormalCube() && !worldIn.getBlockState(pos1.up()).isNormalCube())
             {
                 if (flag && pos1.getY() >= pos2.getY())
                 {
                     l = this.getMaxCurrentStrength(worldIn, blockpos.up(), l);
                 }
             }
-            else if (!worldIn.getBlockState(blockpos).getBlock().isNormalCube() && flag && pos1.getY() <= pos2.getY())
+            else if (!worldIn.getBlockState(blockpos).isNormalCube() && flag && pos1.getY() <= pos2.getY())
             {
                 l = this.getMaxCurrentStrength(worldIn, blockpos.down(), l);
             }
@@ -227,7 +282,7 @@ public class BlockRedstoneWire extends Block
             {
                 BlockPos blockpos = pos.offset(enumfacing2);
 
-                if (worldIn.getBlockState(blockpos).getBlock().isNormalCube())
+                if (worldIn.getBlockState(blockpos).isNormalCube())
                 {
                     this.notifyWireNeighborsOfStateChange(worldIn, blockpos.up());
                 }
@@ -261,7 +316,7 @@ public class BlockRedstoneWire extends Block
             {
                 BlockPos blockpos = pos.offset(enumfacing2);
 
-                if (worldIn.getBlockState(blockpos).getBlock().isNormalCube())
+                if (worldIn.getBlockState(blockpos).isNormalCube())
                 {
                     this.notifyWireNeighborsOfStateChange(worldIn, blockpos.up());
                 }
@@ -287,9 +342,11 @@ public class BlockRedstoneWire extends Block
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn)
     {
         if (!worldIn.isRemote)
         {
@@ -308,17 +365,18 @@ public class BlockRedstoneWire extends Block
     /**
      * Get the Item that this Block should drop when harvested.
      */
+    @Nullable
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.redstone;
+        return Items.REDSTONE;
     }
 
-    public int getStrongPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
+    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return !this.canProvidePower ? 0 : this.getWeakPower(worldIn, pos, state, side);
+        return !this.canProvidePower ? 0 : blockState.getWeakPower(blockAccess, pos, side);
     }
 
-    public int getWeakPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
         if (!this.canProvidePower)
         {
@@ -326,7 +384,7 @@ public class BlockRedstoneWire extends Block
         }
         else
         {
-            int i = ((Integer)state.getValue(POWER)).intValue();
+            int i = ((Integer)blockState.getValue(POWER)).intValue();
 
             if (i == 0)
             {
@@ -342,7 +400,7 @@ public class BlockRedstoneWire extends Block
 
                 for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
                 {
-                    if (this.func_176339_d(worldIn, pos, enumfacing))
+                    if (this.isPowerSourceAt(blockAccess, pos, enumfacing))
                     {
                         enumset.add(enumfacing);
                     }
@@ -364,49 +422,54 @@ public class BlockRedstoneWire extends Block
         }
     }
 
-    private boolean func_176339_d(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+    private boolean isPowerSourceAt(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
     {
         BlockPos blockpos = pos.offset(side);
         IBlockState iblockstate = worldIn.getBlockState(blockpos);
-        Block block = iblockstate.getBlock();
-        boolean flag = block.isNormalCube();
-        boolean flag1 = worldIn.getBlockState(pos.up()).getBlock().isNormalCube();
-        return !flag1 && flag && canRestoneConnect(worldIn, blockpos.up(), null) ? true : (canRestoneConnect(worldIn, blockpos, side) ? true : (block == Blocks.powered_repeater && iblockstate.getValue(BlockRedstoneDiode.FACING) == side ? true : !flag && canRestoneConnect(worldIn, blockpos.down(), null)));
+        boolean flag = iblockstate.isNormalCube();
+        boolean flag1 = worldIn.getBlockState(pos.up()).isNormalCube();
+        return !flag1 && flag && canConnectUpwardsTo(worldIn, blockpos.up()) ? true : (canConnectTo(iblockstate, side, worldIn, pos) ? true : (iblockstate.getBlock() == Blocks.POWERED_REPEATER && iblockstate.getValue(BlockRedstoneDiode.FACING) == side ? true : !flag && canConnectUpwardsTo(worldIn, blockpos.down())));
     }
 
-    protected static boolean canRestoneConnect(IBlockAccess world, BlockPos pos, EnumFacing side)
+    protected static boolean canConnectUpwardsTo(IBlockAccess worldIn, BlockPos pos)
     {
-        IBlockState state = world.getBlockState(pos);
-        if (state.getBlock() == Blocks.redstone_wire)
+        return canConnectTo(worldIn.getBlockState(pos), null, worldIn, pos);
+    }
+
+    protected static boolean canConnectTo(IBlockState blockState, @Nullable EnumFacing side, IBlockAccess world, BlockPos pos )
+    {
+        Block block = blockState.getBlock();
+
+        if (block == Blocks.REDSTONE_WIRE)
         {
             return true;
         }
-        else if (Blocks.unpowered_repeater.isAssociated(state.getBlock()))
+        else if (Blocks.UNPOWERED_REPEATER.isSameDiode(blockState))
         {
-            EnumFacing direction = (EnumFacing)state.getValue(BlockRedstoneRepeater.FACING);
-            return direction == side || direction.getOpposite() == side;
+            EnumFacing enumfacing = (EnumFacing)blockState.getValue(BlockRedstoneRepeater.FACING);
+            return enumfacing == side || enumfacing.getOpposite() == side;
         }
         else
         {
-            return state.getBlock().canConnectRedstone(world, pos, side);
+            return blockState.getBlock().canConnectRedstone(blockState, world, pos, side);
         }
     }
 
     /**
      * Can this block provide power. Only wire currently seems to have this change based on its state.
      */
-    public boolean canProvidePower()
+    public boolean canProvidePower(IBlockState state)
     {
         return this.canProvidePower;
     }
 
     @SideOnly(Side.CLIENT)
-    private int colorMultiplier(int powerLevel)
+    public static int colorMultiplier(int p_176337_0_)
     {
-        float f = (float)powerLevel / 15.0F;
+        float f = (float)p_176337_0_ / 15.0F;
         float f1 = f * 0.6F + 0.4F;
 
-        if (powerLevel == 0)
+        if (p_176337_0_ == 0)
         {
             f1 = 0.3F;
         }
@@ -431,9 +494,9 @@ public class BlockRedstoneWire extends Block
     }
 
     @SideOnly(Side.CLIENT)
-    public void randomDisplayTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
     {
-        int i = ((Integer)state.getValue(POWER)).intValue();
+        int i = ((Integer)stateIn.getValue(POWER)).intValue();
 
         if (i != 0)
         {
@@ -448,16 +511,9 @@ public class BlockRedstoneWire extends Block
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    public Item getItem(World worldIn, BlockPos pos)
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
-        return Items.redstone;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
-    {
-        return EnumWorldBlockLayer.CUTOUT;
+        return new ItemStack(Items.REDSTONE);
     }
 
     /**
@@ -468,6 +524,12 @@ public class BlockRedstoneWire extends Block
         return this.getDefaultState().withProperty(POWER, Integer.valueOf(meta));
     }
 
+    @SideOnly(Side.CLIENT)
+    public BlockRenderLayer getBlockLayer()
+    {
+        return BlockRenderLayer.CUTOUT;
+    }
+
     /**
      * Convert the BlockState into the correct metadata value
      */
@@ -476,9 +538,45 @@ public class BlockRedstoneWire extends Block
         return ((Integer)state.getValue(POWER)).intValue();
     }
 
-    protected BlockState createBlockState()
+    /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
     {
-        return new BlockState(this, new IProperty[] {NORTH, EAST, SOUTH, WEST, POWER});
+        switch (rot)
+        {
+            case CLOCKWISE_180:
+                return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(EAST, state.getValue(WEST)).withProperty(SOUTH, state.getValue(NORTH)).withProperty(WEST, state.getValue(EAST));
+            case COUNTERCLOCKWISE_90:
+                return state.withProperty(NORTH, state.getValue(EAST)).withProperty(EAST, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(WEST)).withProperty(WEST, state.getValue(NORTH));
+            case CLOCKWISE_90:
+                return state.withProperty(NORTH, state.getValue(WEST)).withProperty(EAST, state.getValue(NORTH)).withProperty(SOUTH, state.getValue(EAST)).withProperty(WEST, state.getValue(SOUTH));
+            default:
+                return state;
+        }
+    }
+
+    /**
+     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+    {
+        switch (mirrorIn)
+        {
+            case LEFT_RIGHT:
+                return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(NORTH));
+            case FRONT_BACK:
+                return state.withProperty(EAST, state.getValue(WEST)).withProperty(WEST, state.getValue(EAST));
+            default:
+                return super.withMirror(state, mirrorIn);
+        }
+    }
+
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {NORTH, EAST, SOUTH, WEST, POWER});
     }
 
     static enum EnumAttachPosition implements IStringSerializable
