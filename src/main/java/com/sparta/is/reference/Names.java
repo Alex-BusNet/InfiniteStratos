@@ -1,19 +1,19 @@
 package com.sparta.is.reference;
 
-public final class Names
+public class Names
 {
-   public static final class Keys
-   {
-       public static final String CATEGORY = "keys.is.category";
-       public static final String CHARGE = "keys.is.charge";
-       public static final String RELEASE = "keys.is.release";
-       public static final String STANDBY  = "keys.is.standby";
-       public static final String PARTIAL_DEPLOY  = "keys.is.partialDeploy";
-       public static final String FULL_DEPLOY  = "keys.is.fullDeploy";
-       public static final String EQUALIZER_ACCESS_MODIFIER = "keys.is.equalizerAccessModifier";
-       public static final String ONE_OFF_ABILITY = "keys.is.oneOffAbility";
-       public static final String ONE_OFF_ABILITY_OFF = "keys.is.oneOffAbilityOff";
-   }
+    public static final class Keys
+    {
+        public static final String CATEGORY = "keys.is.category";
+        public static final String CHARGE = "keys.is.charge";
+        public static final String RELEASE = "keys.is.release";
+        public static final String STANDBY  = "keys.is.standby";
+        public static final String PARTIAL_DEPLOY  = "keys.is.partialDeploy";
+        public static final String FULL_DEPLOY  = "keys.is.fullDeploy";
+        public static final String EQUALIZER_ACCESS_MODIFIER = "keys.is.equalizerAccessModifier";
+        public static final String ONE_OFF_ABILITY = "keys.is.oneOffAbility";
+        public static final String ONE_OFF_ABILITY_OFF = "keys.is.oneOffAbilityOff";
+    }
 
     public static final class Materials
     {

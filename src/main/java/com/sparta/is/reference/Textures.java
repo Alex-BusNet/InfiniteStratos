@@ -1,11 +1,11 @@
 package com.sparta.is.reference;
 
-import com.sparta.is.utility.ResourceLocationHelper;
+import com.sparta.is.utils.ResourceLocationHelper;
 import net.minecraft.util.ResourceLocation;
 
 public class Textures
 {
-    public static final String RESOURCE_PREFIX = Reference.LOWERCASE_MOD_ID + ":";
+    public static final String RESOURCE_PREFIX = Reference.MOD_ID + ":";
 
     public static final class Armor
     {
@@ -108,6 +108,4 @@ public class Textures
 
         public static final ResourceLocation ELUCIDATOR = ResourceLocationHelper.getResourceLocation(MTL_LOCATION + "elucidator.mtl");
     }
-
 }
-

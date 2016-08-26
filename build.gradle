@@ -1,7 +1,11 @@
+import groovy.json.JsonException
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 // For those who want the bleeding edge
 buildscript {
     repositories {
+        mavenCentral()
         jcenter()
         maven {
             name = "forge"
@@ -52,7 +56,7 @@ minecraft {
     version = minecraft_version + "-" + forge_version
     runDir = "run"
 
-    useDepAts = true //Required for JEI
+    useDepAts = true // Required for JEI
 
     // Set mod version in code prior to compilation
     replaceIn "InfiniteStratos.java"
@@ -62,16 +66,17 @@ minecraft {
     if (project.hasProperty("is_sha1_signature")) {
         replace "@FINGERPRINT@", project.is_sha1_signature
     }
+
+    // Specify the mcp mappings to use
     mappings = mcp_mappings_version
 }
 
 dependencies {
     deobfCompile "mezz.jei:jei_${minecraft_version}:${dep_jei_version}"
-    deobfCompile "mcp.mobius.waila:Waila:${dep_waila_version}"
+    // deobfCompile "mcp.mobius.waila:Waila:${dep_waila_version}"
 }
 
-processResources
-{
+processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
@@ -90,117 +95,5 @@ processResources
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
-    }
-}
-
-task devJar(type: Jar, dependsOn: 'classes') {
-    from(sourceSets.main.output) {
-        include '**'
-    }
-
-    extension = 'jar'
-    classifier = 'dev'
-}
-
-artifacts {
-    archives devJar
-}
-
-task createChangelog(type: JenkinsChangelog) {
-    onlyIf {
-        return (("${System.getenv().JOB_NAME}" != null) && project.hasProperty("jenkins_server") && project.hasProperty("jenkins_password"))
-    }
-
-    outputs.upToDateWhen { false } // never up to date
-    serverRoot = project.hasProperty('jenkins_server') ? project.getProperty('jenkins_server') : "";
-    jobName = System.env['JOB_NAME'] ?: ""
-    targetBuild = System.env['BUILD_NUMBER'] ?: 0;
-    authName = project.hasProperty('jenkins_user') ? project.getProperty('jenkins_user') : "";
-    authPassword = project.hasProperty('jenkins_password') ? project.getProperty('jenkins_password') : "";
-    output = "build/libs/${project.archivesBaseName}-${project.version}-changelog.txt"
-}
-
-task signJar(type: SignJar, dependsOn: ["jar", "devJar"]) {
-    onlyIf {
-        project.hasProperty('keystore_location')
-    }
-
-    keyStore = project.hasProperty('keystore_location') ? project.getProperty('keystore_location') : "";
-    storePass = project.hasProperty('keystore_password') ? project.getProperty('keystore_password') : "";
-    alias = project.hasProperty('is_keystore_alias') ? project.getProperty('is_keystore_alias') : "";
-    keyPass = project.hasProperty('keystore_password') ? project.getProperty('keystore_password') : "";
-    inputFile = jar.archivePath
-    outputFile = jar.archivePath
-}
-
-uploadArchives.dependsOn signJar
-build.dependsOn signJar
-
-curseforge {
-    apiKey = project.hasProperty('is_curseforge_apikey') ? project.is_curseforge_apikey : ''
-    project {
-        id = project.hasProperty('is_curseforge_projectid') ? project.is_curseforge_projectid : '0'
-        releaseType = mod_release_type
-        changelogType = 'text'
-        changelog = file("build/libs/${project.archivesBaseName}-${project.version}-changelog.txt")
-        addArtifact devJar
-        relations {
-            optionalLibrary 'jei'
-        }
-    }
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            if (project.hasProperty("forgemaven_url")) {
-                logger.info('Publishing to files server')
-                repository(url: project.forgemaven_url) {
-                    authentication(userName: project.forgemaven_username, password: project.forgemaven_password)
-                }
-            }
-
-            pom {
-                groupId = project.group
-                version = project.version
-                artifactId = project.archivesBaseName
-            }
-
-            pom.project {
-                name project.archivesBaseName
-                packaging 'jar'
-                description 'Infinite Stratos'
-                url 'https://github.com/Alex-BusNet/InfiniteStratos/'
-
-                scm {
-                    url 'https://github.com/Alex-BusNet/InfiniteStratos/'
-                    connection 'scm:git:git://github.com/Alex-BusNet/InfiniteStratos.git'
-                    developerConnection 'scm:git:git@github.com/Alex-BusNet/InfiniteStratos.git'
-                }
-
-                issueManagement {
-                    system 'github'
-                    url 'https://github.com/Alex-BusNet/InfiniteStratos/issues'
-                }
-
-                licenses {
-                    license {
-                        name 'GNU Lesser General Public License 3.0'
-                        url 'https://www.gnu.org/licenses/lgpl-3.0.txt'
-                        distribution 'repo'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'Sparta'
-                        name 'Sparta'
-                        roles {
-                            role 'developer'
-                        }
-                    }
-                }
-            }
-        }
     }
 }
