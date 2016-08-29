@@ -1,5 +1,5 @@
 package com.sparta.is.utils;
 
-public class IOwnable
+public interface IOwnable
 {
 }

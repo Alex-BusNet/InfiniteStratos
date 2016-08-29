@@ -1,9 +1,13 @@
 package com.sparta.is.init;
 
 import com.sparta.is.item.base.ItemIS;
+import com.sparta.is.item.base.ItemYukihiraNigata;
+import com.sparta.is.reference.Names;
 import net.minecraft.client.renderer.color.IItemColor;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -14,9 +18,11 @@ public class ModItems
 {
     public static final List<ItemIS> ITEMS = new ArrayList<>();
 
+    public static Item yukihira = new ItemYukihiraNigata();
+
     public static void register()
     {
-
+        yukihira = registerItem(new ItemYukihiraNigata(), Names.Weapons.YUKIHIRA_NIGATA);
     }
 
     @SideOnly(Side.CLIENT)
@@ -42,6 +48,17 @@ public class ModItems
                 }, itemIS);
             }
         }
+    }
+
+    private static Item registerItem(Item item, String name)
+    {
+        if(item.getRegistryName() == null)
+        {
+            item.setRegistryName(name);
+        }
+        GameRegistry.register(item);
+
+        return item;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.sparta.is.creativetab;
 
+import com.sparta.is.item.base.ItemTabLabel;
 import com.sparta.is.reference.Reference;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
@@ -14,7 +15,7 @@ public class CreativeTab
         @Override
         public Item getTabIconItem()
         {
-            return Items.FLINT_AND_STEEL;
+            return ItemTabLabel;
         }
     };
 }
