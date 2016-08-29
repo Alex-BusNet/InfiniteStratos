@@ -1,6 +1,6 @@
 package com.sparta.is.init;
 
-import com.sparta.is.item.ItemIS;
+import com.sparta.is.item.base.ItemIS;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.client.FMLClientHandler;

@@ -597,8 +597,8 @@ public class BlockStairs extends Block
         if (face == EnumFacing.DOWN) return half == EnumHalf.BOTTOM;
         if (shape == EnumShape.OUTER_LEFT || shape == EnumShape.OUTER_RIGHT) return false;
         if (face == side) return true;
-        if (shape == EnumShape.INNER_LEFT && face.rotateYCCW() == side) return true;
-        if (shape == EnumShape.INNER_RIGHT && face.rotateY() == side) return true;
+        if (shape == EnumShape.INNER_LEFT && face.rotateY() == side) return true;
+        if (shape == EnumShape.INNER_RIGHT && face.rotateYCCW() == side) return true;
         return false;
     }
 

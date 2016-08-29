@@ -1,4 +1,4 @@
-package com.sparta.is.item;
+package com.sparta.is.item.base;
 
 import net.minecraft.client.renderer.ItemMeshDefinition;
 

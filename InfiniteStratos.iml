@@ -24,6 +24,17 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/minecraft/deobfedDeps/deobf/mcp/mobius/waila/Waila/1.7.0-B3_1.9.4/Waila-1.7.0-B3_1.9.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/minecraft/deobfedDeps/deobf/mcp/mobius/waila/Waila/1.7.0-B3_1.9.4/Waila-1.7.0-B3_1.9.4-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/minecraft/deobfedDeps/compileDummy.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -690,18 +701,18 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/.gradle/minecraft/forgeSrc-1.10.2-12.18.1.2073-PROJECT(InfiniteStratos).jar!/" />
+          <root url="jar://$MODULE_DIR$/.gradle/minecraft/forgeSrc-1.10.2-12.18.1.2075-PROJECT(InfiniteStratos).jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/.gradle/minecraft/forgeSrc-1.10.2-12.18.1.2073-PROJECT(InfiniteStratos)-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/.gradle/minecraft/forgeSrc-1.10.2-12.18.1.2075-PROJECT(InfiniteStratos)-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="RUNTIME">
       <library>
         <CLASSES>
-          <root url="file://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.10.2-12.18.1.2073/start" />
+          <root url="file://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.10.2-12.18.1.2075/start" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

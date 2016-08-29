@@ -1,0 +1,21 @@
+[
+{
+  "modid": "IS",
+  "name": "Infinite Stratos",
+  "description": "A mod based off of the Anime, Infinite Stratos",
+  "version": "${mod_version)",
+  "mcversion": "${minecraft_version}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": [
+    "sparta"
+  ],
+  "credits": "Sparta",
+  "logoFile": "",
+  "screenshots": [
+  ],
+  "parent":"",
+  "dependencies": [
+  ]
+}
+]

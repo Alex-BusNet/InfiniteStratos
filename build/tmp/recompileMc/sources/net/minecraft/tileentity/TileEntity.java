@@ -427,6 +427,10 @@ public abstract class TileEntity implements net.minecraftforge.common.capabiliti
         {
             bb = new net.minecraft.util.math.AxisAlignedBB(pos.add(-1, 0, -1), pos.add(2, 2, 2));
         }
+        else if (type == Blocks.STRUCTURE_BLOCK)
+        {
+            bb = INFINITE_EXTENT_AABB;
+        }
         else if (type != null && type != Blocks.BEACON)
         {
             net.minecraft.util.math.AxisAlignedBB cbb = null;

@@ -1,4 +1,4 @@
-package com.sparta.is.item;
+package com.sparta.is.item.base;
 
 import com.sparta.is.creativetab.CreativeTab;
 import com.sparta.is.reference.Materials;

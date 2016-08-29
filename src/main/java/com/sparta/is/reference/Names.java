@@ -148,4 +148,31 @@ public class Names
         public static final String TAB_LABEL = "tabLabel";
 
     }
+
+    public static final class Commands
+    {
+        //TODO: Update Commands list
+        public static final String BASE_COMMAND = Reference.MOD_ID.toLowerCase();
+        public static final String SET_ENERGY_VALUE = "set-energy-value";
+        public static final String SET_ENERGY_VALUE_CURRENT_ITEM = "set-energy-value-current-item";
+        public static final String REGEN_ENERGY_VALUES = "regen-energy-values";
+        public static final String SYNC_ENERGY_VALUES = "sync-energy-values";
+        public static final String PLAYER_LEARN_EVERYTHING = "player-learn-everything";
+        public static final String PLAYER_LEARN_ITEM = "player-learn-item";
+        public static final String PLAYER_LEARN_CURRENT_ITEM = "player-learn-current-item";
+        public static final String PLAYER_FORGET_EVERYTHING = "player-forget-everything";
+        public static final String PLAYER_FORGET_ITEM = "player-forget-item";
+        public static final String PLAYER_FORGET_CURRENT_ITEM = "player-forget-current-item";
+        public static final String SET_ITEM_LEARNABLE = "set-item-learnable";
+        public static final String SET_CURRENT_ITEM_LEARNABLE = "set-current-item-learnable";
+        public static final String SET_ITEM_NOT_LEARNABLE = "set-item-not-learnable";
+        public static final String SET_CURRENT_ITEM_NOT_LEARNABLE = "set-current-item-not-learnable";
+        public static final String SET_ITEM_RECOVERABLE = "set-item-recoverable";
+        public static final String SET_CURRENT_ITEM_RECOVERABLE = "set-current-item-recoverable";
+        public static final String SET_ITEM_NOT_RECOVERABLE = "set-item-not-recoverable";
+        public static final String SET_CURRENT_ITEM_NOT_RECOVERABLE = "set-current-item-not-recoverable";
+        public static final String RUN_TEST = "run-tests";
+        public static final String DEBUG = "debug";
+        public static final String ADMIN_PANEL = "admin";
+    }
 }
