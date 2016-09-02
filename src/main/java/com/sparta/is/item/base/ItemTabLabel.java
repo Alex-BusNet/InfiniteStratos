@@ -1,13 +1,32 @@
 package com.sparta.is.item.base;
 
 import com.sparta.is.reference.Names;
+import com.sparta.is.reference.Textures;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 
 public class ItemTabLabel extends Item
 {
-    ItemTabLabel()
+    public ItemTabLabel()
     {
-        super();
-        this.setRegistryName(Names.Empty.TAB_LABEL);
+        this.setUnlocalizedName(Names.Empty.TAB_LABEL);
+//        this.setTextureName(Names.Empty.TAB_LABEL);
+    }
+
+    @Override
+    public String getUnlocalizedName()
+    {
+        return String.format("item.%s%s", Textures.RESOURCE_PREFIX, getUnwrappedUnlocalizedName(super.getUnlocalizedName()));
+    }
+
+    @Override
+    public String getUnlocalizedName(ItemStack itemStack)
+    {
+        return String.format("item.%s%s", Textures.RESOURCE_PREFIX, getUnwrappedUnlocalizedName(super.getUnlocalizedName()));
+    }
+
+    protected String getUnwrappedUnlocalizedName(String unlocalizedName)
+    {
+        return unlocalizedName.substring(unlocalizedName.indexOf(".") + 1);
     }
 }

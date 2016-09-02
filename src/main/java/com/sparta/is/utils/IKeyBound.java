@@ -6,5 +6,5 @@ import net.minecraft.item.ItemStack;
 
 public interface IKeyBound
 {
-    void doKeyBindingAction(EntityPlayer entityPlayer, ItemStack itemStack, Key key);
+    void doKeyBindingAction(EntityPlayer entityPlayer, ItemStack itemStack, Key key, boolean falling);
 }

@@ -84,4 +84,14 @@ public class Messages
 
         public static final String ADMIN_USAGE = COMMAND_PREFIX + Names.Commands.ADMIN_PANEL + ".usage";
     }
+
+    public static final class ItemUse
+    {
+        public static final String SWORD_SWING_FAILED = "misc.is:swingSwordFailed";
+        public static final String INVALID_UNIT = "misc.is:invalidUnit";
+        public static final String ONE_OFF_ACTIVE = "misc.is:oneOffActive";
+        public static final String ONE_OFF_DEACTIVE = "misc.is:oneOffDeactive";
+        public static final String INVALID_ACTION = "misc.is:invalidAction";
+
+    }
 }

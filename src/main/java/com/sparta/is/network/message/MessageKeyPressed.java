@@ -44,7 +44,7 @@ public class MessageKeyPressed implements IMessage
             EntityPlayer entityPlayer = ctx.getServerHandler().playerEntity;
 
             if (entityPlayer != null && entityPlayer.getHeldItemMainhand() != null && entityPlayer.getHeldItemMainhand().getItem() instanceof IKeyBound ) {
-                ((IKeyBound) entityPlayer.getHeldItemMainhand().getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getHeldItemMainhand(), message.keyPressed);
+                ((IKeyBound) entityPlayer.getHeldItemMainhand().getItem()).doKeyBindingAction(entityPlayer, entityPlayer.getHeldItemMainhand(), message.keyPressed, false);
             }
 
             return null;

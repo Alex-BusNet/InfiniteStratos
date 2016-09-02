@@ -5,10 +5,10 @@
 
 
 #Keys
-keys.categories.is=Infinite Stratos
-keys.fullDeploy=IS Unit Full Deployment
-keys.partialDeploy=IS Unit Partial Deployment
-keys.standby=IS Unit Standby
+keys.is.category=Infinite Stratos
+keys.is.fullDeploy=IS Unit Full Deployment
+keys.is.partialDeploy=IS Unit Partial Deployment
+keys.is.standby=IS Unit Standby
 keys.is.equalizerAccessModifier=Equalizer Slot Access
 keys.is.oneOffAbility=One-Off Ability on
 keys.is.oneOffAbilityOff=One-Off Ability off
@@ -21,7 +21,7 @@ material.is:isArmorMaterial.name=Adamantine
 material.is:isSwordMaterial.name=Equalizer Weapon Material
 
 #Items
-tem.is:yukihiraBlade=Yukihira Blade
+item.is:yukihiraBlade.name=Yukihira Blade
 item.is:yukihiraHilt=Yukihira Hilt
 item.is:absoluteDefense=Absolute Defense System
 item.is:isCore=IS Unit Core
@@ -36,8 +36,8 @@ item.is:tabaneSpawnEgg=Spawn Tabane Shinonono [WARNING]
 
 
 #Weapons
-weapons.is:yukihira=Yukihira Nigata
-weapons.is:reiraku=Reiraku Byakuya
+weapon.is:yukihiraNigata.name=Yukihira Nigata
+weapon.is:reiraku=Reiraku Byakuya
 
 
 
@@ -75,3 +75,19 @@ misc.is:oneOffActive=Activated %s
 misc.is:oneOffDeactive=Deactivated %s
 misc.is:alreadyOwner=You are already the owner of %s
 misc.is:invalidAction=You cannot perform this action right now
+
+#Info
+info.is.charge=Charge
+info.is.tool.energyPerUse=RF per use
+
+info.is.forDetails=for Details
+info.is.hold=Hold
+info.is.shift=Shift
+
+info.is.tutorial.fluxRequired=Requires Redstone Flux to operate.
+info.is.tutorial.tabAugment=The Augment tab allows for modular additions.
+info.is.tutorial.tabConfiguration.0=The Configuration tab determines how items enter and leave this device.
+info.is.tutorial.tabConfiguration.1=The Configuration tab determines how energy is transferred to and from this device.
+info.is.tutorial.tabConfiguration.2=The Configuration tab determines the operation modes for this device.
+info.is.tutorial.tabRedstone=The Redstone Control tab configures how this device reacts to redstone signals.
+info.is.tutorial.tabSecurity=The Security tab allows the owner to control who can access this device.

@@ -20,7 +20,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 @Mod(modid = Reference.MOD_ID,
         name = "InfiniteStratos",
         certificateFingerprint = Reference.FINGERPRINT,
-        version = "@MOD_VERSION@",
+        version = Reference.MOD_VERSION,
         dependencies = "required-after:Forge@[12.18.1,)",
         guiFactory = "com.sparta.is.client.gui.GuiFactory")
 
@@ -58,6 +58,7 @@ public class InfiniteStratos
         ConfigurationHandler.init(event.getSuggestedConfigurationFile());
 
         Network.init();
+
         proxy.registerKeyBindings();
 
         ModItems.register();

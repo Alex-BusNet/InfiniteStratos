@@ -24,13 +24,13 @@ public class ItemISMelee extends ItemSword
     @Override
     public String getUnlocalizedName()
     {
-        return String.format("item.%s%s", Textures.RESOURCE_PREFIX, getUnwrappedLocalizedName(super.getUnlocalizedName()));
+        return String.format("weapon.%s%s", Textures.RESOURCE_PREFIX, getUnwrappedLocalizedName(super.getUnlocalizedName()));
     }
 
     @Override
     public String getUnlocalizedName(ItemStack itemStack)
     {
-        return String.format("item.%s%s", Textures.RESOURCE_PREFIX, getUnwrappedLocalizedName(super.getUnlocalizedName()));
+        return String.format("weapon.%s%s", Textures.RESOURCE_PREFIX, getUnwrappedLocalizedName(super.getUnlocalizedName()));
     }
 
     protected String getUnwrappedLocalizedName(String unlocalizedName)

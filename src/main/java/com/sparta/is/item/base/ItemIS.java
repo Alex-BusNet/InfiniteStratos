@@ -23,8 +23,6 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>
     public ItemIS(String name, String ... variants)
     {
         super();
-        setRegistryName(name);
-        setUnlocalizedName(name);
         setCreativeTab(CreativeTab.IS_TAB);
         setMaxStackSize(1);
         setNoRepair();
@@ -43,9 +41,11 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>
         ModItems.ITEMS.add(this);
     }
     @Override
-    public String getUnlocalizedName(ItemStack itemStack) {
+    public String getUnlocalizedName(ItemStack itemStack)
+    {
 
-        if (hasSubtypes && itemStack.getMetadata() < VARIANTS.length) {
+        if (hasSubtypes && itemStack.getMetadata() < VARIANTS.length)
+        {
             return String.format("item.%s", VARIANTS[itemStack.getMetadata()]);
         }
         return super.getUnlocalizedName(itemStack);
@@ -53,35 +53,45 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubItems(Item item, CreativeTabs creativeTab, List<ItemStack> list) {
+    public void getSubItems(Item item, CreativeTabs creativeTab, List<ItemStack> list)
+    {
 
-        if (!getHasSubtypes()) {
+        if (!getHasSubtypes())
+        {
             super.getSubItems(item, creativeTab, list);
         }
-        else {
-            for (int meta = 0; meta < VARIANTS.length; ++meta) {
+        else
+        {
+            for (int meta = 0; meta < VARIANTS.length; ++meta)
+            {
                 list.add(new ItemStack(this, 1, meta));
             }
         }
     }
 
     @SideOnly(Side.CLIENT)
-    public void initModelsAndVariants() {
+    public void initModelsAndVariants()
+    {
 
         // TODO TRACE level logging
-        if (getCustomMeshDefinition() != null) {
+        if (getCustomMeshDefinition() != null)
+        {
 
             ModelLoader.setCustomMeshDefinition(this, getCustomMeshDefinition());
-            for (int i = 0; i < VARIANTS.length; i++) {
+            for (int i = 0; i < VARIANTS.length; i++)
+            {
                 ModelBakery.registerItemVariants(this, getCustomModelResourceLocation(VARIANTS[i]));
             }
         }
         else {
-            if (!getHasSubtypes()) {
+            if (!getHasSubtypes())
+            {
                 ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName().toString()));
             }
-            else {
-                for (int i = 0; i < VARIANTS.length; i++) {
+            else
+            {
+                for (int i = 0; i < VARIANTS.length; i++)
+                {
                     ModelLoader.setCustomModelResourceLocation(this, i, getCustomModelResourceLocation(VARIANTS[i]));
                 }
             }
@@ -89,21 +99,25 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>
     }
 
     @Override
-    public ItemIS getItem() {
+    public ItemIS getItem()
+    {
         return this;
     }
 
     @Override
-    public String[] getVariants() {
+    public String[] getVariants()
+    {
         return VARIANTS;
     }
 
     @Override
-    public ItemMeshDefinition getCustomMeshDefinition() {
+    public ItemMeshDefinition getCustomMeshDefinition()
+    {
         return null;
     }
 
-    protected ModelResourceLocation getCustomModelResourceLocation(String variant) {
+    protected ModelResourceLocation getCustomModelResourceLocation(String variant)
+    {
         return new ModelResourceLocation(Reference.MOD_ID + ":" + variant);
     }
 }
