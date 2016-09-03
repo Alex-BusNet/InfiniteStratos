@@ -55,7 +55,7 @@ minecraft {
     useDepAts = true // Required for JEI
 
     // Set mod version in code prior to compilation
-    replaceIn "InfiniteStratos.java"
+    replaceIn "reference/Reference.java"
     replace "@MOD_VERSION@", "${mod_version}.${System.getenv("BUILD_NUMBER") ?: 0}"
 
     // Set the jar signature in code prior to compilation, if it exists as a build property
@@ -85,7 +85,7 @@ processResources {
         include 'mcmod.info'
 
         // replace version and mcversion
-        expand 'version': project.version, 'mcversion': project.minecraft.version
+        expand "version": project.version, "mcversion": project.minecraft.version
     }
 
     // copy everything else, thats not the mcmod.info

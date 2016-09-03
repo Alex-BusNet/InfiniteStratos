@@ -50,6 +50,7 @@ tile.is:flag=Emerald Flag Block
 tile.is:isUnitStation=IS Unit Maintenance Station
 tile.is:unitStand=Unit Maintenance Stand
 tile.is:byakushikiChestGuard=Byakushiki Chest Guard
+tile.is:adamantineOre=Adamantine Ore
 
 
 #GUIs

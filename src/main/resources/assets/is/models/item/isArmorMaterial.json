@@ -1,0 +1,8 @@
+{
+  "parent": "is:item/_standard_item",
+  "textures":
+  {
+    "layer0": "is:items/isArmorMaterial"
+  }
+
+}

@@ -5,6 +5,7 @@ import com.sparta.is.handler.ConfigurationHandler;
 import com.sparta.is.handler.FuelHandler;
 import com.sparta.is.handler.GuiHandler;
 import com.sparta.is.init.ModItems;
+import com.sparta.is.init.ModBlocks;
 import com.sparta.is.network.Network;
 import com.sparta.is.proxy.IProxy;
 import com.sparta.is.recipe.RecipeRegistry;
@@ -62,6 +63,8 @@ public class InfiniteStratos
         proxy.registerKeyBindings();
 
         ModItems.register();
+		
+		ModBlocks.register();
     }
 
     @Mod.EventHandler

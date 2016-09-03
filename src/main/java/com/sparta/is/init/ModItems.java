@@ -2,6 +2,7 @@ package com.sparta.is.init;
 
 import com.sparta.is.InfiniteStratos;
 import com.sparta.is.item.base.ItemIS;
+import com.sparta.is.item.base.ItemISAdamantine;
 import com.sparta.is.item.base.ItemYukihiraNigata;
 import com.sparta.is.reference.Names;
 import net.minecraft.item.Item;
@@ -15,12 +16,12 @@ public class ModItems
     public static final List<ItemIS> ITEMS = new ArrayList<>();
 
     public static Item yukihira;
-    public static Item tabLabel;
+    public static Item adamantineItem;
 
     public static void register()
     {
         yukihira = registerItem(new ItemYukihiraNigata(), Names.Weapons.YUKIHIRA_NIGATA);
-//        tabLabel = registerItem(new ItemTabLabel(), Names.Empty.TAB_LABEL);
+        adamantineItem = registerItem(new ItemISAdamantine(), Names.Materials.IS_ARMOR);
     }
 
 //    @SideOnly(Side.CLIENT)
