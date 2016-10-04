@@ -64,7 +64,7 @@ public class InfiniteStratos
 
         ModItems.register();
 		
-		ModBlocks.register();
+		ModBlocks.init();
     }
 
     @Mod.EventHandler
