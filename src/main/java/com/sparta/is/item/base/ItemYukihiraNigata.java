@@ -1,7 +1,6 @@
 package com.sparta.is.item.base;
 
 import com.sparta.is.armor.ArmorIS;
-import com.sparta.is.creativetab.CreativeTab;
 import com.sparta.is.reference.Key;
 import com.sparta.is.reference.Materials;
 import com.sparta.is.reference.Messages;
@@ -35,10 +34,7 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
 
     public ItemYukihiraNigata()
     {
-        super();
-        this.setUnlocalizedName(Names.Weapons.YUKIHIRA_NIGATA);
-        this.setRegistryName(Names.Weapons.YUKIHIRA_NIGATA);
-        this.setCreativeTab(CreativeTab.IS_TAB);
+        super(Names.Weapons.YUKIHIRA_NIGATA);
         this.isFull3D();
     }
 
@@ -156,7 +152,7 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
 //                 */
 //                if (byakushiki.getState() == 0)
 //                {
-                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, new Object[]{itemStack.getItem()}));
+                    entityPlayer.sendStatusMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED), true /*new Object[]{itemStack.getItem()})*/);
 //                }
 //                else
 //                {

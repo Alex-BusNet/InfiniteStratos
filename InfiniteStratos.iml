@@ -13,11 +13,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/minecraft/deobfedDeps/deobf/mezz/jei/jei_1.10.2/3.7.3.221/jei_1.10.2-3.7.3.221.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/minecraft/deobfedDeps/deobf/mezz/jei/jei_1.11/4.0.5.202/jei_1.11-4.0.5.202.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/minecraft/deobfedDeps/deobf/mezz/jei/jei_1.10.2/3.7.3.221/jei_1.10.2-3.7.3.221-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/minecraft/deobfedDeps/deobf/mezz/jei/jei_1.11/4.0.5.202/jei_1.11-4.0.5.202-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -223,7 +223,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.mojang/authlib/1.5.22/afaa8f6df976fcb5520e76ef1d5798c9e6b5c0b2/authlib-1.5.22.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.mojang/authlib/1.5.24/889ff5477b844800cff734babbf42c1bbda4b10/authlib-1.5.24.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -232,7 +232,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.mojang/realms/1.9.5/efd57120f97df871cc725cf832f628d9d3f17eec/realms-1.9.5.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.mojang/realms/1.10.4/7e837a5eae3fc08b13d5e1baf5ddf5b5d31aa2ff/realms-1.10.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -701,18 +701,18 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/.gradle/minecraft/forgeSrc-1.10.2-12.18.1.2075-PROJECT(InfiniteStratos).jar!/" />
+          <root url="jar://$MODULE_DIR$/.gradle/minecraft/forgeSrc-1.11-13.19.1.2188-PROJECT(InfiniteStratos).jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/.gradle/minecraft/forgeSrc-1.10.2-12.18.1.2075-PROJECT(InfiniteStratos)-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/.gradle/minecraft/forgeSrc-1.11-13.19.1.2188-PROJECT(InfiniteStratos)-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="RUNTIME">
       <library>
         <CLASSES>
-          <root url="file://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.10.2-12.18.1.2075/start" />
+          <root url="file://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.11-13.19.1.2188/start" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

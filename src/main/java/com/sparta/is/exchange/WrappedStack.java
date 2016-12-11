@@ -38,7 +38,7 @@ public final class WrappedStack implements Comparable<WrappedStack> {
 
             if (((ItemStack) object).getItem() != null) {
 
-                stackSize = ((ItemStack) object).stackSize;
+                stackSize = ((ItemStack) object).getCount();
                 wrappedObject = ItemStackUtils.clone((ItemStack) object, 1);
             }
             else {

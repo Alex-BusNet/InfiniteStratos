@@ -3,16 +3,18 @@ package com.sparta.is.item.base;
 import com.sparta.is.creativetab.CreativeTab;
 import com.sparta.is.init.ModItems;
 import com.sparta.is.reference.Reference;
-import net.minecraft.client.renderer.ItemMeshDefinition;
+import com.sparta.is.utils.ResourceLocationHelper;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ItemIS extends Item implements IItemVariantHolder<ItemIS>
@@ -43,57 +45,62 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>
     @Override
     public String getUnlocalizedName(ItemStack itemStack)
     {
-
         if (hasSubtypes && itemStack.getMetadata() < VARIANTS.length)
         {
-            return String.format("item.%s", VARIANTS[itemStack.getMetadata()]);
+            return String.format("item.%s:%s", Reference.MOD_ID, VARIANTS[Math.abs(itemStack.getMetadata() % VARIANTS.length)]);
         }
-        return super.getUnlocalizedName(itemStack);
+        else
+        {
+            return String.format("item.%s:%s", Reference.MOD_ID, BASE_NAME);
+        }
     }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubItems(Item item, CreativeTabs creativeTab, List<ItemStack> list)
+    public void getSubItems(Item item, CreativeTabs creativeTab, NonNullList<ItemStack> list)
     {
 
-        if (!getHasSubtypes())
+        if (!getHasSubtypes() && VARIANTS.length > 0)
         {
-            super.getSubItems(item, creativeTab, list);
-        }
-        else
-        {
-            for (int meta = 0; meta < VARIANTS.length; ++meta)
+            for(int meta = 0; meta < VARIANTS.length; meta++)
             {
                 list.add(new ItemStack(this, 1, meta));
             }
+        }
+        else
+        {
+            super.getSubItems(item, creativeTab, list);
         }
     }
 
     @SideOnly(Side.CLIENT)
     public void initModelsAndVariants()
     {
-
-        // TODO TRACE level logging
         if (getCustomMeshDefinition() != null)
         {
-
-            ModelLoader.setCustomMeshDefinition(this, getCustomMeshDefinition());
             for (int i = 0; i < VARIANTS.length; i++)
             {
-                ModelBakery.registerItemVariants(this, getCustomModelResourceLocation(VARIANTS[i]));
+                ModelBakery.registerItemVariants(this, ResourceLocationHelper.getModelResourceLocation(VARIANTS[i]));
             }
+
+            ModelLoader.setCustomMeshDefinition(this, getCustomMeshDefinition());
         }
-        else {
-            if (!getHasSubtypes())
+        else
+        {
+            if (getHasSubtypes() && VARIANTS.length > 0)
             {
-                ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName().toString()));
+                List<ModelResourceLocation> modelResources = new ArrayList<>();
+                for(int i = 0; i < VARIANTS.length; i++)
+                {
+                    modelResources.add(ResourceLocationHelper.getModelResourceLocation(VARIANTS[i]));
+                }
+
+                ModelBakery.registerItemVariants(this, modelResources.toArray(new ModelResourceLocation[0]));
+                ModelLoader.setCustomMeshDefinition(this, itemStack -> modelResources.get(itemStack.getMetadata()));
             }
             else
             {
-                for (int i = 0; i < VARIANTS.length; i++)
-                {
-                    ModelLoader.setCustomModelResourceLocation(this, i, getCustomModelResourceLocation(VARIANTS[i]));
-                }
+                    ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName().toString()));
             }
         }
     }
@@ -108,16 +115,5 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>
     public String[] getVariants()
     {
         return VARIANTS;
-    }
-
-    @Override
-    public ItemMeshDefinition getCustomMeshDefinition()
-    {
-        return null;
-    }
-
-    protected ModelResourceLocation getCustomModelResourceLocation(String variant)
-    {
-        return new ModelResourceLocation(Reference.MOD_ID + ":" + variant);
     }
 }

@@ -3,7 +3,7 @@ package com.sparta.is.creativetab;
 import com.sparta.is.init.ModItems;
 import com.sparta.is.reference.Reference;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 
 public class CreativeTab extends CreativeTabs
 {
@@ -16,8 +16,8 @@ public class CreativeTab extends CreativeTabs
 
     //TODO: Reimplement ItemTabLabel as IS tab icon
     @Override
-    public Item getTabIconItem()
+    public ItemStack getTabIconItem()
     {
-        return ModItems.yukihira;
+        return new ItemStack(ModItems.yukihira);
     }
 }

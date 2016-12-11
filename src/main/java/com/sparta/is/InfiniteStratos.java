@@ -22,7 +22,6 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
         name = "InfiniteStratos",
         certificateFingerprint = Reference.FINGERPRINT,
         version = Reference.MOD_VERSION,
-        dependencies = "required-after:Forge@[12.18.1,)",
         guiFactory = "com.sparta.is.client.gui.GuiFactory")
 
 public class InfiniteStratos
@@ -76,7 +75,6 @@ public class InfiniteStratos
 
         GameRegistry.registerFuelHandler(new FuelHandler());
 
-        FMLInterModComms.sendMessage("Waila", "register", "com.sparta.is.waila.WailaDataProvider.callbackRegister");
     }
 
     @Mod.EventHandler

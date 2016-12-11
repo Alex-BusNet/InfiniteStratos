@@ -521,13 +521,15 @@ public class BlockHelper
         worldObj.setBlockToAir(blockPos);
 
         List<EntityItem> result = worldObj.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(blockPos.getX() - 2, blockPos.getY() - 2, blockPos.getZ() - 2, blockPos.getX() + 3, blockPos.getY() + 3, blockPos.getZ() + 3));
-        for (int i = 0; i < result.size(); i++) {
+        for (int i = 0; i < result.size(); i++)
+        {
             EntityItem entity = result.get(i);
-            if (entity.isDead || entity.getEntityItem().stackSize <= 0) {
+            if (entity.isDead || entity.getEntityItem().getCount() <= 0)
+            {
                 continue;
             }
             stacks.add(entity.getEntityItem());
-            entity.worldObj.removeEntity(entity);
+            entity.world.removeEntity(entity);
         }
         return stacks;
     }

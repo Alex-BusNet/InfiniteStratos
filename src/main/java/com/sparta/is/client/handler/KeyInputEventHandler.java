@@ -70,7 +70,7 @@ public class KeyInputEventHandler
 
                         if(currentEquippedItem.getItem() instanceof IKeyBound )
                         {
-                            if(entityPlayer.worldObj.isRemote)
+                            if(entityPlayer.world.isRemote)
                             {
                                 Network.INSTANCE.sendToServer(new MessageKeyPressed(getPressedKeyBinding()));
                             }
@@ -95,7 +95,7 @@ public class KeyInputEventHandler
 
                     if(currentEquippedArmor.getItem() instanceof IKeyBound)
                     {
-                        if(entityPlayer.worldObj.isRemote)
+                        if(entityPlayer.world.isRemote)
                         {
                             Network.INSTANCE.sendToServer(new MessageKeyPressed(getPressedKeyBinding()));
                         }

@@ -18,12 +18,14 @@ public class CommandIS extends CommandBase
     private static List<String> commands = new ArrayList<>();
 
     @Override
-    public String getCommandName() {
+    public String getName()
+    {
         return Names.Commands.BASE_COMMAND;
     }
 
     @Override
-    public String getCommandUsage(ICommandSender commandSender) {
+    public String getUsage(ICommandSender commandSender)
+    {
         return Messages.Commands.BASE_COMMAND_USAGE;
     }
 
@@ -37,7 +39,7 @@ public class CommandIS extends CommandBase
 
             for (CommandBase command : modCommands) {
 
-                if (command.getCommandName().equalsIgnoreCase(args[0]) && command.checkPermission(server, sender)) {
+                if (command.getName().equalsIgnoreCase(args[0]) && command.checkPermission(server, sender)) {
                     found = true;
                     command.execute(server, sender, args);
                 }
@@ -50,15 +52,15 @@ public class CommandIS extends CommandBase
     }
 
     @Override
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
 
         if (args.length == 1) {
             return getListOfStringsMatchingLastWord(args, commands);
         }
         else if (args.length >= 2) {
             for (CommandBase command : modCommands) {
-                if (command.getCommandName().equalsIgnoreCase(args[0])) {
-                    return command.getTabCompletionOptions(server, sender, args, pos);
+                if (command.getName().equalsIgnoreCase(args[0])) {
+                    return command.getTabCompletions(server, sender, args, pos);
                 }
             }
         }
@@ -81,6 +83,6 @@ public class CommandIS extends CommandBase
 //        modCommands.add(new CommandRegenEnergyValues());
 //        modCommands.add(new CommandRunTest());
 
-        commands.addAll(modCommands.stream().map(ICommand::getCommandName).collect(Collectors.toList()));
+        commands.addAll(modCommands.stream().map(ICommand::getName).collect(Collectors.toList()));
     }
 }
