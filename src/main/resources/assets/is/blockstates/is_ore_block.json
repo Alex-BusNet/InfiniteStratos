@@ -1,0 +1,17 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "transform": "forge:default-block",
+    "model": "cube_column"
+  },
+  "variants": {
+    "variant": {
+      "adamantine_ore": {
+        "textures": {
+          "end": "is:blocks/flag",
+          "side": "is:blocks/flag"
+        }
+      }
+    }
+  }
+}

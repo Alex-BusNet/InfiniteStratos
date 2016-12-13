@@ -25,6 +25,7 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>
     public ItemIS(String name, String ... variants)
     {
         super();
+        setRegistryName(name);
         setCreativeTab(CreativeTab.IS_TAB);
         setMaxStackSize(1);
         setNoRepair();
@@ -40,7 +41,7 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>
             VARIANTS = variants;
         }
 
-        ModItems.ITEMS.add(this);
+        ModItems.registerItem(this);
     }
     @Override
     public String getUnlocalizedName(ItemStack itemStack)

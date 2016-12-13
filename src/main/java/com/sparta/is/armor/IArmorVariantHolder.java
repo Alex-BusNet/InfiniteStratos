@@ -1,11 +1,10 @@
-package com.sparta.is.item.base;
+package com.sparta.is.armor;
 
 import net.minecraft.client.renderer.ItemMeshDefinition;
-import net.minecraft.item.Item;
 
-public interface IItemVariantHolder <T extends Item>
+public interface IArmorVariantHolder<T extends ArmorIS>
 {
-    T getItem();
+    T getArmor();
 
     String[] getVariants();
 

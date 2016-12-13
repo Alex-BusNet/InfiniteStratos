@@ -13,6 +13,7 @@ public class ConfigurationHandler
     public static Configuration configuration;
 
     private static final String CATEGORY_SERVER = "general.server";
+    private static final String CATEGORY_ENERGY_VALUE = "general.energy_value";
 
     public static void init(File configFile)
     {
@@ -33,6 +34,13 @@ public class ConfigurationHandler
                 Settings.SERVER_SYNC_THRESHOLD_MAX,
                 I18n.translateToLocal(Settings.SERVER_SYNC_THRESHOLD_COMMENT),
                 Settings.SERVER_SYNC_THRESHOLD_LABEL);
+
+        Settings.requireShiftToDisplayExtra = configuration.getBoolean(
+                Settings.SHIFT_DISPLAYS_ENERGY_VALUE_NAME,
+                CATEGORY_ENERGY_VALUE,
+                Settings.SHIFT_DISPLAYS_ENERGY_VALUE_DEFAULT,
+                I18n.translateToLocal(Settings.SHIFT_DISPLAYS_ENERGY_VALUE_COMMENT),
+                Settings.SHIFT_DISPLAYS_ENERGY_VALUE_LABEL);
 
         if ( configuration.hasChanged() )
             configuration.save();
@@ -57,5 +65,11 @@ public class ConfigurationHandler
         private static final int SERVER_SYNC_THRESHOLD_DEFAULT = 5;
         private static final int SERVER_SYNC_THRESHOLD_MIN = 0;
         private static final int SERVER_SYNC_THRESHOLD_MAX = Short.MAX_VALUE;
+
+        public static boolean requireShiftToDisplayExtra;
+        private static final String SHIFT_DISPLAYS_ENERGY_VALUE_NAME = "hold_shift_to_display_emc_value";
+        private static final String SHIFT_DISPLAYS_ENERGY_VALUE_LABEL = "energy_value.hold_shift_to_display_emc_value.label";
+        private static final String SHIFT_DISPLAYS_ENERGY_VALUE_COMMENT = "energy_value.hold_shift_to_display_emc_value.comment";
+        private static final boolean SHIFT_DISPLAYS_ENERGY_VALUE_DEFAULT = true;
     }
 }

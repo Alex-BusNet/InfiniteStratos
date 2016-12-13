@@ -1,12 +1,5 @@
 package com.sparta.is;
 
-import com.sparta.is.command.CommandIS;
-import com.sparta.is.handler.ConfigurationHandler;
-import com.sparta.is.handler.FuelHandler;
-import com.sparta.is.handler.GuiHandler;
-import com.sparta.is.init.ModItems;
-import com.sparta.is.init.ModBlocks;
-import com.sparta.is.network.Network;
 import com.sparta.is.proxy.IProxy;
 import com.sparta.is.recipe.RecipeRegistry;
 import com.sparta.is.reference.Messages;
@@ -15,8 +8,6 @@ import com.sparta.is.utils.LogHelper;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.*;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 @Mod(modid = Reference.MOD_ID,
         name = "InfiniteStratos",
@@ -48,40 +39,33 @@ public class InfiniteStratos
     @Mod.EventHandler
     public void onServerStarting(FMLServerStartingEvent event)
     {
-//        Files.updateFileReferences();
-        event.registerServerCommand(new CommandIS());
+        proxy.onServerStarting(event);
     }
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
-        ConfigurationHandler.init(event.getSuggestedConfigurationFile());
-
-        Network.init();
-
-        proxy.registerKeyBindings();
-
-        ModItems.register();
-		
-		ModBlocks.init();
+        proxy.onPreInit(event);
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
     {
-        NetworkRegistry.INSTANCE.registerGuiHandler(instance, new GuiHandler());
-
-        proxy.registerEventHandlers();
-
-        GameRegistry.registerFuelHandler(new FuelHandler());
-
+        proxy.onInit(event);
     }
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event)
     {
-
+        proxy.onPostInit(event);
     }
+
+    @Mod.EventHandler
+    public void onServerStopping(FMLServerStoppingEvent event)
+    {
+        proxy.onServerStopping(event);
+    }
+
 
     public RecipeRegistry getRecipeRegistry()
     {

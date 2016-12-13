@@ -2,7 +2,7 @@ package com.sparta.is.reference;
 
 public class Messages
 {
-    public static final String OWNER_SET_TO_SELF = "misc.is:owner-set-to-self";
+
     public static final String ENERGY_VALUE = "misc.is:energy-value";
 
     /* Fingerprint check related constants */
@@ -94,4 +94,19 @@ public class Messages
         public static final String INVALID_ACTION = "misc.is:invalidAction";
 
     }
+
+    public static final class ToolTips
+    {
+        public static final String ITEM_BELONGS_TO_NO_ONE = "tooltip.is:belongsToNoOne";
+        public static final String ITEM_BELONGS_TO = "tooltip.is:belongsTo";
+        public static final String NO_ENERGY_VALUE = "tooltip.is:noEnergyValue";
+    }
+
+    public static final class UnitControl
+    {
+        public static final String OWNER_SET_TO_SELF = "misc.is:owner-set-to-self";
+        public static final String ALREADY_OWNER = "misc.is:alreadyOwner";
+        public static final String INVALID_OWNER = "misc.is:invalidOwner";
+    }
+
 }

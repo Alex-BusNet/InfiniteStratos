@@ -1,10 +1,12 @@
 package com.sparta.is.client.handler;
 
+import com.sparta.is.armor.ArmorIS;
 import com.sparta.is.client.settings.KeyBindings;
 import com.sparta.is.network.Network;
 import com.sparta.is.network.message.MessageKeyPressed;
 import com.sparta.is.reference.Key;
 import com.sparta.is.utils.IKeyBound;
+import com.sparta.is.utils.LogHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -19,90 +21,76 @@ public class KeyInputEventHandler
 {
     private static Key getPressedKeyBinding()
     {
-        if ( KeyBindings.STANDBY.isPressed())
+        if ( KeyBindings.STANDBY.isPressed() )
         {
             return Key.STANDBY;
         }
-        else if (KeyBindings.PARTIAL_DEPLOY.isPressed())
+        else if ( KeyBindings.PARTIAL_DEPLOY.isPressed() )
         {
             return Key.PARTIAL_DEPLOY;
         }
-        else if (KeyBindings.FULL_DEPLOY.isPressed())
+        else if ( KeyBindings.FULL_DEPLOY.isPressed() )
         {
             return Key.FULL_DEPLOY;
         }
-        else if (KeyBindings.EQUALIZER_ACCESS.isPressed())
+        else if ( KeyBindings.EQUALIZER_ACCESS.isPressed() )
         {
             return Key.EQUALIZER_ACCESS_MODIFIER;
         }
-        else if(KeyBindings.ONE_OFF_ON.isPressed())
+        else if ( KeyBindings.ONE_OFF.isPressed() )
         {
             return Key.ONE_OFF_ABILITY;
         }
-        else if (KeyBindings.ONE_OFF_OFF.isPressed())
-        {
-            return Key.ONE_OFF_ABILITY_OFF;
-        }
 
         return Key.UNKNOWN;
-
     }
 
     @SubscribeEvent
     public void handleKeyInputEvent(InputEvent.KeyInputEvent event)
     {
-        if(getPressedKeyBinding() == Key.UNKNOWN)
+        Key key = getPressedKeyBinding();
+
+        if(key == Key.UNKNOWN)
         {
             return;
         }
 
-        if(getPressedKeyBinding() == Key.ONE_OFF_ABILITY || getPressedKeyBinding() == Key.ONE_OFF_ABILITY_OFF)
+        LogHelper.info(LogHelper.MOD_MARKER, key.name());
+
+        if(key == Key.ONE_OFF_ABILITY)
         {
-            if(FMLClientHandler.instance().getClient().inGameHasFocus)
+            if(FMLClientHandler.instance().getClient().inGameHasFocus && FMLClientHandler.instance().getClientPlayerEntity() != null)
             {
-                if(FMLClientHandler.instance().getClientPlayerEntity() != null)
+                EntityPlayer entityPlayer = FMLClientHandler.instance().getClientPlayerEntity();
+
+                if(entityPlayer.getHeldItemMainhand() != ItemStack.EMPTY && entityPlayer.getHeldItemMainhand().getItem() instanceof IKeyBound)
                 {
-                    EntityPlayer entityPlayer = FMLClientHandler.instance().getClientPlayerEntity();
-
-                    if(entityPlayer.getHeldItemMainhand() != null)
+                    if ( entityPlayer.getEntityWorld().isRemote )
                     {
-                        ItemStack currentEquippedItem = entityPlayer.getHeldItemMainhand();
-
-                        if(currentEquippedItem.getItem() instanceof IKeyBound )
-                        {
-                            if(entityPlayer.world.isRemote)
-                            {
-                                Network.INSTANCE.sendToServer(new MessageKeyPressed(getPressedKeyBinding()));
-                            }
-                            else
-                            {
-                                ((IKeyBound) currentEquippedItem.getItem()).doKeyBindingAction(entityPlayer, currentEquippedItem, getPressedKeyBinding(), false);
-                            }
-                        }
+                        Network.INSTANCE.sendToServer(new MessageKeyPressed(key));
+                    }
+                    else
+                    {
+                        ((IKeyBound) entityPlayer.getHeldItemMainhand().getItem()).doKeyBindingAction(entityPlayer, key, false);
                     }
                 }
             }
         }
-        else if(FMLClientHandler.instance().getClient().inGameHasFocus)
+        else if(key == Key.FULL_DEPLOY || key == Key.PARTIAL_DEPLOY || key == Key.STANDBY)
         {
-            if(FMLClientHandler.instance().getClientPlayerEntity() != null)
+            if ( FMLClientHandler.instance().getClient().inGameHasFocus && FMLClientHandler.instance().getClientPlayerEntity() != null )
             {
                 EntityPlayer entityPlayer = FMLClientHandler.instance().getClientPlayerEntity();
 
-                if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST)!= null)
+                if ( entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof ArmorIS && entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof IKeyBound )
                 {
-                    ItemStack currentEquippedArmor = entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
-
-                    if(currentEquippedArmor.getItem() instanceof IKeyBound)
+                    if ( entityPlayer.getEntityWorld().isRemote )
                     {
-                        if(entityPlayer.world.isRemote)
-                        {
-                            Network.INSTANCE.sendToServer(new MessageKeyPressed(getPressedKeyBinding()));
-                        }
-                        else
-                        {
-                            ((IKeyBound) currentEquippedArmor.getItem()).doKeyBindingAction(entityPlayer, currentEquippedArmor, getPressedKeyBinding(), false);
-                        }
+                        Network.INSTANCE.sendToServer(new MessageKeyPressed(key));
+                    }
+                    else
+                    {
+                        ((IKeyBound) entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem()).doKeyBindingAction(entityPlayer, key, false);
                     }
                 }
             }

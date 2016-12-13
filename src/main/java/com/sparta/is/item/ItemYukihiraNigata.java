@@ -1,20 +1,31 @@
-package com.sparta.is.item.base;
+package com.sparta.is.item;
 
 import com.sparta.is.armor.ArmorIS;
+import com.sparta.is.armor.UnitByakushiki;
+import com.sparta.is.item.base.ItemISMelee;
+import com.sparta.is.network.Network;
+import com.sparta.is.network.message.MessageOneOffSettings;
 import com.sparta.is.reference.Key;
 import com.sparta.is.reference.Materials;
 import com.sparta.is.reference.Messages;
 import com.sparta.is.reference.Names;
+import com.sparta.is.settings.OneOffSettings;
+import com.sparta.is.settings.UnitSettings;
 import com.sparta.is.utils.*;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -28,13 +39,17 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
     public int maxTransfer;
     public int energyPerUse;
     public int energyPerUseOneOff;
+    private static final String[] VARIANTS = {"yukihiranigata", "reiraku"};
+
+    //This should be removed. It isn't a good idea to have a copy of the unit exist within the sword object
+    private UnitByakushiki byakushiki = new UnitByakushiki();
 
     public int damage = 1;
     public int damageOneOff = 0;
 
     public ItemYukihiraNigata()
     {
-        super(Names.Weapons.YUKIHIRA_NIGATA);
+        super(Names.Weapons.YUKIHIRA_NIGATA, VARIANTS);
         this.isFull3D();
     }
 
@@ -51,12 +66,19 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
     }
 
     @Override
+    public ItemMeshDefinition getCustomMeshDefinition()
+    {
+        return itemStack -> (oneOff == 1) ? ResourceLocationHelper.getModelResourceLocation(VARIANTS[1])
+                : ResourceLocationHelper.getModelResourceLocation(VARIANTS[0]);
+    }
+
+    @Override
     public boolean hitEntity(ItemStack itemStack, EntityLivingBase entity, EntityLivingBase player)
     {
         EntityPlayer entityPlayer = (EntityPlayer) player;
         double shieldEnergy = 0.0;
 
-        if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != null)
+        if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != ItemStack.EMPTY)
         {
             Item item = entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem();
 
@@ -126,7 +148,7 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
         else if(oneOff == 1)
         {
             list.add(StringHelper.RED + "Bypasses an IS Unit's absolute defense" + StringHelper.END);
-            list.add(StringHelper.RED + "Dealing damage directly to pilot." + StringHelper.END);
+            list.add(StringHelper.RED + "and deals damage directly to pilot." + StringHelper.END);
             list.add(StringHelper.RED + "Consumes lots of energy very quickly" + StringHelper.END);
 
         }
@@ -136,52 +158,50 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
 
     }
 
-    //    @Override
-    public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer entityPlayer)
+    @Override
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer entityPlayer, EnumHand hand)
     {
-//        if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != null)
-//        {
-//            /*
-//             * Checks if the Player has the correct unit equipped
-//             */
-//
-//            if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem().getUnlocalizedName().equals(byakushiki.getUnlocalizedName()))
-//            {
-//                /*
-//                 * Checks if Byakushiki is in Standby mode
-//                 */
-//                if (byakushiki.getState() == 0)
-//                {
-                    entityPlayer.sendStatusMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED), true /*new Object[]{itemStack.getItem()})*/);
-//                }
-//                else
-//                {
-//                    entityPlayer.getHeldItemMainhand().setItemDamage(itemStack.getMetadata()); //, this.getMaxItemUseDuration(itemStack));
-//                    return itemStack;
-//                }
-//            }
-//            else
-//            {
+        if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != ItemStack.EMPTY)
+        {
+            /*
+             * Checks if the Player has the correct unit equipped
+             */
+
+            if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem().getUnlocalizedName().equals(byakushiki.getUnlocalizedName()))
+            {
+                /*
+                 * Checks if Byakushiki is in Standby mode
+                 */
+                if (byakushiki.getState() == 0)
+                {
+                    entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, entityPlayer.getHeldItemMainhand().getItem().getItemStackDisplayName(entityPlayer.getHeldItemMainhand())));
+                }
+                else
+                {
+                    entityPlayer.getHeldItemMainhand().setItemDamage(getMetadata(0)); //, this.getMaxItemUseDuration(itemStack));
+                }
+            }
+            else
+            {
                 /*
                  * Player tried to use weapon with different unit
                  */
-//                if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof ArmorIS)
-//                {
-//                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT, "The Yukihira Nigata", entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getUnlocalizedName()));
-//                }
-//                else
-//                {
-//                    entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, new Object[]{itemStack.getItem()}));
-//                }
-//            }
-//        }
-//        else
-//        {
-//
-//            entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, new Object[]{itemStack.getItem()}));
-//        }
+                if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof ArmorIS)
+                {
+                    entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT,  entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getDisplayName()));
+                }
+                else
+                {
+                    entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, entityPlayer.getHeldItemMainhand().getItem().getItemStackDisplayName(entityPlayer.getHeldItemMainhand())));
+                }
+            }
+        }
+        else
+        {
+            entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, entityPlayer.getHeldItemMainhand().getItem().getItemStackDisplayName(entityPlayer.getHeldItemMainhand())));
+        }
 
-        return itemStack;
+        return new ActionResult(EnumActionResult.PASS, entityPlayer.getHeldItem(hand));
     }
 
 //    @Override
@@ -193,77 +213,57 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
 
 
     @Override
-    public void onUpdate(ItemStack itemStack, World world, Entity entity, int slot, boolean isCurrentItem)
+    public void doKeyBindingAction(EntityPlayer entityPlayer, Key key, boolean falling)
     {
-//        if ( oneOff == 1 && byakushiki.getState() == 2)
-//        {
-//            this.setUnlocalizedName(Names.One_Off.REIRAKU_BYAKUYA);
-//            this.setTextureName(TEX_LOC + Names.One_Off.REIRAKU_BYAKUYA);
-//            ReirakuByakuya(itemStack, world, entity);
-//        }
-//        else
-//        {
-            this.setUnlocalizedName(Names.Weapons.YUKIHIRA_NIGATA);
-//            this.setTextureName(TEX_LOC + Names.Weapons.YUKIHIRA_NIGATA);
+        if(key != Key.UNKNOWN)
+        {
+            NBTTagCompound playerCustomData = EntityHelper.getCustomEntityData(entityPlayer);
+            OneOffSettings oneOffSettings = new OneOffSettings();
+            oneOffSettings.readFromNBT(playerCustomData);
+            UnitSettings unitSettings = new UnitSettings();
+            unitSettings.readFromNBT(playerCustomData);
 
-//            if(byakushiki.getState() == 2)
-//            {
-//                ((EntityPlayer) entity).capabilities.allowFlying = true;
-//                ((EntityPlayer) entity).capabilities.setPlayerWalkSpeed(0.3F);
-//                ((EntityPlayer) entity).capabilities.setFlySpeed(0.1F);
-//            }
-//        }
-    }
+            if ( key == Key.ONE_OFF_ABILITY && oneOff != 1)
+            {
+                if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != ItemStack.EMPTY)
+                {
+                    if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof UnitByakushiki)
+                    {
+                        if(byakushiki.getState() != 0)
+                        {
+                            oneOff = 1;
+                            oneOffSettings.setOneOff(1);
+                            entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.ONE_OFF_ACTIVE));
+                            setEmpoweredState(entityPlayer.getHeldItemMainhand(), true);
+                        }
+                        else
+                        {
+                            entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_ACTION));
+                        }
+                    }
+                    else
+                    {
+                        entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT, entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getDisplayName()));
+                    }
+                }
+            }
+            else if ( key == Key.ONE_OFF_ABILITY && oneOff != 0 )
+            {
+                oneOff = 0;
+                oneOffSettings.setOneOff(0);
+                entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.ONE_OFF_DEACTIVE));
+                setEmpoweredState(entityPlayer.getHeldItemMainhand(), false);
+            }
 
-    @Override
-    public void doKeyBindingAction(EntityPlayer entityPlayer, ItemStack itemStack, Key key, boolean falling)
-    {
-        //TODO: reimplement once Byakushiki, Reiraku, Unit settings, and One-Off settings are re-added
-//        if(key != Key.UNKNOWN)
-//        {
-//            NBTTagCompound playerCustomData = EntityHelper.getCustomEntityData(entityPlayer);
-//            OneOffSettings oneOffSettings = new OneOffSettings();
-//            oneOffSettings.readFromNBT(playerCustomData);
-//            UnitSettings unitSettings = new UnitSettings();
-//            unitSettings.readFromNBT(playerCustomData);
-//
-//            if ( key == Key.ONE_OFF_ABILITY && oneOff != 1)
-//            {
-//                if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != null)
-//                {
-//                    if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof UnitByakushiki)
-//                    {
-//                        if(byakushiki.getState() != 0)
-//                        {
-//                            oneOff = 1;
-//                            oneOffSettings.setOneOff(1);
-//                            entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.ONE_OFF_ACTIVE, "Reiraku Byakuya"));
-//                            setEmpoweredState(itemStack, true);
-//                        }
-//                        else
-//                        {
-//                            entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_ACTION));
-//                        }
-//                    }
-//                    else
-//                    {
-//                        entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT, new Object[]{itemStack.getItem()}, entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getUnlocalizedName()));
-//                    }
-//                }
-//            }
-//            else if ( key == Key.ONE_OFF_ABILITY_OFF && oneOff != 0 )
-//            {
-//                oneOff = 0;
-//                oneOffSettings.setOneOff(0);
-//                entityPlayer.addChatComponentMessage(new TextComponentTranslation(Messages.ItemUse.ONE_OFF_DEACTIVE, "Reiraku Byakuya"));
-//                setEmpoweredState(itemStack, false);
-//            }
-//
-//            unitSettings.writeToNBT(playerCustomData);
-//            oneOffSettings.writeToNBT(playerCustomData);
-//            EntityHelper.saveCustomEntityData(entityPlayer, playerCustomData);
-//            Network.INSTANCE.sendTo(new MessageOneOffSettings(oneOffSettings), (EntityPlayerMP) entityPlayer);
-//        }
+            unitSettings.writeToNBT(playerCustomData);
+            oneOffSettings.writeToNBT(playerCustomData);
+            EntityHelper.saveCustomEntityData(entityPlayer, playerCustomData);
+
+            if(entityPlayer.getEntityWorld().isRemote)
+            {
+                Network.INSTANCE.sendTo(new MessageOneOffSettings(oneOffSettings), (EntityPlayerMP) entityPlayer);
+            }
+        }
     }
 
     @Override
@@ -340,7 +340,7 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
 
     public boolean isEmpowered(ItemStack stack)
     {
-        return stack.getTagCompound() == null ? false : stack.getTagCompound().getBoolean("oneOffActive");
+        return (stack.getTagCompound() == null) ? false : stack.getTagCompound().getBoolean("oneOffActive");
     }
 
 

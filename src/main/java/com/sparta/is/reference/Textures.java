@@ -18,7 +18,7 @@ public class Textures
     {
         private static String WEAPON_ICON_LOCATION = "textures/items/";
 
-        public static ResourceLocation YUKIHIRA_NIGATA_ICON = ResourceLocationHelper.getResourceLocation(WEAPON_ICON_LOCATION + "yukihiraNigata.png");
+        public static ResourceLocation YUKIHIRA_NIGATA_ICON = ResourceLocationHelper.getResourceLocation(WEAPON_ICON_LOCATION + "yukihiranigata.png");
     }
 
     public static final class Items
@@ -27,9 +27,9 @@ public class Textures
 
         public static final ResourceLocation YUKIHIRA_HILT = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihirahilt.png");
         public static final ResourceLocation YUKIHIRA_BLADE = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihirablade.png");
-        public static final ResourceLocation YUKIHIRA_NIGATA = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihiraNigata.png");
+        public static final ResourceLocation YUKIHIRA_NIGATA = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihiranigata.png");
         public static final ResourceLocation YUKIHIRA_MODEL_TEXTURE = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihiraModel_color.png");
-        public static final ResourceLocation REIRAKU_BYAKUYA = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihiraNigata_oneOff.png");
+        public static final ResourceLocation REIRAKU_BYAKUYA = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "yukihiranigata_oneoff.png");
         public static final ResourceLocation ABSOLUTE_DEFENSE = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "absolutedefense.png");
         public static final ResourceLocation IS_CORE = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "isCore.png");
         public static final ResourceLocation IS_PROCESSOR = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "isProcessor.png");
@@ -48,7 +48,7 @@ public class Textures
     {
         public static final String MATERIAL_TEXTURE_LOCATION = "textures/materials/";
 
-        public static final ResourceLocation IS_ARMOR = ResourceLocationHelper.getResourceLocation(MATERIAL_TEXTURE_LOCATION + "isArmorMaterial.png");
+        public static final ResourceLocation IS_ARMOR = ResourceLocationHelper.getResourceLocation(MATERIAL_TEXTURE_LOCATION + "isarmormaterial.png");
         public static final ResourceLocation IS_SWORD = ResourceLocationHelper.getResourceLocation(MATERIAL_TEXTURE_LOCATION + "isWeaponMaterial.png");
     }
 

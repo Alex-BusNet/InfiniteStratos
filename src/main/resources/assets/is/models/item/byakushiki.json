@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "is:items/yukihiranigata"
+    "layer0": "is:items/byakushiki"
   }
 }

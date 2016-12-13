@@ -1,7 +1,14 @@
 #Configuration
-
+energy_value=Energy Value Options
+energy_value.regenerate_values_when.label=Regenerate Energy Values When
+energy_value.regenerate_values_when.comment=When to regenerate energy values for objects. Options are "Always" (every time Minecraft starts) or "As Needed" (whenever the mod cannot the calculated energy values file).
+energy_value.hold_shift_to_display_emc_value.label=Hold Shift To Display EMC Values
+energy_value.hold_shift_to_display_emc_value.comment=Whether or not Shift must be pressed to display EMC values (true = Hold Shift, false = Always displayed)
 
 #Server Options
+server=Server Options
+server.sync_threshold.label=Sync Threshold
+server.sync_threshold.comment=The number of seconds a player must wait before they can sync their energy values for objects with the server again
 
 
 #Keys
@@ -10,8 +17,7 @@ keys.is.fullDeploy=IS Unit Full Deployment
 keys.is.partialDeploy=IS Unit Partial Deployment
 keys.is.standby=IS Unit Standby
 keys.is.equalizerAccessModifier=Equalizer Slot Access
-keys.is.oneOffAbility=One-Off Ability on
-keys.is.oneOffAbilityOff=One-Off Ability off
+keys.is.oneOffAbility=Toggle One-Off Ability
 
 #Creative Tabs
 itemGroup.is=Infinite Stratos
@@ -22,12 +28,12 @@ material.is:isSwordMaterial.name=Equalizer Weapon Material
 
 #Items
 item.is:yukihiraBlade.name=Yukihira Blade
-item.is:yukihiraHilt=Yukihira Hilt
-item.is:absoluteDefense=Absolute Defense System
-item.is:isCore=IS Unit Core
-item.is:isProcessor=IS Unit Processor
-item.is:testUnit=IS Testing Unit [Dev use only]
-item.is:tabaneSpawnEgg=Spawn Tabane Shinonono [WARNING]
+item.is:yukihiraHilt.name=Yukihira Hilt
+item.is:absoluteDefense.name=Absolute Defense System
+item.is:isCore.name=IS Unit Core
+item.is:isProcessor.name=IS Unit Processor
+item.is:testUnit.name=IS Testing Unit [Dev use only]
+item.is:tabaneSpawnEgg.name=Spawn Tabane Shinonono [WARNING]
 
 
 #Tools
@@ -37,20 +43,21 @@ item.is:tabaneSpawnEgg=Spawn Tabane Shinonono [WARNING]
 
 #Weapons
 weapon.is:yukihiraNigata.name=Yukihira Nigata
-weapon.is:reiraku=Reiraku Byakuya
+weapon.is:reiraku.name=Reiraku Byakuya
 
 
 
 #IS Units
-armor.is:byakushiki=Byakushiki
-armor.is:kuroAkiko=Kuro Akiko
+armor.is:byakushiki.name=Byakushiki
+armor.is:kuroAkiko.name=Kuro Akiko
 
 #Blocks
-tile.is:flag=Emerald Flag Block
-tile.is:isUnitStation=IS Unit Maintenance Station
-tile.is:unitStand=Unit Maintenance Stand
-tile.is:byakushikiChestGuard=Byakushiki Chest Guard
-tile.is:adamantineOre=Adamantine Ore
+tile.is:flag.name=Emerald Flag Block
+tile.is:isUnitStation.name=IS Unit Maintenance Station
+tile.is:unitStand.name=Unit Maintenance Stand
+tile.is:byakushikiChestGuard.name=Byakushiki Chest Guard
+tile.is:adamantineOre.name=Adamantine Ore
+tile.is:adamantine_ore.name=Adamantine Ore Block
 
 
 #GUIs
@@ -65,10 +72,10 @@ tile.is:adamantineOre=Adamantine Ore
 #Tooltips
 tooltip.is:belongsTo=Belongs to %s
 tooltip.is:belongsToNoOne=Belongs to no one
-
+tooltip.is:noEnergyValue=No Energy
 
 #Misc
-misc.is:invalid-owner=This Unit is owned by %s
+misc.is:invalidOwner=This Unit is owned by %s
 misc.is:owner-set-to-self=You are now the owner of %s
 misc.is:swingSwordFailed=You try to swing %s, but it is too heavy
 misc.is:invalidUnit=%s does not belong to %s and cannot be used

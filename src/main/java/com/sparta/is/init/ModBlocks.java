@@ -1,19 +1,29 @@
 package com.sparta.is.init;
 
-import com.sparta.is.block.BlockAdamantineOre;
+import com.sparta.is.block.BlockIS;
+import com.sparta.is.block.BlockOre;
 import net.minecraft.block.Block;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.oredict.OreDictionary;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class ModBlocks
 {
-    public static Block adamantine;
+    private static final List<BlockIS> BLOCKS = new ArrayList<>();
+//    public static final BlockIS adamantine = new BlockAdamantine();
+    public static final BlockIS oreBlock = new BlockOre();
 
-    public static void init()
+    private ModBlocks() {}
+
+    public static void register(BlockIS block)
     {
-        adamantine = new BlockAdamantineOre();
+        BLOCKS.add(block);
+    }
 
-        OreDictionary.registerOre("adamantineOre", new ItemStack(adamantine, 1, 1));
+    public static Collection<BlockIS> getBlocks()
+    {
+        return BLOCKS;
     }
 
     private static void registerTileEntity(Block block, String name)

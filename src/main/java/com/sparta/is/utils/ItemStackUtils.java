@@ -83,4 +83,19 @@ public class ItemStackUtils
     public static void setOwnerName(ItemStack itemStack, EntityPlayer entityPlayer) {
         NBTUtils.setString(itemStack, Names.NBT.OWNER, entityPlayer.getName());
     }
+
+    public static boolean hasOwner(ItemStack itemStack)
+    {
+        return (NBTUtils.hasTag(itemStack, Names.NBT.OWNER_UUID_MOST_SIG) && NBTUtils.hasTag(itemStack, Names.NBT.OWNER_UUID_LEAST_SIG)) || NBTUtils.hasTag(itemStack, Names.NBT.OWNER);
+    }
+
+    public static boolean hasOwnerUUID(ItemStack itemStack)
+    {
+        return NBTUtils.hasTag(itemStack, Names.NBT.OWNER_UUID_MOST_SIG) && NBTUtils.hasTag(itemStack, Names.NBT.OWNER_UUID_LEAST_SIG);
+    }
+
+    public static boolean hasOwnerName(ItemStack itemStack)
+    {
+        return NBTUtils.hasTag(itemStack, Names.NBT.OWNER);
+    }
 }

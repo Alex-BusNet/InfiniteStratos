@@ -32,7 +32,7 @@ public class RecipesVanilla
                 });
 
         if (!FluidRegistry.isFluidRegistered("milk")) {
-            RecipeRegistryProxy.addRecipe(Items.MILK_BUCKET, Items.BUCKET, new OreStack("ee3Milk"));
+            RecipeRegistryProxy.addRecipe(Items.MILK_BUCKET, Items.BUCKET, new OreStack("isMilk"));
         }
         else {
             RecipeRegistryProxy.addRecipe(Items.MILK_BUCKET, Items.BUCKET, new FluidStack(FluidRegistry.getFluid("milk"), Fluid.BUCKET_VOLUME));

@@ -24,6 +24,11 @@ public class NBTUtils
         }
     }
 
+    public static boolean hasTag(ItemStack itemStack, String keyName)
+    {
+        return itemStack != null && itemStack.getTagCompound() != null && itemStack.getTagCompound().hasKey(keyName);
+    }
+
     public static boolean hasUUID(ItemStack itemStack) {
         return getLong(itemStack, Names.NBT.UUID_MOST_SIG) != null && getLong(itemStack, Names.NBT.UUID_LEAST_SIG) != null;
     }
