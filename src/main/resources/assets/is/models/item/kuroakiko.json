@@ -1,0 +1,19 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "is:items/kuroakiko"
+  },
+  "variants": {
+    "normal": {
+      "textures": {
+        "layer0": "is:items/kuroakiko"
+      }
+    },
+    "inventory": {
+      "textures": {
+        "layer0": "is:items/kuroakiko"
+      }
+    }
+  }
+
+}

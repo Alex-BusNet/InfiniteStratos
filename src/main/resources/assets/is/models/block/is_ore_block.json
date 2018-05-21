@@ -1,0 +1,16 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "textures": {"all": "is:blocks/isarmormaterial"},
+    "model": "cube_all",
+    "uvlock": true
+  },
+  "variants": {
+    "variant=adamantine_ore": [{
+      "textures": "is:blocks/isarmormaterial"
+    }],
+    "variant=crystalline_ore": [{
+      "textures": "is:blocks/isswordmaterial"
+    }]
+  }
+}

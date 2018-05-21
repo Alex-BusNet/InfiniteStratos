@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "is:items/isarmormaterial"
+  },
+  "variants": {
+    "normal": {
+      "textures": {
+        "layer0": "is:items/isarmormaterial"
+      }
+    }
+  }
+
+}

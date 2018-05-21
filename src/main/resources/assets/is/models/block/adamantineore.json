@@ -1,0 +1,10 @@
+{
+  "parent": "block/cube",
+  "textures": "is:blocks/flag",
+  "variants": {
+    "normal": {
+      "textures": { "layer0": "is:blocks/flag" }
+    },
+    "inventory": [{}]
+  }
+}

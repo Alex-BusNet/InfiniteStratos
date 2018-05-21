@@ -1,0 +1,9 @@
+{
+  "parent": "builtin/generated",
+  "textures": { "layer0": "is:items/tablabel" },
+  "variants": {
+    "normal": {
+      "textures": { "layer0": "is:items/tablabel" }
+    }
+  }
+}

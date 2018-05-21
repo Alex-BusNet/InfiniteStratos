@@ -8,8 +8,11 @@
 *.war
 *.ear
 .gradle/
+.idea/
+build/
 eclipse/
 out/
+run/
 
 #*.ipr
 #*.iws

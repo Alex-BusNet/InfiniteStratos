@@ -1,0 +1,7 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "is:items/tabanespawnegg",
+    "layer1": "is:items/tabanespawnegg_overlay"
+  }
+}

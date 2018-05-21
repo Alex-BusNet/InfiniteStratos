@@ -1,0 +1,12 @@
+{
+  "forge_marker": 1,
+  "textures": {"layer0": "is:items/isarmormaterial" },
+  "variants": {
+    "isarmormaterial": {
+      "textures": "is:items/isarmormaterial"
+    },
+    "isswordmaterial": {
+      "textures": "is:item/isswordmaterial"
+    }
+  }
+}

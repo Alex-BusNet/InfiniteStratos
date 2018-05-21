@@ -1,0 +1,18 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "is:items/byakushiki"
+  },
+  "variants": {
+    "normal" : {
+      "textures": {
+        "layer0": "is:items/byakushiki"
+      }
+    },
+    "inventory": {
+      "textures": {
+        "layer0": "is:items/byakushiki"
+      }
+    }
+  }
+}
