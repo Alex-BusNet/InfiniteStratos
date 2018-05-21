@@ -33,7 +33,7 @@ item.is:absoluteDefense.name=Absolute Defense System
 item.is:isCore.name=IS Unit Core
 item.is:isProcessor.name=IS Unit Processor
 item.is:testUnit.name=IS Testing Unit [Dev use only]
-item.is:tabaneSpawnEgg.name=Spawn Tabane Shinonono [WARNING]
+item.is:tabanespawnegg.name=Spawn Tabane Shinonono [WARNING]
 
 
 #Tools
@@ -44,7 +44,7 @@ item.is:tabaneSpawnEgg.name=Spawn Tabane Shinonono [WARNING]
 #Weapons
 weapon.is:yukihiraNigata.name=Yukihira Nigata
 weapon.is:reiraku.name=Reiraku Byakuya
-
+weapon.is:elucidator.name=Elucidator
 
 
 #IS Units

@@ -39,8 +39,8 @@ public class Textures
         public static final ResourceLocation IS_UNIT_STATION_SMALL_DISPLAY = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "isUnitStation_smallDisplay.png");
         public static final ResourceLocation UNIT_STAND = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "unitStand.png");
         public static final ResourceLocation BYAKUSHIKI_CHEST = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "byakushikiChest.png");
-        public static final ResourceLocation TABANE_SPAWN_EGG = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "tabaneSpawnEgg.png");
-        public static final ResourceLocation TABANE_SPAWN_EGG_OVERLAY = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "tabaneSpawnEgg_overlay.png");
+        public static final ResourceLocation TABANE_SPAWN_EGG = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "tabanespawnegg.png");
+        public static final ResourceLocation TABANE_SPAWN_EGG_OVERLAY = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "tabanespawnegg_overlay.png");
         public static final ResourceLocation KURO_AKIKO_CHEST = ResourceLocationHelper.getResourceLocation(ITEM_TEXTURE_LOCATION + "kuroAkikoChest.png");
     }
 
@@ -92,7 +92,7 @@ public class Textures
         public static final String MODEL_TEXTURE_LOCATION = "textures/models/";
 
         public static final ResourceLocation BYAKUSHIKI_CHEST = ResourceLocationHelper.getResourceLocation(MODEL_TEXTURE_LOCATION + "byakushiki_1.png");
-        public static final ResourceLocation KURO_AKIKO_TEST = ResourceLocationHelper.getResourceLocation(MODEL_TEXTURE_LOCATION + "kuroAkiko_1.png");
+        public static final ResourceLocation KURO_AKIKO_TEST = ResourceLocationHelper.getResourceLocation(MODEL_TEXTURE_LOCATION + "kuroakiko_1.png");
     }
 
     public static final class Villagers

@@ -1,18 +1,15 @@
 package com.sparta.is.item.base;
 
 import com.sparta.is.creativetab.CreativeTab;
+import com.sparta.is.entity.driveables.types.EqualizerMeleeType;
 import com.sparta.is.init.ModItems;
 import com.sparta.is.reference.Materials;
 import com.sparta.is.reference.Reference;
 import com.sparta.is.utils.ResourceLocationHelper;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -24,6 +21,8 @@ public class ItemISMelee extends ItemSword implements IMeleeVariantHolder<ItemIS
 {
     private String BASE_NAME;
     private final String[] VARIANTS;
+    private boolean displayOnce = false;
+    private EqualizerMeleeType type;
 
     public ItemISMelee(String name, String ... variants)
     {
@@ -100,11 +99,6 @@ public class ItemISMelee extends ItemSword implements IMeleeVariantHolder<ItemIS
         }
     }
 
-    @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
-    {
-        return super.onItemRightClick(world, player, hand);
-    }
 
     @Override
     public ItemISMelee getItem()
@@ -117,4 +111,10 @@ public class ItemISMelee extends ItemSword implements IMeleeVariantHolder<ItemIS
     {
         return VARIANTS;
     }
+
+    public EqualizerMeleeType getType()
+    {
+        return type;
+    }
+
 }

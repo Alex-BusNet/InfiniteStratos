@@ -1,5 +1,6 @@
 package com.sparta.is;
 
+import com.sparta.is.entity.driveables.types.IScope;
 import com.sparta.is.proxy.IProxy;
 import com.sparta.is.recipe.RecipeRegistry;
 import com.sparta.is.reference.Messages;
@@ -72,5 +73,5 @@ public class InfiniteStratos
         return RecipeRegistry.INSTANCE;
     }
 
-
+    public IScope currentScope = null;
 }

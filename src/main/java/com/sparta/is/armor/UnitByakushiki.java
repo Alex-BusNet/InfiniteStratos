@@ -23,7 +23,7 @@ import java.util.List;
 public class UnitByakushiki extends ArmorIS implements ISpecialArmor, IKeyBound, IOwnable
 {
     public static final ArmorProperties SWORD = new ArmorProperties(0, 0.2D, Integer.MAX_VALUE);
-    private static final String[] VARIANTS = {"byakushiki"};
+    private static final String[] VARIANTS = {"byakushiki"/*"byakushiki_standby", "byakushiki_partial_deploy", "byakushiki_full_deploy, "setsura"*/};
 
     protected String ownerName;
     private int equalizers = 4;
@@ -38,9 +38,7 @@ public class UnitByakushiki extends ArmorIS implements ISpecialArmor, IKeyBound,
 
     public UnitByakushiki()
     {
-        super(Materials.Armor.IS_ARMOR, EntityEquipmentSlot.CHEST, 4, VARIANTS);
-        this.setUnlocalizedName(Names.Units.BYAKUSHIKI);
-        this.setRegistryName(Names.Units.BYAKUSHIKI);
+        super(Names.Units.BYAKUSHIKI, Materials.Armor.IS_ARMOR, EntityEquipmentSlot.CHEST, 4, VARIANTS);
         this.setShieldCapacity(20000);
         this.setRemainingShieldCapacity();
         setArmorTextures(textures);
@@ -49,6 +47,12 @@ public class UnitByakushiki extends ArmorIS implements ISpecialArmor, IKeyBound,
     public int getState()
     {
         return state;
+    }
+
+    @Override
+    public String[] getVariants()
+    {
+        return VARIANTS;
     }
 
     @Override
@@ -147,7 +151,6 @@ public class UnitByakushiki extends ArmorIS implements ISpecialArmor, IKeyBound,
 
             unitSettings.writeToNBT(playerCustomData);
             EntityHelper.saveCustomEntityData(entityPlayer, playerCustomData);
-            LogHelper.info(LogHelper.MOD_MARKER, entityPlayer.getEntityData());
 
             if(entityPlayer.getEntityWorld().isRemote)
             {

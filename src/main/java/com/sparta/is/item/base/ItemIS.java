@@ -1,6 +1,7 @@
 package com.sparta.is.item.base;
 
 import com.sparta.is.creativetab.CreativeTab;
+import com.sparta.is.entity.driveables.types.InfoType;
 import com.sparta.is.init.ModItems;
 import com.sparta.is.reference.Reference;
 import com.sparta.is.utils.ResourceLocationHelper;
@@ -21,6 +22,7 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>
 {
     private final String BASE_NAME;
     private final String[] VARIANTS;
+    private InfoType type;
 
     public ItemIS(String name, String ... variants)
     {
@@ -117,4 +119,11 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>
     {
         return VARIANTS;
     }
+
+    public InfoType getType()
+    {
+        return type;
+    }
+
+
 }

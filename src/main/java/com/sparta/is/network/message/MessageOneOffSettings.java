@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class MessageOneOffSettings implements IMessage, IMessageHandler<MessageOneOffSettings, IMessage>
+public class MessageOneOffSettings implements IMessage
 {
     private boolean oneOffActive;
 
@@ -34,10 +34,13 @@ public class MessageOneOffSettings implements IMessage, IMessageHandler<MessageO
         buf.writeBoolean(this.oneOffActive);
     }
 
-    @Override
-    public IMessage onMessage(MessageOneOffSettings message, MessageContext ctx)
+    public static class MessageHandler implements IMessageHandler<MessageOneOffSettings, IMessage>
     {
-        InfiniteStratos.proxy.getClientProxy().oneOffSettings = new OneOffSettings(message.oneOffActive);
-        return null;
+        @Override
+        public IMessage onMessage(MessageOneOffSettings message, MessageContext ctx)
+        {
+            InfiniteStratos.proxy.getClientProxy().oneOffSettings = new OneOffSettings(message.oneOffActive);
+            return null;
+        }
     }
 }

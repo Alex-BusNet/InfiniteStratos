@@ -4,8 +4,10 @@ import com.sparta.is.InfiniteStratos;
 import com.sparta.is.command.CommandIS;
 import com.sparta.is.handler.*;
 import com.sparta.is.init.ModBlocks;
+import com.sparta.is.init.ModEntities;
 import com.sparta.is.init.ModItems;
 import com.sparta.is.network.Network;
+import com.sparta.is.reference.Files;
 import com.sparta.is.utils.BlockUtils;
 import net.minecraft.block.Block;
 import net.minecraftforge.common.MinecraftForge;
@@ -19,11 +21,13 @@ public abstract class CommonProxy implements  IProxy
     public void onPreInit(FMLPreInitializationEvent event)
     {
         ConfigurationHandler.init(event.getSuggestedConfigurationFile());
-
+        Files.init(event);
         Network.init();
         ModItems.getItems().forEach(GameRegistry::register);
+        GameRegistry.register(ModItems.tabaneSpawnEgg);
         ModItems.getMeleeItems().forEach(GameRegistry::register);
         ModItems.getUnits().forEach(GameRegistry::register);
+        ModEntities.init();
 
         for ( Block block : ModBlocks.getBlocks() )
         {
@@ -57,6 +61,7 @@ public abstract class CommonProxy implements  IProxy
     @Override
     public void onServerStarting(FMLServerStartingEvent event)
     {
+        Files.updateFileReferences();
         event.registerServerCommand(new CommandIS());
     }
 

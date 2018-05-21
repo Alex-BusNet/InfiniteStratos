@@ -16,6 +16,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -25,6 +26,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -40,9 +42,7 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
     public int energyPerUse;
     public int energyPerUseOneOff;
     private static final String[] VARIANTS = {"yukihiranigata", "reiraku"};
-
-    //This should be removed. It isn't a good idea to have a copy of the unit exist within the sword object
-    private UnitByakushiki byakushiki = new UnitByakushiki();
+    private boolean displayOnce = false;
 
     public int damage = 1;
     public int damageOneOff = 0;
@@ -73,6 +73,45 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
     }
 
     @Override
+    public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand)
+    {
+        if(player.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != ItemStack.EMPTY)
+        {
+            ItemStack itemStack = player.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
+
+            if(itemStack.getItem() instanceof UnitByakushiki)
+            {
+                if(((UnitByakushiki) itemStack.getItem()).getState() == 0)
+                {
+                    LogHelper.info("Use Action Failed");
+                    return EnumActionResult.FAIL;
+                }
+            }
+        }
+        return EnumActionResult.PASS;
+    }
+
+    @Override
+    public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity)
+    {
+        if(player.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != ItemStack.EMPTY)
+        {
+            ItemStack itemStack = player.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
+
+            if(itemStack.getItem() instanceof UnitByakushiki)
+            {
+                if(((UnitByakushiki) itemStack.getItem()).getState() == 0)
+                {
+                    LogHelper.info("Attack Action Failed");
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    @Override
     public boolean hitEntity(ItemStack itemStack, EntityLivingBase entity, EntityLivingBase player)
     {
         EntityPlayer entityPlayer = (EntityPlayer) player;
@@ -82,8 +121,13 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
         {
             Item item = entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem();
 
-            if(item instanceof ArmorIS )
+            if(item instanceof UnitByakushiki )
             {
+                if(((UnitByakushiki) item).getState() == 0)
+                {
+                    return true;
+                }
+
                 useEnergy(itemStack, false);
             }
         }
@@ -106,7 +150,7 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
             }
         }
 
-        return true;
+        return false;
     }
 
     @Override
@@ -161,34 +205,90 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer entityPlayer, EnumHand hand)
     {
-        if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != ItemStack.EMPTY)
+        // displayOnce prevents the right click message from appearing twice per click.
+        if(!displayOnce)
         {
-            /*
-             * Checks if the Player has the correct unit equipped
-             */
-
-            if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem().getUnlocalizedName().equals(byakushiki.getUnlocalizedName()))
+            displayOnce = true;
+            if ( entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != ItemStack.EMPTY )
             {
-                /*
-                 * Checks if Byakushiki is in Standby mode
-                 */
-                if (byakushiki.getState() == 0)
+                ItemStack isUnit = entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
+                //Checks if the Player has the correct unit equipped
+                if ( isUnit.getItem() instanceof UnitByakushiki)
                 {
-                    entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, entityPlayer.getHeldItemMainhand().getItem().getItemStackDisplayName(entityPlayer.getHeldItemMainhand())));
+                    //Checks if Byakushiki is in Standby mode
+                    if ( ((UnitByakushiki) isUnit.getItem()).getState() == 0 )
+                    {
+                        entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, entityPlayer.getHeldItemMainhand().getItem().getItemStackDisplayName(entityPlayer.getHeldItemMainhand())));
+                    }
+                    else
+                    {
+                        return new ActionResult(EnumActionResult.PASS, entityPlayer.getHeldItem(hand));
+                    }
                 }
                 else
                 {
-                    entityPlayer.getHeldItemMainhand().setItemDamage(getMetadata(0)); //, this.getMaxItemUseDuration(itemStack));
+                    // Player tried to use weapon with different unit
+                    if ( isUnit.getItem() instanceof ArmorIS )
+                    {
+                        entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT, isUnit.getDisplayName()));
+                    }
+                    else
+                    {
+                        entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, entityPlayer.getHeldItemMainhand().getItem().getItemStackDisplayName(entityPlayer.getHeldItemMainhand())));
+                    }
                 }
             }
             else
             {
-                /*
-                 * Player tried to use weapon with different unit
-                 */
-                if (entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof ArmorIS)
+                entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, entityPlayer.getHeldItemMainhand().getItem().getItemStackDisplayName(entityPlayer.getHeldItemMainhand())));
+            }
+        }
+        else
+        {
+            displayOnce = false;
+        }
+
+        return new ActionResult(EnumActionResult.FAIL, entityPlayer.getHeldItem(hand));
+    }
+
+    @Override
+    public boolean onEntitySwing(EntityLivingBase entityLivingBase, ItemStack itemStack)
+    {
+        if(!displayOnce)
+        {
+            displayOnce = true;
+            if(entityLivingBase instanceof EntityPlayer)
+            {
+                EntityPlayer entityPlayer = ((EntityPlayer) entityLivingBase);
+
+                if ( entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != ItemStack.EMPTY )
                 {
-                    entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT,  entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getDisplayName()));
+                    ItemStack isUnit = entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
+                    //Checks if the Player has the correct unit equipped
+                    if ( isUnit.getItem() instanceof UnitByakushiki )
+                    {
+                        //Checks if Byakushiki is in Standby mode
+                        if ( ((UnitByakushiki) isUnit.getItem()).getState() == 0 )
+                        {
+                            entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, entityPlayer.getHeldItemMainhand().getItem().getItemStackDisplayName(entityPlayer.getHeldItemMainhand())));
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        // Player tried to use weapon with different unit
+                        if ( isUnit.getItem() instanceof ArmorIS )
+                        {
+                            entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT, isUnit.getDisplayName()));
+                        }
+                        else
+                        {
+                            entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, entityPlayer.getHeldItemMainhand().getItem().getItemStackDisplayName(entityPlayer.getHeldItemMainhand())));
+                        }
+                    }
                 }
                 else
                 {
@@ -198,11 +298,12 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
         }
         else
         {
-            entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.SWORD_SWING_FAILED, entityPlayer.getHeldItemMainhand().getItem().getItemStackDisplayName(entityPlayer.getHeldItemMainhand())));
+            displayOnce = false;
         }
 
-        return new ActionResult(EnumActionResult.PASS, entityPlayer.getHeldItem(hand));
+        return true;
     }
+
 
 //    @Override
 //    public void getSubItems(Item item, CreativeTab tabs, List list)
@@ -227,14 +328,18 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
             {
                 if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != ItemStack.EMPTY)
                 {
-                    if(entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof UnitByakushiki)
+                    ItemStack isUnit = entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
+
+                    if(isUnit.getItem() instanceof UnitByakushiki)
                     {
-                        if(byakushiki.getState() != 0)
+                        if(((UnitByakushiki) isUnit.getItem()).getState() != 0)
                         {
                             oneOff = 1;
                             oneOffSettings.setOneOff(1);
                             entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.ONE_OFF_ACTIVE));
                             setEmpoweredState(entityPlayer.getHeldItemMainhand(), true);
+                            entityPlayer.capabilities.disableDamage = true;
+                            entityPlayer.sendPlayerAbilities();
                         }
                         else
                         {
@@ -243,7 +348,7 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
                     }
                     else
                     {
-                        entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT, entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getDisplayName()));
+                        entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.INVALID_UNIT, isUnit.getDisplayName()));
                     }
                 }
             }
@@ -253,6 +358,8 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
                 oneOffSettings.setOneOff(0);
                 entityPlayer.sendMessage(new TextComponentTranslation(Messages.ItemUse.ONE_OFF_DEACTIVE));
                 setEmpoweredState(entityPlayer.getHeldItemMainhand(), false);
+                entityPlayer.capabilities.disableDamage = false;
+                entityPlayer.sendPlayerAbilities();
             }
 
             unitSettings.writeToNBT(playerCustomData);

@@ -102,7 +102,7 @@ public class Names
 
     public static final class Villagers
     {
-        public static final String TABANE = "tabaneShinonono";
+        public static final String TABANE = "tabaneshinonono";
     }
 
     public static final class NBT
@@ -127,8 +127,8 @@ public class Names
 
     public static final class Items
     {
-        public static final String TABANE_SPAWN_EGG = "tabaneSpawnEgg";
-        public static final String TABANE_SPAWN_EGG_OVERLAY = "tabaneSpawnEgg_overlay"; //Used in ItemTabaneSpawnEgg to get overlay texture.
+        public static final String TABANE_SPAWN_EGG = "tabanespawnegg";
+        public static final String TABANE_SPAWN_EGG_OVERLAY = "tabanespawnegg_overlay"; //Used in ItemTabaneSpawnEgg to get overlay texture.
         public static final String ITEM_CORE = "itemCore";
         public static final String YUKIHIRA_BLADE = "yukihiraBlade";
         public static final String YUKIHIRA_HILT = "yukihiraHilt";

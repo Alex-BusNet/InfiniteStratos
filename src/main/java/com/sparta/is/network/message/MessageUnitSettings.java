@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class MessageUnitSettings implements IMessage, IMessageHandler<MessageUnitSettings, IMessage>
+public class MessageUnitSettings implements IMessage
 {
     public UnitSettings unitSettings;
 
@@ -39,10 +39,13 @@ public class MessageUnitSettings implements IMessage, IMessageHandler<MessageUni
         buf.writeBytes(unitSettings.getUnitName().getBytes());
     }
 
-    @Override
-    public IMessage onMessage(MessageUnitSettings message, MessageContext ctx)
+    public static class MessageHandler implements IMessageHandler<MessageUnitSettings, IMessage>
     {
-        InfiniteStratos.proxy.getClientProxy().unitSettings = message.unitSettings;
-        return null;
+        @Override
+        public IMessage onMessage(MessageUnitSettings message, MessageContext ctx)
+        {
+            InfiniteStratos.proxy.getClientProxy().unitSettings = message.unitSettings;
+            return null;
+        }
     }
 }

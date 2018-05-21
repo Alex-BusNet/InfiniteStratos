@@ -8,12 +8,8 @@ import com.sparta.is.network.Network;
 import com.sparta.is.network.message.MessageUnitSettings;
 import com.sparta.is.reference.Messages;
 import com.sparta.is.reference.Reference;
-import com.sparta.is.reference.Textures;
 import com.sparta.is.settings.UnitSettings;
-import com.sparta.is.utils.EntityHelper;
-import com.sparta.is.utils.IModifyable;
-import com.sparta.is.utils.ItemStackUtils;
-import com.sparta.is.utils.ResourceLocationHelper;
+import com.sparta.is.utils.*;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
@@ -50,17 +46,20 @@ public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHold
     private final String[] VARIANTS;
     private String ownerName = "Unknown";
     private int TOTAL_EQUALIZERS = 4;
+    private String BASE_NAME;
 
     private static int totalShieldCapacity;
     private static int remainingShieldCapacity;
 
-    public ArmorIS(ArmorMaterial armorMaterial, EntityEquipmentSlot slot, int numberOfEqualizers, String ... variants)
+    public ArmorIS(String name, ArmorMaterial armorMaterial, EntityEquipmentSlot slot, int numberOfEqualizers, String ... variants)
     {
         super(armorMaterial, 0 , slot);
         this.setCreativeTab(CreativeTab.IS_TAB);
         this.setMaxStackSize(1);
         this.modifyType = "Armor";
-        this.setUnlocalizedName(Reference.MOD_ID + ".ArmorIS");
+        BASE_NAME = name;
+        this.setRegistryName(name);
+        this.setHasSubtypes(true);
 
         TOTAL_EQUALIZERS = numberOfEqualizers;
 
@@ -79,13 +78,13 @@ public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHold
     @Override
     public String getUnlocalizedName()
     {
-        return String.format("armor.%s%s", Textures.RESOURCE_PREFIX, getUnwrappedLocalizedName(super.getUnlocalizedName()));
+        return String.format("armor.%s:%s", Reference.MOD_ID, BASE_NAME);
     }
 
     @Override
     public String getUnlocalizedName(ItemStack itemStack)
     {
-        return String.format("armor.%s%s", Textures.RESOURCE_PREFIX, getUnwrappedLocalizedName(super.getUnlocalizedName()));
+        return String.format("armor.%s:%s", Reference.MOD_ID, BASE_NAME);
     }
 
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer entityPlayer, EnumHand handIn)
