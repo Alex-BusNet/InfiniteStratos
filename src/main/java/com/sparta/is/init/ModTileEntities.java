@@ -1,6 +1,6 @@
 package com.sparta.is.init;
 
-import com.sparta.is.tileentity.TileEntityIS;
+import com.sparta.is.core.tileentity.TileEntityIS;
 import com.sparta.is.tileentity.TileEntityISUnitStation;
 
 import java.util.ArrayList;

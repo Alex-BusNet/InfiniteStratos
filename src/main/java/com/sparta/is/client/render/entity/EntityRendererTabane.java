@@ -2,7 +2,7 @@ package com.sparta.is.client.render.entity;
 
 import com.sparta.is.client.render.model.ModelTabane;
 import com.sparta.is.entity.EntityTabane;
-import com.sparta.is.reference.Textures;
+import com.sparta.is.core.reference.Textures;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.util.ResourceLocation;

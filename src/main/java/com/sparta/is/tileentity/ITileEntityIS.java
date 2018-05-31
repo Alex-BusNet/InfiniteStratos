@@ -1,6 +1,6 @@
 package com.sparta.is.tileentity;
 
-import com.sparta.is.utils.ResourceLocationHelper;
+import com.sparta.is.core.utils.helpers.ResourceLocationHelper;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;

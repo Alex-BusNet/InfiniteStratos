@@ -1,4 +1,6 @@
 {
-  "forge_marker": 1,
-  "texures": "is:items/elucidator"
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "is:items/elucidator"
+  }
 }

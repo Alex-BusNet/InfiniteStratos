@@ -1,12 +1,12 @@
 package com.sparta.is.item;
 
-import com.sparta.is.armor.ArmorIS;
 import com.sparta.is.armor.UnitKuroAkiko;
-import com.sparta.is.item.base.ItemISMelee;
-import com.sparta.is.reference.Messages;
-import com.sparta.is.reference.Names;
-import com.sparta.is.utils.LogHelper;
-import com.sparta.is.utils.StringHelper;
+import com.sparta.is.core.armor.ArmorIS;
+import com.sparta.is.core.item.ItemISMelee;
+import com.sparta.is.core.reference.Messages;
+import com.sparta.is.core.reference.Names;
+import com.sparta.is.core.utils.helpers.LogHelper;
+import com.sparta.is.core.utils.helpers.StringHelper;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

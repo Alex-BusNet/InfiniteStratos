@@ -1,12 +1,12 @@
 package com.sparta.is.client.handler;
 
-import com.sparta.is.armor.ArmorIS;
+import com.sparta.is.core.armor.ArmorIS;
 import com.sparta.is.client.settings.KeyBindings;
-import com.sparta.is.network.Network;
-import com.sparta.is.network.message.MessageKeyPressed;
-import com.sparta.is.reference.Key;
-import com.sparta.is.utils.IKeyBound;
-import com.sparta.is.utils.LogHelper;
+import com.sparta.is.core.network.Network;
+import com.sparta.is.core.network.message.MessageKeyPressed;
+import com.sparta.is.core.reference.Key;
+import com.sparta.is.core.utils.interfaces.IKeyBound;
+import com.sparta.is.core.utils.helpers.LogHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;

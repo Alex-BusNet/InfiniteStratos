@@ -1,28 +1,3 @@
 {
-    "parent": "is:item/yukihiranigata_fullmodel",
-	"variants": {
-		"normal": [{
-			"textures": { "layer0": "is:items/yukihiranigata" }
-		}],
-		"reiraku": [{
-			"textures": { "layer0": "is:items/yukihiranigata_oneoff" }
-		}],
-		"inventory": {
-		    "normal": { "textures": { "layer0": "is:items/yukihiranigata" } },
-		    "reiraku": { "textures": { "layer0": "is:items/yukihiranigata_oneoff" } }
-		}
-	},
-	"display":{
-	    "thirdperson_righthand": {
-	        "rotation": [50.0, 0.0, 0.0],
-	        "translation": [0.0, 11.0, 0.0]
-	    },
-		"thirdperson_lefthand": {
-	        "rotation": [50.0, 0.0, 0.0],
-	        "translation": [0.0, 11.0, 0.0]
-	    },
-	    "firstperson_righthand": {
-	        "rotation": [75.0, 0.0, 0.0]
-	    }
-	}
+  "parent": "is:item/yukihiranigata_fullmodel"
 }

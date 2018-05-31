@@ -1,6 +1,6 @@
 package com.sparta.is.api;
 
-import com.sparta.is.InfiniteStratos;
+import com.sparta.is.core.InfiniteStratos;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.Arrays;

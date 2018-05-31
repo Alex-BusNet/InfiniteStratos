@@ -1,7 +1,7 @@
 package com.sparta.is.recipe;
 
 import com.sparta.is.api.RecipeRegistryProxy;
-import com.sparta.is.utils.ItemStackUtils;
+import com.sparta.is.core.utils.ItemStackUtils;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.PotionTypes;

@@ -1,9 +1,9 @@
 package com.sparta.is.block;
 
-import com.sparta.is.InfiniteStratos;
-import com.sparta.is.armor.ArmorIS;
-import com.sparta.is.reference.GUIs;
-import com.sparta.is.reference.Names;
+import com.sparta.is.core.InfiniteStratos;
+import com.sparta.is.core.armor.ArmorIS;
+import com.sparta.is.core.reference.GUIs;
+import com.sparta.is.core.reference.Names;
 import com.sparta.is.tileentity.TileEntityISUnitStation;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

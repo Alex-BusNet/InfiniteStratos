@@ -1,9 +1,10 @@
 package com.sparta.is.entity;
 
 import com.sparta.is.armor.raytracing.Raytracer;
+import com.sparta.is.core.entity.EntityIS;
 import com.sparta.is.entity.driveables.*;
 import com.sparta.is.entity.driveables.types.BulletType;
-import com.sparta.is.utils.LogHelper;
+import com.sparta.is.core.utils.helpers.LogHelper;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

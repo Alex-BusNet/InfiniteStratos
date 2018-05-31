@@ -1,22 +1,26 @@
 package com.sparta.is.proxy;
 
-import com.sparta.is.armor.ArmorIS;
+import cofh.core.render.IModelRegister;
 import com.sparta.is.armor.UnitByakushiki;
 import com.sparta.is.armor.units.Byakushiki;
 import com.sparta.is.client.handler.ItemToolTipEventHandler;
 import com.sparta.is.client.handler.KeyInputEventHandler;
+import com.sparta.is.client.render.ItemRenderRegistry;
 import com.sparta.is.client.render.entity.EntityRendererTabane;
 import com.sparta.is.client.settings.KeyBindings;
+import com.sparta.is.core.armor.ArmorIS;
+import com.sparta.is.core.reference.EnumUnitState;
+import com.sparta.is.core.settings.OneOffSettings;
+import com.sparta.is.core.settings.UnitSettings;
+import com.sparta.is.core.utils.helpers.LogHelper;
 import com.sparta.is.entity.EntityTabane;
-import com.sparta.is.reference.EnumUnitState;
-import com.sparta.is.settings.OneOffSettings;
-import com.sparta.is.settings.UnitSettings;
-import com.sparta.is.utils.LogHelper;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.event.*;
+
+import java.util.ArrayList;
 
 public class ClientProxy extends CommonProxy
 {
@@ -25,6 +29,8 @@ public class ClientProxy extends CommonProxy
 
     private static Byakushiki byakushikiModel = new Byakushiki(1.0f, false);
     private static Byakushiki byakushikiPartialModel = new Byakushiki(1.0f, true);
+
+    private static ArrayList<IModelRegister> modelList = new ArrayList<>();
 
     @Override
     public ClientProxy getClientProxy()
@@ -48,12 +54,19 @@ public class ClientProxy extends CommonProxy
 
         RenderingRegistry.registerEntityRenderingHandler(EntityTabane.class, EntityRendererTabane::new);
 
+        for(IModelRegister register : modelList)
+        {
+            register.registerModels();
+        }
+
+        ItemRenderRegistry.register();
 
         ClientRegistry.registerKeyBinding(KeyBindings.STANDBY);
         ClientRegistry.registerKeyBinding(KeyBindings.PARTIAL_DEPLOY);
         ClientRegistry.registerKeyBinding(KeyBindings.FULL_DEPLOY);
         ClientRegistry.registerKeyBinding(KeyBindings.ONE_OFF);
         ClientRegistry.registerKeyBinding(KeyBindings.EQUALIZER_ACCESS);
+
     }
 
     @Override
@@ -61,6 +74,7 @@ public class ClientProxy extends CommonProxy
     {
         LogHelper.info("Initializing...");
         super.onInit(event);
+
 
         MinecraftForge.EVENT_BUS.register(new KeyInputEventHandler());
         MinecraftForge.EVENT_BUS.register(new ItemToolTipEventHandler());
@@ -96,5 +110,10 @@ public class ClientProxy extends CommonProxy
         }
 
         return null;
+    }
+
+    public void addIModel(IModelRegister imr)
+    {
+        modelList.add(imr);
     }
 }

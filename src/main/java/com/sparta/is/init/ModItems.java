@@ -1,14 +1,19 @@
 package com.sparta.is.init;
 
-import com.sparta.is.armor.ArmorIS;
+import cofh.core.util.core.IInitializer;
 import com.sparta.is.armor.UnitByakushiki;
 import com.sparta.is.armor.UnitKuroAkiko;
-import com.sparta.is.handler.RegistrationHandler;
-import com.sparta.is.item.*;
-import com.sparta.is.item.base.ItemIS;
-import com.sparta.is.item.base.ItemISMelee;
-import com.sparta.is.item.base.ItemISRange;
-import com.sparta.is.item.base.ItemTabLabel;
+import com.sparta.is.core.armor.ArmorIS;
+import com.sparta.is.core.handler.RegistrationHandler;
+import com.sparta.is.core.item.ItemIS;
+import com.sparta.is.core.item.ItemISMelee;
+import com.sparta.is.core.item.ItemISRange;
+import com.sparta.is.core.item.ItemTabLabel;
+import com.sparta.is.item.ItemAdamantine;
+import com.sparta.is.item.ItemElucidator;
+import com.sparta.is.item.ItemTabaneSpawnEgg;
+import com.sparta.is.item.ItemYukihiraNigata;
+import com.sparta.is.item.base.ItemMaterials;
 import net.minecraft.item.Item;
 
 import java.util.ArrayList;
@@ -25,10 +30,20 @@ public class ModItems
 
     public static final RegistrationHandler HELPER = new RegistrationHandler();
 
+    //
+    // Equalizers
+    //
     public static ItemISMelee yukihira = new ItemYukihiraNigata();
     public static ItemISMelee elucidator = new ItemElucidator();
+
+    //
+    // Ores
+    //
     public static ItemIS adamantineItem = new ItemAdamantine();
-    public static ItemIS isOres = new ItemOre();
+    public static ItemMaterials itemMaterials;
+
+//    public static ItemIS isOres = new ItemOre();
+
     public static ItemTabaneSpawnEgg tabaneSpawnEgg = new ItemTabaneSpawnEgg(0xFFA8DE, 0xCF5DA3);
 
     public static ArmorIS byakushiki = new UnitByakushiki();
@@ -37,6 +52,26 @@ public class ModItems
     public static Item tabLabelItem = new ItemTabLabel();
 
     private ModItems() {}
+
+    public static void preInit()
+    {
+        itemMaterials = new ItemMaterials();
+
+        initList.add(itemMaterials);
+
+        for(IInitializer init : initList)
+        {
+            init.register();
+        }
+    }
+
+    public static void init()
+    {
+        for(IInitializer init : initList)
+        {
+            init.initialize();
+        }
+    }
 
     public static Collection<ItemIS> getItems()
     {
@@ -69,5 +104,7 @@ public class ModItems
     {
         MELEE.add(melee);
     }
+
+    private static ArrayList<IInitializer> initList = new ArrayList<>();
 
 }

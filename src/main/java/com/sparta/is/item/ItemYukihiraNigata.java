@@ -1,17 +1,17 @@
 package com.sparta.is.item;
 
-import com.sparta.is.armor.ArmorIS;
 import com.sparta.is.armor.UnitByakushiki;
-import com.sparta.is.item.base.ItemISMelee;
-import com.sparta.is.network.Network;
-import com.sparta.is.network.message.MessageOneOffSettings;
-import com.sparta.is.reference.Key;
-import com.sparta.is.reference.Materials;
-import com.sparta.is.reference.Messages;
-import com.sparta.is.reference.Names;
-import com.sparta.is.settings.OneOffSettings;
-import com.sparta.is.settings.UnitSettings;
-import com.sparta.is.utils.*;
+import com.sparta.is.core.armor.ArmorIS;
+import com.sparta.is.core.item.ItemISMelee;
+import com.sparta.is.core.network.Network;
+import com.sparta.is.core.network.message.MessageOneOffSettings;
+import com.sparta.is.core.reference.*;
+import com.sparta.is.core.settings.OneOffSettings;
+import com.sparta.is.core.settings.UnitSettings;
+import com.sparta.is.core.utils.helpers.*;
+import com.sparta.is.core.utils.interfaces.IEnergy;
+import com.sparta.is.core.utils.interfaces.IKeyBound;
+import com.sparta.is.core.utils.interfaces.IOwnable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.util.ITooltipFlag;
@@ -52,6 +52,17 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
     {
         super(Names.Weapons.YUKIHIRA_NIGATA, VARIANTS);
         this.setFull3D();
+    }
+
+    @Override
+    public String getUnlocalizedName(ItemStack itemStack)
+    {
+        if(itemStack.getItemDamage() == 0)
+            return String.format("weapon.%s:%s", Reference.MOD_ID, Names.Weapons.YUKIHIRA_NIGATA);
+        else if(itemStack.getItemDamage() == 1)
+            return String.format("weapon.%s:%s", Reference.MOD_ID, Names.One_Off.REIRAKU_BYAKUYA);
+        else
+            return super.getUnlocalizedName(itemStack);
     }
 
     protected int useEnergy(ItemStack stack, boolean simulate)
@@ -163,11 +174,13 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
     @Override
     public void addInformation(ItemStack itemStack, World worldIn, List<String> toolTip, ITooltipFlag ttFlag)
     {
-        if(oneOff == 0)
+        toolTip.add(StringHelper.RED + "Byakushiki's Primary Weapon");
+        int localOneOff = itemStack.getItemDamage();
+        if(localOneOff== 0)
         {
             toolTip.add(StringHelper.LIGHT_BLUE + "\"Second Snowflake\"");
         }
-        else if(oneOff == 1)
+        else if(localOneOff == 1)
         {
             toolTip.add(StringHelper.LIGHT_BLUE + "\"White Night of Downfall\"");
         }
@@ -184,13 +197,13 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
         {
             EnergyHelper.setDefaultEnergyTag(itemStack, 0);
         }
-        toolTip.add(StringHelper.localize("info.is.charge") + ": " + itemStack.getTagCompound().getInteger("Energy") + " / " + maxEnergy + "RF");
+        toolTip.add(StringHelper.localize("info.is.charge") + ": " + itemStack.getTagCompound().getInteger("Energy") + " / " + maxEnergy + " RF");
 
-        if(oneOff == 0)
+        if(localOneOff == 0)
         {
             toolTip.add(StringHelper.RED + "Has the One-Off Ability, 'Barrier-Void Attack'");
         }
-        else if(oneOff == 1)
+        else if(localOneOff == 1)
         {
             toolTip.add(StringHelper.RED + "Bypasses an IS Unit's absolute defense" + StringHelper.END);
             toolTip.add(StringHelper.RED + "and deals damage directly to pilot." + StringHelper.END);
@@ -308,7 +321,7 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
 //    @Override
 //    public void getSubItems(Item item, CreativeTab tabs, List list)
 //    {
-////        list.add(EnergyHelper.setDefaultEnergyTag(new ItemStack(item, 1, 0), 0));
+//        list.add(EnergyHelper.setDefaultEnergyTag(new ItemStack(item, 1, 0), 0));
 //        list.add(EnergyHelper.setDefaultEnergyTag(new ItemStack(item, 1, 0), maxEnergy));
 //    }
 

@@ -1,6 +1,6 @@
 package com.sparta.is.block;
 
-import com.sparta.is.utils.ResourceLocationHelper;
+import com.sparta.is.core.utils.helpers.ResourceLocationHelper;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;

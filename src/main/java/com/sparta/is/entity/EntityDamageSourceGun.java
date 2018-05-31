@@ -1,7 +1,7 @@
 package com.sparta.is.entity;
 
 import com.sparta.is.entity.driveables.types.InfoType;
-import com.sparta.is.handler.PlayerEventHandler;
+import com.sparta.is.core.handler.PlayerEventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;

@@ -1,11 +1,11 @@
 package com.sparta.is.client.handler;
 
-import com.sparta.is.exchange.WrappedStack;
-import com.sparta.is.handler.ConfigurationHandler;
-import com.sparta.is.reference.Colors;
-import com.sparta.is.reference.Messages;
-import com.sparta.is.utils.IOwnable;
-import com.sparta.is.utils.ItemStackUtils;
+import com.sparta.is.core.exchange.WrappedStack;
+import com.sparta.is.core.handler.ConfigurationHandler;
+import com.sparta.is.core.reference.Colors;
+import com.sparta.is.core.reference.Messages;
+import com.sparta.is.core.utils.interfaces.IOwnable;
+import com.sparta.is.core.utils.ItemStackUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;

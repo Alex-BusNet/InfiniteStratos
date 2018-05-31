@@ -1,7 +1,7 @@
 package com.sparta.is.entity.driveables.types;
 
-import com.sparta.is.item.base.ItemIS;
-import com.sparta.is.utils.LogHelper;
+import com.sparta.is.core.item.ItemIS;
+import com.sparta.is.core.utils.helpers.LogHelper;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;

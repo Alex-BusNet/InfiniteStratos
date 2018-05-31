@@ -4,7 +4,7 @@ import com.sparta.is.entity.EntityUnitController;
 import com.sparta.is.entity.driveables.types.EqualizerRangeType;
 import com.sparta.is.entity.driveables.types.ShootableType;
 import com.sparta.is.item.base.ItemShootable;
-import com.sparta.is.utils.ClientSideUtils;
+import com.sparta.is.core.utils.ClientSideUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;

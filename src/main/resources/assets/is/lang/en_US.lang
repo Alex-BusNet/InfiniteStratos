@@ -25,6 +25,9 @@ itemGroup.is=Infinite Stratos
 #Materials
 material.is:isArmorMaterial.name=Adamantine
 material.is:isSwordMaterial.name=Equalizer Weapon Material
+item.is.material.ingotAdamantine.name=Adamantine Ingot
+item.is.material.ingotArmorMaterial.name=IS Unit Armor Ingot
+item.is.material.ingotWeaponMaterial.name=IS Unit Weapon Ingot
 
 #Items
 item.is:yukihiraBlade.name=Yukihira Blade
@@ -43,11 +46,15 @@ item.is:isswordmaterial.name=Equalizer Weapon Material
 #Tools
 
 
-
+#Fluids
+fluid.adamantine=Melted Adamantine Ore
+fluid.armorfluid=Melted IS Armor Material
+fluid.weaponfluid=Melted IS Weapon Material
+tile.is.fluid.adamantine.name=Adamantine Fluid
 
 #Weapons
 weapon.is:yukihiraNigata.name=Yukihira Nigata
-weapon.is:reiraku.name=Reiraku Byakuya
+weapon.is:reirakuByakuya.name=Reiraku Byakuya
 weapon.is:elucidator.name=Elucidator
 
 
@@ -62,6 +69,7 @@ tile.is:unitStand.name=Unit Maintenance Stand
 tile.is:byakushikiChestGuard.name=Byakushiki Chest Guard
 tile.is:adamantineOre.name=Adamantine Ore
 tile.is:adamantine_ore.name=Adamantine Ore Block
+
 
 
 #GUIs

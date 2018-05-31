@@ -1,7 +1,7 @@
 package com.sparta.is.client.render.model;
 
 import com.sparta.is.entity.driveables.types.BulletType;
-import com.sparta.is.utils.ResourceLocationHelper;
+import com.sparta.is.core.utils.helpers.ResourceLocationHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;

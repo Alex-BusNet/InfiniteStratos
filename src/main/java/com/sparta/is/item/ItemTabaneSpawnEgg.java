@@ -1,11 +1,11 @@
 package com.sparta.is.item;
 
-import com.sparta.is.creativetab.CreativeTab;
-import com.sparta.is.entity.EntityIS;
+import com.sparta.is.core.creativetab.CreativeTab;
+import com.sparta.is.core.entity.EntityIS;
 import com.sparta.is.entity.EntityTabane;
-import com.sparta.is.reference.Names;
-import com.sparta.is.reference.Reference;
-import com.sparta.is.utils.ResourceLocationHelper;
+import com.sparta.is.core.reference.Names;
+import com.sparta.is.core.reference.Reference;
+import com.sparta.is.core.utils.helpers.ResourceLocationHelper;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;

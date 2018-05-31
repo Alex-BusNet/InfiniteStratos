@@ -1,10 +1,10 @@
 package com.sparta.is.init;
 
-import com.sparta.is.InfiniteStratos;
-import com.sparta.is.entity.EntityIS;
+import com.sparta.is.core.InfiniteStratos;
+import com.sparta.is.core.entity.EntityIS;
 import com.sparta.is.entity.EntityTabane;
-import com.sparta.is.reference.Names;
-import com.sparta.is.utils.ResourceLocationHelper;
+import com.sparta.is.core.reference.Names;
+import com.sparta.is.core.utils.helpers.ResourceLocationHelper;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 

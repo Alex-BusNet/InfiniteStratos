@@ -1,7 +1,8 @@
 package com.sparta.is.tileentity;
 
-import com.sparta.is.armor.ArmorIS;
-import com.sparta.is.reference.Names;
+import com.sparta.is.core.armor.ArmorIS;
+import com.sparta.is.core.tileentity.TileEntityIS;
+import com.sparta.is.core.reference.Names;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;

@@ -1,7 +1,8 @@
 package com.sparta.is.inventory;
 
-import com.sparta.is.item.base.ItemISMelee;
-import com.sparta.is.item.base.ItemISRange;
+import com.sparta.is.core.inventory.ContainerIS;
+import com.sparta.is.core.item.ItemISMelee;
+import com.sparta.is.core.item.ItemISRange;
 import com.sparta.is.tileentity.TileEntityISUnitStation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;

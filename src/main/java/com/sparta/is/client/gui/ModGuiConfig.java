@@ -1,7 +1,7 @@
 package com.sparta.is.client.gui;
 
-import com.sparta.is.handler.ConfigurationHandler;
-import com.sparta.is.reference.Reference;
+import com.sparta.is.core.handler.ConfigurationHandler;
+import com.sparta.is.core.reference.Reference;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;

@@ -4,8 +4,8 @@ import com.sparta.is.entity.EntityISUnit;
 import com.sparta.is.entity.driveables.EntityBullet;
 import com.sparta.is.item.ItemAttachment;
 import com.sparta.is.item.ItemBullet;
-import com.sparta.is.item.base.ItemISMelee;
-import com.sparta.is.item.base.ItemISRange;
+import com.sparta.is.core.item.ItemISMelee;
+import com.sparta.is.core.item.ItemISRange;
 
 public enum EnumType
 {

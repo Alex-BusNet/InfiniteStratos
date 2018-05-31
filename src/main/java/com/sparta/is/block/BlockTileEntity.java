@@ -1,8 +1,9 @@
 package com.sparta.is.block;
 
-import com.sparta.is.creativetab.CreativeTab;
-import com.sparta.is.reference.UnlistedDirection;
-import com.sparta.is.tileentity.TileEntityIS;
+import com.sparta.is.core.block.BlockIS;
+import com.sparta.is.core.creativetab.CreativeTab;
+import com.sparta.is.core.reference.UnlistedDirection;
+import com.sparta.is.core.tileentity.TileEntityIS;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;

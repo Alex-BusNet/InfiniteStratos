@@ -1,14 +1,19 @@
 package com.sparta.is.armor;
 
-import com.sparta.is.InfiniteStratos;
-import com.sparta.is.network.Network;
-import com.sparta.is.network.message.MessageUnitSettings;
-import com.sparta.is.reference.EnumUnitState;
-import com.sparta.is.reference.Key;
-import com.sparta.is.reference.Materials;
-import com.sparta.is.reference.Names;
-import com.sparta.is.settings.UnitSettings;
-import com.sparta.is.utils.*;
+import com.sparta.is.core.InfiniteStratos;
+import com.sparta.is.core.armor.ArmorIS;
+import com.sparta.is.core.utils.helpers.EntityHelper;
+import com.sparta.is.core.utils.helpers.ResourceLocationHelper;
+import com.sparta.is.core.utils.helpers.StringHelper;
+import com.sparta.is.core.utils.interfaces.IKeyBound;
+import com.sparta.is.core.utils.interfaces.IOwnable;
+import com.sparta.is.core.network.Network;
+import com.sparta.is.core.network.message.MessageUnitSettings;
+import com.sparta.is.core.reference.EnumUnitState;
+import com.sparta.is.core.reference.Key;
+import com.sparta.is.core.reference.Materials;
+import com.sparta.is.core.reference.Names;
+import com.sparta.is.core.settings.UnitSettings;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.util.ITooltipFlag;
@@ -34,6 +39,7 @@ public class UnitByakushiki extends ArmorIS implements ISpecialArmor, IKeyBound,
     private static final String[] VARIANTS = {"normal"/*, "standby", "partial_deploy", "full_deploy, "setsura"*/};
 
     protected String ownerName;
+    private String unitName;
     private int equalizers = 4;
     private static EnumUnitState state = EnumUnitState.STANDBY_STATE; // 0 = Standby, 1 = Partial deploy, 2 = Full deploy, 3 = Second Shift
 
@@ -47,6 +53,7 @@ public class UnitByakushiki extends ArmorIS implements ISpecialArmor, IKeyBound,
     public UnitByakushiki()
     {
         super(Names.Units.BYAKUSHIKI, Materials.Armor.IS_ARMOR, EntityEquipmentSlot.CHEST, 4, VARIANTS);
+        this.unitName = "Byakushiki";
         this.setShieldCapacity(20000);
         this.setRemainingShieldCapacity();
         setArmorTextures(textures);
@@ -241,6 +248,16 @@ public class UnitByakushiki extends ArmorIS implements ISpecialArmor, IKeyBound,
             default:
                 break;
         }
+    }
+
+    public String getUnitName()
+    {
+        if(state == EnumUnitState.SECOND_SHIFT)
+        {
+            return "Setsura";
+        }
+
+        return "Byakushiki";
     }
 
 }

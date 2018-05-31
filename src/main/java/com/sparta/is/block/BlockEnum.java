@@ -1,7 +1,8 @@
 package com.sparta.is.block;
 
-import com.sparta.is.reference.Reference;
-import com.sparta.is.utils.LogHelper;
+import com.sparta.is.core.block.BlockIS;
+import com.sparta.is.core.reference.Reference;
+import com.sparta.is.core.utils.helpers.LogHelper;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;

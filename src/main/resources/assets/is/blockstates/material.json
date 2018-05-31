@@ -1,0 +1,29 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "builtin/generated",
+    "textures": {
+      "layer0": "blocks/dirt"
+    },
+    "transform": "forge:default-item"
+  },
+  "variants": {
+    "type": {
+      "ingotadamantine": {
+        "textures": {
+          "layer0": "is:materials/ingot_adamantine"
+        }
+      },
+      "ingotarmormaterial": {
+        "textures": {
+          "layer0": "is:materials/ingot_armormaterial"
+        }
+      },
+      "ingotweaponmaterial": {
+        "textures": {
+          "layer0": "is:materials/ingot_weaponmaterial"
+        }
+      }
+    }
+  }
+}

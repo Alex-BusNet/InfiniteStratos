@@ -1,10 +1,6 @@
 {
   "parent": "is:item/elucidator_fullmodel",
-  "variants": {
-    "inventory": [{
-      "textures": "is:items/elucidator"
-    }],
-    "normal": [{}],
-    "reiraku": [[]]
+  "defaults": {
+    "model": "is:item/elucidator_fullmodel"
   }
 }

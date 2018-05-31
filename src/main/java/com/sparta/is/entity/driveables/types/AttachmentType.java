@@ -2,8 +2,8 @@ package com.sparta.is.entity.driveables.types;
 
 import com.sparta.is.armor.models.ModelAttachment;
 import com.sparta.is.item.ItemAttachment;
-import com.sparta.is.reference.EnumAttachmentType;
-import com.sparta.is.reference.EnumFireMode;
+import com.sparta.is.core.reference.EnumAttachmentType;
+import com.sparta.is.core.reference.EnumFireMode;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;

@@ -1,13 +1,18 @@
 package com.sparta.is.armor;
 
-import com.sparta.is.network.Network;
-import com.sparta.is.network.message.MessageUnitSettings;
-import com.sparta.is.reference.EnumUnitState;
-import com.sparta.is.reference.Key;
-import com.sparta.is.reference.Materials;
-import com.sparta.is.reference.Names;
-import com.sparta.is.settings.UnitSettings;
-import com.sparta.is.utils.*;
+import com.sparta.is.core.armor.ArmorIS;
+import com.sparta.is.core.utils.helpers.EntityHelper;
+import com.sparta.is.core.utils.helpers.ResourceLocationHelper;
+import com.sparta.is.core.utils.helpers.StringHelper;
+import com.sparta.is.core.utils.interfaces.IKeyBound;
+import com.sparta.is.core.utils.interfaces.IOwnable;
+import com.sparta.is.core.network.Network;
+import com.sparta.is.core.network.message.MessageUnitSettings;
+import com.sparta.is.core.reference.EnumUnitState;
+import com.sparta.is.core.reference.Key;
+import com.sparta.is.core.reference.Materials;
+import com.sparta.is.core.reference.Names;
+import com.sparta.is.core.settings.UnitSettings;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;

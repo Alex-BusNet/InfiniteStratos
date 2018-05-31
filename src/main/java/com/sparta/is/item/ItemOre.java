@@ -1,6 +1,6 @@
 package com.sparta.is.item;
 
-import com.sparta.is.item.base.ItemIS;
+import com.sparta.is.core.item.ItemIS;
 
 public class ItemOre extends ItemIS
 {

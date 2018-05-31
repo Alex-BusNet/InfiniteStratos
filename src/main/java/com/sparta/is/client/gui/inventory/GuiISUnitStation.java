@@ -3,9 +3,9 @@ package com.sparta.is.client.gui.inventory;
 import com.sparta.is.client.gui.base.GuiBase;
 import com.sparta.is.client.gui.base.GuiColor;
 import com.sparta.is.inventory.ContainerISUnitStation;
-import com.sparta.is.reference.Textures;
+import com.sparta.is.core.reference.Textures;
 import com.sparta.is.tileentity.TileEntityISUnitStation;
-import com.sparta.is.utils.LogHelper;
+import com.sparta.is.core.utils.helpers.LogHelper;
 import net.minecraft.entity.player.InventoryPlayer;
 import org.lwjgl.opengl.GL11;
 

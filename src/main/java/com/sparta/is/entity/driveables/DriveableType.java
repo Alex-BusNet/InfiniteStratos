@@ -5,7 +5,7 @@ import com.sparta.is.entity.driveables.types.BulletType;
 import com.sparta.is.entity.driveables.types.InfoType;
 import com.sparta.is.entity.driveables.types.PartType;
 import com.sparta.is.entity.driveables.types.TypeFile;
-import com.sparta.is.reference.EnumFireMode;
+import com.sparta.is.core.reference.EnumFireMode;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumParticleTypes;

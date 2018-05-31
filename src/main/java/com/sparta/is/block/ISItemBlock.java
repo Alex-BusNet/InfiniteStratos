@@ -1,5 +1,6 @@
 package com.sparta.is.block;
 
+import com.sparta.is.core.block.BlockIS;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemBlock;
 
