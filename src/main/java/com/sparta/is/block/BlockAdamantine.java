@@ -9,10 +9,13 @@ import net.minecraftforge.fml.common.event.FMLInterModComms;
 
 public class BlockAdamantine extends BlockIS implements IForgeable
 {
+//    public static final PropertyEnum<Type> VARIANT = PropertyEnum.create("type", Type.class);
     public BlockAdamantine()
     {
         super(Names.Blocks.ADAMANTINE_ORE);
+
     }
+
 
     @Override
     public void registerBlockWithTCon()

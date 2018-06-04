@@ -1,9 +1,14 @@
 package com.sparta.is.init;
 
-import com.sparta.is.block.BlockAdamantine;
+import cofh.core.util.core.IInitializer;
 import com.sparta.is.block.BlockISUnitStation;
+import com.sparta.is.block.BlockItemDisplay;
+import com.sparta.is.block.BlockOre;
 import com.sparta.is.core.block.BlockIS;
-import net.minecraft.block.Block;
+import com.sparta.is.core.block.BlockISContainerBase;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,11 +17,39 @@ import java.util.List;
 public class ModBlocks
 {
     private static final List<BlockIS> BLOCKS = new ArrayList<>();
-    public static final BlockIS adamantine = new BlockAdamantine();
-//    public static final BlockIS oreBlock = new BlockOre();
-    public static final BlockIS unitStation = new BlockISUnitStation();
+    private static final List<BlockISContainerBase> TILE_BLOCKS = new ArrayList<>();
+    private static final ArrayList<IInitializer> initList = new ArrayList<>();
+
+    public static BlockOre oreBlock;
+    public static BlockISUnitStation unitStation;
+    public static BlockItemDisplay itemDisplay;
 
     private ModBlocks() {}
+
+    public static void preInit()
+    {
+        oreBlock = new BlockOre();
+        itemDisplay = new BlockItemDisplay();
+        unitStation = new BlockISUnitStation();
+
+        initList.add(oreBlock);
+        initList.add(itemDisplay);
+        initList.add(unitStation);
+
+        for( IInitializer init : initList)
+        {
+            init.register();
+        }
+    }
+
+    @SubscribeEvent
+    public static void registerRecipes(RegistryEvent.Register<IRecipe> event)
+    {
+        for(IInitializer init : initList)
+        {
+            init.initialize();
+        }
+    }
 
     public static void register(BlockIS block)
     {
@@ -28,13 +61,13 @@ public class ModBlocks
         return BLOCKS;
     }
 
-    private static void registerTileEntity(Block block, String name)
+    public static void registerTileEntity(BlockISContainerBase block)
     {
-
+        TILE_BLOCKS.add(block);
     }
 
-    private static void registerTile()
+    public static Collection<BlockISContainerBase> getTileBlocks()
     {
-
+        return TILE_BLOCKS;
     }
 }

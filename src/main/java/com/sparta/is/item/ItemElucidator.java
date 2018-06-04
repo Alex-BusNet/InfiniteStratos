@@ -38,7 +38,18 @@ public class ItemElucidator extends ItemISMelee
         maxEnergy = 50000;
         this.maxTransfer = 300;
         this.energyPerUse = 50;
-        this.setFull3D();
+    }
+
+    @Override
+    public int getMetadata(int damage)
+    {
+        return damage;
+    }
+
+    @Override
+    public int getMetadata()
+    {
+        return this.getDamage(this.getDefaultInstance());
     }
 
     @Override

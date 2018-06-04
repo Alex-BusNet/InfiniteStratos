@@ -18,7 +18,6 @@ import com.sparta.is.core.utils.interfaces.IModifyable;
 import com.sparta.is.init.ModItems;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -39,9 +38,10 @@ import net.minecraftforge.common.UsernameCache;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.List;
 import java.util.UUID;
 
-public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHolder, IISVariant
+public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHolder, IISVariant, IISUnit
 {
     protected UUID ownerUUID = getOwnerUUID();
     public String repairIngot = "";
@@ -56,6 +56,8 @@ public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHold
     private String BASE_NAME;
     private EntityEquipmentSlot currentSlot = null;
 
+    public final String identifier;
+
     private static int totalShieldCapacity;
     private static int remainingShieldCapacity;
 
@@ -68,6 +70,7 @@ public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHold
         BASE_NAME = name;
         this.setRegistryName(name);
         this.setHasSubtypes(true);
+        this.identifier = name.toLowerCase();
 
         TOTAL_EQUALIZERS = numberOfEqualizers;
 
@@ -83,16 +86,16 @@ public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHold
         ModItems.registerArmor(this);
     }
 
-//    @Override
-//    public boolean isValidArmor(ItemStack stack, EntityEquipmentSlot armorType, Entity entity)
-//    {
-//        return true;
-//    }
+    @Override
+    public boolean isValidArmor(ItemStack stack, EntityEquipmentSlot armorType, Entity entity)
+    {
+        return true;
+    }
 
     @Override
     public EntityEquipmentSlot getEquipmentSlot()
     {
-        return EntityEquipmentSlot.CHEST;
+        return EntityEquipmentSlot.LEGS;
     }
 
     @Override
@@ -267,12 +270,6 @@ public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHold
     }
 
     @Override
-    public ItemMeshDefinition getCustomMeshDefinition()
-    {
-        return itemstack -> ResourceLocationHelper.getModelResourceLocation(BASE_NAME, VARIANTS[Math.abs(state.getMeta() % VARIANTS.length)]);
-    }
-
-    @Override
     @SideOnly(Side.CLIENT)
     public void addModelVariants(TIntObjectHashMap<ModelResourceLocation> variants)
     {
@@ -286,7 +283,7 @@ public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHold
     @Override
     public void addVariant(TIntObjectHashMap<ModelResourceLocation> variants, int meta, String suffix)
     {
-        variants.put(meta, ResourceLocationHelper.getModelResourceLocation(this.getRegistryName(), suffix));
+        variants.put(meta, ResourceLocationHelper.getModelResourceLocation(this.getRegistryName().getResourcePath() + ".unit", suffix));
     }
 
     @Override
@@ -299,5 +296,41 @@ public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHold
             ModelResourceLocation variant = variants.get(key);
             ModelLoader.setCustomModelResourceLocation(this, key, variant);
         }
+    }
+
+    @Override
+    public List<String> getExtraInfo(ItemStack unit, NBTTagCompound unitTag)
+    {
+        return null;
+    }
+
+    @Override
+    public boolean isHidden()
+    {
+        return false;
+    }
+
+    @Override
+    public String getTooltip(NBTTagCompound modifierTag, boolean detailed)
+    {
+        return null;
+    }
+
+    @Override
+    public void updateNBT(NBTTagCompound modifierTag)
+    {
+
+    }
+
+    @Override
+    public boolean hasTexturePerMaterial()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean equalModifier(NBTTagCompound modifierTag1, NBTTagCompound modifierTag2)
+    {
+        return false;
     }
 }

@@ -7,6 +7,8 @@ import com.sparta.is.client.handler.ItemToolTipEventHandler;
 import com.sparta.is.client.handler.KeyInputEventHandler;
 import com.sparta.is.client.render.ItemRenderRegistry;
 import com.sparta.is.client.render.entity.EntityRendererTabane;
+import com.sparta.is.client.render.tile.RenderItemDisplay;
+import com.sparta.is.client.render.tile.RenderUnitStation;
 import com.sparta.is.client.settings.KeyBindings;
 import com.sparta.is.core.armor.ArmorIS;
 import com.sparta.is.core.reference.EnumUnitState;
@@ -14,7 +16,13 @@ import com.sparta.is.core.settings.OneOffSettings;
 import com.sparta.is.core.settings.UnitSettings;
 import com.sparta.is.core.utils.helpers.LogHelper;
 import com.sparta.is.entity.EntityTabane;
+import com.sparta.is.tileentity.TileEntityISUnitStation;
+import com.sparta.is.tileentity.TileEntityItemDisplay;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBiped;
+import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -31,6 +39,7 @@ public class ClientProxy extends CommonProxy
     private static Byakushiki byakushikiPartialModel = new Byakushiki(1.0f, true);
 
     private static ArrayList<IModelRegister> modelList = new ArrayList<>();
+
 
     @Override
     public ClientProxy getClientProxy()
@@ -54,6 +63,9 @@ public class ClientProxy extends CommonProxy
 
         RenderingRegistry.registerEntityRenderingHandler(EntityTabane.class, EntityRendererTabane::new);
 
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityItemDisplay.class, new RenderItemDisplay());
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityISUnitStation.class, new RenderUnitStation());
+
         for(IModelRegister register : modelList)
         {
             register.registerModels();
@@ -74,7 +86,6 @@ public class ClientProxy extends CommonProxy
     {
         LogHelper.info("Initializing...");
         super.onInit(event);
-
 
         MinecraftForge.EVENT_BUS.register(new KeyInputEventHandler());
         MinecraftForge.EVENT_BUS.register(new ItemToolTipEventHandler());
@@ -116,4 +127,12 @@ public class ClientProxy extends CommonProxy
     {
         modelList.add(imr);
     }
+
+    public void sendBreakPacket(BlockPos pos)
+    {
+        NetHandlerPlayClient netHandlerPlayClient = Minecraft.getMinecraft().getConnection();
+        assert netHandlerPlayClient != null;
+        netHandlerPlayClient.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, pos, Minecraft.getMinecraft().objectMouseOver.sideHit));
+    }
+
 }

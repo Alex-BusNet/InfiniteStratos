@@ -20,12 +20,12 @@ public class ItemMaterials extends ItemMulti implements IInitializer
     @Override
     public boolean register()
     {
-//        ForgeRegistries.ITEMS.register(setRegistryName("material"));
         InfiniteStratos.proxy.getClientProxy().addIModel(this);
 
         adamantineIngot = addOreDictItem(2000, "ingotAdamantine");
-        armorMaterial = addOreDictItem(2001, "ingotArmorMaterial");
-        weaponMaterial = addOreDictItem(2002, "ingotWeaponMaterial");
+        crystallineIngot = addOreDictItem( 2001, "ingotCrystalline");
+        armorMaterial = addOreDictItem(2002, "ingotArmorMaterial");
+        weaponMaterial = addOreDictItem(2003, "ingotWeaponMaterial");
 
         return true;
     }
@@ -34,11 +34,13 @@ public class ItemMaterials extends ItemMulti implements IInitializer
     public boolean initialize()
     {
         addReverseStorageRecipe(adamantineIngot, "blockAdamantine");
+        addReverseStorageRecipe(crystallineIngot, "blockCrystalline");
 
         return true;
     }
 
     public static ItemStack adamantineIngot;
+    public static ItemStack crystallineIngot;
     public static ItemStack armorMaterial;
     public static ItemStack weaponMaterial;
 }

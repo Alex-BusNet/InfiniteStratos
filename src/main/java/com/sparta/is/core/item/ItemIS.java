@@ -4,11 +4,10 @@ import com.sparta.is.core.creativetab.CreativeTab;
 import com.sparta.is.core.reference.Reference;
 import com.sparta.is.core.utils.helpers.ResourceLocationHelper;
 import com.sparta.is.core.utils.interfaces.IISVariant;
+import com.sparta.is.core.utils.interfaces.IItemVariantHolder;
 import com.sparta.is.entity.driveables.types.InfoType;
 import com.sparta.is.init.ModItems;
-import com.sparta.is.core.utils.interfaces.IItemVariantHolder;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -27,11 +26,11 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>, IISVaria
 
     public ItemIS(String name, String ... variants)
     {
-        setRegistryName(name);
-        setUnlocalizedName(name);
-        setCreativeTab(CreativeTab.IS_TAB);
-        setMaxStackSize(1);
-        setNoRepair();
+        this.setRegistryName(name);
+        this.setUnlocalizedName(name);
+        this.setCreativeTab(CreativeTab.IS_TAB);
+        this.setMaxStackSize(1);
+        this.setNoRepair();
 
         BASE_NAME = name;
 
@@ -93,13 +92,6 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>, IISVaria
         {
             items.add(new ItemStack(this, 1, meta));
         }
-    }
-
-
-    @Override
-    public ItemMeshDefinition getCustomMeshDefinition()
-    {
-        return itemstack -> ResourceLocationHelper.getModelResourceLocation(BASE_NAME, VARIANTS[Math.abs(activeVariant % VARIANTS.length)]);
     }
 
     @Override

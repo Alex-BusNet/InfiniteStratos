@@ -26,8 +26,8 @@ import java.util.List;
 
 public class ItemTabaneSpawnEgg extends ItemEgg
 {
-    protected int colorBase = 0x000000;
-    protected int colorSpots = 0xFFFFFF;
+    protected int colorBase = 0xFFFFFF;
+    protected int colorSpots = 0xE694EB;
     protected String entityToSpawnName = "";
     protected String entityToSpawnNameFull = "";
     protected EntityTabane entityToSpawn = null;

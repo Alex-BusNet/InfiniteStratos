@@ -9,8 +9,8 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -20,7 +20,6 @@ import net.minecraftforge.common.property.IUnlistedProperty;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 
 public abstract class BlockTileEntity extends BlockIS implements ITileEntityProvider
 {
@@ -54,7 +53,7 @@ public abstract class BlockTileEntity extends BlockIS implements ITileEntityProv
         if(teis == null) { return state; }
 
         IExtendedBlockState extState = (IExtendedBlockState) state;
-        return extState.withProperty(FORWARD, teis.getForward()).withProperty(UP, teis.getUp());
+        return extState.withProperty(FORWARD, EnumFacing.NORTH).withProperty(UP, EnumFacing.UP);
     }
 
     private boolean hasBlockTileEntity()
@@ -127,22 +126,6 @@ public abstract class BlockTileEntity extends BlockIS implements ITileEntityProv
     @Override
     public void breakBlock(final World w,  final BlockPos pos, final IBlockState state)
     {
-        final TileEntityIS teis = this.getTileEntity(w, pos);
-        if(teis != null)
-        {
-            final ArrayList<ItemStack> drops = new ArrayList<>();
-            if(teis.dropItems())
-            {
-                teis.getDrops(w, pos, drops);
-            }
-            else
-            {
-                teis.getNoDrops(w, pos, drops);
-            }
-
-            // Spawn Drops
-        }
-
         super.breakBlock(w, pos, state);
     }
 }

@@ -1,0 +1,12 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "is:block/displaystand",
+    "transform": "forge:default-block"
+  },
+  "variants": {
+    "normal": [{}],
+    "inventory": [{}]
+  }
+
+}

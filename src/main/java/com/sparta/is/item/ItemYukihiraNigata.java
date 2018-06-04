@@ -13,7 +13,6 @@ import com.sparta.is.core.utils.interfaces.IEnergy;
 import com.sparta.is.core.utils.interfaces.IKeyBound;
 import com.sparta.is.core.utils.interfaces.IOwnable;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -51,7 +50,6 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
     public ItemYukihiraNigata()
     {
         super(Names.Weapons.YUKIHIRA_NIGATA, VARIANTS);
-        this.setFull3D();
     }
 
     @Override
@@ -75,13 +73,6 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
     {
         int unbreakingLevel = MathHelper.clamp(EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByID(34), stack), 0, 4);
         return (isEmpowered(stack) ? energyPerUseOneOff : energyPerUse) * (5 - unbreakingLevel) / 5;
-    }
-
-    @Override
-    public ItemMeshDefinition getCustomMeshDefinition()
-    {
-        return itemStack -> (oneOff == 1) ? ResourceLocationHelper.getModelResourceLocation(Names.Weapons.YUKIHIRA_NIGATA, VARIANTS[oneOff])
-                : ResourceLocationHelper.getModelResourceLocation(Names.Weapons.YUKIHIRA_NIGATA, VARIANTS[0]);
     }
 
     @Override
@@ -174,14 +165,18 @@ public class ItemYukihiraNigata extends ItemISMelee implements IOwnable, IKeyBou
     @Override
     public void addInformation(ItemStack itemStack, World worldIn, List<String> toolTip, ITooltipFlag ttFlag)
     {
-        toolTip.add(StringHelper.RED + "Byakushiki's Primary Weapon");
+
         int localOneOff = itemStack.getItemDamage();
+
+
         if(localOneOff== 0)
         {
+            toolTip.add(StringHelper.RED + "Byakushiki's Primary Weapon");
             toolTip.add(StringHelper.LIGHT_BLUE + "\"Second Snowflake\"");
         }
         else if(localOneOff == 1)
         {
+            toolTip.add(StringHelper.RED + "Yukihira Nigata's One Off Form");
             toolTip.add(StringHelper.LIGHT_BLUE + "\"White Night of Downfall\"");
         }
 

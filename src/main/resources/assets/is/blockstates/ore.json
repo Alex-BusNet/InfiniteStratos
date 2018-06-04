@@ -1,0 +1,17 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "cube_all",
+    "transform": "forge:default-block"
+  },
+  "variants": {
+    "variant": {
+      "adamantine": {
+        "textures": { "all": "is:blocks/ore_adamantine" }
+      },
+      "crystalline": {
+        "textures": { "all": "is:blocks/ore_crystalline" }
+      }
+    }
+  }
+}

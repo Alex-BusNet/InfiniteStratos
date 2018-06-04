@@ -6,6 +6,7 @@ import com.sparta.is.core.fluid.BlockFluidIS;
 import com.sparta.is.core.fluid.FluidIS;
 import com.sparta.is.core.reference.Reference;
 import com.sparta.is.fluid.BlockFluidAdamantine;
+import com.sparta.is.fluid.BlockFluidCrystalline;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.util.ResourceLocation;
@@ -38,33 +39,41 @@ public class ModFluids
     public static void registerAllFluids()
     {
         fluidAdamantine = new FluidIS("adamantine", "is").setDensity(1000).setViscosity(1500).setRarity(EnumRarity.RARE);
+        fluidCrystalline = new FluidIS("crystalline", "is").setDensity(1000).setViscosity(1500).setRarity(EnumRarity.RARE);
 
         FluidRegistry.registerFluid(fluidAdamantine);
+        FluidRegistry.registerFluid(fluidCrystalline);
     }
 
     public static void registerAllFluidBlocks()
     {
         blockFluidAdamantine = new BlockFluidAdamantine(fluidAdamantine);
+        blockFluidCrystalline = new BlockFluidCrystalline(fluidCrystalline);
 
         initList.add(blockFluidAdamantine);
+        initList.add(blockFluidCrystalline);
 
         InfiniteStratos.proxy.getClientProxy().addIModel(blockFluidAdamantine);
+        InfiniteStratos.proxy.getClientProxy().addIModel(blockFluidCrystalline);
     }
 
     public static void createBuckets()
     {
         FluidRegistry.addBucketForFluid(fluidAdamantine);
+        FluidRegistry.addBucketForFluid(fluidCrystalline);
     }
 
     public static void refreshReferences()
     {
         fluidAdamantine = FluidRegistry.getFluid("adamantine");
+        fluidCrystalline = FluidRegistry.getFluid("crystalline");
     }
 
     public static void registerTextures(TextureMap map)
     {
         textureMap = map;
         registerFluidTextures(fluidAdamantine);
+        registerFluidTextures(fluidCrystalline);
     }
 
     private static void registerFluidTextures(Fluid fluid)
@@ -97,5 +106,7 @@ public class ModFluids
     private static TextureMap textureMap;
 
     public static Fluid fluidAdamantine;
+    public static Fluid fluidCrystalline;
     public static BlockFluidIS blockFluidAdamantine;
+    public static BlockFluidIS blockFluidCrystalline;
 }

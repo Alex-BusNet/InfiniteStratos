@@ -80,7 +80,9 @@ public class Names
         public static final String DUMMY_ARRAY = "dummyArray";
         public static final String ALCHEMY_ARRAY = "alchemyArray";
         public static final String UNIT_STAND = "unitStand";
+        public static final String ITEM_DISPLAY_STAND = "itemDisplayStand";
         public static final String ADAMANTINE_ORE="adamantineOre";
+        public static final String CRYSTALLINE_ORE = "crystallineOre";
     }
 
     public static final class Parts

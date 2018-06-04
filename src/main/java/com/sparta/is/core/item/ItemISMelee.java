@@ -5,17 +5,15 @@ import com.sparta.is.core.reference.Materials;
 import com.sparta.is.core.reference.Reference;
 import com.sparta.is.core.utils.helpers.ResourceLocationHelper;
 import com.sparta.is.core.utils.interfaces.IISVariant;
+import com.sparta.is.core.utils.interfaces.IMeleeVariantHolder;
 import com.sparta.is.entity.driveables.types.EqualizerMeleeType;
 import com.sparta.is.init.ModItems;
-import com.sparta.is.core.utils.interfaces.IMeleeVariantHolder;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.util.NonNullList;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -31,10 +29,11 @@ public class ItemISMelee extends ItemSword implements IMeleeVariantHolder<ItemIS
     {
         super(Materials.Weapons.IS_SWORD);
 
-        setRegistryName(name);
-        setUnlocalizedName(name);
-        setCreativeTab(CreativeTab.IS_TAB);
-        setMaxStackSize(1);
+        this.setRegistryName(name);
+        this.setUnlocalizedName(name);
+        this.setCreativeTab(CreativeTab.IS_TAB);
+        this.setMaxStackSize(1);
+
         BASE_NAME = name;
 
         if(variants.length == 0)
@@ -70,12 +69,6 @@ public class ItemISMelee extends ItemSword implements IMeleeVariantHolder<ItemIS
     protected String getUnwrappedLocalizedName(String unlocalizedName)
     {
         return unlocalizedName.substring(unlocalizedName.indexOf(".") + 1);
-    }
-
-    @Override
-    public ItemMeshDefinition getCustomMeshDefinition()
-    {
-        return itemstack -> ResourceLocationHelper.getModelResourceLocation(BASE_NAME, VARIANTS[Math.abs(activeVariant % VARIANTS.length)]);
     }
 
     public int getMetadata()
@@ -120,13 +113,13 @@ public class ItemISMelee extends ItemSword implements IMeleeVariantHolder<ItemIS
     @Override
     public void registerVariants()
     {
-        TIntObjectHashMap<ModelResourceLocation> variants = new TIntObjectHashMap<>();
-        addModelVariants(variants);
-        for(int key : variants.keys())
-        {
-            ModelResourceLocation variant = variants.get(key);
-            ModelLoader.setCustomModelResourceLocation(this, key, variant);
-        }
+//        TIntObjectHashMap<ModelResourceLocation> variants = new TIntObjectHashMap<>();
+//        addModelVariants(variants);
+//        for(int key : variants.keys())
+//        {
+//            ModelResourceLocation variant = variants.get(key);
+//            ModelLoader.setCustomModelResourceLocation(this, key, variant);
+//        }
     }
 
     @Override

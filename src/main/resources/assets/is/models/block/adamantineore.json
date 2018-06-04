@@ -1,9 +1,12 @@
 {
-  "parent": "block/cube",
-  "textures": "is:blocks/flag",
+  "forge_marker": 1,
+  "defaults": {
+    "model": "cube_all",
+    "transform": "forge:default-block"
+  },
   "variants": {
     "normal": {
-      "textures": { "layer0": "is:blocks/flag" }
+      "textures": { "all": "is:blocks/flag" }
     },
     "inventory": [{}]
   }

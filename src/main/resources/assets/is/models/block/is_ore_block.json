@@ -6,11 +6,11 @@
     "uvlock": true
   },
   "variants": {
-    "variant=adamantine_ore": [{
-      "textures": "is:blocks/isarmormaterial"
+    "variant=adamantine": [{
+      "textures": "is:blocks/ore_adamantine"
     }],
-    "variant=crystalline_ore": [{
-      "textures": "is:blocks/isswordmaterial"
+    "variant=crystalline": [{
+      "textures": "is:blocks/ore_crystalline"
     }]
   }
 }

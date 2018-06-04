@@ -4,12 +4,16 @@ import com.sparta.is.core.InfiniteStratos;
 import com.sparta.is.core.command.CommandIS;
 import com.sparta.is.core.handler.*;
 import com.sparta.is.core.network.Network;
+import com.sparta.is.core.network.PacketHandler;
 import com.sparta.is.core.reference.Files;
+import com.sparta.is.core.tileentity.TileEntityIS;
 import com.sparta.is.core.utils.helpers.LogHelper;
+import com.sparta.is.init.ModBlocks;
 import com.sparta.is.init.ModFluids;
 import com.sparta.is.init.ModItems;
 import com.sparta.is.init.ModPlugins;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -23,12 +27,16 @@ public abstract class CommonProxy implements IProxy
         ConfigurationHandler.init(event.getSuggestedConfigurationFile());
         Files.init(event);
         Network.init();
+        PacketHandler.init();
 
+        ModBlocks.preInit();
         ModItems.preInit();
         ModFluids.preInit();
 //        ModPlugins.preInit();
 
         registerEventHandlers();
+
+        InfiniteStratos.commonCapsLoaded = Loader.isModLoaded("commoncapabilities");
     }
 
     @Override
@@ -42,6 +50,7 @@ public abstract class CommonProxy implements IProxy
         MinecraftForge.EVENT_BUS.register(new CraftingHandler());
 
         ModItems.init();
+        TileEntityIS.init();
 
 //        CraftingHandler.init();
 

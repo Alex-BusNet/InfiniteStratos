@@ -21,4 +21,5 @@ public class Materials
 
     public static final Material adamantineMaterial = new Material(MapColor.AIR);
     public static final Material adamantineFluidMaterial = new MaterialLiquid(MapColor.AIR);
+    public static final Material crystallineFluidMaterial = new MaterialLiquid(MapColor.AIR);
 }

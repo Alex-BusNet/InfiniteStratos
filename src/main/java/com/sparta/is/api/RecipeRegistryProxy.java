@@ -28,10 +28,10 @@ public final class RecipeRegistryProxy {
 
         init();
 
-        if (isMod != null)
-        {
-            ISWrapper.ismod.getRecipeRegistry().addRecipe(recipeOutput, recipeInputs);
-        }
+//        if (isMod != null)
+//        {
+//            ISWrapper.ismod.getRecipeRegistry().addRecipe(recipeOutput, recipeInputs);
+//        }
     }
 
     @Mod.Instance("is")

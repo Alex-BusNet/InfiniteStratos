@@ -2,6 +2,7 @@ package com.sparta.is.core.handler;
 
 import com.sparta.is.core.armor.ArmorIS;
 import com.sparta.is.core.block.BlockIS;
+import com.sparta.is.core.block.BlockISContainerBase;
 import com.sparta.is.core.item.ItemIS;
 import com.sparta.is.core.item.ItemISMelee;
 import com.sparta.is.core.item.ItemISRange;
@@ -45,13 +46,13 @@ public class RegistrationHandler
             item.registerVariants();
         }
 
-        LogHelper.info("\tRegistering Melee Equalizer Models...");
-        for( ItemISMelee item : ModItems.getMeleeItems())
-        {
+//        LogHelper.info("\tRegistering Melee Equalizer Models...");
+//        for( ItemISMelee item : ModItems.getMeleeItems())
+//        {
 
-            LogHelper.info("\t\t" + item.getUnlocalizedName());
-            item.registerVariants();
-        }
+//            LogHelper.info("\t\t" + item.getUnlocalizedName());
+//            item.registerVariants();
+//        }
 
         LogHelper.info("\tRegistering Ranged Equalizers Models...");
         for ( ItemISRange item : ModItems.getRangeItems() )
@@ -64,7 +65,6 @@ public class RegistrationHandler
         LogHelper.info("\tRegistering Unit Models...");
         for( ArmorIS item : ModItems.getUnits())
         {
-
             LogHelper.info("\t\t" + item.getUnlocalizedName());
             item.registerVariants();
         }
@@ -74,13 +74,6 @@ public class RegistrationHandler
 
         LogHelper.info("\tRegistering Tabane Spawn Egg Model...");
         ModelLoader.setCustomModelResourceLocation(ModItems.tabaneSpawnEgg, 0, new ModelResourceLocation(ModItems.tabaneSpawnEgg.getRegistryName().toString()));
-
-        LogHelper.info("\tRegistering Block Models...");
-        for(BlockIS block : ModBlocks.getBlocks())
-        {
-            LogHelper.info("\t\t" + block.getUnlocalizedName());
-            block.registerVariants();
-        }
     }
 
     @SubscribeEvent
@@ -91,7 +84,13 @@ public class RegistrationHandler
         {
             LogHelper.info("\t" + block.getUnlocalizedName());
             event.getRegistry().register(block);
-//            block.setCreativeTab(CreativeTab.IS_TAB);
+        }
+
+        LogHelper.info("Registering Tile Blocks...");
+        for(BlockISContainerBase blockISContainerBase : ModBlocks.getTileBlocks())
+        {
+            LogHelper.info("\t" + blockISContainerBase.getUnlocalizedName());
+            event.getRegistry().register(blockISContainerBase);
         }
     }
 
@@ -103,7 +102,6 @@ public class RegistrationHandler
         {
             LogHelper.info("\t" + item.getUnlocalizedName());
             event.getRegistry().register(item);
-//            item.setCreativeTab(CreativeTab.IS_TAB);
 
             if(item instanceof IOreItem)
                 ((IOreItem) item).registerOreItem();
@@ -114,7 +112,6 @@ public class RegistrationHandler
         {
             LogHelper.info("\t" + item.getUnlocalizedName());
             event.getRegistry().register(item);
-//            item.setCreativeTab(CreativeTab.IS_TAB);
         }
 
         LogHelper.info("Registering Ranged Equalizers...");
@@ -122,7 +119,6 @@ public class RegistrationHandler
         {
             LogHelper.info("\t" + item.getUnlocalizedName());
             event.getRegistry().register(item);
-//            item.setCreativeTab(CreativeTab.IS_TAB);
         }
 
         LogHelper.info("Registering misc. items...");
@@ -134,7 +130,6 @@ public class RegistrationHandler
         {
             LogHelper.info("\t" + item.getUnlocalizedName());
             event.getRegistry().register(item);
-//            item.setCreativeTab(CreativeTab.IS_TAB);
         }
     }
 

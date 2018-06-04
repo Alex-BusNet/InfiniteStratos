@@ -1,14 +1,13 @@
 package com.sparta.is.client.handler;
 
-import com.sparta.is.core.armor.ArmorIS;
 import com.sparta.is.client.settings.KeyBindings;
+import com.sparta.is.core.armor.ArmorIS;
 import com.sparta.is.core.network.Network;
 import com.sparta.is.core.network.message.MessageKeyPressed;
 import com.sparta.is.core.reference.Key;
-import com.sparta.is.core.utils.interfaces.IKeyBound;
 import com.sparta.is.core.utils.helpers.LogHelper;
+import com.sparta.is.core.utils.interfaces.IKeyBound;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -82,7 +81,21 @@ public class KeyInputEventHandler
             {
                 EntityPlayer entityPlayer = FMLClientHandler.instance().getClientPlayerEntity();
 
-                if ( entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof ArmorIS && entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof IKeyBound )
+                // Search all armor slots for an instance of ArmorIS.
+                // Always grabs the first armor found.
+                // (Players shouldn't have more than one equipped anyways)
+                ItemStack equippedArmor = ItemStack.EMPTY;
+                for(ItemStack itemStack : entityPlayer.getArmorInventoryList())
+                {
+                    if(itemStack.getItem() instanceof ArmorIS )
+                    {
+                        equippedArmor = itemStack;
+                        break;
+                    }
+
+                }
+
+                if ( equippedArmor != ItemStack.EMPTY && equippedArmor.getItem() instanceof IKeyBound )
                 {
                     if ( entityPlayer.getEntityWorld().isRemote )
                     {
@@ -90,7 +103,7 @@ public class KeyInputEventHandler
                     }
                     else
                     {
-                        ((IKeyBound) entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem()).doKeyBindingAction(entityPlayer, key, false);
+                        ((IKeyBound) equippedArmor.getItem()).doKeyBindingAction(entityPlayer, key, false);
                     }
                 }
             }

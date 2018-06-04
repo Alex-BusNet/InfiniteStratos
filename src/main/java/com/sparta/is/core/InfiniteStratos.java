@@ -1,15 +1,18 @@
 package com.sparta.is.core;
 
+import com.sparta.is.core.client.model.ISUnitModelLoader;
 import com.sparta.is.core.reference.Messages;
 import com.sparta.is.core.reference.Reference;
 import com.sparta.is.core.utils.helpers.LogHelper;
 import com.sparta.is.entity.driveables.types.IScope;
 import com.sparta.is.proxy.IProxy;
-import com.sparta.is.recipe.RecipeRegistry;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.*;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 
 @Mod(modid = Reference.MOD_ID,
@@ -25,6 +28,17 @@ public class InfiniteStratos
 
     @SidedProxy(clientSide = "com.sparta.is.proxy.ClientProxy", serverSide = "com.sparta.is.proxy.ServerProxy")
     public static IProxy proxy;
+
+    public static boolean commonCapsLoaded;
+
+    private static ISUnitModelLoader unitModelLoader = new ISUnitModelLoader();
+
+    @SideOnly(Side.CLIENT)
+    public static void registerLoaders()
+    {
+        ModelLoaderRegistry.registerLoader(unitModelLoader);
+
+    }
 
     @Mod.EventHandler
     public void invalidFingerprint(FMLFingerprintViolationEvent event)
@@ -44,7 +58,13 @@ public class InfiniteStratos
     }
 
     @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event) { proxy.onPreInit(event); }
+    public void preInit(FMLPreInitializationEvent event)
+    {
+        if(event.getSide() == Side.CLIENT)
+            registerLoaders();
+
+        proxy.onPreInit(event);
+    }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) { proxy.onInit(event); }
@@ -58,8 +78,6 @@ public class InfiniteStratos
     @Mod.EventHandler
     public void serverStopping(FMLServerStoppingEvent event) { proxy.onServerStopping(event); }
 
-
-    public RecipeRegistry getRecipeRegistry() { return RecipeRegistry.INSTANCE; }
 
     public IScope currentScope = null;
 

@@ -2,11 +2,6 @@ package com.sparta.is.armor;
 
 import com.sparta.is.core.InfiniteStratos;
 import com.sparta.is.core.armor.ArmorIS;
-import com.sparta.is.core.utils.helpers.EntityHelper;
-import com.sparta.is.core.utils.helpers.ResourceLocationHelper;
-import com.sparta.is.core.utils.helpers.StringHelper;
-import com.sparta.is.core.utils.interfaces.IKeyBound;
-import com.sparta.is.core.utils.interfaces.IOwnable;
 import com.sparta.is.core.network.Network;
 import com.sparta.is.core.network.message.MessageUnitSettings;
 import com.sparta.is.core.reference.EnumUnitState;
@@ -14,8 +9,11 @@ import com.sparta.is.core.reference.Key;
 import com.sparta.is.core.reference.Materials;
 import com.sparta.is.core.reference.Names;
 import com.sparta.is.core.settings.UnitSettings;
+import com.sparta.is.core.utils.helpers.EntityHelper;
+import com.sparta.is.core.utils.helpers.StringHelper;
+import com.sparta.is.core.utils.interfaces.IKeyBound;
+import com.sparta.is.core.utils.interfaces.IOwnable;
 import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -52,7 +50,7 @@ public class UnitByakushiki extends ArmorIS implements ISpecialArmor, IKeyBound,
 
     public UnitByakushiki()
     {
-        super(Names.Units.BYAKUSHIKI, Materials.Armor.IS_ARMOR, EntityEquipmentSlot.CHEST, 4, VARIANTS);
+        super(Names.Units.BYAKUSHIKI, Materials.Armor.IS_ARMOR, EntityEquipmentSlot.LEGS, 4, VARIANTS);
         this.unitName = "Byakushiki";
         this.setShieldCapacity(20000);
         this.setRemainingShieldCapacity();
@@ -220,12 +218,6 @@ public class UnitByakushiki extends ArmorIS implements ISpecialArmor, IKeyBound,
                 Network.INSTANCE.sendTo(new MessageUnitSettings(unitSettings), (EntityPlayerMP) entityPlayer);
             }
         }
-    }
-
-    @Override
-    public ItemMeshDefinition getCustomMeshDefinition()
-    {
-        return itemStack -> ResourceLocationHelper.getModelResourceLocation(Names.Units.BYAKUSHIKI, VARIANTS[0]);
     }
 
     @Override

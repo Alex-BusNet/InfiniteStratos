@@ -1,10 +1,10 @@
 package com.sparta.is.core.network.message;
 
+import com.sparta.is.core.armor.ArmorIS;
 import com.sparta.is.core.reference.Key;
 import com.sparta.is.core.utils.interfaces.IKeyBound;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -60,9 +60,20 @@ public class MessageKeyPressed implements IMessage
                 }
                 else if(message.keyPressed == Key.FULL_DEPLOY || message.keyPressed == Key.PARTIAL_DEPLOY || message.keyPressed == Key.STANDBY)
                 {
-                    if ( entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != ItemStack.EMPTY && entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof IKeyBound )
+                    ItemStack equippedArmor = ItemStack.EMPTY;
+                    for(ItemStack itemStack : entityPlayer.getArmorInventoryList())
                     {
-                        ((IKeyBound) entityPlayer.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem()).doKeyBindingAction(entityPlayer, message.keyPressed, false);
+                        if(itemStack.getItem() instanceof ArmorIS )
+                        {
+                            equippedArmor = itemStack;
+                            break;
+                        }
+
+                    }
+
+                    if ( equippedArmor != ItemStack.EMPTY && equippedArmor.getItem() instanceof IKeyBound )
+                    {
+                        ((IKeyBound) equippedArmor.getItem()).doKeyBindingAction(entityPlayer, message.keyPressed, false);
                     }
                 }
             }

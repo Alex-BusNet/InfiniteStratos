@@ -1,7 +1,7 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "is:items/kuroakiko"
+    "layer0": "is:items/kuroakikochest"
   },
   "variants": {
     "normal": {
@@ -11,7 +11,7 @@
     },
     "inventory": {
       "textures": {
-        "layer0": "is:items/kuroakiko"
+        "layer0": "is:items/kuroakikochest"
       }
     }
   }

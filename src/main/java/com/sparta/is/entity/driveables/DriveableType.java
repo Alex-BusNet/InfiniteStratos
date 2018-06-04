@@ -1,11 +1,10 @@
 package com.sparta.is.entity.driveables;
 
-import com.sparta.is.armor.models.ModelUnit;
+import com.sparta.is.core.reference.EnumFireMode;
 import com.sparta.is.entity.driveables.types.BulletType;
 import com.sparta.is.entity.driveables.types.InfoType;
 import com.sparta.is.entity.driveables.types.PartType;
 import com.sparta.is.entity.driveables.types.TypeFile;
-import com.sparta.is.core.reference.EnumFireMode;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumParticleTypes;
@@ -20,7 +19,7 @@ import java.util.List;
 public abstract class DriveableType extends InfoType
 {
     @SideOnly(Side.CLIENT)
-    public ModelUnit model;
+    public ModelBase model;
 
     public HashMap<EnumDriveablePart, CollisionBox> health = new HashMap<EnumDriveablePart, CollisionBox>();
     public HashMap<EnumDriveablePart, ItemStack[]> partwiseRecipe = new HashMap<EnumDriveablePart, ItemStack[]>();

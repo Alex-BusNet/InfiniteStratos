@@ -1,15 +1,17 @@
 package com.sparta.is.init;
 
 import cofh.core.util.core.IInitializer;
+import com.google.common.collect.Maps;
 import com.sparta.is.armor.UnitByakushiki;
 import com.sparta.is.armor.UnitKuroAkiko;
 import com.sparta.is.core.armor.ArmorIS;
+import com.sparta.is.core.armor.IISUnit;
 import com.sparta.is.core.handler.RegistrationHandler;
 import com.sparta.is.core.item.ItemIS;
 import com.sparta.is.core.item.ItemISMelee;
 import com.sparta.is.core.item.ItemISRange;
 import com.sparta.is.core.item.ItemTabLabel;
-import com.sparta.is.item.ItemAdamantine;
+import com.sparta.is.core.utils.helpers.LogHelper;
 import com.sparta.is.item.ItemElucidator;
 import com.sparta.is.item.ItemTabaneSpawnEgg;
 import com.sparta.is.item.ItemYukihiraNigata;
@@ -19,6 +21,7 @@ import net.minecraft.item.Item;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 
 public class ModItems
@@ -28,28 +31,33 @@ public class ModItems
     public static final List<ItemISMelee> MELEE = new ArrayList<>();
     public static final List<ItemISRange> RANGE = new ArrayList<>();
 
+    private static final Map<String, IISUnit> UNIT_REGISTRY = Maps.newLinkedHashMap();
+
+
     public static final RegistrationHandler HELPER = new RegistrationHandler();
 
     //
     // Equalizers
     //
-    public static ItemISMelee yukihira = new ItemYukihiraNigata();
-    public static ItemISMelee elucidator = new ItemElucidator();
+    public static ItemYukihiraNigata yukihira = new ItemYukihiraNigata();
+    public static ItemElucidator elucidator = new ItemElucidator();
 
     //
     // Ores
     //
-    public static ItemIS adamantineItem = new ItemAdamantine();
     public static ItemMaterials itemMaterials;
 
-//    public static ItemIS isOres = new ItemOre();
-
-    public static ItemTabaneSpawnEgg tabaneSpawnEgg = new ItemTabaneSpawnEgg(0xFFA8DE, 0xCF5DA3);
-
+    //
+    // IS Units
+    //
     public static ArmorIS byakushiki = new UnitByakushiki();
     public static ArmorIS kuroakiko = new UnitKuroAkiko();
 
+    //
+    // Other
+    //
     public static Item tabLabelItem = new ItemTabLabel();
+    public static ItemTabaneSpawnEgg tabaneSpawnEgg = new ItemTabaneSpawnEgg(0xFFA8DE, 0xCF5DA3);
 
     private ModItems() {}
 
@@ -98,11 +106,24 @@ public class ModItems
     public static void registerArmor(ArmorIS armor)
     {
         UNITS.add(armor);
+
+        if(UNIT_REGISTRY.containsKey(armor.identifier))
+        {
+            LogHelper.error("Could not register unit: " + armor.identifier + "; Unit already registered");
+            return;
+        }
+
+        UNIT_REGISTRY.put(armor.identifier, armor);
     }
 
     public static void registerMelee(ItemISMelee melee)
     {
         MELEE.add(melee);
+    }
+
+    public static IISUnit getUnit(String identifier)
+    {
+        return UNIT_REGISTRY.containsKey(identifier) ? UNIT_REGISTRY.get(identifier) : null;
     }
 
     private static ArrayList<IInitializer> initList = new ArrayList<>();

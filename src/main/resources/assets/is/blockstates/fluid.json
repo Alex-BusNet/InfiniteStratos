@@ -4,10 +4,19 @@
     "model": "forge:fluid"
   },
   "variants": {
-    "adamantine": {
-      "custom": {
-        "fluid": "adamantine"
+    "adamantine": [
+      {
+        "custom": {
+          "fluid": "adamantine"
+        }
       }
-    }
+    ],
+    "crystalline": [
+      {
+        "custom": {
+          "fluid": "crystalline"
+        }
+      }
+    ]
   }
 }

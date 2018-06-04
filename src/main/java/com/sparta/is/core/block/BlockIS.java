@@ -2,24 +2,15 @@ package com.sparta.is.core.block;
 
 import com.sparta.is.core.creativetab.CreativeTab;
 import com.sparta.is.core.reference.Reference;
-import com.sparta.is.core.utils.helpers.LogHelper;
-import com.sparta.is.core.utils.helpers.ResourceLocationHelper;
-import com.sparta.is.core.utils.interfaces.IISVariant;
-import com.sparta.is.init.ModBlocks;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BlockIS extends Block implements IISVariant
+public class BlockIS extends Block
 {
-    private final String BASE_NAME;
+    public String BASE_NAME;
+    private String modName;
     private boolean fullSize = true;
     private boolean opaque = true;
 
@@ -31,15 +22,13 @@ public class BlockIS extends Block implements IISVariant
         this(name, Material.WOOD);
     }
 
-    public BlockIS(String name, Material material)
+    public BlockIS(String modName, Material material)
     {
         super(material);
-        this.setRegistryName(name);
-        this.setUnlocalizedName(name);
+        this.modName = modName;
         setCreativeTab(CreativeTab.IS_TAB);
-        BASE_NAME = name;
-        ModBlocks.register(this);
-        this.fullBlock = this.isFullSize();
+
+//        ModBlocks.register(this);
     }
 
     public boolean hasSubtypes()
@@ -54,37 +43,19 @@ public class BlockIS extends Block implements IISVariant
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public void addModelVariants(TIntObjectHashMap<ModelResourceLocation> variants)
-    {
-        LogHelper.info("\t\t Initializing " + BASE_NAME);
-        addVariant(variants, 0, "normal");
-    }
-
-    @Override
     public CreativeTabs getCreativeTabToDisplayOn()
     {
         return CreativeTab.IS_TAB;
     }
 
     @Override
-    public void addVariant(TIntObjectHashMap<ModelResourceLocation> variants, int meta, String suffix)
+    public Block setUnlocalizedName(String name)
     {
-        variants.put(meta, ResourceLocationHelper.getModelResourceLocation(((Block)this).getRegistryName(), suffix));
+        this.BASE_NAME = name;
+        name = modName + ":" + name;
+        return super.setUnlocalizedName(name);
     }
 
-    @Override
-    public void registerVariants()
-    {
-        Block thisItem = (Block) this;
-        TIntObjectHashMap<ModelResourceLocation> variants = new TIntObjectHashMap<>();
-        addModelVariants(variants);
-        for(int key : variants.keys())
-        {
-            ModelResourceLocation variant = variants.get(key);
-            ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(thisItem), key, variant);
-        }
-    }
 
     public boolean isFullSize()
     {
