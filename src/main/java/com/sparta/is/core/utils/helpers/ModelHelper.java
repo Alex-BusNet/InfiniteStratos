@@ -1,9 +1,11 @@
 package com.sparta.is.core.utils.helpers;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.sparta.is.core.client.model.format.Armament;
 import com.sparta.is.core.client.model.format.DeployVariants;
 import com.sparta.is.core.client.model.format.TextureDeserializer;
@@ -18,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.Map;
 
 public class ModelHelper
@@ -55,12 +56,17 @@ public class ModelHelper
         }
     }
 
-    public static Map<String, Map<String, ArrayList<Armament>>> loadArmamentFromJson(ResourceLocation location) throws IOException
+    public static Map<String, Map<String, Armament>> loadArmamentFromJson(ResourceLocation location) throws IOException
     {
         Reader reader = getReaderForResource(location);
         try
         {
             return GSON.fromJson(reader, Armament.ArmamentDeserializer.TYPE);
+        }
+        catch (JsonParseException e)
+        {
+            LogHelper.error("Error parsing Armament JSON: " + e);
+            return Maps.newHashMap();
         }
         finally
         {

@@ -16,6 +16,7 @@ import com.sparta.is.core.settings.OneOffSettings;
 import com.sparta.is.core.settings.UnitSettings;
 import com.sparta.is.core.utils.helpers.LogHelper;
 import com.sparta.is.entity.EntityTabane;
+import com.sparta.is.init.ModModels;
 import com.sparta.is.tileentity.TileEntityISUnitStation;
 import com.sparta.is.tileentity.TileEntityItemDisplay;
 import net.minecraft.client.Minecraft;
@@ -60,6 +61,8 @@ public class ClientProxy extends CommonProxy
         super.onPreInit(event);
 
 //        OBJLoader.INSTANCE.addDomain(Reference.MOD_ID);
+
+        ModModels.preInit();
 
         RenderingRegistry.registerEntityRenderingHandler(EntityTabane.class, EntityRendererTabane::new);
 

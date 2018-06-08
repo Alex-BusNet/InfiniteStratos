@@ -10,6 +10,7 @@ import com.sparta.is.core.client.model.format.Armament;
 import com.sparta.is.core.utils.helpers.LogHelper;
 import com.sparta.is.core.utils.helpers.ModelHelper;
 import com.sparta.is.init.ModItems;
+import com.sparta.is.init.ModModels;
 import gnu.trove.map.hash.THashMap;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -19,7 +20,6 @@ import org.apache.commons.io.FilenameUtils;
 import slimeknights.tconstruct.library.client.CustomTextureCreator;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -92,7 +92,6 @@ public class ISUnitModelLoader implements ICustomModelLoader
             for(Map.Entry<String, Map<String, String>> textureEntry : textureEntries.entrySet())
             {
                 String unit = textureEntry.getKey().toLowerCase();
-
                 unitCache.put(unit, textureEntry.getValue());
             }
         }
@@ -105,15 +104,45 @@ public class ISUnitModelLoader implements ICustomModelLoader
             LogHelper.info("Cannot load IS Unit model for " + isUnit, e);
             throw e;
         }
+        catch(NullPointerException e)
+        {
+            LogHelper.error("NullPointer found. That shouldn't happen...", e);
+            throw e;
+        }
 
-        ModelUnit model = new ModelUnit();
-        Map<String, Map<String, ArrayList<Armament>>> armaments = ModelHelper.loadArmamentFromJson(isUnit);
+        // Grabs the model from the existing registry for the IS Unit being loaded.
+        ModelUnit model = ModModels.GetModelForUnit(unitName);
+        if(model == null)
+            return model;
 
+        // Reads the armament information from the JSON file.
+        Map<String, Map<String, Armament>> armaments = ModelHelper.loadArmamentFromJson(isUnit);
+        LogHelper.info("Armaments loaded for " + unitName + ":");
+
+        for(Map.Entry<String, Map<String, Armament>> stringMapEntry : armaments.entrySet())
+        {
+            LogHelper.info("\n" + stringMapEntry.getKey() + " " + stringMapEntry.getValue().values().toString());
+        }
+
+        // Load the textures into the Armaments object.
         if(cache.containsKey(unitName))
         {
             for(Map.Entry<String, Map<String, String>> entry : cache.get(unitName).entrySet())
             {
                 IISUnit unit = ModItems.getUnit(entry.getKey());
+                Map<String, ResourceLocation> txtMap = Maps.newHashMap();
+                for(Map.Entry<String, String> sm : entry.getValue().entrySet())
+                {
+                    ResourceLocation rl = new ResourceLocation("is", sm.getValue().split(":")[1]);
+                    txtMap.put(sm.getKey(), rl);
+                }
+
+                for(Map.Entry<String, Armament> arms : armaments.get(entry.getKey()).entrySet())
+                {
+                    arms.getValue().textures.put(entry.getKey(), txtMap);
+                }
+
+                model.addModelForVariant(entry.getKey(), armaments.get(entry.getKey()));
 
                 if(unit != null && unit.hasTexturePerMaterial())
                 {
@@ -128,6 +157,7 @@ public class ISUnitModelLoader implements ICustomModelLoader
         }
 
         LogHelper.info("");
+
         return model;
     }
 

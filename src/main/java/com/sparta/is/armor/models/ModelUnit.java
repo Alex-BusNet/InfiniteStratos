@@ -2,6 +2,7 @@ package com.sparta.is.armor.models;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.sparta.is.core.armor.IISUnit;
 import com.sparta.is.core.client.model.format.Armament;
 import com.sparta.is.init.ModItems;
@@ -35,14 +36,13 @@ public class ModelUnit implements IModel
 //    public ModelBiped.ArmPose rightArmPose;
 //    public boolean isSneak;
 
-    private Map<String, Armament[]> models = new THashMap<>();
+    private Map<String, Map<String, Armament>> models = Maps.newHashMap();
 
     public ModelUnit()
     {
-
     }
 
-    public void addModelForVariant(String variant, Armament[] model)
+    public void addModelForVariant(String variant, Map<String, Armament> model)
     {
         models.put(variant, model);
     }
@@ -60,16 +60,19 @@ public class ModelUnit implements IModel
 
         List<ResourceLocation> cache = new ArrayList<>();
         // Retrieve all textures for each model.
-        for(Armament[] model : models.values())
+        for(Map<String, Armament> model : models.values())
         {
-            for(Armament a : model)
+            for(Armament a : model.values())
             {
-                for(ResourceLocation texture : a.textures.values())
+                for(Map.Entry<String, Map<String, ResourceLocation>> textures : a.textures.entrySet())
                 {
-                    if(!cache.contains(texture))
+                    for(Map.Entry<String, ResourceLocation> texture : textures.getValue().entrySet())
                     {
-                        cache.add(texture);
-                        builder.add(texture);
+                        if ( ! cache.contains(texture.getValue()) )
+                        {
+                            cache.add(texture.getValue());
+                            builder.add(texture.getValue());
+                        }
                     }
                 }
             }
@@ -81,6 +84,7 @@ public class ModelUnit implements IModel
     @Override
     public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
     {
+        // See ModelBlockDefinition#backeModel(ModleBlock, ITransformation boolean);
         throw new UnsupportedOperationException("The Unit model is not built to be used as an item model.");
     }
 
@@ -92,7 +96,7 @@ public class ModelUnit implements IModel
         //float scale = 0.025f;
         //ITransformation transformation = new TRSRTransformation(new Vector3f(0, 0, 0.0001f - scale / 2f), null, new Vector3f(1, 1, 1f + scale), null);
 
-        for(Map.Entry<String, Armament[]> entry : models.entrySet())
+        for(Map.Entry<String, Map<String, Armament>> entry : models.entrySet())
         {
             IISUnit unit = ModItems.getUnit(entry.getKey());
             if(unit != null && unit.hasTexturePerMaterial())
