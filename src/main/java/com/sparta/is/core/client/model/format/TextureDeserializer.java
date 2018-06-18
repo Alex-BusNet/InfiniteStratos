@@ -27,6 +27,7 @@ public class TextureDeserializer implements JsonDeserializer<Map<String, Map<Str
             throw new JsonParseException("Missing variants entry in json");
         }
 
+        // State, <ref name, location>
         Map<String, Map<String, String>> textureMap = Maps.newHashMap();
         obj = elem.getAsJsonObject();
 
@@ -38,6 +39,18 @@ public class TextureDeserializer implements JsonDeserializer<Map<String, Map<Str
             textureMap.put(VARIANTS[i], GSON.fromJson(texElem, TYPE));
         }
 
-        return textureMap;
+        Map<String, Map<String, String>> newTextMap = Maps.newHashMap();
+        for(Map.Entry<String, Map<String, String>> entry : textureMap.entrySet())
+        {
+            Map<String, String> newSubTextMap = Maps.newHashMap();
+            for(Map.Entry<String, String> mapString : entry.getValue().entrySet())
+            {
+                newSubTextMap.put("#" + mapString.getKey(), mapString.getValue());
+            }
+
+            newTextMap.put(entry.getKey(), newSubTextMap);
+        }
+
+        return newTextMap;
     }
 }

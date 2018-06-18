@@ -146,5 +146,4 @@ public class ItemIS extends Item implements IItemVariantHolder<ItemIS>, IISVaria
     {
         return type;
     }
-
 }

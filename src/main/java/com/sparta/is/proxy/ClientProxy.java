@@ -5,7 +5,6 @@ import com.sparta.is.armor.UnitByakushiki;
 import com.sparta.is.armor.units.Byakushiki;
 import com.sparta.is.client.handler.ItemToolTipEventHandler;
 import com.sparta.is.client.handler.KeyInputEventHandler;
-import com.sparta.is.client.render.ItemRenderRegistry;
 import com.sparta.is.client.render.entity.EntityRendererTabane;
 import com.sparta.is.client.render.tile.RenderItemDisplay;
 import com.sparta.is.client.render.tile.RenderUnitStation;
@@ -74,7 +73,7 @@ public class ClientProxy extends CommonProxy
             register.registerModels();
         }
 
-        ItemRenderRegistry.register();
+//        ItemRenderRegistry.register();
 
         ClientRegistry.registerKeyBinding(KeyBindings.STANDBY);
         ClientRegistry.registerKeyBinding(KeyBindings.PARTIAL_DEPLOY);

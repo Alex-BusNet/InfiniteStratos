@@ -1,0 +1,56 @@
+{
+  "is_marker": 1,
+  "variants": {
+    "full_deploy": {
+      "textures": {
+        "0": "is:items/kuroakiko"
+      },
+      "armaments": {
+        "rightarm": {
+          "elements": [ ]
+        },
+        "leftarm": {
+          "elements": [ ]
+        },
+        "chest": {
+          "elements": [ ]
+        },
+        "rightleg": {
+          "elements": [ ]
+        },
+        "leftleg": {
+          "elements": [ ]
+        },
+        "rightwing": {
+          "elements": [ ]
+        },
+        "leftwing": {
+          "elements": [ ]
+        },
+        "headpiece": {
+          "elements": [ ]
+        }
+      }
+    },
+    "partial_deploy": {
+      "textures": {
+        "0": "is:items/kuroakiko"
+      },
+      "armaments": {
+        "rightarm": {
+          "elements": [ ]
+        }
+      }
+    },
+    "standby": {
+      "textures": {
+        "0": "is:items/kuroakiko"
+      },
+      "armaments": {
+        "rightarm": {
+          "elements": [ ]
+        }
+      }
+    }
+  }
+}

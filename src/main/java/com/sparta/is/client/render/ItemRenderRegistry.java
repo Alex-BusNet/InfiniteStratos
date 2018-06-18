@@ -1,6 +1,9 @@
 package com.sparta.is.client.render;
 
+import com.google.common.collect.Maps;
 import com.sparta.is.client.render.Items.PerspectiveModel;
+import com.sparta.is.core.client.model.BakedISUnitModel;
+import com.sparta.is.core.reference.Names;
 import com.sparta.is.core.reference.Reference;
 import com.sparta.is.core.utils.helpers.LogHelper;
 import com.sparta.is.init.ModItems;
@@ -15,6 +18,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 @Mod.EventBusSubscriber
 public class ItemRenderRegistry
@@ -27,6 +31,9 @@ public class ItemRenderRegistry
     private static ModelResourceLocation itemStandNormalMrl, itemStandInvMrl;
     private static ModelResourceLocation unitStationNormalMrl, unitStationInvMrl;
 
+    private static ModelResourceLocation byakushikiNormalMrl, byakushikiInvMrl;
+    private static ModelResourceLocation kuroakikoNormalMrl, kuroakikoInvMrl;
+
     public static void register()
     {
         LogHelper.info("Registering Custom models...");
@@ -38,6 +45,12 @@ public class ItemRenderRegistry
         reirakuInvMrl = new ModelResourceLocation(Reference.MOD_ID + ":reiraku_inv");
         elucidatorNormalMrl = new ModelResourceLocation(Reference.MOD_ID + ":elucidator");
         elucidatorInvMrl = new ModelResourceLocation(Reference.MOD_ID + ":elucidator_inv");
+
+        byakushikiInvMrl = new ModelResourceLocation(Reference.MOD_ID  + ":byakushiki_inv");
+        byakushikiNormalMrl = new ModelResourceLocation(Reference.MOD_ID + ":byakushiki.unit");
+        kuroakikoInvMrl = new ModelResourceLocation(Reference.MOD_ID + ":kuroakiko_inv");
+        kuroakikoNormalMrl = new ModelResourceLocation(Reference.MOD_ID + ":kuroakiko.unit");
+
 //        itemStandNormalMrl = new ModelResourceLocation(Reference.MOD_ID + ":itemdisplaystand");
 //        itemStandInvMrl = new ModelResourceLocation(Reference.MOD_ID + ":itemdisplaystand_inv");
 //        unitStationNormalMrl = new ModelResourceLocation(Reference.MOD_ID + ":isunitstation");
@@ -46,6 +59,9 @@ public class ItemRenderRegistry
         modelList.add(Pair.of(yukihiraNormalMrl, yukihiraInvMrl));
         modelList.add(Pair.of(reirakuNormalMrl, reirakuInvMrl));
         modelList.add(Pair.of(elucidatorNormalMrl, elucidatorInvMrl));
+
+        unitMrlRefMap.put(Names.Units.BYAKUSHIKI, byakushikiInvMrl);
+        unitMrlRefMap.put(Names.Units.KURO_AKIKO, kuroakikoInvMrl);
 //        modelList.add(Pair.of(itemStandNormalMrl, itemStandInvMrl));
 //        modelList.add(Pair.of(unitStationNormalMrl, unitStationInvMrl));
 
@@ -53,6 +69,9 @@ public class ItemRenderRegistry
         ModelLoader.setCustomModelResourceLocation(ModItems.yukihira, 0, yukihiraInvMrl);
         ModelLoader.setCustomModelResourceLocation(ModItems.yukihira, 1, reirakuInvMrl);
         ModelLoader.setCustomModelResourceLocation(ModItems.elucidator, 0, elucidatorInvMrl);
+
+        ModelLoader.setCustomModelResourceLocation(ModItems.byakushiki, 0, byakushikiInvMrl);
+        ModelLoader.setCustomModelResourceLocation(ModItems.kuroakiko, 0, kuroakikoInvMrl);
 //        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ModBlocks.itemDisplay), 0, itemStandInvMrl);
 //        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ModBlocks.unitStation), 0, unitStationInvMrl);
 
@@ -60,8 +79,20 @@ public class ItemRenderRegistry
         ModelBakery.registerItemVariants(ModItems.yukihira, yukihiraNormalMrl);
         ModelBakery.registerItemVariants(ModItems.yukihira, reirakuNormalMrl);
         ModelBakery.registerItemVariants(ModItems.elucidator, elucidatorNormalMrl);
+        ModelBakery.registerItemVariants(ModItems.byakushiki, byakushikiNormalMrl);
+        ModelBakery.registerItemVariants(ModItems.kuroakiko, kuroakikoNormalMrl);
 //        ModelBakery.registerItemVariants(Item.getItemFromBlock(ModBlocks.itemDisplay), itemStandNormalMrl);
 //        ModelBakery.registerItemVariants(Item.getItemFromBlock(ModBlocks.unitStation), unitStationNormalMrl);
+    }
+
+    public static void registerUnitModel(BakedISUnitModel unitModel, ModelResourceLocation inventoryModel)
+    {
+        unitModelList.add(Pair.of(unitModel, inventoryModel));
+    }
+
+    public static ModelResourceLocation getUnitInvMrl(String name)
+    {
+        return unitMrlRefMap.getOrDefault(name, null);
     }
 
     @SubscribeEvent
@@ -79,6 +110,19 @@ public class ItemRenderRegistry
                 e.getModelRegistry().putObject(mrl.getValue(), perspectiveModel);
             }
         }
+
+        for(Pair<BakedISUnitModel, ModelResourceLocation> bmrl : unitModelList)
+        {
+            IBakedModel obj3d = bmrl.getLeft();
+            IBakedModel obj2d = e.getModelRegistry().getObject(bmrl.getValue());
+
+            if(obj2d != null)
+            {
+                LogHelper.info("Creating new Perspective model for " + bmrl.getValue() + "...");
+                PerspectiveModel perspectiveModel = new PerspectiveModel(obj3d, obj2d, obj2d);
+                e.getModelRegistry().putObject(bmrl.getValue(), perspectiveModel);
+            }
+        }
     }
 
     /*
@@ -87,4 +131,8 @@ public class ItemRenderRegistry
      *     a special variant to be used.
      */
     private static ArrayList<Pair<ModelResourceLocation, ModelResourceLocation>> modelList = new ArrayList<>();
+
+    private static ArrayList<Pair<BakedISUnitModel, ModelResourceLocation>> unitModelList = new ArrayList<>();
+
+    private static Map<String, ModelResourceLocation> unitMrlRefMap = Maps.newHashMap();
 }

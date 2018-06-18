@@ -1,6 +1,6 @@
 {
   "forge_marker": 1,
   "defaults": {
-    "model": "is:item/kuroakiko.unit"
+    "model": "is:item/byakushiki.unit"
   }
 }

@@ -63,7 +63,7 @@ weapon.is:elucidator.name=Elucidator
 
 #IS Units
 armor.is:byakushiki.name=Byakushiki
-armor.is:kuroAkiko.name=Kuro Akiko
+armor.is:kuroakiko.name=Kuro Akiko
 
 #Blocks
 tile.is:flag.name=Emerald Flag Block

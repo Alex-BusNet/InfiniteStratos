@@ -5,11 +5,9 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.sparta.is.armor.models.ModelUnit;
-import com.sparta.is.core.armor.IISUnit;
 import com.sparta.is.core.client.model.format.Armament;
 import com.sparta.is.core.utils.helpers.LogHelper;
 import com.sparta.is.core.utils.helpers.ModelHelper;
-import com.sparta.is.init.ModItems;
 import com.sparta.is.init.ModModels;
 import gnu.trove.map.hash.THashMap;
 import net.minecraft.client.resources.IResourceManager;
@@ -17,7 +15,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.client.model.IModel;
 import org.apache.commons.io.FilenameUtils;
-import slimeknights.tconstruct.library.client.CustomTextureCreator;
 
 import java.io.IOException;
 import java.util.List;
@@ -72,13 +69,13 @@ public class ISUnitModelLoader implements ICustomModelLoader
             loadFilesToCache();
         }
 
-//        String location = modelLocation.getResourcePath().substring(12); // remove 'models/units/'
         ResourceLocation isUnit = new ResourceLocation(modelLocation.getResourceDomain(), modelLocation.getResourcePath());
         LogHelper.info("Unit resource location: " + isUnit);
 
         try
         {
             Map<String, JsonElement> deployVariants = ModelHelper.loadDeployVariants(isUnit);
+            // <Deploy state, <texture ref, texture location> >
             Map<String, Map<String, String>> textureEntries = ModelHelper.loadTexturesFromJson(isUnit);
 
             if(!cache.containsKey(unitName))
@@ -91,8 +88,8 @@ public class ISUnitModelLoader implements ICustomModelLoader
             LogHelper.info("Adding Textures to cache...");
             for(Map.Entry<String, Map<String, String>> textureEntry : textureEntries.entrySet())
             {
-                String unit = textureEntry.getKey().toLowerCase();
-                unitCache.put(unit, textureEntry.getValue());
+                String state = textureEntry.getKey().toLowerCase();
+                unitCache.put(state, textureEntry.getValue());
             }
         }
         catch(IOException e)
@@ -104,11 +101,6 @@ public class ISUnitModelLoader implements ICustomModelLoader
             LogHelper.info("Cannot load IS Unit model for " + isUnit, e);
             throw e;
         }
-        catch(NullPointerException e)
-        {
-            LogHelper.error("NullPointer found. That shouldn't happen...", e);
-            throw e;
-        }
 
         // Grabs the model from the existing registry for the IS Unit being loaded.
         ModelUnit model = ModModels.GetModelForUnit(unitName);
@@ -117,19 +109,13 @@ public class ISUnitModelLoader implements ICustomModelLoader
 
         // Reads the armament information from the JSON file.
         Map<String, Map<String, Armament>> armaments = ModelHelper.loadArmamentFromJson(isUnit);
-        LogHelper.info("Armaments loaded for " + unitName + ":");
-
-        for(Map.Entry<String, Map<String, Armament>> stringMapEntry : armaments.entrySet())
-        {
-            LogHelper.info("\n" + stringMapEntry.getKey() + " " + stringMapEntry.getValue().values().toString());
-        }
 
         // Load the textures into the Armaments object.
         if(cache.containsKey(unitName))
         {
             for(Map.Entry<String, Map<String, String>> entry : cache.get(unitName).entrySet())
             {
-                IISUnit unit = ModItems.getUnit(entry.getKey());
+//                IISUnit unit = ModItems.getUnit(entry.getKey());
                 Map<String, ResourceLocation> txtMap = Maps.newHashMap();
                 for(Map.Entry<String, String> sm : entry.getValue().entrySet())
                 {
@@ -141,19 +127,25 @@ public class ISUnitModelLoader implements ICustomModelLoader
                 {
                     arms.getValue().textures.put(entry.getKey(), txtMap);
                 }
-
+                LogHelper.info("Adding model " + entry.getKey() + " to " + unitName + "...");
                 model.addModelForVariant(entry.getKey(), armaments.get(entry.getKey()));
 
-                if(unit != null && unit.hasTexturePerMaterial())
-                {
-                    for(Map.Entry<String, String> e : entry.getValue().entrySet())
-                        CustomTextureCreator.registerTexture(new ResourceLocation(e.getValue()));
-                }
+//                if(unit != null && unit.hasTexturePerMaterial())
+//                {
+//                    for(Map.Entry<String, String> e : entry.getValue().entrySet())
+//                        CustomTextureCreator.registerTexture(new ResourceLocation(e.getValue()));
+//                }
             }
         }
         else
         {
             LogHelper.info("Tried to load models for " + unitName + " but none were found");
+        }
+
+        LogHelper.debug("Armaments loaded for " + unitName + ":");
+        for(Map.Entry<String, Map<String, Armament>> stringMapEntry : armaments.entrySet())
+        {
+            LogHelper.debug("\n" + stringMapEntry.getKey() + " " + stringMapEntry.getValue().values().toString());
         }
 
         LogHelper.info("");

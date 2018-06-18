@@ -33,7 +33,6 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.UsernameCache;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -95,7 +94,7 @@ public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHold
     @Override
     public EntityEquipmentSlot getEquipmentSlot()
     {
-        return EntityEquipmentSlot.LEGS;
+        return EntityEquipmentSlot.CHEST;
     }
 
     @Override
@@ -289,13 +288,13 @@ public class ArmorIS extends ItemArmor implements IModifyable, IArmorVariantHold
     @Override
     public void registerVariants()
     {
-        TIntObjectHashMap<ModelResourceLocation> variants = new TIntObjectHashMap<>();
-        addModelVariants(variants);
-        for(int key : variants.keys())
-        {
-            ModelResourceLocation variant = variants.get(key);
-            ModelLoader.setCustomModelResourceLocation(this, key, variant);
-        }
+//        TIntObjectHashMap<ModelResourceLocation> variants = new TIntObjectHashMap<>();
+//        addModelVariants(variants);
+//        for(int key : variants.keys())
+//        {
+//            ModelResourceLocation variant = variants.get(key);
+//            ModelLoader.setCustomModelResourceLocation(this, key, variant);
+//        }
     }
 
     @Override

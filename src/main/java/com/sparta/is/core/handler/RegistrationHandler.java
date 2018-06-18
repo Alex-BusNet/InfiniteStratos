@@ -1,5 +1,6 @@
 package com.sparta.is.core.handler;
 
+import com.sparta.is.client.render.ItemRenderRegistry;
 import com.sparta.is.core.armor.ArmorIS;
 import com.sparta.is.core.block.BlockIS;
 import com.sparta.is.core.block.BlockISContainerBase;
@@ -63,11 +64,13 @@ public class RegistrationHandler
         }
 
         LogHelper.info("\tRegistering Unit Models...");
-        for( ArmorIS item : ModItems.getUnits())
-        {
-            LogHelper.info("\t\t" + item.getUnlocalizedName());
-            item.registerVariants();
-        }
+//        for( ArmorIS item : ModItems.getUnits())
+//        {
+//            LogHelper.info("\t\t" + item.getUnlocalizedName());
+//            item.registerVariants();
+//        }
+
+        ItemRenderRegistry.register();
 
         LogHelper.info("\tRegistering Tab Label Item Model...");
         ModelLoader.setCustomModelResourceLocation(ModItems.tabLabelItem, 0, new ModelResourceLocation(ModItems.tabLabelItem.getRegistryName().toString()));

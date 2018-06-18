@@ -144,5 +144,4 @@ public class ItemISMelee extends ItemSword implements IMeleeVariantHolder<ItemIS
     {
         return type;
     }
-
 }

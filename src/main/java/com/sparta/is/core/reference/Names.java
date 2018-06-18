@@ -60,7 +60,7 @@ public class Names
         public static final String TEST_UNIT = "testUnit";
         public static final String SCHWARZER_REGEN = "schwarzerRegen";
         public static final String AKATSUBAKI = "akatsubaki";
-        public static final String KURO_AKIKO = "kuroAkiko";
+        public static final String KURO_AKIKO = "kuroakiko";
         public static final String RAPHAEL_REVIVE_CUSTOM_II = "raphealReviveCustomII";
         public static final String SHENLONG = "shenlong";
         public static final String BLUE_TEARS = "blueTears";

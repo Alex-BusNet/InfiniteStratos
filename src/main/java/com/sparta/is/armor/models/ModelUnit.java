@@ -3,17 +3,22 @@ package com.sparta.is.armor.models;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.sparta.is.core.armor.IISUnit;
+import com.sparta.is.client.render.ItemRenderRegistry;
+import com.sparta.is.core.client.model.BakedISUnitModel;
 import com.sparta.is.core.client.model.format.Armament;
-import com.sparta.is.init.ModItems;
-import gnu.trove.map.hash.THashMap;
-import net.minecraft.client.renderer.block.model.IBakedModel;
+import com.sparta.is.core.utils.helpers.LogHelper;
+import net.minecraft.client.model.ModelBiped;
+import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.common.model.IModelState;
 import net.minecraftforge.common.model.TRSRTransformation;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class ModelUnit implements IModel
+public class ModelUnit extends ModelBiped implements IModel
 {
 //    public ModelRenderer unitHead;
 //    public ModelRenderer unitBody;
@@ -37,9 +42,11 @@ public class ModelUnit implements IModel
 //    public boolean isSneak;
 
     private Map<String, Map<String, Armament>> models = Maps.newHashMap();
+    private final String unitName;
 
-    public ModelUnit()
+    public ModelUnit(String name)
     {
+        unitName = name;
     }
 
     public void addModelForVariant(String variant, Map<String, Armament> model)
@@ -84,34 +91,52 @@ public class ModelUnit implements IModel
     @Override
     public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
     {
-        // See ModelBlockDefinition#backeModel(ModleBlock, ITransformation boolean);
-        throw new UnsupportedOperationException("The Unit model is not built to be used as an item model.");
-    }
-
-    public Map<String, IBakedModel> bakeModels(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
-    {
-        Map<String, IBakedModel> bakedModels = new THashMap<>();
-
-        // Scale unit
-        //float scale = 0.025f;
-        //ITransformation transformation = new TRSRTransformation(new Vector3f(0, 0, 0.0001f - scale / 2f), null, new Vector3f(1, 1, 1f + scale), null);
-
+        List<BakedQuad> quads = new ArrayList<>();
+        FaceBakery faceBakery = new FaceBakery();
+        BakedISUnitModel bakedISUnitModel = new BakedISUnitModel();
         for(Map.Entry<String, Map<String, Armament>> entry : models.entrySet())
         {
-            IISUnit unit = ModItems.getUnit(entry.getKey());
-            if(unit != null && unit.hasTexturePerMaterial())
-            {
+            LogHelper.debug("Baking " + entry.getKey() + " state...");
 
-            }
-            else
+            for(Armament a : entry.getValue().values())
             {
-//                IModel model = ItemLayerModel.INSTANCE.retexture(ImmutableMap.of("layer0", entry.getValue()));
-//                IBakedModel bakedModel = model.bake(state, format, bakedTextureGetter);
-//                bakedModels.put(entry.getKey(), bakedModel);
+                LogHelper.debug("\tBaking " + a.armamentName + "...");
+
+                for( Map.Entry<String, Armament.ArmamentBlock> aEntry : a.subblocks.entrySet())
+                {
+                    LogHelper.debug("\t\tBaking subblock " + aEntry.getKey() + "...");
+
+                    Armament.ArmamentBlock ab = aEntry.getValue();
+                    for(Map.Entry<EnumFacing, Pair<String, BlockFaceUV>> abEntry : ab.getFaces().entrySet())
+                    {
+                        String abTexture = a.textures.get(entry.getKey()).get(abEntry.getValue().getLeft()).toString();
+                        BlockPartFace bpf = new BlockPartFace(abEntry.getKey(), -1, abTexture, abEntry.getValue().getRight());
+
+                        BakedQuad quad = faceBakery.makeBakedQuad(ab.getFrom(), ab.getTo(), bpf,
+                                bakedTextureGetter.apply(a.textures.get(entry.getKey()).get(abEntry.getValue().getLeft())),
+                                abEntry.getKey(), ModelRotation.X0_Y0, ab.getRotation(), false, false);
+
+                        quads.add(quad);
+                    }
+
+
+                    LogHelper.debug("\t\tFinished baking subblock " + aEntry.getKey());
+                }
+
+                bakedISUnitModel.addQuads(entry.getKey(), a.armamentName, quads);
+                quads.clear();
+
+                LogHelper.debug("\tFinished baking " + a.armamentName);
             }
+
+            LogHelper.debug("Finished baking " + entry.getKey() + " state");
         }
 
-        return bakedModels;
+        // The ModelResourceLocation generated here MUST match the pre-defined one in ItemRenderRegistry
+        ItemRenderRegistry.registerUnitModel(bakedISUnitModel, ItemRenderRegistry.getUnitInvMrl(unitName));
+
+        return bakedISUnitModel;
+//        throw new UnsupportedOperationException("The Unit model is not built to be used as an item model.");
     }
 
     @Override
@@ -120,6 +145,63 @@ public class ModelUnit implements IModel
         return TRSRTransformation.identity();
     }
 
+    public ModelBiped getArmorForState(String unitState, ModelBiped mb)
+    {
+        Map<String, Armament> armamentMap = models.get(unitState);
+
+        for(Map.Entry<String, Armament> entry : armamentMap.entrySet())
+        {
+            ModelRenderer armamentRenderer = new ModelRenderer(this, entry.getValue().armamentName);
+            for( Map.Entry<String, Armament.ArmamentBlock> abe : entry.getValue().subblocks.entrySet())
+            {
+                Armament.ArmamentBlock ab = abe.getValue();
+                float w = ab.getTo().x - ab.getFrom().x;
+                float h = ab.getTo().y - ab.getFrom().y;
+                float d = ab.getTo().z - ab.getFrom().z;
+                armamentRenderer.addBox(abe.getKey(), ab.getFrom().x, ab.getFrom().y, ab.getFrom().z, (int)w, (int)h, (int)d);
+                armamentRenderer.setRotationPoint(0F, 0F, 0F);
+            }
+
+            addToModel(mb, armamentRenderer, entry.getValue().armamentName);
+        }
+
+        return this;
+    }
+
+    private void addToModel(ModelBiped mb, ModelRenderer child, String sectionName)
+    {
+        if(sectionName.equals("headpiece"))
+        {
+            mb.bipedHead.addChild(child);
+        }
+        else if(sectionName.equals("chest") || sectionName.equals("leftwing") || sectionName.equals("rightwing"))
+        {
+            mb.bipedBody.addChild(child);
+        }
+        else if(sectionName.equals("leftleg"))
+        {
+            mb.bipedLeftLeg.addChild(child);
+        }
+        else if(sectionName.equals("rightleg"))
+        {
+            mb.bipedRightLeg.addChild(child);
+        }
+        else if(sectionName.equals("rightarm"))
+        {
+            mb.bipedRightArm.addChild(child);
+        }
+        else if(sectionName.equals("leftarm"))
+        {
+            mb.bipedLeftArm.addChild(child);
+        }
+    }
+
+    @Override
+    public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5)
+    {
+        super.render(entity, f, f1, f2, f3, f4, f5);
+        super.setRotationAngles(f, f1, f2, f3, f4, f5, entity);
+    }
 
     /*
      *

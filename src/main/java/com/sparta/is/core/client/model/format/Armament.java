@@ -4,8 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import com.sparta.is.core.utils.helpers.LogHelper;
-import net.minecraft.client.renderer.block.model.BlockFaceUV;
-import net.minecraft.client.renderer.block.model.BlockPartRotation;
+import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
@@ -57,6 +56,29 @@ public class Armament
 
             return s;
         }
+
+        @Nonnull
+        public Vector3f getFrom()
+        {
+            return from;
+        }
+
+        @Nonnull
+        public Vector3f getTo()
+        {
+            return to;
+        }
+
+        @Nullable
+        public BlockPartRotation getRotation()
+        {
+            return rotation;
+        }
+
+        public Map<EnumFacing, Pair<String, BlockFaceUV>> getFaces()
+        {
+            return faces;
+        }
     }
 
     @Override
@@ -67,7 +89,11 @@ public class Armament
         s += "\tTextures: { \n";
         for(Map.Entry<String, Map<String, ResourceLocation>> t : textures.entrySet())
         {
-            s += "\t" + t.getKey() + ": " + t.getValue() + "\n";
+            s += "\t\t" + t.getKey() + ":\n";
+            for(Map.Entry<String, ResourceLocation> r : t.getValue().entrySet())
+            {
+                s += "\t\t\t[ " + r.getKey() + ", " + r.getValue() + " ]\n";
+            }
         }
 
         s += "\t},\n\tSubblocks: {\n";
@@ -191,7 +217,7 @@ public class Armament
                                         {
                                             JsonElement face = faceObj.get(s);
 
-                                            String textureRef = face.getAsJsonObject().get("texture").toString();
+                                            String textureRef = face.getAsJsonObject().get("texture").getAsString();
 
                                             int rotation = 0;
                                             if ( face.getAsJsonObject().has("rotation") )

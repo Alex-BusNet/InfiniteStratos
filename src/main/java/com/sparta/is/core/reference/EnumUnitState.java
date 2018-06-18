@@ -18,5 +18,16 @@ public enum EnumUnitState implements IEnumMeta, Comparable<EnumUnitState>
     @Override
     public int getMeta() { return meta; }
 
+    @Override
+    public String getName()
+    {
+        if(this != DEFAULT && this != SECOND_SHIFT)
+        {
+            return this.name().split("_S")[0].toLowerCase();
+        }
+
+        return this.name().toLowerCase();
+    }
+
     public static EnumUnitState byMeta(int meta) { return VARIANTS[Math.abs(meta) & VARIANTS.length]; }
 }

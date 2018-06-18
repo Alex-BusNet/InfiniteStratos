@@ -1,6 +1,5 @@
 package com.sparta.is.armor;
 
-import com.sparta.is.core.InfiniteStratos;
 import com.sparta.is.core.armor.ArmorIS;
 import com.sparta.is.core.network.Network;
 import com.sparta.is.core.network.message.MessageUnitSettings;
@@ -13,6 +12,7 @@ import com.sparta.is.core.utils.helpers.EntityHelper;
 import com.sparta.is.core.utils.helpers.StringHelper;
 import com.sparta.is.core.utils.interfaces.IKeyBound;
 import com.sparta.is.core.utils.interfaces.IOwnable;
+import com.sparta.is.init.ModModels;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -46,11 +46,11 @@ public class UnitByakushiki extends ArmorIS implements ISpecialArmor, IKeyBound,
     public double absorbRatio = 0.9D;
     public int energyPerDamage = 100;
 
-    private String[] textures = {"is:textures/models/byakushiki_0.png", "is:textures/models/byakushiki_1.png", "is:textures/armor/byakushiki_armor.png"};
+    private String[] textures = {"is:textures/models/byakushiki_0.png", "is:textures/models/byakushiki_1.png", "is:textures/armor/byakushiki_arm.png"};
 
     public UnitByakushiki()
     {
-        super(Names.Units.BYAKUSHIKI, Materials.Armor.IS_ARMOR, EntityEquipmentSlot.LEGS, 4, VARIANTS);
+        super(Names.Units.BYAKUSHIKI, Materials.Armor.IS_ARMOR, EntityEquipmentSlot.CHEST, 4, VARIANTS);
         this.unitName = "Byakushiki";
         this.setShieldCapacity(20000);
         this.setRemainingShieldCapacity();
@@ -67,7 +67,7 @@ public class UnitByakushiki extends ArmorIS implements ISpecialArmor, IKeyBound,
             {
                 if(state != EnumUnitState.STANDBY_STATE)
                 {
-                    ModelBiped armorModel = InfiniteStratos.proxy.getClientProxy().getArmorModel(this);
+                    ModelBiped armorModel = /*InfiniteStratos.proxy.getClientProxy().getArmorModel(this);*/ ModModels.GetModelForUnit(Names.Units.BYAKUSHIKI).getArmorForState(state.getName(), defaultModel);
 
                     if(state == EnumUnitState.FULL_DEPLOY_STATE)
                     {
